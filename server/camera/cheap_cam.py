@@ -2,12 +2,13 @@ from .base import CameraBase
 from cv2 import *
 
 SERAIL_NOS = [
-    '200619',
+    '6',
+    '8',
 ]
 
 
 class CheapCam(CameraBase):
-    FILE_FORMAT = '/dev/v4l/by-id/usb-9726-%s_Integrated_Camera-video-index0'
+    FILE_FORMAT = '/dev/v4l/by-path/pci-0000:00:14.0-usb-0:%s:1.0-video-index0'
 
     def get_frame(self, pre_fetch=4, roi_index=0):
         frame = super().get_frame(pre_fetch)
@@ -18,12 +19,8 @@ class CheapCam(CameraBase):
 
 
 def create_camera(index):
-    x0y0 = [
-        ((50, 195),),
-    ]
-
     v4l2_base = {
-        'brightness': 150,
+        'brightness': 110,
         'contrast': 48,
         'saturation': 58,
         'hue': 0,
@@ -35,16 +32,24 @@ def create_camera(index):
         'white_balance_temperature_auto': 0,
         'white_balance_temperature': 5250,
         'exposure_auto': 1,
-        'exposure_absolute': 1500,
-        # 'focus_auto': 0,
-        # 'focus_absolute': 30,
+        'exposure_absolute': 10,
     }
     v4l2_config = [
-        {'exposure_absolute': 27, 'white_balance_temperature': 5750, },
+        {'brightness': 110, },
+        {'brightness': 150, },
     ]
+
+    x0y0 = [
+        ((145, 180),),
+        ((50, 195),),
+
+    ]
+    frame_size = (
+        ((335, 215),),
+        ((300, 190),),
+    )
 
     v4l2 = dict(v4l2_base)
     v4l2.update(v4l2_config[index])
-    frame_size = ((300, 190),)
 
-    return CheapCam(SERAIL_NOS[index], config={}, settings={'x0y0': x0y0[index], 'frame_size': frame_size}, v4l2_config=v4l2)
+    return CheapCam(SERAIL_NOS[index], config={}, settings={'x0y0': x0y0[index], 'frame_size': frame_size[index]}, v4l2_config=v4l2)

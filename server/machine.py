@@ -99,7 +99,7 @@ class Machine(object):
                      run_blocking_3=1,
 
                      sa=0,
-                     delay_4=200,
+                     delay_4=5000,
                      run_blocking_4=1,
 
                      valve1=0,
@@ -130,6 +130,18 @@ class Machine(object):
         self.lock.release()
         return result
 
+    def bootup(self):
+        self.send_command(home=1)
+        #
+        # # comming down
+        # self.send_command(vdc=1)
+        input('place dosing and holder')
+        self.send_command(sa=5950, vdc=1, vh=1)
+        time.sleep(0.25)
+        self.send_command(vdc=1, vd=1, vh=1)
+        time.sleep(0.25)
+        self.send_command(vd=1, vh=1)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -156,13 +168,14 @@ def main():
     parser.add_argument('-vh', nargs='?', type=int)
     parser.add_argument('-vp', nargs='?', type=int)
     parser.add_argument('-home', nargs='?', type=int)
+    parser.add_argument('-boot', nargs='?', type=int)
 
     args = vars(parser.parse_args())
     args = {k: v for k, v in args.items() if v is not None}
 
     machine = Machine()
-    if args.get('stations'):
-        machine.go_n_step_forward(args['stations'])
+    if args.get('boot'):
+        machine.bootup()
     else:
         machine.send_command(**args)
 

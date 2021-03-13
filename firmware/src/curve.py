@@ -4,16 +4,10 @@ import matplotlib.pyplot as plt
 # unit = edge
 
 # RAIL
-# define RAIL_PERIOD 250 usec
-# MICRO_STEP_RAIL = 32
+# define RAIL_PERIOD 90 usec
+# MICRO_STEP_RAIL = 1
 # Current Vmax
-# vmax = 1 edge / 0.00025 = 4000 edge / sec = 2000 ustep / sec = 62.5 step / sec = 112.5 deg / sec = 3.4375 station / sec
-
-# Closer
-# define RAIL_PERIOD 1000 usec
-# MICRO_STEP_LEADSHINE = 2
-# Current Vmax
-# vmax = 1 edge / 0.001 = 1000 edge / sec = 500 ustep / sec = 250 step / sec = 450 deg / sec = 1.25 rev / sec
+# vmax = 1 edge / 0.00009 = 11,000 edge / sec = 5,500 ustep / sec = 5,500 step / sec = 13.75 rev / sec = 825 rpm = 110 mm / s = ~3s
 
 
 def calc_curve(Vmax, Amax, Jmax, V0=0, A0=0, reverse=False):
@@ -108,36 +102,37 @@ def create_hfile(filename, acceleration, deceleration, distance=0):
         file.write(text)
 
 
+vmax = 30  # cm/s  - 1/1000 edge/s
 create_hfile('rail_long', {
-    'Vmax': 11 * 1000.,
-    'Amax': 30 * 1000.,
-    'Jmax': 90 * 1000.,
-    'V0': 2000,
-    'A0': 5000,
+    'Vmax': vmax * 1000.,
+    'Amax': 500 * 1000.,
+    'Jmax': 2000 * 1000.,
+    'V0': 10000,
+    'A0': 10000,
 },
     {
-    'Vmax': 11 * 1000.,
-        'Amax': 260 * 1000.,
-        'Jmax': 800 * 1000.,
-        'V0': 2000,
-        'A0': 5000,
+    'Vmax': vmax * 1000.,
+        'Amax': 2000 * 1000.,
+        'Jmax': 2000 * 1000.,
+        'V0': 25000,
+        'A0': 100000,
 },
-    distance=11636,
+    distance=32000,
 )
-
-create_hfile('rail_short', {
-    'Vmax': 8 * 1000.,
-    'Amax': 50 * 1000.,
-    'Jmax': 500 * 1000.,
-    'V0': 2000,
-    'A0': 5000,
-},
-    {
-    'Vmax': 8 * 1000.,
-    'Amax': 400 * 1000.,
-    'Jmax': 500 * 1000.,
-    'V0': 2000,
-    'A0': 5000,
-},
-    distance=2327,
-)
+#
+# create_hfile('rail_short', {
+#     'Vmax': 8 * 1000.,
+#     'Amax': 50 * 1000.,
+#     'Jmax': 500 * 1000.,
+#     'V0': 2000,
+#     'A0': 5000,
+# },
+#     {
+#     'Vmax': 8 * 1000.,
+#     'Amax': 400 * 1000.,
+#     'Jmax': 500 * 1000.,
+#     'V0': 2000,
+#     'A0': 5000,
+# },
+#     distance=2327,
+# )
