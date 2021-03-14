@@ -9,7 +9,7 @@
 #include "HX711.h"
 
 // Timers
-DueTimer MOTOR_TIMERS[MOTOR_COUNT] = {Timer1, Timer2, Timer3, Timer4};
+DueTimer MOTOR_TIMERS[MOTOR_COUNT] = {Timer4, Timer5, Timer6, Timer7};
 
 
 typedef struct Command {
@@ -37,6 +37,7 @@ typedef struct Response {
 typedef struct Motor {
         int32_t steps;
         bool value;
+        bool dir;
 } Motor;
 
 void setup_pins();
@@ -83,6 +84,8 @@ void process_command_wrapper(const uint8_t *data, size_t size) {
         response.status_code = process_command(data, size);
         response.encoder  = REG_TC0_CV0;
         response.reserve[0]  = sizeof(Command);
+        response.reserve[1] = !digitalRead(DI_1) | (!digitalRead(DI_2) << 1) | (!digitalRead(DI_3) << 2) | (!digitalRead(DI_4) << 3);
+        response.reserve[2] = 0;
 
         packet_serial.send((uint8_t *)&response, sizeof(Response));
 }
@@ -97,7 +100,7 @@ uint8_t process_command(const uint8_t *data, size_t size) {
 
         // Pneumatic
         for (uint8_t valve = 0; valve < PNEUMATIC_COUNT; valve++) {
-                digitalWrite(PNEUMATIC_PINS[valve], !command.pneumatic[valve]);
+                digitalWrite(PNEUMATIC_PINS[valve], command.pneumatic[valve]);
         }
 
         if (command.home) {
@@ -111,26 +114,30 @@ uint8_t process_command(const uint8_t *data, size_t size) {
                 Motor  *motor     = &motors[motor_number];
                 int32_t steps_raw = command.steps[motor_number];
                 int32_t delay_ = command.delay[motor_number];
+                bool dir = steps_raw > 0;
                 uint32_t steps = abs(steps_raw) << 1;
 
                 if (steps) {
                         motor->steps = steps;
-                        digitalWrite(MOTOR_PINS[motor_number][MOTOR_DIR], steps_raw > 0);
+                        motor->dir = dir;
+                        digitalWrite(MOTOR_PINS[motor_number][MOTOR_DIR], dir);
                         motor->value = false;
                         if (motor_number==0)
-                                Timer1.attachInterrupt(motor_loop_0).start(delay_);
+                                Timer4.attachInterrupt(motor_loop_0).start(delay_);
                         if (motor_number==1)
-                                Timer2.attachInterrupt(motor_loop_1).start(delay_);
+                                Timer5.attachInterrupt(motor_loop_1).start(delay_);
                         if (motor_number==2)
-                                Timer3.attachInterrupt(motor_loop_2).start(delay_);
+                                Timer6.attachInterrupt(motor_loop_2).start(delay_);
                         if (motor_number==3)
                                 // if (abs(motor->steps) > (CURVE_RAIL_LONG_A_LEN + CURVE_RAIL_LONG_D_LEN + 20)) {
                                 //         rail_fast_run(motor->steps, CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_D, CURVE_RAIL_LONG_A_LEN, CURVE_RAIL_LONG_D_LEN);
                                 //         motor->steps = 0;
                                 // } else {
-                                Timer4.attachInterrupt(motor_loop_3).start(delay_);
+                                Timer7.attachInterrupt(motor_loop_3).start(delay_);
                         // }
                         motors_running[motor_number] = true;
+
+
                 } else {
                         motors_running[motor_number] = false;
                 }
@@ -190,7 +197,7 @@ void motor_loop_2() {
 void motor_loop_3() {
         uint8_t motor_index = 3;
         Motor* motor_p = &motors[motor_index];
-        if (motor_p->steps && !digitalRead(HOME_PIN) ) {
+        if (motor_p->steps && (!digitalRead(HOME_PIN) ||  motor_p->dir)) {
                 motor_p->value = !motor_p->value;
                 digitalWrite(MOTOR_PINS[motor_index][MOTOR_PULS], motor_p->value);
                 motor_p->steps--;
@@ -296,15 +303,14 @@ bool sure_pin_low(){
 }
 
 bool home() {
-        digitalWrite(PNEUMATIC_PINS[2], 0);
+        // digitalWrite(PNEUMATIC_PINS[2], 0);
         uint8_t motor_number = 3;
         uint8_t pulse_pin = MOTOR_PINS[motor_number][MOTOR_PULS];
         uint8_t dir_pin = MOTOR_PINS[motor_number][MOTOR_DIR];
-        uint32_t pos_step_count = 20000;
+        uint32_t pos_step_count = 100000;
         uint32_t neg_step_count = 500;
 
-
-        digitalWrite(dir_pin, 1);
+        digitalWrite(dir_pin, 0);
         // while (!digitalRead(HOME_PIN)) {
         while (!sure_pin_high()) {
                 digitalWrite(pulse_pin, !digitalRead(pulse_pin));
@@ -314,7 +320,7 @@ bool home() {
 
         }
 
-        digitalWrite(dir_pin, 0);
+        digitalWrite(dir_pin, 1);
         while (!sure_pin_low()) {
                 digitalWrite(pulse_pin, !digitalRead(pulse_pin));
                 neg_step_count--;

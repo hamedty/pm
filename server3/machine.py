@@ -35,6 +35,7 @@ class Machine(object):
 
     RESPONSE = ''.join([
         'H',  # uint16_t status_code
+        'h',  # int16_t encoder
         'H' * 3,  # reserve
     ])
 
@@ -77,8 +78,9 @@ class Machine(object):
         data = struct.pack(self.FORMAT, *data)
         self._serial_write(data)
         ret = self._serial_read()
+        print(ret)
         response = struct.unpack(self.RESPONSE, ret)
-        # print(response)
+        print(response)
         status_code = response[0]
         if status_code == SUCCESS:
             return response
@@ -86,41 +88,41 @@ class Machine(object):
 
     def send_command(self,
 
-                     st=0,
-                     delay_1=3000,
-                     run_blocking_1=1,
+                     m1=0,
+                     d1=4000,
+                     b1=1,
 
-                     sd=0,
-                     delay_2=1000,
-                     run_blocking_2=1,
+                     m2=0,
+                     d2=10,
+                     b2=1,
 
-                     sh=0,
-                     delay_3=1000,
-                     run_blocking_3=1,
+                     m3=0,
+                     d3=3000,
+                     b3=1,
 
-                     sa=0,
-                     delay_4=5000,
-                     run_blocking_4=1,
+                     m4=0,
+                     d4=100,
+                     b4=1,
 
-                     valve1=0,
-                     vdn=0,
-                     vdc=0,
-                     vd=0,
-                     vh=0,
-                     vp=0,
+                     v1=0,
+                     v2=0,
+                     v3=0,
+                     v4=0,
+                     v5=0,
+                     v6=0,
                      dance=0,
                      home=0,
                      ):
         if dance:
-            sd = int(dance * 400)
-            sa = int(sd * 11. / 8.)
-            delay_4 = int(delay_2 * 8. / 11.)
+            m1 = int(dance * 400)
+            m4 = int(m1 * 11. / 8.)
+            d4 = int(d2 * 8. / 11.)
         # print(sd, sa, delay_4)
         data = [
-            st, sd, sh, int(sa),
-            delay_1, delay_2, delay_3, delay_4,
-            run_blocking_1, run_blocking_2, run_blocking_3, run_blocking_4,
-            valve1, vdn, vdc, vd, vh, vp,
+            m1, m2, m3, int(m4),
+            d1, d2, d3, d4,
+            b1, b2, b3, b4,
+            v1, v2, v3, v4, v5, v6,
             home,
         ]
         data += [0] * self.ALIGNMENT_BYTES
@@ -145,28 +147,28 @@ class Machine(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-sa', nargs='?', type=int)
-    parser.add_argument('-delay_1', nargs='?', type=int)
-    parser.add_argument('-run_blocking_1', nargs='?', type=bool)
+    parser.add_argument('-m1', nargs='?', type=int)
+    parser.add_argument('-d1', nargs='?', type=int)
+    parser.add_argument('-b1', nargs='?', type=bool)
 
-    parser.add_argument('-sd', nargs='?', type=int)
-    parser.add_argument('-delay_2', nargs='?', type=int)
-    parser.add_argument('-run_blocking_2', nargs='?', type=bool)
+    parser.add_argument('-m2', nargs='?', type=int)
+    parser.add_argument('-d2', nargs='?', type=int)
+    parser.add_argument('-b2', nargs='?', type=bool)
 
-    parser.add_argument('-sh', nargs='?', type=int)
-    parser.add_argument('-delay_3', nargs='?', type=int)
-    parser.add_argument('-run_blocking_3', nargs='?', type=bool)
+    parser.add_argument('-m3', nargs='?', type=int)
+    parser.add_argument('-d3', nargs='?', type=int)
+    parser.add_argument('-b3', nargs='?', type=bool)
 
-    parser.add_argument('-st', nargs='?', type=int)
-    parser.add_argument('-delay_4', nargs='?', type=int)
-    parser.add_argument('-run_blocking_4', nargs='?', type=bool)
+    parser.add_argument('-m4', nargs='?', type=int)
+    parser.add_argument('-d4', nargs='?', type=int)
+    parser.add_argument('-b4', nargs='?', type=bool)
 
-    parser.add_argument('-valve1', nargs='?', type=int)
-    parser.add_argument('-vdn', nargs='?', type=int)
-    parser.add_argument('-vdc', nargs='?', type=int)
-    parser.add_argument('-vd', nargs='?', type=int)
-    parser.add_argument('-vh', nargs='?', type=int)
-    parser.add_argument('-vp', nargs='?', type=int)
+    parser.add_argument('-v1', nargs='?', type=int)
+    parser.add_argument('-v2', nargs='?', type=int)
+    parser.add_argument('-v3', nargs='?', type=int)
+    parser.add_argument('-v4', nargs='?', type=int)
+    parser.add_argument('-v5', nargs='?', type=int)
+    parser.add_argument('-v6', nargs='?', type=int)
     parser.add_argument('-home', nargs='?', type=int)
     parser.add_argument('-boot', nargs='?', type=int)
 

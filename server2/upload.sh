@@ -11,6 +11,8 @@ sleep .1
 ./arduino-cli compile --fqbn arduino:sam:arduino_due_x pi
 ./arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:sam:arduino_due_x pi
 
-raspi-gpio set 21 dl
-sleep .3
-raspi-gpio set 21 dh
+ssh-1 "raspi-gpio set 21 dl && sleep .3 && raspi-gpio set 21 dh"
+
+
+
+./arduino-cli upload -p /dev/ttyACM0 --fqbn arduino:sam:arduino_due_x --input-file firmware.bin
