@@ -303,7 +303,7 @@ bool sure_pin_low(){
 }
 
 bool home() {
-        // digitalWrite(PNEUMATIC_PINS[2], 0);
+        digitalWrite(PNEUMATIC_PINS[3], 1);
         uint8_t motor_number = 3;
         uint8_t pulse_pin = MOTOR_PINS[motor_number][MOTOR_PULS];
         uint8_t dir_pin = MOTOR_PINS[motor_number][MOTOR_DIR];
@@ -316,7 +316,7 @@ bool home() {
                 digitalWrite(pulse_pin, !digitalRead(pulse_pin));
                 pos_step_count--;
                 if (pos_step_count==0) return false;
-                delayMicroseconds(300);
+                delayMicroseconds(100);
 
         }
 

@@ -1,10 +1,21 @@
 remove static ip  `sudo nano /etc/dhcpcd.conf`
 copy ssh key
 copy .bashrc
-create ~/data folder
-enable tempfs /etc/fstab
 
+mkdir /home/pi/data
+sudo nano /etc/fstab
+add `tmpfs /home/pi/data tmpfs nodev,nosuid,size=1G 0 0`
+
+nano /boot/config.txt
+add `gpio=21=pu,op,dh`
+
+sudo crontab -e
+add `@reboot /home/pi/boot.sh`
+copy boot.sh, chmod +x
+
+
+copy `.arduino` & arduino-cli
 
 python3-pip libwebp-dev libtiff-dev libopenjp2-7-dev libilmbase-dev libopenexr-dev libgstreamer1.0-dev libatlas-base-dev
 
-pip3 install pyserial
+pip3 install pyserial scikit-learn

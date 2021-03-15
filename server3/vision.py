@@ -6,10 +6,11 @@ from camera import cheap_cam
 class Detector(object):
     def __init__(self):
         # self.camera_dosing = cheap_cam.create_camera(0)
-        self.clf_dosing = pickle.load(open('model_dosing.clf', 'rb'))
+        # self.clf_dosing = pickle.load(open('model_dosing.clf', 'rb'))
 
         self.camera_holder = cheap_cam.create_camera(1)
-        self.clf_holder = pickle.load(open('model_holder.clf', 'rb'))
+        self.clf_holder = pickle.load(
+            open('/home/pi/models/model_holder.clf', 'rb'))
 
     def detect_dosing(self):
         frame = self.camera_dosing.get_frame()
@@ -27,11 +28,8 @@ class Detector(object):
     def detect_holder(self):
         frame = self.camera_holder.get_frame()
         d = detect(self.clf_holder, frame)
-        d = (d - 2) * -4.0
+        # d = (d - 2) * -4.0
         return d
-
-
-DOWNSAMPLE_FACTOR = .5
 
 
 def resize_and_bw(image):
@@ -49,7 +47,9 @@ def detect(model, frame):
 
 def main():
     d = Detector()
-    print(d.detect_dosing())
+    while True:
+        print(d.detect_holder())
+        input('')
 
 
 if __name__ == '__main__':
