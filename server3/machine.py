@@ -89,7 +89,7 @@ class Machine(object):
     def send_command(self,
 
                      m1=0,
-                     d1=4000,
+                     d1=100,
                      b1=1,
 
                      m2=0,
@@ -97,7 +97,7 @@ class Machine(object):
                      b2=1,
 
                      m3=0,
-                     d3=3000,
+                     d3=100,
                      b3=1,
 
                      m4=0,
@@ -114,18 +114,25 @@ class Machine(object):
                      home=0,
                      ):
         if dance:
-            m1 = int(dance * 400)
-            m4 = int(m1 * 11. / 8.)
-            d4 = int(d2 * 8. / 11.)
+
+            # m1 6400 -> 1 rev
+            # m4 1600 -> 1 rev -> 8mm
+            # pen 11mm/rev
+            m1 = dance * 6400.
+            m4 = dance * 11. / 8. * 1600
+            d4 = d1 * m1 / m4
+
         # print(sd, sa, delay_4)
         data = [
-            m1, m2, m3, int(m4),
+            m1, m2, m3, m4,
             d1, d2, d3, d4,
             b1, b2, b3, b4,
             v1, v2, v3, v4, v5, v6,
             home,
         ]
         data += [0] * self.ALIGNMENT_BYTES
+
+        data = [int(d) for d in data]
 
         self.lock.acquire()
         result = self._send_command(data)
@@ -169,6 +176,7 @@ def main():
     parser.add_argument('-v4', nargs='?', type=int)
     parser.add_argument('-v5', nargs='?', type=int)
     parser.add_argument('-v6', nargs='?', type=int)
+    parser.add_argument('-dance', nargs='?', type=int)
     parser.add_argument('-home', nargs='?', type=int)
     parser.add_argument('-boot', nargs='?', type=int)
 

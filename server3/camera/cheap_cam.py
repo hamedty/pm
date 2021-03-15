@@ -9,12 +9,17 @@ SERAIL_NOS = [
 
 class CheapCam(CameraBase):
     FILE_FORMAT = '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.%s:1.0-video-index0'
+    CONFIG_BASE = {
+        CAP_PROP_FOURCC: VideoWriter_fourcc('M', 'J', 'P', 'G'),
+        CAP_PROP_FRAME_WIDTH: 640,
+        CAP_PROP_FRAME_HEIGHT: 480,
+    }
 
     def get_frame(self, pre_fetch=4, roi_index=0):
         frame = super().get_frame(pre_fetch)
-        # y0, x0 = self.settings['x0y0'][roi_index]
-        # dy, dx = self.settings['frame_size'][roi_index]
-        # frame = frame[y0:y0 + dy, x0:x0 + dx, :]
+        y0, x0 = self.settings['x0y0'][roi_index]
+        dy, dx = self.settings['frame_size'][roi_index]
+        frame = frame[y0:y0 + dy, x0:x0 + dx, :]
         return frame
 
 
@@ -40,13 +45,13 @@ def create_camera(index):
     ]
 
     x0y0 = [
-        ((145, 180),),
-        ((50, 195),),
+        ((200, 240),),
+        ((135, 250),),
 
     ]
     frame_size = (
-        ((335, 215),),
-        ((300, 190),),
+        ((185, 240),),
+        ((128, 170),),
     )
 
     v4l2 = dict(v4l2_base)

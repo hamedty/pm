@@ -25,8 +25,8 @@ class CameraBase(object):
         result, _ = self._cap.read()
 
         for i in range(2):
-            command = 'v4l2-ctl --device=%s --set-fmt-video=width=1280,height=720,pixelformat=MJPG' % self.filename
-            os.system(command)
+            # command = 'v4l2-ctl --device=%s --set-fmt-video=width=1280,height=720,pixelformat=MJPG' % self.filename
+            # os.system(command)
             for key, value in self.v4l2_config.items():
                 command = 'v4l2-ctl --device=%s --set-ctrl=%s=%d' % (
                     self.filename, key, value)

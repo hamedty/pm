@@ -25,9 +25,9 @@ const uint8_t MOTOR_PINS[MOTOR_COUNT][MOTOR_PIN_COUNT] = {
 };
 const bool MOTOR_PRESET[MOTOR_COUNT][MOTOR_PIN_COUNT] = {
         // M0 M1 M2
-        { 0, 0, 0, 0, 0 }, // Motor 1
-        { 0, 0, 0, 0, 0 }, // Motor 2
-        { 0, 0, 0, 0, 0 }, // Motor 3
+        { 0, 0, 1, 1, 1 }, // Motor 1
+        { 0, 0, 1, 1, 1 }, // Motor 2
+        { 0, 0, 1, 1, 1 }, // Motor 3
         { 0, 0, 0, 0, 0 },
 };
 
