@@ -1,0 +1,10 @@
+remove static ip  `sudo nano /etc/dhcpcd.conf`
+copy ssh key
+copy .bashrc
+create ~/data folder
+enable tempfs /etc/fstab
+
+
+python3-pip libwebp-dev libtiff-dev libopenjp2-7-dev libilmbase-dev libopenexr-dev libgstreamer1.0-dev libatlas-base-dev
+
+pip3 install pyserial
