@@ -51,7 +51,7 @@ void (*motor_loop_array[MOTOR_COUNT])(void) = {
         motor_loop_0, motor_loop_1, motor_loop_2, motor_loop_3
 };
 
-void rail_fast_run(uint16_t, unsigned long *, uint16_t);
+void rail_fast_run(uint16_t);
 
 Motor motors[MOTOR_COUNT];
 
@@ -131,8 +131,8 @@ uint8_t process_command(const uint8_t *data, size_t size) {
                         if (motor_number==2)
                                 Timer6.attachInterrupt(motor_loop_2).start(delay_);
                         if (motor_number==3)
-                                if (abs(motor->steps) > (CURVE_RAIL_LONG_A_COURSE + 20)) {
-                                        rail_fast_run(motor->steps, CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_A_LEN);
+                                if (abs(motor->steps) > (CURVE_RAIL_LONG_A_DISTANCE + CURVE_RAIL_LONG_D_DISTANCE + 20)) {
+                                        rail_fast_run(motor->steps);
                                         motor->steps = 0;
                                         motors_running[motor_number] = false;
 
@@ -284,13 +284,11 @@ uint16_t rail_run_curve(unsigned long *start, unsigned long *finish) {
         return delay;
 }
 
-void rail_fast_run(uint16_t steps, unsigned long * A, uint16_t A_LEN) {
-
-
-        uint16_t delay_time = rail_run_curve(A, A + A_LEN);
+void rail_fast_run(uint16_t steps) {
+        uint16_t delay_time = rail_run_curve(CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_A + CURVE_RAIL_LONG_A_LEN);
         bool value               = 0;
 
-        steps = steps - CURVE_RAIL_LONG_A_COURSE;
+        steps = steps - CURVE_RAIL_LONG_A_DISTANCE - CURVE_RAIL_LONG_D_DISTANCE;
 
         for (uint16_t i = 0; i < steps; i++) {
                 value = !value;
@@ -298,7 +296,7 @@ void rail_fast_run(uint16_t steps, unsigned long * A, uint16_t A_LEN) {
                 if (digitalRead(HOME_PIN)) return;
                 delayMicroseconds(delay_time);
         }
-        // rail_run_curve(D, D + D_LEN);
+        rail_run_curve(CURVE_RAIL_LONG_D, CURVE_RAIL_LONG_D + CURVE_RAIL_LONG_D_LEN);
 }
 
 bool sure_pin_high(){

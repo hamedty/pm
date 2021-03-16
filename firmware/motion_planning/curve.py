@@ -91,8 +91,8 @@ def calc_curve(Vmax, Amax, Jmax, V0=0, A0=0, reverse=False):
     if reverse:
         periods = periods[::-1]
 
-    course = sum([i[1] for i in periods])
-    return periods, course
+    distance = sum([i[1] for i in periods])
+    return periods, distance
 
 
 def create_hfile(filename, acceleration, deceleration, distance=0):
@@ -100,24 +100,26 @@ def create_hfile(filename, acceleration, deceleration, distance=0):
     acceleration['reverse'] = False
     deceleration['reverse'] = True
 
-    a, a_course = calc_curve(**acceleration)
-    d, D_course = calc_curve(**deceleration)
+    a, a_distance = calc_curve(**acceleration)
+    d, d_distance = calc_curve(**deceleration)
 
     a = sum(a, [])
     d = sum(d, [])
 
     text = '''
     # define %(name)s_A_LEN %(a_len)d
-    # define %(name)s_A_COURSE %(a_course)d
+    # define %(name)s_A_DISTANCE %(a_distance)d
 
     # define %(name)s_D_LEN %(d_len)d
+    # define %(name)s_D_DISTANCE %(d_distance)d
 
     unsigned long %(name)s_A[%(name)s_A_LEN] = {%(a_str)s};
     unsigned long %(name)s_D[%(name)s_D_LEN] = {%(d_str)s};
 
     ''' % {
         'name': 'CURVE_' + filename.upper(),
-        'a_course': a_course,
+        'a_distance': a_distance,
+        'd_distance': d_distance,
         'a_len': len(a),
         'd_len': len(d),
         'a_str': ', '.join([str(i) for i in a]),
@@ -125,10 +127,12 @@ def create_hfile(filename, acceleration, deceleration, distance=0):
     }
 
     if distance:
-        d0 = len(a) + len(d)
-        d1 = distance - d0
-        assert d1 > 0, 'acceleration and deceleration is longer than main distance'
-        time_elapsed = a[-1] + d[-1] + d1 * float(a[-1] - a[-2])
+        cruise_distance = distance - a_distance - d_distance
+        assert cruise_distance > 0, 'acceleration and deceleration is longer than main distance'
+        f = a + d
+        time_elapsed = cruise_distance * \
+            a[-2] + sum([f[2 * i] * f[2 * i + 1]
+                         for i in range(int(len(f) / 2))])
         print(time_elapsed / 1000, ' ms')
     with open('../src/curve_%s.h' % filename.lower(), 'w') as file:
         file.write(text)
@@ -138,18 +142,20 @@ vmax = 40  # 1000 edge/s
 create_hfile('rail_long', {
     'Vmax': vmax * 1000.,
     'Amax': 70 * 1000.,
-    'Jmax': 200 * 1000.,
-    'V0': 5000,
-    'A0': 40000,
+    'Jmax': 400 * 1000.,
+    'V0': 10 * 1000,
+    'A0': 40 * 1000,
 },
     {
     'Vmax': vmax * 1000.,
-        'Amax': 2000 * 1000.,
+        'Amax': 400 * 1000.,
         'Jmax': 2000 * 1000.,
-        'V0': 25000,
-        'A0': 100000,
+        'V0': 10 * 1000,
+        'A0': 100 * 1000,
 },
-    # distance=86000,
+
+
+    distance=24000 * 2,
 )
 #
 # create_hfile('rail_short', {
