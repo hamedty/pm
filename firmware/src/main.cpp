@@ -29,9 +29,9 @@ typedef struct Command {
 } Command;
 
 typedef struct Response {
-        uint16_t status_code;
-        int16_t encoder;
-        uint16_t reserve[3];
+        uint32_t status_code;
+        uint32_t encoder;
+        uint32_t reserve[3];
 } Response;
 
 typedef struct Motor {
@@ -50,8 +50,8 @@ void motor_loop_3();
 void (*motor_loop_array[MOTOR_COUNT])(void) = {
         motor_loop_0, motor_loop_1, motor_loop_2, motor_loop_3
 };
-// void rail_fast_run(uint16_t);
-void rail_fast_run(uint16_t, unsigned long *, unsigned long *, uint16_t, uint16_t);
+
+void rail_fast_run(uint16_t, unsigned long *, uint16_t);
 
 Motor motors[MOTOR_COUNT];
 
@@ -117,6 +117,8 @@ uint8_t process_command(const uint8_t *data, size_t size) {
                 bool dir = steps_raw > 0;
                 uint32_t steps = abs(steps_raw) << 1;
 
+                motors_running[motor_number] = true;
+
                 if (steps) {
                         motor->steps = steps;
                         motor->dir = dir;
@@ -129,13 +131,14 @@ uint8_t process_command(const uint8_t *data, size_t size) {
                         if (motor_number==2)
                                 Timer6.attachInterrupt(motor_loop_2).start(delay_);
                         if (motor_number==3)
-                                // if (abs(motor->steps) > (CURVE_RAIL_LONG_A_LEN + CURVE_RAIL_LONG_D_LEN + 20)) {
-                                //         rail_fast_run(motor->steps, CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_D, CURVE_RAIL_LONG_A_LEN, CURVE_RAIL_LONG_D_LEN);
-                                //         motor->steps = 0;
-                                // } else {
-                                Timer7.attachInterrupt(motor_loop_3).start(delay_);
-                        // }
-                        motors_running[motor_number] = true;
+                                if (abs(motor->steps) > (CURVE_RAIL_LONG_A_COURSE + 20)) {
+                                        rail_fast_run(motor->steps, CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_A_LEN);
+                                        motor->steps = 0;
+                                        motors_running[motor_number] = false;
+
+                                } else {
+                                        Timer7.attachInterrupt(motor_loop_3).start(delay_);
+                                }
 
 
                 } else {
@@ -259,33 +262,43 @@ void setup_pins() {
 
 }
 
-void rail_run_curve(unsigned long *start, unsigned long *finish) {
-        unsigned long t0 = micros();
+uint16_t rail_run_curve(unsigned long *start, unsigned long *finish) {
         bool value       = 0;
+        uint16_t delay;
 
         while (start < finish) {
-                delayMicroseconds(*start - (micros() - t0));
+                delay = *start;
+                uint16_t count = *(start +1);
+                while(count) {
+                        delayMicroseconds(delay);
 
-                value = !value;
-                digitalWrite(MOTOR_PINS[3][MOTOR_PULS], value);
-                start++;
+                        value = !value;
+                        digitalWrite(MOTOR_PINS[3][MOTOR_PULS], value);
+                        count--;
+
+                        if (digitalRead(HOME_PIN)) return 0;
+                }
+
+                start = start + 2;
         }
+        return delay;
 }
 
-void rail_fast_run(uint16_t steps, unsigned long * A, unsigned long * D, uint16_t A_LEN, uint16_t D_LEN) {
-        rail_run_curve(A, A + A_LEN);
+void rail_fast_run(uint16_t steps, unsigned long * A, uint16_t A_LEN) {
 
-        unsigned long delay_time = A[A_LEN - 1] - A[A_LEN - 2];
+
+        uint16_t delay_time = rail_run_curve(A, A + A_LEN);
         bool value               = 0;
 
-        steps = steps - A_LEN - D_LEN;
+        steps = steps - CURVE_RAIL_LONG_A_COURSE;
 
         for (uint16_t i = 0; i < steps; i++) {
                 value = !value;
                 digitalWrite(MOTOR_PINS[3][MOTOR_PULS], value);
+                if (digitalRead(HOME_PIN)) return;
                 delayMicroseconds(delay_time);
         }
-        rail_run_curve(D, D + D_LEN);
+        // rail_run_curve(D, D + D_LEN);
 }
 
 bool sure_pin_high(){
@@ -332,6 +345,7 @@ bool home() {
                 delay(1);
         }
 
+        REG_TC0_CV0 = 0;
         return true;
 
 }

@@ -34,9 +34,9 @@ class Machine(object):
     ])
 
     RESPONSE = ''.join([
-        'H',  # uint16_t status_code
-        'h',  # int16_t encoder
-        'H' * 3,  # reserve
+        'I',  # uint32_t status_code
+        'I',  # uint32_t encoder
+        'I' * 3,  # reserve
     ])
 
     def __init__(self, encoder_compensate_non_linearity=True):
@@ -116,10 +116,10 @@ class Machine(object):
         if dance:
 
             # m1 6400 -> 1 rev
-            # m4 1600 -> 1 rev -> 8mm
+            # m4 800 -> 1 rev -> 8mm
             # pen 11mm/rev
             m1 = dance * 6400.
-            m4 = dance * 11. / 8. * 1600
+            m4 = dance * 11. / 8. * 800
             d4 = d1 * m1 / m4
 
         # print(sd, sa, delay_4)

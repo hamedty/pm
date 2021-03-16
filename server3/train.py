@@ -9,7 +9,7 @@ def train_dosing():
     name = 'dosing'
     FPR = 400.0
     CPR = 100.0
-    X = np.load('/home/it/Desktop/data/frames_%s.npy' % name)
+    X = np.load('/home/it/Desktop/data_dosing/frames_%s.npy' % name)
     y = np.arange(X.shape[0]) / (FPR / CPR)
     y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
 
@@ -20,20 +20,20 @@ def train_dosing():
     X = X[selected].copy()
     y = y[selected].copy()
 
-    y[y > start_back] = 25
-    y[y < end_back] = 25
+    y[y > start_back] = 40
+    y[y < end_back] = 40
 
     plt.plot(y)
     plt.show()
-    raise
-    train(C, X, y, name)
+    # raise
+    train(CPR, X, y, name)
 
 
 def train_holder():
     name = 'holder'
     FPR = 400.0
     CPR = 100.0
-    X = np.load('/home/it/Desktop/data/frames_%s.npy' % name)
+    X = np.load('/home/it/Desktop/data_holder/frames_%s.npy' % name)
     y = np.arange(X.shape[0]) / (FPR / CPR) - 0.5
     y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
     train(CPR, X, y, name)
@@ -52,7 +52,7 @@ def train(C, X, y, name):
     X_test = X_test[IX, :]
     y_test = y_test[IX]
 
-    clf = svm.LinearSVC(C=1, max_iter=5, verbose=True)
+    clf = svm.LinearSVC(C=1, max_iter=10, verbose=True)
     clf = calibration.CalibratedClassifierCV(clf)
     clf = clf.fit(X_train, y_train)
 
