@@ -78,8 +78,9 @@ class Machine(object):
         data = struct.pack(self.FORMAT, *data)
         self._serial_write(data)
         ret = self._serial_read()
-        print(ret)
+        # print(ret)
         response = struct.unpack(self.RESPONSE, ret)
+        # response = struct.unpack('I' * 1000, ret)
         print(response)
         status_code = response[0]
         if status_code == SUCCESS:

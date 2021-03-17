@@ -11,6 +11,9 @@
 // Timers
 DueTimer MOTOR_TIMERS[MOTOR_COUNT] = {Timer4, Timer5, Timer6, Timer7};
 
+#define ENC_HARD_LIMIT 72400
+#define RAIL_SOFT_LIMIT 48000
+
 
 typedef struct Command {
         // motors
@@ -51,7 +54,7 @@ void (*motor_loop_array[MOTOR_COUNT])(void) = {
         motor_loop_0, motor_loop_1, motor_loop_2, motor_loop_3
 };
 
-void rail_fast_run(uint16_t);
+void rail_fast_run(uint16_t, bool);
 
 Motor motors[MOTOR_COUNT];
 
@@ -132,7 +135,7 @@ uint8_t process_command(const uint8_t *data, size_t size) {
                                 Timer6.attachInterrupt(motor_loop_2).start(delay_);
                         if (motor_number==3)
                                 if (abs(motor->steps) > (CURVE_RAIL_LONG_A_DISTANCE + CURVE_RAIL_LONG_D_DISTANCE + 20)) {
-                                        rail_fast_run(motor->steps);
+                                        rail_fast_run(motor->steps, dir);
                                         motor->steps = 0;
                                         motors_running[motor_number] = false;
 
@@ -284,7 +287,24 @@ uint16_t rail_run_curve(unsigned long *start, unsigned long *finish) {
         return delay;
 }
 
-void rail_fast_run(uint16_t steps) {
+void rail_fast_run(uint16_t steps, bool dir) {
+        // // Sanity Check
+        // if (steps > RAIL_SOFT_LIMIT)
+        //         return ERR_RAIL_SOFT_LIMIT;
+        // uint32_t enc_start = REG_TC0_CV0;
+        // uint32_t enc_inc = steps + (steps >> 1); // 2400/1600 = 1.5
+        // uint32_t enc_end;
+        // if (dir) {
+        //         enc_end = enc_start + enc_inc;
+        //         if (enc_end > ENC_HARD_LIMIT)
+        //                 return ERR_RAIL_SOFT_LIMIT;
+        // } else {
+        //         if ((enc_inc + 150) > enc_start)
+        //                 return ERR_RAIL_SOFT_LIMIT;
+        //
+        //         enc_end = enc_start - enc_inc;
+        // }
+
         uint16_t delay_time = rail_run_curve(CURVE_RAIL_LONG_A, CURVE_RAIL_LONG_A + CURVE_RAIL_LONG_A_LEN);
         bool value               = 0;
 
@@ -331,6 +351,9 @@ bool home() {
 
         }
 
+        delay(10);
+        REG_TC0_CCR0 = REG_TC0_CCR0 | TC_CCR_SWTRG;
+
         digitalWrite(dir_pin, 1);
         while (!sure_pin_low()) {
                 digitalWrite(pulse_pin, !digitalRead(pulse_pin));
@@ -343,7 +366,6 @@ bool home() {
                 delay(1);
         }
 
-        REG_TC0_CV0 = 0;
         return true;
 
 }

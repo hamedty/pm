@@ -3,6 +3,7 @@
 #define SUCCESS 0
 #define ERR_INVALID_PACKET_SIZE 1
 #define ERR_HOMING_FAILED 2
+#define ERR_RAIL_SOFT_LIMIT 3
 
 
 // Motors
