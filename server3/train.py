@@ -14,7 +14,16 @@ def train_dosing():
     name = 'dosing'
     FPR = 400.0
     CPR = 100.0
-    X = np.load('/home/it/Desktop/data_dosing/frames_%s.npy' % name)
+
+    files = glob.glob(DATA_PATH + '/frames_%s_*.npy' % name)
+    X = [np.load(file) for file in files]
+    for x in X:
+        print(x.shape)
+        assert x.shape[0] == X[0].shape[0]
+        assert x.shape[0] % FPR == 0
+    X = np.concatenate(X)
+    print(X.shape)
+
     y = np.arange(X.shape[0]) / (FPR / CPR)
     y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
 
@@ -42,8 +51,8 @@ def train_holder():
     X = [np.load(file) for file in files]
     for x in X:
         print(x.shape)
-        assert len(x.shape[0]) == len(X[0].shape[0])
-        assert len(x.shape[0]) % FPR == 0
+        assert x.shape[0] == X[0].shape[0]
+        assert x.shape[0] % FPR == 0
     X = np.concatenate(X)
     print(X.shape)
 
