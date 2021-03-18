@@ -1,10 +1,10 @@
 from .base import CameraBase
 from cv2 import *
 
-SERAIL_NOS = [
-    '1',
-    '2',
-]
+SERAIL_NOS = {
+    'dosing': '1',
+    'holder': '2',
+}
 
 
 class CheapCam(CameraBase):
@@ -39,20 +39,19 @@ def create_camera(index):
         'exposure_auto': 1,
         'exposure_absolute': 10,
     }
-    v4l2_config = [
-        {'brightness': 110, },
-        {'brightness': 150, },
-    ]
+    v4l2_config = {
+        'dosing': {'brightness': 110, },
+        'holder': {'brightness': 150, },
+    }
+    x0y0 = {
+        'dosing': ((200, 240),),
+        'holder': ((135, 250),),
+    }
 
-    x0y0 = [
-        ((200, 240),),
-        ((135, 250),),
-
-    ]
-    frame_size = (
-        ((185, 240),),
-        ((128, 170),),
-    )
+    frame_size = {
+        'dosing': ((185, 240),),
+        'holder': ((128, 170),),
+    }
 
     v4l2 = dict(v4l2_base)
     v4l2.update(v4l2_config[index])

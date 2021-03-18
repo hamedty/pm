@@ -8,34 +8,59 @@ from camera import cheap_cam
 import vision
 
 machine = Machine()
-camera = cheap_cam.create_camera(0)
+
+camera_dosing = cheap_cam.create_camera('dosing')
+camera_holder = cheap_cam.create_camera('holder')
+
+
+def collect_single_round(round):
+
+    frames_dosing = []
+    frames_holder = []
+
+    FPR = 400
+    SPR = 32 * 200
+    for i in range(FPR * 3):
+        print(i)
+
+        machine.send_command(v1=1, v2=1, v4=1, m1=SPR / FPR, m3=SPR / FPR)
+
+        time.sleep(.1)
+        frame_dosing = camera_dosing.get_frame()
+        frame_holder = camera_holder.get_frame()
+
+        cv2.imwrite('/home/pi/data/dosing_%02d_%04d.png' %
+                    (round, i), frame_dosing)
+        cv2.imwrite('/home/pi/data/holder_%02d_%04d.png' %
+                    (round, i), frame_holder)
+
+        frames_dosing.append(vision.resize_and_bw(frame_dosing).flatten())
+        frames_holder.append(vision.resize_and_bw(frame_holder).flatten())
+
+    frames_dosing = np.array(frames_dosing)
+    frames_holder = np.array(frames_holder)
+
+    np.save('/home/pi/data/frames_dosing_%02d.npy' % round, frames_dosing)
+    np.save('/home/pi/data/frames_holder_%02d.npy' % round, frames_holder)
 
 
 def main():
-    # machine.send_command(v2=1)
-    machine.send_command(v1=1, v4=1)
+    for i in range(1, 5):
+        machine.send_command(v4=1)
+        time.sleep(.3)
+        machine.send_command(home=1)
 
-    frames = []
+        input('place everything')
 
-    FPR = 400
-    SPR = 6400
-    for i in range(FPR * 10):
-        print(i)
-        # machine.send_command(v2=1, m3=SPR / FPR)
-        machine.send_command(v1=1, v4=1, m1=SPR / FPR)
+        machine.send_command(v2=1, v4=1)
+        time.sleep(.3)
+        machine.send_command(v2=1, v4=1, m4=21750)
+        time.sleep(.3)
+        machine.send_command(v1=1, v2=1, v4=1)
+        time.sleep(.3)
 
-        time.sleep(.1)
-        frame = camera.get_frame()
-
-        cv2.imwrite('/home/pi/data/dosing_%04d.png' % i, frame)
-        # cv2.imwrite('/home/pi/data/holder_%04d.png' % i, frame)
-
-        frames.append(vision.resize_and_bw(frame).flatten())
-
-    frames = np.array(frames)
-
-    np.save('/home/pi/data/frames_dosing.npy', frames)
-    # np.save('/home/pi/data/frames_holder.npy', frames)
+        machine.send_command(v1=1, v4=1)
+        collect_single_round(i)
 
 
 main()
