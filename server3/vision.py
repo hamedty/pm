@@ -4,32 +4,42 @@ from camera import cheap_cam
 
 
 class Detector(object):
-    def __init__(self):
-        # self.camera_dosing = cheap_cam.create_camera(0)
-        # self.clf_dosing = pickle.load(open('model_dosing.clf', 'rb'))
+    N = 1
 
-        self.camera_holder = cheap_cam.create_camera(1)
+    def __init__(self):
+        self.camera_dosing = cheap_cam.create_camera('dosing')
+        self.clf_dosing = pickle.load(
+            open('/home/pi/models/model_dosing.clf', 'rb'))
+
+        self.camera_holder = cheap_cam.create_camera('holder')
         self.clf_holder = pickle.load(
             open('/home/pi/models/model_holder.clf', 'rb'))
 
     def detect_dosing(self):
         frame = self.camera_dosing.get_frame()
-        cv2.imwrite('current.png', frame)
 
-        d = detect(self.clf_dosing, frame)
-        if d != 25:
-            d = (d - 0) * -4.0
+        cls = detect(self.clf_dosing, frame)
+        p = 1 / 100.0 * 200 * 32
+        if cls <= 0:
+            steps = -cls * p
+        elif cls <= 33:
+            steps = (100 - cls) * p
         else:
-            d = 100
-        if d < -10:
-            d = 400 + d
-        return d
+            steps = 25 * p
+
+        aligned = abs(cls) < 3
+
+        return cls, steps, aligned
 
     def detect_holder(self):
         frame = self.camera_holder.get_frame()
-        d = detect(self.clf_holder, frame)
-        # d = (d - 2) * -4.0
-        return d
+        # cv2.imwrite('/home/pi/server3/%d.png' % self.N, frame)
+        # self.N += 1
+        p = 1 / 100.0 * 200 * 32
+        cls = detect(self.clf_holder, frame)
+        steps = -cls * p
+        aligned = abs(cls) < 3
+        return cls, steps, aligned
 
 
 def resize_and_bw(image):
