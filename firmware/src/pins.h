@@ -23,6 +23,7 @@ const uint8_t MOTOR_PINS[MOTOR_COUNT][MOTOR_PIN_COUNT] = {
         { 23,25, 31, 29, 27 },
         { 47, 48, 51, 50, 49 },
         { 33, 35, 39, 38, 37 },
+        // { 12, 11, 46, 45, 44 }, robot
 };
 const bool MOTOR_PRESET[MOTOR_COUNT][MOTOR_PIN_COUNT] = {
         // M0 M1 M2
