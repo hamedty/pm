@@ -19,7 +19,7 @@ class CheapCam(CameraBase):
         frame = super().get_frame(pre_fetch)
         y0, x0 = self.settings['x0y0'][roi_index]
         dy, dx = self.settings['frame_size'][roi_index]
-        frame = frame[y0:y0 + dy, x0:x0 + dx, :]
+        # frame = frame[y0:y0 + dy, x0:x0 + dx, :]
         return frame
 
 

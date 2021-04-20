@@ -81,7 +81,7 @@ class Machine(object):
         # print(ret)
         response = struct.unpack(self.RESPONSE, ret)
         # response = struct.unpack('I' * 1000, ret)
-        # print(response)
+        print(response)
         status_code = response[0]
         if status_code == SUCCESS:
             return response
@@ -94,7 +94,7 @@ class Machine(object):
                      b1=1,
 
                      m2=0,
-                     d2=10,
+                     d2=100,
                      b2=1,
 
                      m3=0,
