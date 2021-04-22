@@ -21,34 +21,34 @@ void setup() {
   packet_serial.setStream(&SerialUSB);
   packet_serial.setPacketHandler(&process_command);
 
-  Motor0.set_timer();
   Motor0.set_isr(m0_isr);
-  Motor0.set_pins(12, 11);
-
   Motor1.set_isr(m1_isr);
-  Motor1.set_pins(9, 8);
+  Motor2.set_isr(m2_isr);
+  Motor3.set_isr(m3_isr);
+
+  Motor0.set_pins(12, 11, 16, 15, 128, 128, 128);
+  Motor0.set_timer(); // this call allocates a timer - don't confilit with
+                      // encoder
+
+  Motor1.set_pins(9, 8, 128, 14, 128, 128, 128);
+  Motor1.set_timer(); // this call allocates a timer - don't confilit with
+                      // encoder
+
   pinMode(LED_BUILTIN, OUTPUT);
-}
-
-void myDelay(uint32_t d) {
-  uint32_t t0 =  millis();
-
-  while ((millis() - t0) < d);
 }
 
 void loop() {
   // packet_serial.update();
 
-  Motor0.go_steps(100, 50);
+  Motor0.go_steps(-500, 500);
+  Motor1.go_steps(500, 500);
 
-  // Motor1.go_steps(500, 500);
-  myDelay(1000);
+  delay(100);
 
-  // Motor0.go_steps(-500, 500);
-  // Motor1.go_steps(-500, 500);
+  Motor0.go_steps(500, 500);
+  Motor1.go_steps(-500, 500);
 
-  // delay(50);
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  delay(100);
 }
 
 void process_command(const uint8_t *buffer_in, size_t size) {
