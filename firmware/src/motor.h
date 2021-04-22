@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "DueTimer.h"
 #include "encoder.h"
+#include <base.h>
 
 #ifndef Motor_h
 # define Motor_h
@@ -15,15 +16,15 @@ public:
 
   DueTimer timer = Timer3;
 
-  uint8_t pin_pulse = 128;
-  uint8_t pin_dir   = 128;
+  uint8_t pin_pulse = INVALID_PIN;
+  uint8_t pin_dir   = INVALID_PIN;
 
-  uint8_t pin_microstep_0 = 128;
-  uint8_t pin_microstep_1 = 128;
-  uint8_t pin_microstep_2 = 128;
+  uint8_t pin_microstep_0 = INVALID_PIN;
+  uint8_t pin_microstep_1 = INVALID_PIN;
+  uint8_t pin_microstep_2 = INVALID_PIN;
 
-  uint8_t pin_limit_p = 128;
-  uint8_t pin_limit_n = 128;
+  uint8_t pin_limit_p = INVALID_PIN;
+  uint8_t pin_limit_n = INVALID_PIN;
 
   volatile MotorStatus _status = idle;
   volatile int32_t _steps;
@@ -47,9 +48,9 @@ public:
                     uint32_t delay);
   bool     limit_not_reached() {
     return
-      (!_dir || (pin_limit_p & 128) || !digitalRead(pin_limit_p))
+      (!_dir || (pin_limit_p == INVALID_PIN) || !digitalRead(pin_limit_p))
       &&
-      (_dir || (pin_limit_n & 128) || !digitalRead(pin_limit_n));
+      (_dir || (pin_limit_n == INVALID_PIN) || !digitalRead(pin_limit_n));
   }
 
   void isr();
@@ -78,23 +79,23 @@ void Motor::set_pins(uint8_t pin_pulse,
 
   this->pin_limit_p = pin_limit_p;
 
-  if (!(pin_limit_p & 128)) pinMode(pin_limit_p,   INPUT_PULLUP);
+  if (pin_limit_p != INVALID_PIN) pinMode(pin_limit_p,   INPUT_PULLUP);
 
   this->pin_limit_n = pin_limit_n;
 
-  if (!(pin_limit_n & 128)) pinMode(pin_limit_n,   INPUT_PULLUP);
+  if (pin_limit_n != INVALID_PIN) pinMode(pin_limit_n,   INPUT_PULLUP);
 
   this->pin_microstep_0 = pin_microstep_0;
 
-  if (!(pin_microstep_0 & 128)) pinMode(pin_microstep_0,   OUTPUT);
+  if (pin_microstep_0 != INVALID_PIN) pinMode(pin_microstep_0,   OUTPUT);
 
   this->pin_microstep_1 = pin_microstep_1;
 
-  if (!(pin_microstep_1 & 128)) pinMode(pin_microstep_1,   OUTPUT);
+  if (pin_microstep_1 != INVALID_PIN) pinMode(pin_microstep_1,   OUTPUT);
 
   this->pin_microstep_2 = pin_microstep_2;
 
-  if (!(pin_microstep_2 & 128)) pinMode(pin_microstep_2,   OUTPUT);
+  if (pin_microstep_2 != INVALID_PIN) pinMode(pin_microstep_2,   OUTPUT);
 }
 
 void Motor::set_isr(void (*isr)()) {

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <base.h>
 
 #ifndef Gpio_h
 # define Gpio_h
@@ -10,22 +11,23 @@ public:
     mode = _mode;
   }
 
-  void setup(uint8_t pin_no, bool output) {
+  void set_pin(uint8_t pin_no) {
     pin = pin_no;
 
-    if (output) pinMode(pin,   OUTPUT);
-    else pinMode(pin,   INPUT_PULLUP);
+    if (pin != INVALID_PIN) pinMode(pin, mode);
   }
 
-  uint8_t pin = 128;
+  uint8_t pin = INVALID_PIN;
   uint32_t mode;
 
   bool read() {
-    return digitalRead(pin);
+    if (pin != INVALID_PIN) return digitalRead(pin);
+
+    return 0;
   }
 
   void set(bool value) {
-    digitalWrite(pin, value);
+    if (pin != INVALID_PIN) digitalWrite(pin, value);
   }
 };
 
