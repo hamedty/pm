@@ -29,17 +29,17 @@ void setup() {
 
 
   // runtime
-  Motor0.set_pins(12, 11, 16, 15, 128, 128, 128);
-  Motor0.set_timer(); // this call allocates a timer - don't confilit with
-                      // encoder
-  Encoder0.init();
-  Motor0.set_encoder(&Encoder0);
+  motors[0]->set_pins(12, 11, 16, 15, 128, 128, 128);
+  motors[0]->set_timer(); // this call allocates a timer - don't confilit with
+                          // encoder
+  encoders[0].init();
+  motors[0]->set_encoder(&encoders[0]);
 
-  Motor1.set_pins(9, 8, 128, 14, 128, 128, 128);
-  Motor1.set_timer(); // this call allocates a timer - don't confilit with
-                      // encoder
-  Encoder1.init();
-  Motor0.set_encoder(&Encoder1);
+  motors[1]->set_pins(9, 8, 128, 14, 128, 128, 128);
+  motors[1]->set_timer(); // this call allocates a timer - don't confilit with
+                          // encoder
+  encoders[1].init();
+  motors[1]->set_encoder(&encoders[1]);
 
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -48,15 +48,16 @@ void setup() {
 void loop() {
   // packet_serial.update();
 
-  Motor0.go_steps(-500, 500);
-  Motor1.go_steps(500, 500);
+  motors[0]->go_steps(500, 500);
+  motors[1]->go_steps(500, 500);
+
+  delay(100);
+  motors[0]->go_steps(-500, 500);
+  motors[1]->go_steps(-500, 500);
 
   delay(100);
 
-  Motor0.go_steps(500, 500);
-  Motor1.go_steps(-500, 500);
-
-  delay(100);
+  // digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
 void process_command(const uint8_t *buffer_in, size_t size) {

@@ -8,9 +8,10 @@ public:
   Encoder(bool index) {
     this->index = index;
   }
+
   void init() {
     if (index == 0) {
-      pinMode(2,  INPUT_PULLUP);
+      pinMode( 2, INPUT_PULLUP);
       pinMode(13, INPUT_PULLUP);
 
       REG_PMC_PCER0 = PMC_PCER0_PID27;   // activate clock for TC0
@@ -45,7 +46,10 @@ public:
   }
 };
 
-Encoder Encoder0(0);
-Encoder Encoder1(1);
+# define ENCODER_NO
+Encoder encoders[ENCODER_NO] = {
+  Encoder(0),
+  Encoder(1),
+};
 
 #endif /* ifndef Encoder_h */

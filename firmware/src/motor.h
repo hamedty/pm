@@ -176,4 +176,12 @@ void m3_isr() {
   Motor3.isr();
 }
 
+# define MOTORS_NO 4
+Motor *motors[MOTORS_NO] = {
+  &Motor0,
+  &Motor1,
+  &Motor2,
+  &Motor3,
+};
+
 #endif // ifndef Motor_h
