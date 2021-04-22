@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include "PacketSerial.h"
 #include "motor.h"
+#include "gpio.h"
 
 
 // Command
@@ -26,13 +27,20 @@ void setup() {
   Motor2.set_isr(m2_isr);
   Motor3.set_isr(m3_isr);
 
+
+  // runtime
   Motor0.set_pins(12, 11, 16, 15, 128, 128, 128);
   Motor0.set_timer(); // this call allocates a timer - don't confilit with
                       // encoder
+  Encoder0.init();
+  Motor0.set_encoder(&Encoder0);
 
   Motor1.set_pins(9, 8, 128, 14, 128, 128, 128);
   Motor1.set_timer(); // this call allocates a timer - don't confilit with
                       // encoder
+  Encoder1.init();
+  Motor0.set_encoder(&Encoder1);
+
 
   pinMode(LED_BUILTIN, OUTPUT);
 }

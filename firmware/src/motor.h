@@ -11,9 +11,7 @@ public:
 
   Motor();
 
-
-  bool has_encoder = false;
-  Encoder *encoder;
+  Encoder *encoder = NULL;
 
   DueTimer timer = Timer3;
 
@@ -42,6 +40,7 @@ public:
                 );
   void     set_isr(void (*isr)());
   void     set_timer();
+  void     set_encoder(Encoder *);
   void     init();
   uint32_t home();
   uint32_t go_steps(int32_t  steps,
@@ -105,6 +104,10 @@ void Motor::set_isr(void (*isr)()) {
 void Motor::set_timer() {
   this->timer.timer = this->timer.getAvailable();
   this->timer.attachInterrupt(this->isr_ptr);
+}
+
+void Motor::set_encoder(Encoder *enc) {
+  encoder = enc;
 }
 
 void     Motor::init() {}
