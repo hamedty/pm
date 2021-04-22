@@ -15,6 +15,7 @@ public:
   Encoder *encoder = NULL;
 
   DueTimer timer = Timer3;
+  bool timer_set = false;
 
   uint8_t pin_pulse = INVALID_PIN;
   uint8_t pin_dir   = INVALID_PIN;
@@ -30,6 +31,8 @@ public:
   volatile int32_t _steps;
   volatile bool _value;
   volatile bool _dir;
+  uint32_t microstep     = 1;
+  uint32_t encoder_ratio = 1;
 
   void set_pins(uint8_t pin_pulse,
                 uint8_t pin_dir,
@@ -41,11 +44,13 @@ public:
                 );
   void     set_isr(void (*isr)());
   void     set_timer();
-  void     set_encoder(Encoder *);
+  void set_encoder(Encoder *, uint32_t);
+  void set_microstep(uint32_t);
   void     init();
   uint32_t home();
   uint32_t go_steps(int32_t  steps,
-                    uint32_t delay);
+                    uint32_t delay,
+                    bool     block);
   bool     limit_not_reached() {
     return
       (!_dir || (pin_limit_p == INVALID_PIN) || !digitalRead(pin_limit_p))
@@ -98,17 +103,41 @@ void Motor::set_pins(uint8_t pin_pulse,
   if (pin_microstep_2 != INVALID_PIN) pinMode(pin_microstep_2,   OUTPUT);
 }
 
+void Motor::set_microstep(uint32_t _microstep) {
+  if ((pin_microstep_0 == INVALID_PIN) ||
+      (pin_microstep_1 == INVALID_PIN) ||
+      (pin_microstep_2 == INVALID_PIN)) return;
+
+  if ((_microstep != 1) &&
+      (_microstep != 2) &&
+      (_microstep != 4) &&
+      (_microstep != 8) &&
+      (_microstep != 16) &&
+      (_microstep != 32)) return;
+
+  microstep = _microstep;
+  digitalWrite(pin_microstep_0, (microstep == 2) ||
+               (microstep == 8) ||
+               (microstep == 32));
+  digitalWrite(pin_microstep_1, (microstep == 4) || (microstep == 8));
+  digitalWrite(pin_microstep_2, microstep >= 16);
+}
+
 void Motor::set_isr(void (*isr)()) {
   this->isr_ptr = isr;
 }
 
 void Motor::set_timer() {
+  if (timer_set) return;
+
+  timer_set         = true;
   this->timer.timer = this->timer.getAvailable();
   this->timer.attachInterrupt(this->isr_ptr);
 }
 
-void Motor::set_encoder(Encoder *enc) {
-  encoder = enc;
+void Motor::set_encoder(Encoder *enc, uint32_t _encoder_ratio) {
+  encoder       = enc;
+  encoder_ratio = _encoder_ratio;
 }
 
 void     Motor::init() {}
@@ -117,7 +146,7 @@ uint32_t Motor::home() {
   return 10;
 }
 
-uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay) {
+uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay, bool block) {
   this->_status = running;
   this->_dir    = steps_raw > 0;
   this->_steps  = abs(steps_raw) << 2;
@@ -127,8 +156,7 @@ uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay) {
 
   this->timer.start(delay);
 
-  while (this->_status == running);
-
+  if (block) while (this->_status == running);
   return 0;
 }
 

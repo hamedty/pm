@@ -29,7 +29,7 @@ void loop() {
 }
 
 void process_command(const CommandHeader *);
-void send_response(uint16_t, uint32_t);
+void send_response(RESPONSE_CODE, uint32_t);
 
 void process_commands(const uint8_t *buffer_in, size_t size) {
   const uint8_t *rptr = buffer_in;
@@ -64,7 +64,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(DefineValve)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      return;
+      break;
     }
 
     DefineValve *payload = (DefineValve *)payload_buffer;
@@ -80,7 +80,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(SetValve)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      return;
+      break;
     }
 
     SetValve *payload = (SetValve *)payload_buffer;
@@ -97,50 +97,112 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(DefineMotor)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      return;
+      break;
     }
 
     DefineMotor *payload = (DefineMotor *)payload_buffer;
+
+    if (payload->motor_no >= 4) {
+      send_response(RESPONSE_CODE_BAD_MOTOR_NO, command_header->command_id);
+      break;
+    }
+    Motor *m = motors[payload->motor_no];
+    m->set_pins(payload->pin_pulse,
+                payload->pin_dir,
+                payload->pin_limit_p,
+                payload->pin_limit_n,
+                payload->pin_microstep_0,
+                payload->pin_microstep_1,
+                payload->pin_microstep_2
+                );
+    m->set_microstep(payload->microstep);
+
+    m->set_timer(); // this call allocates a timer - don't confilit with
+
+
+    if (payload->has_encoder && (payload->encoder_no > 1)) {
+      send_response(RESPONSE_CODE_BAD_ENCODER_NO, command_header->command_id);
+      break;
+    }
+
+    if (payload->has_encoder) {
+      encoders[payload->encoder_no].init();
+      m->set_encoder(&encoders[payload->encoder_no], payload->encoder_ratio);
+    } else {
+      m->set_encoder(NULL, 1);
+    }
+
+    break;
+  }
+
+  case COMMAND_TYPE_MOVE_MOTOR: // move_motor
+  {
+    if (command_header->payload_size != sizeof(MoveMotor)) {
+      send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
+      break;
+    }
+    MoveMotor *payload = (MoveMotor *)payload_buffer;
+
+    for (uint8_t motor_index = 0; motor_index < MOTORS_NO; motor_index++) {
+      if (payload->steps[motor_index]) {
+        motors[motor_index]->go_steps(payload->steps[motor_index],
+                                      payload->delay[motor_index],
+                                      payload->block[motor_index]);
+      }
+    }
+
+    break;
+  }
+
+  case COMMAND_TYPE_QUERY_MOTOR: // query_motor
+  {
+    break;
+  }
+
+  case COMMAND_TYPE_QUERY_ENCODER: // query_encoder
+  {
+    break;
+  }
+
+  case COMMAND_TYPE_DEFINE_DI: // define_digital_input
+  {
+    if (command_header->payload_size != sizeof(DefineDI)) {
+      send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
+      break;
+    }
+
+    DefineDI *payload = (DefineDI *)payload_buffer;
+
+    for (uint8_t di_index = 0; di_index < INPUTS_NO; di_index++) {
+      inputs[di_index].set_pin(payload->pins[di_index]);
+    }
+
+    break;
+  }
+
+  case COMMAND_TYPE_QUERY_DI: // query_digital_input
+  {
+    break;
+  }
+
+  case COMMAND_TYPE_DEFINE_TRAJECTORY: // define_trajectory
+  {
     break;
   }
 
   default:
+    send_response(RESPONSE_CODE_INVALID_COMMAND, command_header->command_id);
     break;
   }
 }
 
-void send_response(uint16_t response_type,
-                   uint32_t command_id) {
+void send_response(RESPONSE_CODE response_type,
+                   uint32_t      command_id) {
   // TODO: add payload
   ResponseHeader response_header;
 
-  response_header.response_type = response_type;
+  response_header.response_type = (uint16_t)response_type;
   response_header.payload_size  = 0;
   response_header.command_id    = command_id;
   packet_serial.send((uint8_t *)&response_header, sizeof(response_header));
 }
-
-// motors[0]->set_pins(12, 11, 16, 15, INVALID_PIN, INVALID_PIN, INVALID_PIN);
-// motors[0]->set_timer(); // this call allocates a timer - don't confilit
-// with
-//                         // encoder
-// encoders[0].init();
-// motors[0]->set_encoder(&encoders[0]);
-//
-// motors[1]->set_pins(9, 8, INVALID_PIN, 14, INVALID_PIN, INVALID_PIN,
-// INVALID_PIN);
-// motors[1]->set_timer(); // this call allocates a timer - don't confilit
-// with
-//                         // encoder
-// encoders[1].init();
-// motors[1]->set_encoder(&encoders[1]);
-
-
-// motors[0]->go_steps(500, 500);
-// motors[1]->go_steps(500, 500);
-//
-// delay(100);
-// motors[0]->go_steps(-500, 500);
-// motors[1]->go_steps(-500, 500);
-//
-// delay(100);
