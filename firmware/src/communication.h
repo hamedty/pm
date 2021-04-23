@@ -56,8 +56,8 @@ typedef struct DefineMotor {
   uint8_t  pin_microstep_2;
   uint32_t microstep;
   uint32_t encoder_ratio;
+  bool     has_encoder;
   uint8_t  encoder_no;
-  uint8_t  has_encoder;
 
   // TODO: homeing config
 } DefineMotor;
@@ -72,13 +72,14 @@ typedef struct MoveMotor {
 
 # define COMMAND_TYPE_QUERY_MOTOR 5
 # define COMMAND_TYPE_QUERY_ENCODER 6
+
 # define COMMAND_TYPE_DEFINE_DI 7
-
-
-# define COMMAND_TYPE_QUERY_DI 8
 typedef struct DefineDI {
   uint8_t pins[INPUTS_NO];
 } DefineDI;
+
+# define COMMAND_TYPE_QUERY_DI 8
+
 
 # define COMMAND_TYPE_DEFINE_TRAJECTORY 9
 
