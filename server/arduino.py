@@ -10,12 +10,18 @@ import arduino_constants as _
 
 class Arduino(object):
     def __init__(self):
-        # self._open_port()
+        self._open_port()
         self.lock = Lock()
         self._last_command_id = 0
 
     def _open_port(self):
-        self.ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Arduino_Due-if00')
+        print('opening ardiono port')
+        self.ser = serial.Serial(
+            '/dev/serial/by-id/usb-Arduino_Arduino_Due-if00')
+        print('done')
+
+    def _close_port(self):
+        self.ser.close()
 
     def _serial_read(self):
         buffer = []
@@ -34,27 +40,25 @@ class Arduino(object):
         self.ser.write(encoded + b'\x00')
 
     def _send_command(self, data):
-        data = struct.pack(self.FORMAT, *data)
         self._serial_write(data)
-        ret = self._serial_read()
+        # ret = self._serial_read()
         # print(ret)
-        response = struct.unpack(self.RESPONSE, ret)
+        # response = struct.unpack(self.RESPONSE, ret)
         # response = struct.unpack('I' * 1000, ret)
-        print(response)
-        status_code = response[0]
-        if status_code == SUCCESS:
-            return response
-        raise Exception('Invalid response from firmware: %d' % response)
+        # print(response)
+        # status_code = response[0]
+        # if status_code == SUCCESS:
+        #     return response
+        # raise Exception('Invalid response from firmware: %d' % response)
 
     def _get_command_id(self):
         self._last_command_id += 1
         return self._last_command_id
 
-    def send_command(data):
+    def send_command(self, data):
         self.lock.acquire()
-        result = self._send_command(data)
+        self._send_command(data)
         self.lock.release()
-        return result
 
     def _build_single_packet(self, command_type, packet_format, payload):
         format = ''.join([i[0] for i in packet_format])
@@ -74,16 +78,18 @@ class Arduino(object):
         packet = header + payload
         return packet, command_id
 
-    def define_valves(self, *pins):
+    def define_valves(self, pins):
         pins = list(pins) + (_.VALVES_NO - len(pins)) * [_.INVALID_PIN]
         payload = {
             'pins': pins,
         }
 
-        packet, command_id = self._build_single_packet(_.COMMAND_TYPE_DEFINE_VALVE, _.DefineValve, payload)
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_DEFINE_VALVE, _.DefineValve, payload)
+        self.send_command(packet)
         return packet, command_id
 
-    def set_valves(self, *value):
+    def set_valves(self, value):
         value = list(value) + (_.VALVES_NO - len(value)) * [None]
         mask = [i is not None for i in value]
         value = [bool(i) for i in value]
@@ -92,7 +98,10 @@ class Arduino(object):
             'value': value,
         }
 
-        packet, command_id = self._build_single_packet(_.COMMAND_TYPE_SET_VALVE, _.SetValve, payload)
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_SET_VALVE, _.SetValve, payload)
+
+        self.send_command(packet)
         return packet, command_id
 
     def define_motor(self, motor_definition):
@@ -112,14 +121,8 @@ class Arduino(object):
 
         }
 
-        packet, command_id = self._build_single_packet(_.COMMAND_TYPE_DEFINE_MOTOR, _.DefineMotor, payload)
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_DEFINE_MOTOR, _.DefineMotor, payload)
+
+        self.send_command(packet)
         return packet, command_id
-
-
-def main():
-    arduino = Arduino()
-    print(arduino.define_valves(1, 2, 3))
-
-
-if __name__ == '__main__':
-    main()

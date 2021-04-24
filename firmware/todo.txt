@@ -1,6 +1,8 @@
-server code
-orchestra / python
-home
+set valve
+move motor
+home motor
+run script on boot (systemd)
+log rpi to file
 ---------------------
 digital input feedback
 motor status feedback
@@ -10,3 +12,6 @@ double_motor_move
 double trajectory
 ---------------------
 script whole process
+vision
+logging in orcherstra
+HTML GUI

@@ -20,6 +20,13 @@ class Node(object):
             await asyncio.sleep(.5)
         return True
 
+    async def scp(self, path_src, path_dst):
+        command = 'scp -r %s pi@%s:%s' % (path_src, self.ip, path_dst)
+        command = command.split()
+        while subprocess.call(command, stdout=subprocess.PIPE) != 0:
+            await asyncio.sleep(.5)
+        return True
+
     async def connect(self):
         if not self._socket_reader:
             reader, writer = await asyncio.open_connection(self.ip, 2000)
@@ -51,6 +58,13 @@ class Node(object):
         command = {
             'verb': 'config_arduino',
             'hw_config': self.hw_config,
+        }
+        return await self.send_command(command)
+
+    async def send_command_set_valves(self, valves):
+        command = {
+            'verb': 'set_valves',
+            'valves': valves,
         }
         return await self.send_command(command)
 
@@ -99,7 +113,7 @@ class Robot(Node):
     arduino_reset_pin = 2
     valves = [15, 16]
     hw_config = {
-        'valves': [15, 16],
+        'valves': [37, 39],
         'motors': [
             {
                 'pin_pulse': 12,
@@ -127,34 +141,36 @@ STATIONS = [
     # First Five
     None,
     None,
-    Station('192.168.44.23'),
+    Station('192.168.44.52'),  # 23
     None,
     None,
 
     # Second Five
-    Station('192.168.44.26'),
-    Station('192.168.44.27'),
-    Station('192.168.44.28'),
-    Station('192.168.44.29'),
-    Station('192.168.44.30'),
+    # Station('192.168.44.26'),
+    # Station('192.168.44.27'),
+    # Station('192.168.44.28'),
+    # Station('192.168.44.29'),
+    # Station('192.168.44.30'),
 ]
 ROBOTS = [
-    Robot('192.168.44.11'),
+    Robot('192.168.44.51'),  # Robot('192.168.44.11'),
     None,  # Robot('192.168.44.12'),
 ]
 
-RAIL = [Rail('192.168.44.10')]
+RAIL = [
+    # Rail('192.168.44.10'),
+]
 ALL_NODES = STATIONS + ROBOTS + RAIL
 ALL_NODES = [node for node in ALL_NODES if node]
-ALL_NODES = [Station('192.168.44.51')]
-ALL_NODES = [Station('127.0.0.1')]
+# ALL_NODES = [Station('192.168.44.51')]
+# ALL_NODES = [Station('127.0.0.1')]
 N = len(ALL_NODES)
 
 
 async def call_all_wrapper(func, timeout=None):
     result = await asyncio.gather(*[asyncio.wait_for(func(node), timeout=timeout) for node in ALL_NODES], return_exceptions=True)
     for i in range(N):
-        print('%s: ' % ALL_NODES[i].ip, end='')
+        print('\t%s: ' % ALL_NODES[i].ip, end='')
         if result[i] == True:
             print(CHECK_GREEN)
         else:
@@ -174,15 +190,19 @@ async def main():
     assert(all(result))
 
     # reset arduino
-    print('reseting arduino ...')
-    result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=2)
+    # print('reseting arduino ...')
+    # result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
     # assert(all(result))
 
     # define valves
     print('config arduino ...')
     result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=2)
     assert(all(result))
-    # triger a valve
+
+    # define valves
+    print('set valves ...')
+    result = await call_all_wrapper(lambda x: x.send_command_set_valves([0, 1]), timeout=2)
+    assert(all(result))
 
 
 asyncio.run(main())
