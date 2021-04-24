@@ -1,7 +1,6 @@
-set valve
 move motor
 home motor
-run script on boot (systemd)
+run script on boot (systemd) https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/#systemd
 log rpi to file
 ---------------------
 digital input feedback

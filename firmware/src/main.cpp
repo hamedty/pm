@@ -64,7 +64,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(DefineValve)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      break;
+      return;
     }
 
     DefineValve *payload = (DefineValve *)payload_buffer;
@@ -80,7 +80,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(SetValve)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      break;
+      return;
     }
 
     SetValve *payload = (SetValve *)payload_buffer;
@@ -97,14 +97,14 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(DefineMotor)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      break;
+      return;
     }
 
     DefineMotor *payload = (DefineMotor *)payload_buffer;
 
     if (payload->motor_no >= 4) {
       send_response(RESPONSE_CODE_BAD_MOTOR_NO, command_header->command_id);
-      break;
+      return;
     }
     Motor *m = motors[payload->motor_no];
     m->set_pins(payload->pin_pulse,
@@ -122,7 +122,7 @@ void process_command(const CommandHeader *command_header) {
 
     if (payload->has_encoder && (payload->encoder_no > 1)) {
       send_response(RESPONSE_CODE_BAD_ENCODER_NO, command_header->command_id);
-      break;
+      return;
     }
 
     if (payload->has_encoder) {
@@ -139,7 +139,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(MoveMotor)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      break;
+      return;
     }
     MoveMotor *payload = (MoveMotor *)payload_buffer;
 
@@ -168,7 +168,7 @@ void process_command(const CommandHeader *command_header) {
   {
     if (command_header->payload_size != sizeof(DefineDI)) {
       send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
-      break;
+      return;
     }
 
     DefineDI *payload = (DefineDI *)payload_buffer;
@@ -192,8 +192,9 @@ void process_command(const CommandHeader *command_header) {
 
   default:
     send_response(RESPONSE_CODE_INVALID_COMMAND, command_header->command_id);
-    break;
+    return;
   }
+  send_response(RESPONSE_CODE_SUCCESS, command_header->command_id);
 }
 
 void send_response(RESPONSE_CODE response_type,

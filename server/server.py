@@ -118,8 +118,8 @@ class Robot(Node):
             {
                 'pin_pulse': 12,
                 'pin_dir': 11,
-                'pin_limit_n': 15,
-                'pin_limit_p': 16,
+                # 'pin_limit_n': 15,
+                # 'pin_limit_p': 16,
                 'microstep': 2500,
             },
             {
@@ -162,7 +162,7 @@ RAIL = [
 ]
 ALL_NODES = STATIONS + ROBOTS + RAIL
 ALL_NODES = [node for node in ALL_NODES if node]
-# ALL_NODES = [Station('192.168.44.51')]
+ALL_NODES = [Robot('192.168.44.51')]
 # ALL_NODES = [Station('127.0.0.1')]
 N = len(ALL_NODES)
 
@@ -189,7 +189,7 @@ async def main():
     result = await call_all_wrapper(lambda x: x.connect(), timeout=1)
     assert(all(result))
 
-    # reset arduino
+    # # reset arduino
     # print('reseting arduino ...')
     # result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
     # assert(all(result))
@@ -199,9 +199,9 @@ async def main():
     result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=2)
     assert(all(result))
 
-    # define valves
+    # set valves
     print('set valves ...')
-    result = await call_all_wrapper(lambda x: x.send_command_set_valves([0, 1]), timeout=2)
+    result = await call_all_wrapper(lambda x: x.send_command_set_valves([0, 1]), timeout=20)
     assert(all(result))
 
 

@@ -6,16 +6,15 @@ from arduino import Arduino
 
 print('start Arduino')
 arduino = Arduino()
-print('done')
 
 
 async def reset_arduino(command):
     c = ['raspi-gpio', 'set', str(command['pin']), 'dl']
-    arduino._close_port()
-    await asyncio.sleep(.5)
+    await asyncio.sleep(.1)
 
     subprocess.call(c, stdout=subprocess.PIPE)
-    await asyncio.sleep(.5)
+    await asyncio.sleep(.2)
+
     c[3] = 'dh'
     subprocess.call(c, stdout=subprocess.PIPE)
     await asyncio.sleep(2)
@@ -26,11 +25,17 @@ async def reset_arduino(command):
 
 async def config_arduino(command):
     arduino.define_valves(command['hw_config']['valves'])
+    for motor_no, motor in enumerate(command['hw_config']['motors']):
+        motor['motor_no'] = motor_no
+        arduino.define_motor(motor)
+
     return {'success': True}
 
 
 async def set_valves(command):
     arduino.set_valves(command['valves'])
+    arduino.move_motor([(500, 500, 1)])
+
     return {'success': True}
 
 

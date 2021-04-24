@@ -5,7 +5,7 @@
 
 #ifndef Motor_h
 # define Motor_h
-enum MotorStatus { idle, running, limit_reached };
+enum MotorStatus { not_defined, idle, running, limit_reached };
 
 class Motor {
 public:
@@ -27,7 +27,7 @@ public:
   uint8_t pin_limit_p = INVALID_PIN;
   uint8_t pin_limit_n = INVALID_PIN;
 
-  volatile MotorStatus _status = idle;
+  volatile MotorStatus _status = not_defined;
   volatile int32_t _steps;
   volatile bool _value;
   volatile bool _dir;
@@ -101,6 +101,8 @@ void Motor::set_pins(uint8_t pin_pulse,
   this->pin_microstep_2 = pin_microstep_2;
 
   if (pin_microstep_2 != INVALID_PIN) pinMode(pin_microstep_2,   OUTPUT);
+
+  this->_status = idle;
 }
 
 void Motor::set_microstep(uint32_t _microstep) {
@@ -147,6 +149,8 @@ uint32_t Motor::home() {
 }
 
 uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay, bool block) {
+  if (this->_status == not_defined) return 0;
+
   this->_status = running;
   this->_dir    = steps_raw > 0;
   this->_steps  = abs(steps_raw) << 2;

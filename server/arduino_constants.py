@@ -11,6 +11,7 @@ int16_t = 'h'
 uint16_t = 'H'
 int32_t = 'i'
 uint32_t = 'I'
+pad = 'x'
 
 
 CommandHeader = [
@@ -52,6 +53,8 @@ DefineMotor = [
     (uint32_t, 'encoder_ratio'),
     (bool, 'has_encoder'),
     (uint8_t, 'encoder_no'),
+    (pad, None),
+    (pad, None),
 ]
 
 
