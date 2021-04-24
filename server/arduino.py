@@ -129,7 +129,7 @@ class Arduino(object):
         self.send_command(packet)
         return packet, command_id
 
-    def move_motor(self, motor_moves):
+    def move_motors(self, motor_moves):
         # motor_moves = [(step0, delay0, blocking0), ...]
         # make sure length is equal to MOTORS_NO
         motor_moves = list(motor_moves) + (_.MOTORS_NO -

@@ -34,15 +34,18 @@ async def config_arduino(command):
 
 async def set_valves(command):
     arduino.set_valves(command['valves'])
-    arduino.move_motor([(500, 500, 1)])
-
     return {'success': True}
 
+
+async def move_motors(command):
+    arduino.move_motors(command['moves'])
+    return {'success': True}
 
 COMMAND_HANDLER = {
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,
     'set_valves': set_valves,
+    'move_motors': move_motors,
 }
 
 

@@ -194,7 +194,7 @@ async def main():
     # result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
     # assert(all(result))
 
-    # define valves
+    # hardware config
     print('config arduino ...')
     result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=2)
     assert(all(result))
@@ -204,5 +204,14 @@ async def main():
     result = await call_all_wrapper(lambda x: x.send_command_set_valves([0, 1]), timeout=20)
     assert(all(result))
 
+    # move motors
+    command = {
+        'verb': 'move_motors',
+        'moves': [[500, 500, 1]],
+    }
+
+    def func(x): return x.send_command(command)
+    result = await call_all_wrapper(func, timeout=10)
+    assert(all(result))
 
 asyncio.run(main())
