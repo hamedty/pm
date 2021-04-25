@@ -34,6 +34,9 @@ class Station(Node):
                 'pin_pulse': 35,
                 'pin_dir': 33,
                 'pin_limit_n': 28,
+                'course': 50000,
+                'homing_delay': 200,
+                'home_retract': 100,
                 'microstep': 2500,
             },
         ]

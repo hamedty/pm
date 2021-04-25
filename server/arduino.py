@@ -1,5 +1,6 @@
 import time
 import struct
+import glob
 import serial
 from cobs import cobs
 import argparse
@@ -19,8 +20,8 @@ class Arduino(object):
 
     def _open_port(self):
         print('opening ardiono port')
-        self.ser = serial.Serial(
-            '/dev/serial/by-id/usb-Arduino_Arduino_Due-if00')
+        f = glob.glob('/dev/serial/by-id/usb-Arduino*')[0]
+        self.ser = serial.Serial(f)
 
     def _close_port(self):
         self.ser.close()

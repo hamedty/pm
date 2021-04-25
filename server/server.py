@@ -36,7 +36,7 @@ async def main():
 
     # hardware config
     print('config arduino ...')
-    result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=200)
+    result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=20)
     assert(all(result))
 
     # # set valves
@@ -50,25 +50,26 @@ async def main():
     # result = await call_all_wrapper(func, timeout=2)
     # assert(all(result))
 
-    # # move motors
-    # command = {
-    #     'verb': 'move_motors',
-    #     'moves': [[0, 200, 1], [5000, 500, 1]],
-    # }
-    #
-    # def func(x): return x.send_command(command)
-    # result = await call_all_wrapper(func, timeout=10)
-    # assert(all(result))
-
-    # home motors
+    # move motors
+    print('move motors')
     command = {
-        'verb': 'home',
-        'axis': 1,
+        'verb': 'move_motors',
+        'moves': [[50, 500, 0], [0, 500, 0], [000, 500, 0], [00, 500, 0]],
     }
 
     def func(x): return x.send_command(command)
-    result = await call_all_wrapper(func, timeout=30)
+    result = await call_all_wrapper(func, timeout=100)
     assert(all(result))
+
+    # # home motors
+    # command = {
+    #     'verb': 'home',
+    #     'axis': 3,
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # result = await call_all_wrapper(func, timeout=30)
+    # assert(all(result))
 
 asyncio.run(main())
 
