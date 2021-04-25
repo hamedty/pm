@@ -44,7 +44,7 @@ class Arduino(object):
     def _send_command(self, data):
         self._serial_write(data)
         ret = self._serial_read()
-        # print(ret)
+        print(ret)
         # response = struct.unpack(self.RESPONSE, ret)
         # response = struct.unpack('I' * 1000, ret)
         # print(response)
@@ -66,6 +66,7 @@ class Arduino(object):
         format = ''.join([i[0] for i in packet_format])
         data = flatten([payload[i[1]] for i in packet_format if i[1]])
         payload = struct.pack(format, *data)
+        print(format, data, payload)
 
         command_id = self._get_command_id()
         header = {
@@ -76,6 +77,7 @@ class Arduino(object):
         format = ''.join([i[0] for i in _.CommandHeader])
         data = [header[i[1]] for i in _.CommandHeader]
         header = struct.pack(format, *data)
+        print(format, data, header)
 
         packet = header + payload
         return packet, command_id
@@ -120,7 +122,9 @@ class Arduino(object):
             'encoder_ratio': motor_definition.get('encoder_ratio', 1),
             'has_encoder': motor_definition.get('has_encoder', False),
             'encoder_no': motor_definition.get('encoder_no', 0),
-
+            'course': motor_definition.get('course', 0),
+            'homing_delay': motor_definition.get('homing_delay', 500),
+            'home_retract': motor_definition.get('home_retract', 500),
         }
 
         packet, command_id = self._build_single_packet(
@@ -145,6 +149,17 @@ class Arduino(object):
         print(payload)
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_MOVE_MOTOR, _.MoveMotor, payload)
+
+        self.send_command(packet)
+        return packet, command_id
+
+    def home(self, axis):
+        payload = {
+            'motor_index': axis,
+        }
+        print(payload)
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_HOME_MOTOR, _.HomeMotor, payload)
 
         self.send_command(packet)
         return packet, command_id

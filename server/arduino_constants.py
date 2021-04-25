@@ -51,6 +51,9 @@ DefineMotor = [
     (uint8_t, 'pin_microstep_2'),
     (uint32_t, 'microstep'),
     (uint32_t, 'encoder_ratio'),
+    (uint32_t, 'course'),
+    (uint32_t, 'homing_delay'),
+    (uint32_t, 'home_retract'),
     (bool, 'has_encoder'),
     (uint8_t, 'encoder_no'),
     (pad, None),
@@ -65,6 +68,10 @@ MoveMotor = [
     (bool * MOTORS_NO,    'block'),
 ]
 
+COMMAND_TYPE_HOME_MOTOR = 41
+HomeMotor = [
+    (uint8_t,  'motor_index'),
+]
 
 COMMAND_TYPE_QUERY_MOTOR = 5
 COMMAND_TYPE_QUERY_ENCODER = 6

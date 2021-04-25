@@ -41,11 +41,17 @@ async def move_motors(command):
     arduino.move_motors(command['moves'])
     return {'success': True}
 
+
+async def home(command):
+    arduino.home(command['axis'])
+    return {'success': True}
+
 COMMAND_HANDLER = {
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,
     'set_valves': set_valves,
     'move_motors': move_motors,
+    'home': home,
 }
 
 

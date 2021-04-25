@@ -1,8 +1,11 @@
-move motor
-home motor
+simple script
 run script on boot (systemd) https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/#systemd
 log rpi to file
+HTML GUI
 ---------------------
+make sure pin status on homing
+handle microstep
+
 digital input feedback
 motor status feedback
 trajectory

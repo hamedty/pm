@@ -131,7 +131,9 @@ void process_command(const CommandHeader *command_header) {
     } else {
       m->set_encoder(NULL, 1);
     }
-
+    m->set_homing_params(payload->course,
+                         payload->homing_delay,
+                         payload->home_retract);
     break;
   }
 
@@ -151,6 +153,22 @@ void process_command(const CommandHeader *command_header) {
       }
     }
 
+    break;
+  }
+
+  case COMMAND_TYPE_HOME_MOTOR: // home_motor
+  {
+    if (command_header->payload_size != sizeof(HomeMotor)) {
+      send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
+      return;
+    }
+    HomeMotor *payload = (HomeMotor *)payload_buffer;
+
+    if (payload->motor_index >= 4) {
+      send_response(RESPONSE_CODE_BAD_MOTOR_NO, command_header->command_id);
+      return;
+    }
+    motors[payload->motor_index]->home();
     break;
   }
 

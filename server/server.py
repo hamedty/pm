@@ -118,16 +118,22 @@ class Robot(Node):
             {
                 'pin_pulse': 12,
                 'pin_dir': 11,
-                # 'pin_limit_n': 15,
-                # 'pin_limit_p': 16,
+                'pin_limit_n': 15,
+                'pin_limit_p': 16,
                 'microstep': 2500,
+                # 'course': 100000,
+                # 'homing_delay': 500,
+                # 'home_retract': 500,
             },
             {
                 'pin_pulse': 9,
                 'pin_dir': 8,
                 'pin_limit_n': 14,
-                'pin_limit_p': 0,
+                # 'pin_limit_p': 0,
                 'microstep': 2500,
+                'course': 50000,
+                'homing_delay': 200,
+                'home_retract': 100,
             },
         ]
     }
@@ -189,29 +195,49 @@ async def main():
     result = await call_all_wrapper(lambda x: x.connect(), timeout=1)
     assert(all(result))
 
-    # # reset arduino
+    # reset arduino
     # print('reseting arduino ...')
     # result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
     # assert(all(result))
 
     # hardware config
     print('config arduino ...')
-    result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=2)
+    result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=200)
     assert(all(result))
 
-    # set valves
-    print('set valves ...')
-    result = await call_all_wrapper(lambda x: x.send_command_set_valves([0, 1]), timeout=20)
-    assert(all(result))
+    # # set valves
+    # print('set valves ...')
+    # command = {
+    #     'verb': 'set_valves',
+    #     'valves': [0, 1],
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # result = await call_all_wrapper(func, timeout=2)
+    # assert(all(result))
 
-    # move motors
+    # # move motors
+    # command = {
+    #     'verb': 'move_motors',
+    #     'moves': [[0, 200, 1], [5000, 500, 1]],
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # result = await call_all_wrapper(func, timeout=10)
+    # assert(all(result))
+
+    # home motors
     command = {
-        'verb': 'move_motors',
-        'moves': [[500, 500, 1]],
+        'verb': 'home',
+        'axis': 1,
     }
 
     def func(x): return x.send_command(command)
-    result = await call_all_wrapper(func, timeout=10)
+    result = await call_all_wrapper(func, timeout=30)
     assert(all(result))
 
 asyncio.run(main())
+
+# asyncio.run(ALL_NODES[0].send_command(
+#     {'verb': 'move_motors', 'moves': [[00, 200, 1], [-500, 200, 1]], }))
+# asyncio.run(n.send_command({'verb': 'set_valves', 'valves': [1, 1]], }))

@@ -56,10 +56,11 @@ typedef struct DefineMotor {
   uint8_t  pin_microstep_2;
   uint32_t microstep;
   uint32_t encoder_ratio;
+  uint32_t course;
+  uint32_t homing_delay;
+  uint32_t home_retract;
   bool     has_encoder;
   uint8_t  encoder_no;
-
-  // TODO: homeing config
 } DefineMotor;
 
 # define COMMAND_TYPE_MOVE_MOTOR 4
@@ -68,6 +69,11 @@ typedef struct MoveMotor {
   int32_t delay[MOTORS_NO];
   bool    block[MOTORS_NO];
 } MoveMotor;
+
+# define COMMAND_TYPE_HOME_MOTOR 41
+typedef struct HomeMotor {
+  uint8_t motor_index;
+} HomeMotor;
 
 
 # define COMMAND_TYPE_QUERY_MOTOR 5
