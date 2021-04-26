@@ -40,36 +40,36 @@ async def main():
     assert(all(result))
 
     # # set valves
-    # print('set valves ...')
-    # command = {
-    #     'verb': 'set_valves',
-    #     'valves': [0, 1],
-    # }
-    #
-    # def func(x): return x.send_command(command)
+    print('set valves ...')
+    command = {
+        'verb': 'set_valves',
+        'valves': [1, 1],
+    }
+
+    def func(x): return x.send_command(command)
     # result = await call_all_wrapper(func, timeout=2)
-    # assert(all(result))
+    assert(all(result))
 
     # move motors
     print('move motors')
     command = {
         'verb': 'move_motors',
-        'moves': [[50, 500, 0], [0, 500, 0], [000, 500, 0], [00, 500, 0]],
+        'moves': [[500, 250, 0], [000, 250, 0]],
     }
 
     def func(x): return x.send_command(command)
-    result = await call_all_wrapper(func, timeout=100)
+    # result = await call_all_wrapper(func, timeout=100)
     assert(all(result))
 
     # # home motors
-    # command = {
-    #     'verb': 'home',
-    #     'axis': 3,
-    # }
-    #
-    # def func(x): return x.send_command(command)
-    # result = await call_all_wrapper(func, timeout=30)
-    # assert(all(result))
+    command = {
+        'verb': 'home',
+        'axis': 1,
+    }
+
+    def func(x): return x.send_command(command)
+    result = await call_all_wrapper(func, timeout=30)
+    assert(all(result))
 
 asyncio.run(main())
 
