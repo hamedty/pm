@@ -6,5 +6,5 @@ class Rail(Robot):
 
 
 RAILS = [
-    # Rail('192.168.44.10'),
+    Rail('192.168.44.10'),
 ]

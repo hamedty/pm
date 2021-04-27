@@ -4,8 +4,18 @@ import subprocess
 import traceback
 from arduino import Arduino
 
-print('start Arduino')
-arduino = Arduino()
+global ARDUINO_LIST
+ARDUINO_LIST = []
+
+
+async def create_arduino(command):
+    global ARDUINO_LIST
+    ARDUINO_LIST = []
+    N = command.get('arduino_count', 1)
+    for i in range(N):
+        a = Arduino()
+        ARDUINO_LIST.append(a)
+    return {'success': True}
 
 
 async def reset_arduino(command):
@@ -19,11 +29,13 @@ async def reset_arduino(command):
     subprocess.call(c, stdout=subprocess.PIPE)
     await asyncio.sleep(2)
 
-    arduino._open_port()
+    for arduino in ARDUINO_LIST:
+        arduino._open_port()
     return {'success': True}
 
 
 async def config_arduino(command):
+    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
     arduino.define_valves(command['hw_config']['valves'])
     for motor_no, motor in enumerate(command['hw_config']['motors']):
         motor['motor_no'] = motor_no
@@ -33,20 +45,24 @@ async def config_arduino(command):
 
 
 async def set_valves(command):
+    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
     arduino.set_valves(command['valves'])
     return {'success': True}
 
 
 async def move_motors(command):
+    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
     arduino.move_motors(command['moves'])
     return {'success': True}
 
 
 async def home(command):
+    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
     arduino.home(command['axis'])
     return {'success': True}
 
 COMMAND_HANDLER = {
+    'create_arduino': create_arduino,
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,
     'set_valves': set_valves,

@@ -29,47 +29,58 @@ async def main():
     result = await call_all_wrapper(lambda x: x.connect(), timeout=1)
     assert(all(result))
 
+    # create arduino
+    print('create arduino')
+    command = {
+        'verb': 'create_arduino',
+        'arduino_count': 1,
+    }
+
+    def func(x): return x.send_command(command)
+    result = await call_all_wrapper(func, timeout=100)
+    assert(all(result))
+
     # reset arduino
-    # print('reseting arduino ...')
-    # result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
+    print('reseting arduino ...')
+    result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
+    assert(all(result))
+    #
+    # # hardware config
+    # print('config arduino ...')
+    # result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=20)
     # assert(all(result))
-
-    # hardware config
-    print('config arduino ...')
-    result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=20)
-    assert(all(result))
-
-    # # set valves
-    print('set valves ...')
-    command = {
-        'verb': 'set_valves',
-        'valves': [1, 1],
-    }
-
-    def func(x): return x.send_command(command)
-    # result = await call_all_wrapper(func, timeout=2)
-    assert(all(result))
-
-    # move motors
-    print('move motors')
-    command = {
-        'verb': 'move_motors',
-        'moves': [[500, 250, 0], [000, 250, 0]],
-    }
-
-    def func(x): return x.send_command(command)
-    # result = await call_all_wrapper(func, timeout=100)
-    assert(all(result))
-
-    # # home motors
-    command = {
-        'verb': 'home',
-        'axis': 1,
-    }
-
-    def func(x): return x.send_command(command)
-    result = await call_all_wrapper(func, timeout=30)
-    assert(all(result))
+    #
+    # # # set valves
+    # print('set valves ...')
+    # command = {
+    #     'verb': 'set_valves',
+    #     'valves': [1, 1],
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # # result = await call_all_wrapper(func, timeout=2)
+    # assert(all(result))
+    #
+    # # move motors
+    # print('move motors')
+    # command = {
+    #     'verb': 'move_motors',
+    #     'moves': [[500, 250, 0], [000, 250, 0]],
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # # result = await call_all_wrapper(func, timeout=100)
+    # assert(all(result))
+    #
+    # # # home motors
+    # command = {
+    #     'verb': 'home',
+    #     'axis': 1,
+    # }
+    #
+    # def func(x): return x.send_command(command)
+    # result = await call_all_wrapper(func, timeout=30)
+    # assert(all(result))
 
 asyncio.run(main())
 

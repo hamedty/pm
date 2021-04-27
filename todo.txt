@@ -1,13 +1,12 @@
 simple script
-run script on boot (systemd) https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/#systemd
-log rpi to file
 HTML GUI
+digital input feedback
+motor status feedback
+
 ---------------------
 make sure pin status on homing
 handle microstep
-
-digital input feedback
-motor status feedback
+log rpi to file
 trajectory
 encoder
 double_motor_move

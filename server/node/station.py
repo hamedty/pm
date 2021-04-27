@@ -46,16 +46,16 @@ class Station(Node):
 
 STATIONS = [
     # First Five
-    None,
-    None,
-    Station('192.168.44.52'),  # 23
-    None,
-    None,
+    Station('192.168.44.101'),
+    Station('192.168.44.102'),
+    Station('192.168.44.103'),
+    Station('192.168.44.104'),
+    Station('192.168.44.105'),
 
     # Second Five
-    # Station('192.168.44.26'),
-    # Station('192.168.44.27'),
-    # Station('192.168.44.28'),
-    # Station('192.168.44.29'),
-    # Station('192.168.44.30'),
+    Station('192.168.44.106'),
+    Station('192.168.44.107'),
+    Station('192.168.44.108'),
+    Station('192.168.44.109'),
+    Station('192.168.44.110'),
 ]

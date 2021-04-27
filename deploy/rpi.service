@@ -1,0 +1,23 @@
+[Unit]
+Description=PAM2060 RPi server
+After=multi-user.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/server/
+ExecStart=/home/pi/boot.sh
+User=pi
+Group=pi
+Restart=always
+StartLimitIntervalSec=1
+StartLimitBurst=1
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo nano /lib/systemd/system/rpi.service
+sudo chmod 644 /lib/systemd/system/rpi.service
+sudo systemctl daemon-reload
+sudo systemctl enable rpi.service
+sudo reboot

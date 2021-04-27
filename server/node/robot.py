@@ -2,6 +2,7 @@ from .node import Node
 
 
 class Robot(Node):
+    # def __init__(self, arduino_id):
     arduino_reset_pin = 2
     valves = [15, 16]
     hw_config = {
@@ -13,25 +14,25 @@ class Robot(Node):
                 'pin_limit_n': 15,
                 'pin_limit_p': 16,
                 'microstep': 2500,
-                'course': 100000,
-                'homing_delay': 500,
-                'home_retract': 500,
+                'course': 10000,
+                'homing_delay': 200,
+                'home_retract': 400,
             },
             {
                 'pin_pulse': 9,
                 'pin_dir': 8,
                 'pin_limit_n': 14,
-                # 'pin_limit_p': 0,
                 'microstep': 2500,
-                'course': 50000,
+                'course': 30000,
                 'homing_delay': 200,
-                'home_retract': 100,
+                'home_retract': 200,
             },
         ]
     }
 
 
+ROBOT_1_IP = '192.168.44.100'
 ROBOTS = [
-    Robot('192.168.44.11'),
-    Robot('192.168.44.12'),
+    Robot(ROBOT_1_IP),  # 0
+    Robot(ROBOT_1_IP),  # 1
 ]
