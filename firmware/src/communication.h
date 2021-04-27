@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "motor.h"
 #include "gpio.h"
+#include "encoder.h"
 
 #ifndef Communication_h
 # define Communication_h
@@ -29,6 +30,9 @@ typedef struct ResponseHeader {
   uint16_t response_type;
   uint16_t payload_size;
   uint32_t command_id;
+  int32_t  encoders[ENCODER_NO];
+  bool     di_status[INPUTS_NO];
+  uint8_t  motor_status[MOTORS_NO];
 } ResponseHeader;
 
 # define COMMAND_TYPE_DEFINE_VALVE 1

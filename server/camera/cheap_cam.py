@@ -2,8 +2,8 @@ from .base import CameraBase
 from cv2 import *
 
 SERAIL_NOS = {
-    'dosing': '1',
-    'holder': '2',
+    'holder': '1',
+    'dosing': '2',
 }
 
 
@@ -21,6 +21,11 @@ class CheapCam(CameraBase):
         dy, dx = self.settings['frame_size'][roi_index]
         # frame = frame[y0:y0 + dy, x0:x0 + dx, :]
         return frame
+
+    def dump_frame(self, name='dump'):
+        frame = self.get_frame()
+        filename = '/home/pi/data/%s.png' % name
+        imwrite(filename, frame)
 
 
 def create_camera(index):

@@ -1,5 +1,6 @@
+vision:
+  camera config
 motor status / digital input / encoder feedback
-vision
 soft limit stop
 
 ---------------------

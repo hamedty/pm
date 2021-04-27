@@ -2,6 +2,7 @@ import asyncio
 
 from node import ALL_NODES
 
+# ALL_NODES = [ALL_NODES[-1]]
 N = len(ALL_NODES)
 CHECK_GREEN = '\033[92m✓\033[0m'
 CROSS_RED = '\033[91m✖\033[0m'
@@ -12,7 +13,7 @@ async def call_all_wrapper(func, timeout=None):
     for i in range(N):
         print('\t%s: ' % ALL_NODES[i].ip, end='')
         if result[i] == True:
-            print(CHECK_GREEN)
+            print(CHECK_GREEN, repr(result[i]))
         else:
             print(CROSS_RED, repr(result[i]))
     return result
@@ -26,64 +27,36 @@ async def main():
 
     # Connect to them
     print('Connecting to nodes ...')
-    result = await call_all_wrapper(lambda x: x.connect(), timeout=1)
+    result = await call_all_wrapper(lambda x: x.connect(), timeout=10)
     assert(all(result))
 
-    # create arduino
-    print('create arduino')
+    # create camera
+    print('create webcam')
     command = {
-        'verb': 'create_arduino',
-        'arduino_count': 1,
+        'verb': 'create_camera',
     }
 
     def func(x): return x.send_command(command)
     result = await call_all_wrapper(func, timeout=100)
     assert(all(result))
 
-    # reset arduino
-    print('reseting arduino ...')
-    result = await call_all_wrapper(lambda x: x.send_command_reset_arduino(), timeout=5)
+    # dump frame
+    print('create webcam')
+    command = {
+        'verb': 'dump_frame',
+    }
+
+    def func(x): return x.send_command(command)
+    result = await call_all_wrapper(func, timeout=100)
     assert(all(result))
-    #
-    # # hardware config
-    # print('config arduino ...')
-    # result = await call_all_wrapper(lambda x: x.send_command_config_arduino(), timeout=20)
-    # assert(all(result))
-    #
-    # # # set valves
-    # print('set valves ...')
-    # command = {
-    #     'verb': 'set_valves',
-    #     'valves': [1, 1],
-    # }
-    #
-    # def func(x): return x.send_command(command)
-    # # result = await call_all_wrapper(func, timeout=2)
-    # assert(all(result))
-    #
-    # # move motors
-    # print('move motors')
-    # command = {
-    #     'verb': 'move_motors',
-    #     'moves': [[500, 250, 0], [000, 250, 0]],
-    # }
-    #
-    # def func(x): return x.send_command(command)
-    # # result = await call_all_wrapper(func, timeout=100)
-    # assert(all(result))
-    #
-    # # # home motors
-    # command = {
-    #     'verb': 'home',
-    #     'axis': 1,
-    # }
-    #
-    # def func(x): return x.send_command(command)
-    # result = await call_all_wrapper(func, timeout=30)
-    # assert(all(result))
+
+    # copy files
+    def func(x): return x.scp_from('~/data/dosing.png', './dump/dosing.png')
+    result = await call_all_wrapper(func, timeout=100)
+    assert(all(result))
+
+    def func(x): return x.scp_from('~/data/holder.png', './dump/holder.png')
+    result = await call_all_wrapper(func, timeout=100)
+    assert(all(result))
 
 asyncio.run(main())
-
-# asyncio.run(ALL_NODES[0].send_command(
-#     {'verb': 'move_motors', 'moves': [[00, 200, 1], [-500, 200, 1]], }))
-# asyncio.run(n.send_command({'verb': 'set_valves', 'valves': [1, 1]], }))

@@ -24,8 +24,10 @@ ResponseHeader = [
     (uint16_t, 'response_type'),
     (uint16_t, 'payload_size'),
     (uint32_t, 'command_id'),
+    (int32_t * INPUTS_NO, 'encoders'),
+    (bool * INPUTS_NO, 'di_status'),
+    (uint8_t * MOTORS_NO, 'motor_status'),
 ]
-
 
 COMMAND_TYPE_DEFINE_VALVE = 1
 DefineValve = [

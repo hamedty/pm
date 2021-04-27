@@ -57,28 +57,3 @@ class CameraBase(object):
                 self._cap = None
                 if i == device_retries - 1:
                     raise
-
-
-def main():
-    r = CameraBase(ALIGNING_2_SN)
-    # old_t = time.time()
-    #
-    # while True:
-    #     t1 = time.time()
-    #     frame = r.get_frame()
-    #     t2 = time.time()
-    #     period1 = (t2 - t1) * 1000
-    #
-    #     new_t = time.time()
-    #     period2 = (new_t - old_t) * 1000
-    #     old_t = new_t
-    #
-    #     result = 0  # process(frame)
-    #     print(result, '%02d' % period1, '%02d' % period2)
-    #     # time.sleep(0.01)
-
-    imwrite('/home/it/Desktop/a.png', r.get_frame())
-
-
-if __name__ == '__main__':
-    main()

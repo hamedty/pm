@@ -45,8 +45,8 @@ class Arduino(object):
     def _send_command(self, data):
         self._serial_write(data)
         ret = self._serial_read()
-        print(ret)
-        # response = struct.unpack(self.RESPONSE, ret)
+        response_format = ''.join([i[0] for i in _.ResponseHeader])
+        response = struct.unpack(response_format, ret)
         # response = struct.unpack('I' * 1000, ret)
         # print(response)
         # status_code = response[0]

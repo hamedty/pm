@@ -3,18 +3,35 @@ import asyncio
 import subprocess
 import traceback
 from arduino import Arduino
+from camera import cheap_cam
 
-global ARDUINO_LIST
-ARDUINO_LIST = []
+global ARDUINOS, CAMERAS
+ARDUINOS = []
+CAMERAS = {}
+
+
+async def create_camera(command):
+    global CAMERAS
+    CAMERAS = {}
+    CAMERAS['holder'] = cheap_cam.create_camera('holder')
+    CAMERAS['dosing'] = cheap_cam.create_camera('dosing')
+    return {'success': True}
+
+
+async def dump_frame(command):
+    global CAMERAS
+    CAMERAS['holder'].dump_frame('holder')
+    CAMERAS['dosing'].dump_frame('dosing')
+    return {'success': True}
 
 
 async def create_arduino(command):
-    global ARDUINO_LIST
-    ARDUINO_LIST = []
+    global ARDUINOS
+    ARDUINOS = []
     N = command.get('arduino_count', 1)
     for i in range(N):
         a = Arduino()
-        ARDUINO_LIST.append(a)
+        ARDUINOS.append(a)
     return {'success': True}
 
 
@@ -29,13 +46,13 @@ async def reset_arduino(command):
     subprocess.call(c, stdout=subprocess.PIPE)
     await asyncio.sleep(2)
 
-    for arduino in ARDUINO_LIST:
+    for arduino in ARDUINOS:
         arduino._open_port()
     return {'success': True}
 
 
 async def config_arduino(command):
-    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.define_valves(command['hw_config']['valves'])
     for motor_no, motor in enumerate(command['hw_config']['motors']):
         motor['motor_no'] = motor_no
@@ -45,23 +62,28 @@ async def config_arduino(command):
 
 
 async def set_valves(command):
-    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.set_valves(command['valves'])
     return {'success': True}
 
 
 async def move_motors(command):
-    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.move_motors(command['moves'])
     return {'success': True}
 
 
 async def home(command):
-    arduino = ARDUINO_LIST[command.get('arduino_index', 0)]
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.home(command['axis'])
     return {'success': True}
 
 COMMAND_HANDLER = {
+    # vision
+    'create_camera': create_camera,
+    'dump_frame': dump_frame,
+
+    # hardware
     'create_arduino': create_arduino,
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,

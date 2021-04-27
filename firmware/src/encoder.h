@@ -5,11 +5,14 @@ class Encoder {
 public:
 
   bool index; // Encoder 0(2,13) or 1(5,4)
+  bool initialized = false;
   Encoder(bool index) {
     this->index = index;
   }
 
   void init() {
+    initialized = true;
+
     if (index == 0) {
       pinMode( 2, INPUT_PULLUP);
       pinMode(13, INPUT_PULLUP);
@@ -46,7 +49,7 @@ public:
   }
 };
 
-# define ENCODER_NO
+# define ENCODER_NO 2
 Encoder encoders[ENCODER_NO] = {
   Encoder(0),
   Encoder(1),

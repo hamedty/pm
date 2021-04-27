@@ -223,5 +223,15 @@ void send_response(RESPONSE_CODE response_type,
   response_header.response_type = (uint16_t)response_type;
   response_header.payload_size  = 0;
   response_header.command_id    = command_id;
+  response_header.encoders[0]   =
+    encoders[0].initialized ? encoders[0].read() : 0;
+  response_header.encoders[1] =
+    encoders[1].initialized ? encoders[1].read() : 0;
+  response_header.di_status[0]    = inputs[0].read();
+  response_header.di_status[1]    = inputs[1].read();
+  response_header.motor_status[0] = Motor0._status;
+  response_header.motor_status[1] = Motor1._status;
+  response_header.motor_status[2] = Motor2._status;
+  response_header.motor_status[3] = Motor3._status;
   packet_serial.send((uint8_t *)&response_header, sizeof(response_header));
 }

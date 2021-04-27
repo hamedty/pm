@@ -2,6 +2,7 @@ import subprocess
 import asyncio
 import json
 import traceback
+import os
 
 
 class Node(object):
@@ -16,12 +17,20 @@ class Node(object):
             await asyncio.sleep(.5)
         return True
 
-    async def scp(self, path_src, path_dst):
+    async def scp_to(self, path_src, path_dst):
         command = 'scp -r %s pi@%s:%s' % (path_src, self.ip, path_dst)
         command = command.split()
         while subprocess.call(command, stdout=subprocess.PIPE) != 0:
             await asyncio.sleep(.5)
         return True
+
+    async def scp_from(self, path_src, path_dst):
+        path_dst, file_extension = os.path.splitext(path_dst)
+        path_dst = path_dst + '_' + self.ip + file_extension
+        command = 'scp -r pi@%s:%s %s' % (self.ip, path_src, path_dst)
+        command = command.split()
+        res = subprocess.call(command, stdout=subprocess.PIPE)
+        return res == 0
 
     async def connect(self):
         if not self._socket_reader:

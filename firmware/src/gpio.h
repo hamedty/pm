@@ -11,14 +11,14 @@ public:
     mode = _mode;
   }
 
+  uint8_t pin = INVALID_PIN;
+  uint32_t mode;
+
   void set_pin(uint8_t pin_no) {
     pin = pin_no;
 
     if (pin != INVALID_PIN) pinMode(pin, mode);
   }
-
-  uint8_t pin = INVALID_PIN;
-  uint32_t mode;
 
   bool read() {
     if (pin != INVALID_PIN) return digitalRead(pin);
