@@ -1,11 +1,11 @@
-simple script
-HTML GUI
-digital input feedback
-motor status feedback
+motor status / digital input / encoder feedback
+vision
+soft limit stop
 
 ---------------------
-make sure pin status on homing
+HTML GUI
 handle microstep
+make sure pin status on homing
 log rpi to file
 trajectory
 encoder
@@ -13,6 +13,5 @@ double_motor_move
 double trajectory
 ---------------------
 script whole process
-vision
 logging in orcherstra
 HTML GUI
