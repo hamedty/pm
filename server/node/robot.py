@@ -25,7 +25,7 @@ class Robot(Node):
                 'microstep': 2500,
                 'course': 30000,
                 'homing_delay': 200,
-                'home_retract': 200,
+                'home_retract': 400,
             },
         ]
     }
