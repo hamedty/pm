@@ -27,7 +27,7 @@ typedef struct CommandHeader {
 } CommandHeader;
 
 typedef struct ResponseHeader {
-  uint16_t response_type;
+  uint16_t response_code;
   uint16_t payload_size;
   uint32_t command_id;
   int32_t  encoders[ENCODER_NO];

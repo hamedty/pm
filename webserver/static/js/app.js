@@ -20,9 +20,19 @@ app.factory('ws', function($websocket) {
 
 app.controller('app_controller', function($scope, ws) {
   ws.onMessage(function(message) {
-    console.log(JSON.parse(message.data));
-    $scope.nodes = JSON.parse(message.data);
+    message = JSON.parse(message.data)
+    switch (message.type) {
+      case 'architecture':
+        $scope.nodes = message.payload;
+        break;
+      case 'status_update':
+        $scope.nodes_status = message.payload;
+        break;
+      default:
+        console.log(message);
+    }
   });
+
   $scope.send_command = function(command) {
     data = {
       command: command,
@@ -37,6 +47,9 @@ app.controller('app_controller', function($scope, ws) {
 
   $scope.selected_nodes_string = function() {
     return $scope.nodes.filter(x => x.selected).map(x => x.name).join(', ')
+  }
+  $scope.selected_nodes_actions = function() {
+    return $scope.nodes.filter(x => x.selected).map(x => x.actions)
   }
 });
 

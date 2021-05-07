@@ -87,16 +87,19 @@ class System(object):
         message = [{
             'type': n.type,
             'name': n.name,
-            'actions': n.actions,
+            'actions': n.get_actions(),
         } for n in self.nodes]
+        message = {'type': 'architecture', 'payload': message}
         ws.write_message(json.dumps(message))
 
     async def loop(self):
         while True:
-            # response = ['Time: %.01f' % time.time()]
-            # for ws in self._ws:
-            #     ws.write_message(json.dumps(response))
-            await asyncio.sleep(.05)
+            message = [n.get_status() for n in self.nodes]
+            message = {'type': 'status_update', 'payload': message}
+            message = json.dumps(message)
+            for ws in self._ws:
+                ws.write_message(message)
+            await asyncio.sleep(.1)
 
 
 def main():

@@ -5,7 +5,7 @@ body {
     cursor: pointer;
     width: 112px;
 }
-.check {
+.node-button-check {
     display: inline-block;
-    margin-right: 10px;
+    margin-right: 10px !important;
 }

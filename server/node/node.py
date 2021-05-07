@@ -74,3 +74,25 @@ class Node(object):
             'valves': valves,
         }
         return await self.send_command(command)
+
+    def get_status(self):
+        return {
+            'connected': bool(self._socket_reader),
+            'ping': 0.002,
+            'motors': ['idle'] * 4,
+            'encoders': [0, 0],
+            'valves': [0] * 6,
+            'di': [0, 0],
+        }
+
+    def get_actions(self):
+        return [
+            {'verb': 'connect', 'params': None},
+            {'verb': 'firmware_update', 'params': None},
+            {'verb': 'home_m1', 'params': None},
+            {'verb': 'home_m2', 'params': None},
+            {'verb': 'home_m4', 'params': None},
+            {'verb': 'toggle_valve', 'params': 'int'},
+            {'verb': 'toggle_valve', 'params': 'int'},
+
+        ]

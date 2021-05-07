@@ -215,14 +215,17 @@ void process_command(const CommandHeader *command_header) {
   send_response(RESPONSE_CODE_SUCCESS, command_header->command_id);
 }
 
-void send_response(RESPONSE_CODE response_type,
+void send_response(RESPONSE_CODE response_code,
                    uint32_t      command_id) {
   // TODO: add payload
   ResponseHeader response_header;
 
-  response_header.response_type = (uint16_t)response_type;
+  // header
+  response_header.response_code = (uint16_t)response_code;
   response_header.payload_size  = 0;
   response_header.command_id    = command_id;
+
+  // status
   response_header.encoders[0]   =
     encoders[0].initialized ? encoders[0].read() : 0;
   response_header.encoders[1] =
