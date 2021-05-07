@@ -2,7 +2,7 @@ from .node import Node
 
 
 class Robot(Node):
-    # def __init__(self, arduino_id):
+    type = 'robot'
     arduino_reset_pin = 2
     valves = [15, 16]
     hw_config = {
@@ -30,9 +30,13 @@ class Robot(Node):
         ]
     }
 
+    def __init__(self, name, ip, arduino_id):
+        self.arduino_id = arduino_id
+        super(Robot, self).__init__(name, ip)
+
 
 ROBOT_1_IP = '192.168.44.100'
 ROBOTS = [
-    Robot(ROBOT_1_IP),  # 0
-    Robot(ROBOT_1_IP),  # 1
+    Robot('Robot 1', ROBOT_1_IP, 0),
+    Robot('Robot 2', ROBOT_1_IP, 1),
 ]

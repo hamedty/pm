@@ -6,9 +6,11 @@ import os
 
 
 class Node(object):
-    def __init__(self, ip):
+    def __init__(self, name, ip):
+        self.name = name
         self.ip = ip
         self._socket_reader = None
+        self.actions = []
 
     async def ping(self):
         command = 'ping -c 1 -W 0.5'.split()

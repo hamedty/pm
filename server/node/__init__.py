@@ -5,16 +5,15 @@ from .rail import RAILS
 
 ALL_NODES = STATIONS + ROBOTS + RAILS
 ALL_NODES = [node for node in ALL_NODES if node]
-# ALL_NODES = [Robot('192.168.44.51')]
 ALL_NODES = [
-
-    # Robot('192.168.44.100'),  # Robot 01
-    # Station('192.168.44.103'),  # station 03
-    Station('192.168.44.106'),  # station 06
-    Station('192.168.44.108'),  # station 08
-    Station('192.168.44.109'),  # station 09
-    Station('192.168.44.110'),  # station 10
+    Robot('Robot 1', '192.168.44.100', 0),
+    Station('Station 1', '192.168.44.101'),
+    Station('Station 2', '192.168.44.102'),
+    Station('Station 3', '192.168.44.103'),
+    Station('Station 4', '192.168.44.104'),
+    Station('Station 5', '192.168.44.105'),
 
 ]
+ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 
-# ALL_NODES = [Station('127.0.0.1')]
+assert len(ALL_NODES_DICT) == len(ALL_NODES)

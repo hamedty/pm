@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="/static/dependencies/bootstrap-rtl/css/bootstrap-reboot.css">
   <link rel="stylesheet" href="/static/dependencies/bootstrap-rtl/css/bootstrap-grid.css">
 
+  <link rel="stylesheet" href="/static/css/index.css">
+
 
   <script src="/static/dependencies/angular.min.js"></script>
   <script src="/static/dependencies/jquery.min.js"></script>
@@ -33,9 +35,18 @@
   <!-- <body> -->
   <div class="container">
     <h1>PAM2060</h1>
-    <button class="btn btn-success" ng-click="send_command('start')">Start</button>
-    <button class="btn btn-danger" ng-click="send_command('stop')">Stop</button>
-    <h1>M: {{m}}</h1>
+    <hr />
+
+    <div ng-repeat="node in nodes" style="margin:20px">
+
+      <button class="btn node-button" ng-class="{'btn-success': node.type == 'robot', 'btn-warning': node.type == 'station'}" ng-click="select_node(node)">
+        <input type="checkbox" class="check" ng-checked="node.selected">{{node.name}}
+      </button>
+
+    </div>
+    <hr />
+    <p ng-show="selected_nodes_string()"> Actions for: <b>{{selected_nodes_string()}}</b></p>
+
   </div>
 
 

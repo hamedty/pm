@@ -1,0 +1,11 @@
+body {
+    margin: 10px;
+}
+.node-button {
+    cursor: pointer;
+    width: 112px;
+}
+.check {
+    display: inline-block;
+    margin-right: 10px;
+}

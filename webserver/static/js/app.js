@@ -19,16 +19,24 @@ app.factory('ws', function($websocket) {
 })
 
 app.controller('app_controller', function($scope, ws) {
-  console.log('ws:', ws);
   ws.onMessage(function(message) {
-    console.log(message);
-    $scope.m = JSON.parse(message.data);
+    console.log(JSON.parse(message.data));
+    $scope.nodes = JSON.parse(message.data);
   });
   $scope.send_command = function(command) {
     data = {
       command: command,
     }
     ws.get(data);
+  }
+
+  $scope.nodes = []
+  $scope.select_node = function(node) {
+    node.selected = !node.selected;
+  }
+
+  $scope.selected_nodes_string = function() {
+    return $scope.nodes.filter(x => x.selected).map(x => x.name).join(', ')
   }
 });
 

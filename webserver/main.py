@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import asyncio
 
 import tornado.ioloop
 import tornado.web
@@ -19,29 +20,24 @@ class Index(tornado.web.RequestHandler):
 
 
 class WebSocket(tornado.websocket.WebSocketHandler):
-    def open(self):
-        while True:
-            response = [u"You said %d: " % time.time()]
-            self.write_message(json.dumps(response))
-            time.sleep(1)
+    async def open(self):
+        SYSTEM.register_ws(self)
 
     def on_message(self, message):
-        return
+        SYSTEM.message_from_ws(message)
 
-    # def on_close(self):
-    #     print("WebSocket closed")
+    def on_close(self):
+        SYSTEM.deregister_ws(self)
 
 
-def make_app():
-    return tornado.web.Application([
+def create_server(system=None):
+    global SYSTEM
+    SYSTEM = system
+
+    app = tornado.web.Application([
         (r"/", Index),
         (r"/ws", WebSocket),
         (r'/static/(.*)', tornado.web.StaticFileHandler,
          {'path': STATIC_PATH_DIR})
     ], debug=True)
-
-
-if __name__ == "__main__":
-    app = make_app()
     app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()

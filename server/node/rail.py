@@ -1,10 +1,11 @@
 from .robot import Robot
+from .robot import ROBOT_1_IP
 
 
 class Rail(Robot):
-    pass
+    type = 'rail'
 
 
 RAILS = [
-    Rail('192.168.44.10'),
+    Robot('Rail 1', ROBOT_1_IP, 2),
 ]

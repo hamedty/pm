@@ -2,6 +2,7 @@ from .node import Node
 
 
 class Station(Node):
+    type = 'station'
     arduino_reset_pin = 21
     hw_config = {
         'valves': [8, 7, 6, 5, 4, 3],
@@ -41,21 +42,20 @@ class Station(Node):
             },
         ]
     }
-    pass
 
 
 STATIONS = [
     # First Five
-    Station('192.168.44.101'),
-    Station('192.168.44.102'),
-    Station('192.168.44.103'),
-    Station('192.168.44.104'),
-    Station('192.168.44.105'),
+    Station('Station 1', '192.168.44.101'),
+    Station('Station 2', '192.168.44.102'),
+    Station('Station 3', '192.168.44.103'),
+    Station('Station 4', '192.168.44.104'),
+    Station('Station 5', '192.168.44.105'),
 
     # Second Five
-    Station('192.168.44.106'),
-    Station('192.168.44.107'),
-    Station('192.168.44.108'),
-    Station('192.168.44.109'),
-    Station('192.168.44.110'),
+    Station('Station 6', '192.168.44.106'),
+    Station('Station 7', '192.168.44.107'),
+    Station('Station 8', '192.168.44.108'),
+    Station('Station 9', '192.168.44.109'),
+    Station('Station 10', '192.168.44.110'),
 ]
