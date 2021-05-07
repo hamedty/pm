@@ -1,0 +1,4 @@
+<form class="form-inline" ng-submit="console.log('a')" style="margin: 5px;">
+  <span class="col-sm-4" style="text-align: left;">{{$ctrl.data.key | remove_underscore}}:</span>
+  <input class="col-sm-4" type="{{$ctrl.data.value | form_type}}" value="{{$ctrl.data.value}}">
+</form>
