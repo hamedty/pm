@@ -6,7 +6,8 @@ from arduino import Arduino
 from camera import cheap_cam
 
 global ARDUINOS, CAMERAS
-ARDUINOS = []
+MAX_ARDUINO_COUNT = 5
+ARDUINOS = [None] * 6
 CAMERAS = {}
 
 
@@ -28,10 +29,9 @@ async def dump_frame(command):
 async def create_arduino(command):
     global ARDUINOS
     ARDUINOS = []
-    N = command.get('arduino_count', 1)
-    for i in range(N):
-        a = Arduino()
-        ARDUINOS.append(a)
+    usb_index = command.get('arduino_index', None)
+    arduino_index = command.get('arduino_index', 0)
+    ARDUINOS[arduino_index] = Arduino(usb_index, i)
     return {'success': True}
 
 

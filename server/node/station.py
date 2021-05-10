@@ -39,6 +39,8 @@ class Station(Node):
                 'homing_delay': 200,
                 'home_retract': 100,
                 'microstep': 2500,
+                'has_encoder': True,
+                'encoder_no': 0,
             },
         ]
     }

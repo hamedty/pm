@@ -6,26 +6,31 @@ class Robot(Node):
     arduino_reset_pin = 2
     valves = [15, 16]
     hw_config = {
-        'valves': [37, 39],
+        'valves': [47, 44, 45, 42, 43, 40, 41, 38, 39, 36],
         'motors': [
             {
-                'pin_pulse': 12,
-                'pin_dir': 11,
-                'pin_limit_n': 15,
-                'pin_limit_p': 16,
+                'pin_pulse': 15,
+                'pin_dir': 14,
+                'pin_limit_n': 48,
+                'pin_limit_p': 49,
                 'microstep': 2500,
                 'course': 10000,
                 'homing_delay': 200,
                 'home_retract': 400,
+                'has_encoder': True,
+                'encoder_no': 0,
             },
             {
-                'pin_pulse': 9,
-                'pin_dir': 8,
-                'pin_limit_n': 14,
+                'pin_pulse': 17,
+                'pin_dir': 16,
+                'pin_limit_n': 50,
+                'pin_limit_p': 51,
                 'microstep': 2500,
                 'course': 30000,
                 'homing_delay': 200,
                 'home_retract': 400,
+                'has_encoder': True,
+                'encoder_no': 1,
             },
         ]
     }

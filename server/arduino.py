@@ -12,15 +12,24 @@ import arduino_constants as _
 def flatten(l): return sum(map(flatten, l), []) if isinstance(l, list) else [l]
 
 
+FILES = {
+    None: '/dev/serial/by-id/usb-Arduino*',
+    0: '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0',
+    1: '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0',
+    2: '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0',
+}
+
+
 class Arduino(object):
-    def __init__(self):
+    def __init__(self, usb_index=None):
+        self.usb_index = usb_index
         self._open_port()
         self.lock = Lock()
         self._last_command_id = 0
 
     def _open_port(self):
         print('opening ardiono port')
-        f = glob.glob('/dev/serial/by-id/usb-Arduino*')[0]
+        f = glob.glob(FILES[self.usb_index])[0]
         self.ser = serial.Serial(f)
 
     def _close_port(self):
