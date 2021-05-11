@@ -1,7 +1,9 @@
 import time
 import struct
 import glob
+import traceback
 import serial
+
 from cobs import cobs
 import argparse
 from multiprocessing import Lock
@@ -22,10 +24,13 @@ FILES = {
 
 class Arduino(object):
     def __init__(self, usb_index=None):
+        self.set_status(message='object created')
         self.usb_index = usb_index
         self._open_port()
         self.lock = Lock()
         self._last_command_id = 0
+        self.RESPONSE_FORMAT = ''.join([i[0] for i in _.ResponseHeader])
+        self.set_status(message='usb port opened')
 
     def _open_port(self):
         print('opening ardiono port')
@@ -53,15 +58,16 @@ class Arduino(object):
 
     def _send_command(self, data):
         self._serial_write(data)
-        ret = self._serial_read()
-        response_format = ''.join([i[0] for i in _.ResponseHeader])
-        response = struct.unpack(response_format, ret)
-        # response = struct.unpack('I' * 1000, ret)
-        # print(response)
-        # status_code = response[0]
-        # if status_code == SUCCESS:
-        #     return response
-        # raise Exception('Invalid response from firmware: %d' % response)
+
+    def _receive(self):
+        while True:
+            try:
+                ret = self._serial_read()
+                response = struct.unpack(self.RESPONSE_FORMAT, ret)
+                self.set_status(data=response)
+            except:
+                self.set_status(message='receive failed.',
+                                traceback=traceback.format_exc())
 
     def _get_command_id(self):
         self._last_command_id += 1
@@ -76,7 +82,6 @@ class Arduino(object):
         format = ''.join([i[0] for i in packet_format])
         data = flatten([payload[i[1]] for i in packet_format if i[1]])
         payload = struct.pack(format, *data)
-        print(format, data, payload)
 
         command_id = self._get_command_id()
         header = {
@@ -87,10 +92,18 @@ class Arduino(object):
         format = ''.join([i[0] for i in _.CommandHeader])
         data = [header[i[1]] for i in _.CommandHeader]
         header = struct.pack(format, *data)
-        print(format, data, header)
 
         packet = header + payload
         return packet, command_id
+
+    def set_status(self, **kwargs):
+        self._status = dict(**kwargs, time=time.time())
+
+    def get_status(self):
+        d = dict(self._status)
+        d['age'] = time.time() - d['time']
+        del d['time']
+        return d
 
     def define_valves(self, pins):
         pins = list(pins) + (_.VALVES_NO - len(pins)) * [_.INVALID_PIN]
@@ -156,7 +169,7 @@ class Arduino(object):
             'delay': delay,
             'block': blocking,
         }
-        print(payload)
+
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_MOVE_MOTOR, _.MoveMotor, payload)
 
@@ -167,7 +180,7 @@ class Arduino(object):
         payload = {
             'motor_index': axis,
         }
-        print(payload)
+
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_HOME_MOTOR, _.HomeMotor, payload)
 

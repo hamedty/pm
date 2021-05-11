@@ -73,6 +73,13 @@ class System(object):
         self.nodes = nodes
         self._ws = []
 
+    async def connect(self):
+        for node in self.nodes:
+            res = await node.connect()
+            if res:
+                await node.send_command_config_arduino()
+                asyncio.create_task(node.loop())
+
     def register_ws(self, ws):
         self.send_architecture(ws)
         self._ws.append(ws)
@@ -102,13 +109,11 @@ class System(object):
             await asyncio.sleep(.1)
 
 
-def main():
+async def main():
     SYSTEM = System(ALL_NODES)
     webserver.create_server(SYSTEM)
-    ioloop = webserver.tornado.ioloop.IOLoop.current()
-    ioloop.asyncio_loop.create_task(SYSTEM.loop())
-    ioloop.start()
-    ioloop.close(all_fds=True)
+    await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
+    await SYSTEM.loop()
 
 
-main()
+asyncio.run(main())

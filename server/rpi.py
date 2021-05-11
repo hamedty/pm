@@ -1,6 +1,8 @@
 import json
 import asyncio
+import time
 import subprocess
+import threading
 import traceback
 from arduino import Arduino
 from camera import cheap_cam
@@ -26,12 +28,22 @@ async def dump_frame(command):
     return {'success': True}
 
 
+async def get_status(command):
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
+    if arduino is None:
+        status = {'message': 'object not created'}
+    else:
+        status = arduino.get_status()
+    return {'success': True, 'status': status}
+
+
 async def create_arduino(command):
-    global ARDUINOS
-    ARDUINOS = []
     usb_index = command.get('arduino_index', None)
     arduino_index = command.get('arduino_index', 0)
-    ARDUINOS[arduino_index] = Arduino(usb_index, i)
+    arduino = Arduino(usb_index)
+    threading.Thread(target=arduino._receive).start()
+
+    ARDUINOS[arduino_index] = arduino
     return {'success': True}
 
 
@@ -47,7 +59,8 @@ async def reset_arduino(command):
     await asyncio.sleep(2)
 
     for arduino in ARDUINOS:
-        arduino._open_port()
+        if arduino is not None:
+            arduino._open_port()
     return {'success': True}
 
 
@@ -84,6 +97,7 @@ COMMAND_HANDLER = {
     'dump_frame': dump_frame,
 
     # hardware
+    'get_status': get_status,
     'create_arduino': create_arduino,
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,
@@ -107,7 +121,7 @@ async def server_handler(reader, writer):
             print(data)
             response = await COMMAND_HANDLER[data['verb']](data)
         except:
-            response = {'success': False, 'traceback': traceback.print_exc()}
+            response = {'success': False, 'traceback': traceback.format_exc()}
 
         print(response)
         response = json.dumps(response) + '\n'

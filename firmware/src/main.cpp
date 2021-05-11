@@ -11,6 +11,9 @@
 
 PacketSerial packet_serial;
 void process_commands(const uint8_t *, size_t);
+uint32_t last_response;
+void process_command(const CommandHeader *);
+void send_response(RESPONSE_CODE, uint32_t);
 
 void setup() {
   SerialUSB.begin(115200);
@@ -22,14 +25,19 @@ void setup() {
   Motor1.set_isr(m1_isr);
   Motor2.set_isr(m2_isr);
   Motor3.set_isr(m3_isr);
+
+  last_response = millis();
 }
 
 void loop() {
   packet_serial.update();
-}
 
-void process_command(const CommandHeader *);
-void send_response(RESPONSE_CODE, uint32_t);
+  // if ((millis() - last_response) > 100) {
+  send_response(RESPONSE_CODE_SUCCESS, 0);
+  delay(100);
+
+  // }
+}
 
 void process_commands(const uint8_t *buffer_in, size_t size) {
   const uint8_t *rptr = buffer_in;
@@ -226,7 +234,7 @@ void send_response(RESPONSE_CODE response_code,
   response_header.command_id    = command_id;
 
   // status
-  response_header.encoders[0]   =
+  response_header.encoders[0] =
     encoders[0].initialized ? encoders[0].read() : 0;
   response_header.encoders[1] =
     encoders[1].initialized ? encoders[1].read() : 0;
@@ -237,4 +245,5 @@ void send_response(RESPONSE_CODE response_code,
   response_header.motor_status[2] = Motor2._status;
   response_header.motor_status[3] = Motor3._status;
   packet_serial.send((uint8_t *)&response_header, sizeof(response_header));
+  last_response = millis();
 }

@@ -1,5 +1,6 @@
 INVALID_PIN = 128
 MOTORS_NO = 4
+ENCODER_NO = 2
 VALVES_NO = 10
 INPUTS_NO = 2
 
@@ -24,8 +25,9 @@ ResponseHeader = [
     (uint16_t, 'response_code'),
     (uint16_t, 'payload_size'),
     (uint32_t, 'command_id'),
-    (int32_t * INPUTS_NO, 'encoders'),
+    (int32_t * ENCODER_NO, 'encoders'),
     (bool * INPUTS_NO, 'di_status'),
+    (pad * 2, None),
     (uint8_t * MOTORS_NO, 'motor_status'),
 ]
 

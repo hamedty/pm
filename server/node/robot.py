@@ -32,12 +32,17 @@ class Robot(Node):
                 'has_encoder': True,
                 'encoder_no': 1,
             },
-        ]
+        ],
+        'di': [50, 51],
     }
 
     def __init__(self, name, ip, arduino_id):
         self.arduino_id = arduino_id
         super(Robot, self).__init__(name, ip)
+
+    async def send_command(self, command):
+        command.update(arduino_index=self.arduino_id)
+        return await super(Robot, self).send_command(command)
 
 
 ROBOT_1_IP = '192.168.44.100'
