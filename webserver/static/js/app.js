@@ -40,6 +40,19 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
+  $scope.command_text_area = "{\n\
+          'verb': 'set_valves',\n\
+          'valves': [0],\n\
+}";
+
+  $scope.submit_form = function() {
+    data = $scope.command_text_area;
+    data.replace(/\n/g, " ");
+    data = 'new Object(' + data + ')';
+    data = eval(data);
+    console.log(data)
+    ws.get(data);
+  }
   $scope.nodes = []
   $scope.select_node = function(node) {
     node.selected = !node.selected;

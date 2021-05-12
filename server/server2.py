@@ -124,7 +124,7 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    task2 = asyncio.create_task(SYSTEM.valves())
+    # task2 = asyncio.create_task(SYSTEM.valves())
     await task1
     await task2
 

@@ -1,18 +1,10 @@
-vision:
-  camera config
-motor status / digital input / encoder feedback
-soft limit stop
-
----------------------
-HTML GUI
+get command from UI/terminal
+encoder / soft limit stop
 handle microstep
 make sure pin status on homing
-log rpi to file
 trajectory
-encoder
-double_motor_move
 double trajectory
+vision: camera config
+logging (rpi/server)
 ---------------------
 script whole process
-logging in orcherstra
-HTML GUI

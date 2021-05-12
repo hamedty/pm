@@ -40,6 +40,9 @@ async def get_status(command):
 async def create_arduino(command):
     usb_index = command.get('arduino_index', None)
     arduino_index = command.get('arduino_index', 0)
+    if ARDUINOS[arduino_index] is not None:
+        return {'success': True, 'message': 'already created'}
+
     arduino = Arduino(usb_index)
     arduino.receive_thread = threading.Thread(target=arduino._receive)
     arduino.receive_thread.start()

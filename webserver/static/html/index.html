@@ -47,7 +47,27 @@
     </table>
     <hr />
     <p ng-show="selected_nodes_string()"> Actions for: <b>{{selected_nodes_string()}}</b></p>
-    <p ng-show="selected_nodes_string()">{{selected_nodes_actions()}}</p>
+    <!-- <p ng-show="selected_nodes_string()">{{selected_nodes_actions()}}</p> -->
+    <form ng-submit="submit_form()">
+      <fieldset>
+        <div class="btn-group">
+          <a class="btn btn-primary" href="#">Templates</a>
+          <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">set valve</a></li>
+            <li><a href="#">home motor</a></li>
+            <li><a href="#">move motors</a></li>
+            <li class="divider"></li>
+            <li><a href="#"><i class="i"></i> Make admin</a></li>
+          </ul>
+        </div>
+        <br />
+        <textarea style="margin:15px;width:500px;" rows="8" ng-model="command_text_area"></textarea>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </fieldset>
+    </form>
   </div>
 
 </body>
