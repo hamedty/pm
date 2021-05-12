@@ -30,6 +30,7 @@ class Arduino(object):
         self.lock = Lock()
         self._last_command_id = 0
         self.RESPONSE_FORMAT = ''.join([i[0] for i in _.ResponseHeader])
+        self.receive_thread = None
         self.set_status(message='usb port opened')
 
     def _open_port(self):
@@ -128,6 +129,17 @@ class Arduino(object):
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_SET_VALVE, _.SetValve, payload)
 
+        self.send_command(packet)
+        return packet, command_id
+
+    def define_di(self, pins):
+        pins = list(pins) + (_.INPUTS_NO - len(pins)) * [_.INVALID_PIN]
+        payload = {
+            'pins': pins,
+        }
+
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_DEFINE_DI, _.DefineDI, payload)
         self.send_command(packet)
         return packet, command_id
 

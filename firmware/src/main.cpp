@@ -32,11 +32,9 @@ void setup() {
 void loop() {
   packet_serial.update();
 
-  // if ((millis() - last_response) > 100) {
-  send_response(RESPONSE_CODE_SUCCESS, 0);
-  delay(100);
-
-  // }
+  if ((millis() - last_response) > 100) {
+    send_response(RESPONSE_CODE_SUCCESS, 0);
+  }
 }
 
 void process_commands(const uint8_t *buffer_in, size_t size) {

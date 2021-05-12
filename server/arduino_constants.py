@@ -26,8 +26,8 @@ ResponseHeader = [
     (uint16_t, 'payload_size'),
     (uint32_t, 'command_id'),
     (int32_t * ENCODER_NO, 'encoders'),
-    (bool * INPUTS_NO, 'di_status'),
-    (pad * 2, None),
+    (uint8_t * INPUTS_NO, 'di_status'),
+    (uint8_t * 2, None),
     (uint8_t * MOTORS_NO, 'motor_status'),
 ]
 
@@ -80,11 +80,11 @@ HomeMotor = [
 COMMAND_TYPE_QUERY_MOTOR = 5
 COMMAND_TYPE_QUERY_ENCODER = 6
 COMMAND_TYPE_DEFINE_DI = 7
-
-
-COMMAND_TYPE_QUERY_DI = 8
 DefineDI = [
     (uint8_t * INPUTS_NO, 'pins'),
 ]
+
+
+COMMAND_TYPE_QUERY_DI = 8
 
 COMMAND_TYPE_DEFINE_TRAJECTORY = 9

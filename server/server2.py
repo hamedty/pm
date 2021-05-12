@@ -108,12 +108,24 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
+    async def valves(self):
+        while True:
+            for i in range(10):
+                for node in self.nodes[:2]:
+                    valves = [0] * 10
+                    valves[i] = 1
+                    await node.send_command_set_valves(valves)
+                await asyncio.sleep(1)
+
 
 async def main():
     SYSTEM = System(ALL_NODES)
     webserver.create_server(SYSTEM)
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
-    await SYSTEM.loop()
 
+    task1 = asyncio.create_task(SYSTEM.loop())
+    task2 = asyncio.create_task(SYSTEM.valves())
+    await task1
+    await task2
 
 asyncio.run(main())

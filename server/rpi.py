@@ -41,7 +41,8 @@ async def create_arduino(command):
     usb_index = command.get('arduino_index', None)
     arduino_index = command.get('arduino_index', 0)
     arduino = Arduino(usb_index)
-    threading.Thread(target=arduino._receive).start()
+    arduino.receive_thread = threading.Thread(target=arduino._receive)
+    arduino.receive_thread.start()
 
     ARDUINOS[arduino_index] = arduino
     return {'success': True}
@@ -67,6 +68,7 @@ async def reset_arduino(command):
 async def config_arduino(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.define_valves(command['hw_config']['valves'])
+    arduino.define_di(command['hw_config'].get('di', []))
     for motor_no, motor in enumerate(command['hw_config']['motors']):
         motor['motor_no'] = motor_no
         arduino.define_motor(motor)
@@ -118,12 +120,12 @@ async def server_handler(reader, writer):
 
         try:
             data = json.loads(data.decode())
-            print(data)
+            print('command:', data)
             response = await COMMAND_HANDLER[data['verb']](data)
         except:
             response = {'success': False, 'traceback': traceback.format_exc()}
 
-        print(response)
+        print('response', response)
         response = json.dumps(response) + '\n'
 
         writer.write(response.encode())
