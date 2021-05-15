@@ -39,7 +39,7 @@
         <td>
           <span ng-show="nodes_status[$index].connected" style="color:green;" class="glyphicon glyphicon-signal"></span>
           <span ng-show="!nodes_status[$index].connected" style="color:red;" class="glyphicon glyphicon-remove-circle"></span>
-          {{nodes_status[$index]}}
+          {{nodes_status[$index].data}}
 
         </td>
 
@@ -54,11 +54,7 @@
           <a class="btn btn-primary" href="#">Templates</a>
           <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="#">set valve</a></li>
-            <li><a href="#">home motor</a></li>
-            <li><a href="#">move motors</a></li>
-            <li class="divider"></li>
-            <li><a href="#"><i class="i"></i> Make admin</a></li>
+            <li ng-repeat="(name, template) in COMMAND_TEMPLATES" ng-click="select_template(name)"><a href="#">{{name}}</a></li>
           </ul>
         </div>
         <br />

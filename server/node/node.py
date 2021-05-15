@@ -9,6 +9,7 @@ from multiprocessing import Lock
 
 class Node(object):
     def __init__(self, name, ip):
+        self.set_status(message='node instance creating')
         self.name = name
         self.ip = ip
         self._socket_reader = None
@@ -106,6 +107,8 @@ class Node(object):
         data = {'connected': bool(self._socket_reader)}
         if data['connected']:
             data.update(self._status)
+        data['age'] = time.time() - data['time']
+        del data['time']
         return data
 
     def get_actions(self):

@@ -1,5 +1,8 @@
-handle microstep
+run rail
+script process
 encoder / soft limit stop
+handle microstep
+emergency stop
 handle WS restart
 make sure pin status on homing
 trajectory

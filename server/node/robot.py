@@ -1,12 +1,14 @@
 from .node import Node
 
+# 1600 pulse  / rev
+
 
 class Robot(Node):
     type = 'robot'
     arduino_reset_pin = 2
     valves = [15, 16]
     hw_config = {
-        'valves': [47, 44, 45, 42, 43, 40, 41, 38, 39, 36],
+        'valves': [36, 39, 38, 41, 40, 43, 42, 45, 44, 47],
         'motors': [
             {  # AXIS 1 - Up & Down
                 'pin_pulse': 15,

@@ -12,10 +12,10 @@ class Rail(Robot):
                 'pin_dir': 14,
                 'pin_limit_n': 48,
                 'pin_limit_p': 49,
-                'microstep': 2500,
-                'course': 10000,
-                'homing_delay': 200,
-                'home_retract': 400,
+                'microstep': 2500,  # step / mm
+                'course': 10000,  # mm
+                'homing_delay': 200,  # mm / s
+                'home_retract': 400,  # mm
                 'has_encoder': True,
                 'encoder_no': 0,
             },

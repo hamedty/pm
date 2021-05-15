@@ -24,12 +24,19 @@ app.controller('app_controller', function($scope, ws) {
         $scope.nodes = message.payload;
         break;
       case 'status_update':
-        $scope.nodes_status = message.payload;
+        $scope.update_node_status(message.payload);
         break;
       default:
         console.log(message);
     }
   });
+  $scope.update_node_status = function(nodes_status) {
+    // now = Date.parse(new Date()) / 1000.
+    // nodes_status.forEach(x => {
+    //   delete x.age;
+    // })
+    $scope.nodes_status = nodes_status;
+  }
 
   $scope.send_command = function(command) {
     data = {
@@ -38,10 +45,17 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = "{\n\
-          'verb': 'set_valves',\n\
-          'valves': [0],\n\
-}";
+  $scope.command_text_area = "";
+
+  $scope.COMMAND_TEMPLATES = {
+    'set valve': COMMAND_TEMPLATE_SET_VALVE,
+    'home motor': COMMAND_TEMPLATE_HOME_AXIS,
+    'move motors': COMMAND_TEMPLATE_MOVE_MOTORS,
+
+  }
+  $scope.select_template = function(name) {
+    $scope.command_text_area = $scope.COMMAND_TEMPLATES[name];
+  }
 
   $scope.submit_form = function() {
     data = $scope.command_text_area;
@@ -74,3 +88,24 @@ app.run(function($rootScope, $templateCache) {
     $templateCache.removeAll();
   });
 });
+
+
+COMMAND_TEMPLATE_SET_VALVE = "{\n\
+    'verb': 'set_valves',\n\
+    'valves': [0],\n\
+}";
+
+COMMAND_TEMPLATE_HOME_AXIS = "{\n\
+    'verb': 'home',\n\
+    'axis': 0,\n\
+}";
+
+
+
+COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
+    'verb': 'move_motors',\n\
+    'moves': [\n\
+        [500, 250, 0],\n\
+        [500, 250, 0],\n\
+    ]\n\
+}"
