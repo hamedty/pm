@@ -1,3 +1,4 @@
+webcam
 run rail
 script process
 encoder / soft limit stop

@@ -19,3 +19,5 @@ copy `.arduino` & arduino-cli
 python3-pip libwebp-dev libtiff-dev libopenjp2-7-dev libilmbase-dev libopenexr-dev libgstreamer1.0-dev libatlas-base-dev
 
 pip3 install pyserial scikit-learn
+
+install vlc

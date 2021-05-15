@@ -5,7 +5,6 @@ import traceback
 import serial
 
 from cobs import cobs
-import argparse
 from multiprocessing import Lock
 
 import arduino_constants as _

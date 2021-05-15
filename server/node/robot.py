@@ -35,7 +35,6 @@ class Robot(Node):
                 'encoder_no': 1,
             },
         ],
-        'di': [50, 51],
     }
 
     def __init__(self, name, ip, arduino_id):

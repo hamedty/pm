@@ -20,7 +20,7 @@ class Rail(Robot):
                 'encoder_no': 0,
             },
         ],
-        'di': [50, 51],
+        'di': [48, 49],
     }
 
 

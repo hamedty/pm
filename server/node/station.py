@@ -5,9 +5,16 @@ class Station(Node):
     type = 'station'
     arduino_reset_pin = 21
     hw_config = {
-        'valves': [8, 7, 6, 5, 4, 3],
+        'valves': [
+            8,  # holder gripper
+            7,  # dosing gripper
+            6,  # main jack
+            5,  # dosing base
+            4,  # gate
+            3,  # not connected
+        ],
         'motors': [
-            {
+            {  # holder motor
                 'pin_pulse': 43,
                 'pin_dir': 42,
                 'pin_microstep_0': 46,
@@ -15,7 +22,7 @@ class Station(Node):
                 'pin_microstep_2': 44,
                 'microstep': 32,
             },
-            {
+            {  # not connected
                 'pin_pulse': 25,
                 'pin_dir': 23,
                 'pin_microstep_0': 31,
@@ -23,7 +30,7 @@ class Station(Node):
                 'pin_microstep_2': 27,
                 'microstep': 32,
             },
-            {
+            {  # dosing motor
                 'pin_pulse': 48,
                 'pin_dir': 47,
                 'pin_microstep_0': 51,
@@ -31,7 +38,7 @@ class Station(Node):
                 'pin_microstep_2': 49,
                 'microstep': 32,
             },
-            {
+            {  # Main ball-screw motor
                 'pin_pulse': 35,
                 'pin_dir': 33,
                 'pin_limit_n': 28,
@@ -42,8 +49,24 @@ class Station(Node):
                 'has_encoder': True,
                 'encoder_no': 0,
             },
-        ]
+        ],
+        'di': [
+            26,  # jack verification
+            24,  # gate verification
+        ],
+
     }
+
+    def set_status(self, **kwargs):
+        if 'data' in kwargs:
+            data = kwargs['data']
+            data = data[3:-2]
+            data = dict(
+                zip(['enc', 'enc2', 'di-jack', 'di-gate', 'm1-holder', 'm2', 'm3-dosing', 'm4-main'], data))
+            del data['enc2']
+            del data['m2']
+            kwargs['data'] = data
+        super(Station, self).set_status(**kwargs)
 
 
 STATIONS = [
