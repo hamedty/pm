@@ -1,6 +1,6 @@
-get command from UI/terminal
-encoder / soft limit stop
 handle microstep
+encoder / soft limit stop
+handle WS restart
 make sure pin status on homing
 trajectory
 double trajectory

@@ -3,7 +3,7 @@ import os
 import sys
 import json
 
-from node import ALL_NODES
+from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -89,6 +89,9 @@ class System(object):
 
     def message_from_ws(self, message):
         print(message)
+        for node in message['selected_nodes']:
+            node = ALL_NODES_DICT[node]
+            asyncio.create_task(node.send_command(message['form']))
 
     def send_architecture(self, ws):
         message = [{

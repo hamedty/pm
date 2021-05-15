@@ -64,7 +64,7 @@
         <br />
         <textarea style="margin:15px;width:500px;" rows="8" ng-model="command_text_area"></textarea>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button ng-show="selected_nodes_string()" type="submit" class="btn btn-primary">Submit</button>
         </div>
       </fieldset>
     </form>

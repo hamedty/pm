@@ -9,9 +9,7 @@ app.factory('ws', function($websocket) {
       dataStream.onMessage(cb)
     },
     get: function(data) {
-      dataStream.send(JSON.stringify({
-        data
-      }));
+      dataStream.send(JSON.stringify(data));
     }
   };
 
@@ -49,7 +47,10 @@ app.controller('app_controller', function($scope, ws) {
     data = $scope.command_text_area;
     data.replace(/\n/g, " ");
     data = 'new Object(' + data + ')';
-    data = eval(data);
+    data = {
+      form: eval(data),
+      selected_nodes: $scope.nodes.filter(x => x.selected).map(x => x.name),
+    }
     console.log(data)
     ws.get(data);
   }
