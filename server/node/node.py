@@ -4,7 +4,6 @@ import json
 import traceback
 import os
 import time
-from multiprocessing import Lock
 
 
 class Node(object):
@@ -13,9 +12,9 @@ class Node(object):
         self.name = name
         self.ip = ip
         self._socket_reader = None
-        self.lock = Lock()
         self.actions = []
         self.set_status(message='node instance created')
+        self.lock = None
 
     async def ping(self):
         command = 'ping -c 1 -W 0.5'.split()
@@ -51,15 +50,15 @@ class Node(object):
 
     async def send_command(self, command):
         command = json.dumps(command) + '\n'
+        if self.lock is None:
+            self.lock = asyncio.Lock()
 
-        self.lock.acquire()
-        self._socket_writer.write(command.encode())
-        line = await self._socket_reader.readline()
-        self.lock.release()
+        async with self.lock:
+            self._socket_writer.write(command.encode())
+            line = await self._socket_reader.readline()
 
         try:
             line = json.loads(line)
-            print('response', line)
             return line['success'], line
         except:
             trace = traceback.format_exc()
@@ -92,6 +91,9 @@ class Node(object):
             'hw_config': self.hw_config,
         }
         return await self.send_command(command)
+
+    async def send_command_create_camera(self):
+        return
 
     async def send_command_set_valves(self, valves):
         command = {

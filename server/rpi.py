@@ -15,9 +15,10 @@ CAMERAS = {}
 
 async def create_camera(command):
     global CAMERAS
-    CAMERAS = {}
-    CAMERAS['holder'] = cheap_cam.create_camera('holder')
-    CAMERAS['dosing'] = cheap_cam.create_camera('dosing')
+    if 'holder' not in CAMERAS:
+        CAMERAS['holder'] = cheap_cam.create_camera('holder')
+    if 'dosing' not in CAMERAS:
+        CAMERAS['dosing'] = cheap_cam.create_camera('dosing')
     return {'success': True}
 
 

@@ -24,7 +24,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         SYSTEM.register_ws(self)
 
     def on_message(self, message):
-        SYSTEM.message_from_ws(json.loads(message))
+        asyncio.create_task(SYSTEM.message_from_ws(json.loads(message)))
 
     def on_close(self):
         SYSTEM.deregister_ws(self)

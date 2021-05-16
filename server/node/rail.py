@@ -8,20 +8,32 @@ class Rail(Robot):
         'valves': [47, 44],
         'motors': [
             {
-                'pin_pulse': 15,
-                'pin_dir': 14,
+                'pin_pulse': 17,
+                'pin_dir': 16,
                 'pin_limit_n': 48,
-                'pin_limit_p': 49,
-                'microstep': 2500,  # step / mm
-                'course': 10000,  # mm
-                'homing_delay': 200,  # mm / s
-                'home_retract': 400,  # mm
+                'microstep': 2500,
+                'course': 30000,
+                'homing_delay': 200,
+                'home_retract': 400,
                 'has_encoder': True,
-                'encoder_no': 0,
+                'encoder_no': 1,
             },
         ],
-        'di': [48, 49],
+        'di': [48],
+
     }
+
+    def set_status(self, **kwargs):
+        if 'data' in kwargs:
+            data = kwargs['data']
+            data = data[3:-2]
+            data = dict(
+                zip(['enc', 'enc2', 'di-limit', 'di2', 'm', 'm2'], data))
+            del data['di2']
+            del data['enc2']
+            del data['m2']
+            kwargs['data'] = data
+        super(Robot, self).set_status(**kwargs)
 
 
 RAILS = [

@@ -57,6 +57,12 @@ class Station(Node):
 
     }
 
+    async def send_command_create_camera(self):
+        command = {
+            'verb': 'create_camera',
+        }
+        return await self.send_command(command)
+
     def set_status(self, **kwargs):
         if 'data' in kwargs:
             data = kwargs['data']
