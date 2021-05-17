@@ -1,4 +1,5 @@
-webcam
+webcam - visualization + training
+collect dataset
 run rail
 script process
 encoder / soft limit stop

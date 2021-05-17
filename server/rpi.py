@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 import time
@@ -12,9 +13,10 @@ MAX_ARDUINO_COUNT = 5
 ARDUINOS = [None] * 6
 CAMERAS = {}
 
+DATA_PATH = '/home/pi/data'
+
 
 async def create_camera(command):
-    global CAMERAS
     if 'holder' not in CAMERAS:
         CAMERAS['holder'] = cheap_cam.create_camera('holder')
     if 'dosing' not in CAMERAS:
@@ -23,9 +25,31 @@ async def create_camera(command):
 
 
 async def dump_frame(command):
-    global CAMERAS
-    CAMERAS['holder'].dump_frame('holder')
-    CAMERAS['dosing'].dump_frame('dosing')
+    CAMERAS['holder'].dump_frame(
+        filename=DATA_PATH + '/holder.png', roi_index=command.get('roi_index_holder'))
+    CAMERAS['dosing'].dump_frame(
+        filename=DATA_PATH + '/dosing.png', roi_index=command.get('roi_index_dosing'))
+    return {'success': True}
+
+
+async def dump_training_holder(command):
+    if (CAMERAS['holder'] is None) or (CAMERAS['dosing'] is None):
+        return {'success': False, 'message': 'cameras not created'}
+    arduino = ARDUINOS[0]
+
+    os.system('rm -rf %s/*' % DATA_PATH)
+    directory = os.path.join(DATA_PATH, command['folder_name'])
+    os.makedirs(directory)
+
+    no_frames = command['revs'] * command['frames_per_rev']
+    steps = int(command['step_per_rev'] / command['frames_per_rev'])
+
+    for frame_no in range(no_frames):
+        print(frame_no, steps)
+        filename = '%s/%03d.png' % (directory, frame_no)
+        CAMERAS['holder'].dump_frame(filename=filename)
+        arduino.move_motors([[steps, 250, 0]])
+        await asyncio.sleep(command['rotation_delay'])
     return {'success': True}
 
 
@@ -101,6 +125,7 @@ COMMAND_HANDLER = {
     # vision
     'create_camera': create_camera,
     'dump_frame': dump_frame,
+    'dump_training_holder': dump_training_holder,
 
     # hardware
     'get_status': get_status,

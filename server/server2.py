@@ -37,12 +37,7 @@ class System(object):
         print(message)
         for node_name in message['selected_nodes']:
             node = ALL_NODES_DICT[node_name]
-            task = asyncio.create_task(node.send_command(message['form']))
-            if message['form']['verb'] == 'dump_frame':
-                print(node_name)
-                await task
-                await node.scp_from('~/data/dosing.png', './dump/dosing.png')
-                await node.scp_from('~/data/holder.png', './dump/holder.png')
+            await node.send_command_scenario(message['form'])
 
     def send_architecture(self, ws):
         message = [{

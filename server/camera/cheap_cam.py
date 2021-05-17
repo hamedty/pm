@@ -15,16 +15,19 @@ class CheapCam(CameraBase):
         CAP_PROP_FRAME_HEIGHT: 480,
     }
 
-    def get_frame(self, pre_fetch=4, roi_index=0):
+    def get_frame(self, pre_fetch=4, roi_index=None):
         frame = super().get_frame(pre_fetch)
-        y0, x0 = self.settings['x0y0'][roi_index]
-        dy, dx = self.settings['frame_size'][roi_index]
-        # frame = frame[y0:y0 + dy, x0:x0 + dx, :]
+        if roi_index is not None:
+            y0, x0 = self.settings['x0y0'][roi_index]
+            dy, dx = self.settings['frame_size'][roi_index]
+            frame = frame[y0:y0 + dy, x0:x0 + dx, :]
         return frame
 
-    def dump_frame(self, name='dump'):
-        frame = self.get_frame()
-        filename = '/home/pi/data/%s.png' % name
+    def dump_frame(self, roi_index=None, filename=None):
+        frame = self.get_frame(roi_index=roi_index)
+        if filename is None:
+            filename = '/home/pi/data/dump.png'
+        print(filename, frame.shape)
         imwrite(filename, frame)
 
 

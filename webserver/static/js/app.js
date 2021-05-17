@@ -52,6 +52,7 @@ app.controller('app_controller', function($scope, ws) {
     'home motor': COMMAND_TEMPLATE_HOME_AXIS,
     'move motors': COMMAND_TEMPLATE_MOVE_MOTORS,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
+    'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
 
   }
   $scope.select_template = function(name) {
@@ -112,3 +113,4 @@ COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
 }"
 
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
+COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{'verb': 'dump_training_holder'}"
