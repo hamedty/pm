@@ -22,6 +22,7 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
+        $scope.nodes[3].selected = true;
         break;
       case 'status_update':
         $scope.update_node_status(message.payload);
@@ -45,7 +46,7 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = "";
+  $scope.command_text_area = COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER; //"";
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
@@ -113,4 +114,8 @@ COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
 }"
 
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
-COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{'verb': 'dump_training_holder'}"
+COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
+  'verb': 'dump_training_holder',\n\
+  'revs': 1,\n\
+  'frames_per_rev': 400,\n\
+}"

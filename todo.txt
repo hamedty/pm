@@ -1,7 +1,11 @@
-webcam - visualization + training
-collect dataset
+annotaion
+collect data set
+
+run 2nd robot
 run rail
+train / run
 script process
+---------------------
 encoder / soft limit stop
 handle microstep
 emergency stop
@@ -11,5 +15,4 @@ trajectory
 double trajectory
 vision: camera config
 logging (rpi/server)
----------------------
 script whole process

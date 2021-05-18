@@ -6,6 +6,8 @@ SERAIL_NOS = {
     'dosing': '2',
 }
 
+DEFAULT_PRE_FETCH = 4
+
 
 class CheapCam(CameraBase):
     FILE_FORMAT = '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.%s:1.0-video-index0'
@@ -15,7 +17,7 @@ class CheapCam(CameraBase):
         CAP_PROP_FRAME_HEIGHT: 480,
     }
 
-    def get_frame(self, pre_fetch=4, roi_index=None):
+    def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_index=None):
         frame = super().get_frame(pre_fetch)
         if roi_index is not None:
             y0, x0 = self.settings['x0y0'][roi_index]
@@ -23,10 +25,10 @@ class CheapCam(CameraBase):
             frame = frame[y0:y0 + dy, x0:x0 + dx, :]
         return frame
 
-    def dump_frame(self, roi_index=None, filename=None):
-        frame = self.get_frame(roi_index=roi_index)
+    def dump_frame(self, roi_index=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):
+        frame = self.get_frame(roi_index=roi_index, pre_fetch=pre_fetch)
         if filename is None:
-            filename = '/home/pi/data/dump.png'
+            return
         print(filename, frame.shape)
         imwrite(filename, frame)
 

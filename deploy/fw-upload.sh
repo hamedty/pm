@@ -1,4 +1,4 @@
-for i in 101 102 #103 106 108 109 110
+for i in 101 #102 #103 106 108 109 110
 do
   echo 192.168.44.$i
   scp -rq /home/it/Desktop/PAM2060/firmware/.pio/build/due/firmware.bin  pi@192.168.44.$i:~/

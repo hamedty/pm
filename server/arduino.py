@@ -187,6 +187,9 @@ class Arduino(object):
         self.send_command(packet)
         return packet, command_id
 
+    async def move_motors_async(self, motor_moves):
+        self.move_motors(motor_moves)
+
     def home(self, axis):
         payload = {
             'motor_index': axis,
