@@ -66,6 +66,37 @@ async def dump_training_holder(command):
     return {'success': True}
 
 
+async def dump_training_dosing(command):
+    arduino = ARDUINOS[0]
+
+    os.system('rm -rf %s/*' % DATA_PATH)
+    directory = os.path.join(DATA_PATH, command['folder_name'])
+    os.makedirs(directory)
+
+    no_frames = command['revs'] * command['frames_per_rev']
+    steps = int(command['step_per_rev'] / command['frames_per_rev'])
+    # step_delay = 250
+
+    webcam_buffer_length = 4
+    for frame_no in range(-webcam_buffer_length, no_frames):
+        if frame_no < 0:
+            filename = None  # capture frame but ignore buffer
+        else:
+            seq = frame_no % command['frames_per_rev']
+            round = int(frame_no / command['frames_per_rev'])
+            # save file
+            filename = '%s/%03d_%02d.png' % (directory, seq, round)
+        CAMERAS['dosing'].dump_frame(filename=filename, pre_fetch=0)
+
+        if (frame_no + webcam_buffer_length) < no_frames:
+            await asyncio.sleep(.033)  # wait for one frame to scan
+            arduino.move_motors([[0, 0, 0], [0, 0, 0], [-steps, 250, 0]])
+            delay = abs(steps) * 250 * 2 * 1e-6 + .25
+            await asyncio.sleep(delay)  # needed for system to settle
+
+    return {'success': True}
+
+
 async def align_holder(command):
     arduino = ARDUINOS[0]
     camera = CAMERAS['holder']
@@ -161,6 +192,8 @@ COMMAND_HANDLER = {
     'create_camera': create_camera,
     'dump_frame': dump_frame,
     'dump_training_holder': dump_training_holder,
+    'dump_training_dosing': dump_training_dosing,
+
     'align_holder': align_holder,
 
     # hardware

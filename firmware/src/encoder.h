@@ -20,7 +20,7 @@ public:
       REG_PMC_PCER0 = PMC_PCER0_PID27;   // activate clock for TC0
       REG_TC0_CMR0  = TC_CMR_TCCLKS_XC0; // select XC0 as clock source
       REG_TC0_BMR   = TC_BMR_QDEN  | TC_BMR_POSEN | TC_BMR_EDGPHA;
-      REG_TC0_CCR0  = TC_CCR_CLKEN | TC_CCR_SWTRG;
+      REG_TC0_CCR0  = TC_CCR_CLKEN;      // | TC_CCR_SWTRG;
     } else {
       pinMode(4, INPUT_PULLUP);
       pinMode(5, INPUT_PULLUP);
@@ -28,7 +28,7 @@ public:
       REG_PMC_PCER1 = PMC_PCER1_PID33;
       REG_TC2_CMR0  = TC_CMR_TCCLKS_XC0;
       REG_TC2_BMR   = TC_BMR_QDEN | TC_BMR_POSEN  | TC_BMR_EDGPHA;
-      REG_TC2_CCR0  = TC_CCR_CLKEN | TC_CCR_SWTRG;
+      REG_TC2_CCR0  = TC_CCR_CLKEN; // | TC_CCR_SWTRG;
     }
   }
 

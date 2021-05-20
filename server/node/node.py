@@ -69,21 +69,28 @@ class Node(object):
             await asyncio.sleep(1)
             command['folder_name'] = random_string
             command['step_per_rev'] = 32 * 200
-
             await self.send_command(command, assert_success=True)
-            # await self.send_command({
-            #     'verb': 'dump_training_holder',
-            #     'folder_name': random_string,
-            #     'revs': 1,
-            #     'frames_per_rev': 10,
-            #     'step_per_rev': 32 * 200,
-            # }, assert_success=True)
 
             folder_name_src = '~/data/%s' % random_string
             folder_name_dst = '../dataset/holder_%02d_%s' % (
                 self.ip_short, random_string)
 
             await self.send_command({'verb': 'set_valves', 'valves': [0, 0]}, assert_success=True)
+            await self.scp_from(folder_name_src, folder_name_dst)
+
+        elif command['verb'] == 'dump_training_dosing':
+            random_string = generate_random_string()
+            await self.send_command({'verb': 'set_valves', 'valves': [1]}, assert_success=True)
+            await asyncio.sleep(1)
+            command['folder_name'] = random_string
+            command['step_per_rev'] = 32 * 200
+            await self.send_command(command, assert_success=True)
+
+            folder_name_src = '~/data/%s' % random_string
+            folder_name_dst = '../dataset/dosing_%02d_%s' % (
+                self.ip_short, random_string)
+
+            await self.send_command({'verb': 'set_valves', 'valves': [0]}, assert_success=True)
             await self.scp_from(folder_name_src, folder_name_dst)
 
         else:
