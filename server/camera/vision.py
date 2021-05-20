@@ -23,11 +23,12 @@ clf_holder = pickle.load(open('/home/pi/models/holder.clf', 'rb'))
 
 
 def detect_holder(frame):
-    frame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cls = model.predict([frame.flatten()])[0]
-    prin(cls)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cls = clf_holder.predict([frame.flatten()])[0]
 
-    p = 1 / 100.0 * 200 * 32
+    step_per_rev = 32 * 200
+    class_per_rev = 100
+    p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p
     aligned = abs(cls) < 3

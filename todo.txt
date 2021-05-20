@@ -1,12 +1,7 @@
-run model
-fix 101 problems - microswitches
-process for Dosing
-run 2nd robot
-run rail
-run 102
+vision for Dosing
 script process
 ---------------------
-multiprocess vision
+multiprocess vision model runner
 encoder / soft limit stop
 logging (rpi/server)
 debug vision

@@ -161,7 +161,7 @@ uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay, bool block) {
 
   this->_status = running;
   this->_dir    = steps_raw > 0;
-  this->_steps  = abs(steps_raw) << 2;
+  this->_steps  = abs(steps_raw) << 1;
   this->_value  = 0;
 
   digitalWrite(this->pin_dir, this->_dir);

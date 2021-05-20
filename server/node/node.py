@@ -68,7 +68,7 @@ class Node(object):
             await self.send_command({'verb': 'set_valves', 'valves': [0, 1]}, assert_success=True)
             await asyncio.sleep(1)
             command['folder_name'] = random_string
-            command['step_per_rev'] = 16 * 200
+            command['step_per_rev'] = 32 * 200
 
             await self.send_command(command, assert_success=True)
             # await self.send_command({
@@ -76,7 +76,7 @@ class Node(object):
             #     'folder_name': random_string,
             #     'revs': 1,
             #     'frames_per_rev': 10,
-            #     'step_per_rev': 16 * 200,
+            #     'step_per_rev': 32 * 200,
             # }, assert_success=True)
 
             folder_name_src = '~/data/%s' % random_string

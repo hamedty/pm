@@ -46,7 +46,7 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = COMMAND_TEMPLATE_MOVE_MOTORS; //"";
+  $scope.command_text_area = COMMAND_TEMPLATE_ALIGN_HOLDER; //"";
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
@@ -54,6 +54,7 @@ app.controller('app_controller', function($scope, ws) {
     'move motors': COMMAND_TEMPLATE_MOVE_MOTORS,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
+    'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
 
   }
   $scope.select_template = function(name) {
@@ -121,3 +122,4 @@ COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'revs': 1,\n\
   'frames_per_rev': 400,\n\
 }"
+COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align_holder'}"

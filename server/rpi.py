@@ -59,22 +59,32 @@ async def dump_training_holder(command):
 
         if (frame_no + webcam_buffer_length) < no_frames:
             await asyncio.sleep(.033)  # wait for one frame to scan
-            arduino.move_motors([[steps, 250, 1]])
-            await asyncio.sleep(.5)  # needed for system to settle
+            arduino.move_motors([[steps, 250, 0]])
+            delay = abs(steps) * 250 * 2 * 1e-6 + .25
+            await asyncio.sleep(delay)  # needed for system to settle
 
     return {'success': True}
 
 
 async def align_holder(command):
+    arduino = ARDUINOS[0]
+    camera = CAMERAS['holder']
+
+    arduino.set_valves([0, 1])
+    await asyncio.sleep(.5)
+
     while True:
-        frame = CAMERAS['holder'].get_frame(roi_index=0)
+        frame = camera.get_frame(roi_index=0)
         steps, aligned = vision.detect_holder(frame)
         print(steps, aligned)
         if aligned:
             break
-        arduino.move_motors([[steps, 250, 1]])
-        await asyncio.sleep(.5)  # needed for system to settle
 
+        arduino.move_motors([[int(steps), 250, 1]])
+        delay = abs(steps) * 250 * 2 * 1e-6 + .2
+        await asyncio.sleep(delay)  # needed for system to settle
+
+    arduino.set_valves([0, 0])
     return {'success': True}
 
 
