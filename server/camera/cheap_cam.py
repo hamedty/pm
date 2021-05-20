@@ -20,9 +20,13 @@ class CheapCam(CameraBase):
     def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_index=None):
         frame = super().get_frame(pre_fetch)
         if roi_index is not None:
-            y0, x0 = self.settings['x0y0'][roi_index]
-            dy, dx = self.settings['frame_size'][roi_index]
-            frame = frame[y0:y0 + dy, x0:x0 + dx, :]
+            roi = self.settings['roi'][roi_index]
+            x0 = roi['x0']
+            x1 = roi['x0'] + roi['dx']
+            y0 = roi['y0']
+            y1 = roi['y0'] + roi['dy']
+
+            frame = frame[y0:y1, x0:x1, :]
         return frame
 
     def dump_frame(self, roi_index=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):
@@ -53,17 +57,12 @@ def create_camera(index):
         'dosing': {'brightness': 110, },
         'holder': {'brightness': 150, },
     }
-    x0y0 = {
-        'dosing': ((200, 240),),
-        'holder': ((135, 250),),
-    }
-
-    frame_size = {
-        'dosing': ((185, 240),),
-        'holder': ((128, 170),),
+    roi = {
+        'dosing': [{'x0': 294, 'dx': 167, 'y0': 169, 'dy': 169}, ],
+        'holder': [{'x0': 294, 'dx': 167, 'y0': 169, 'dy': 169}, ],
     }
 
     v4l2 = dict(v4l2_base)
     v4l2.update(v4l2_config[index])
 
-    return CheapCam(SERAIL_NOS[index], config={}, settings={'x0y0': x0y0[index], 'frame_size': frame_size[index]}, v4l2_config=v4l2)
+    return CheapCam(SERAIL_NOS[index], config={}, settings={'roi': roi[index]}, v4l2_config=v4l2)

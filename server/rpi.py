@@ -4,9 +4,10 @@ import asyncio
 import time
 import subprocess
 import threading
+# import multiprocessing as mp
 import traceback
 from arduino import Arduino
-from camera import cheap_cam
+from camera import cheap_cam, vision
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
@@ -60,6 +61,19 @@ async def dump_training_holder(command):
             await asyncio.sleep(.033)  # wait for one frame to scan
             arduino.move_motors([[steps, 250, 1]])
             await asyncio.sleep(.5)  # needed for system to settle
+
+    return {'success': True}
+
+
+async def align_holder(command):
+    while True:
+        frame = CAMERAS['holder'].get_frame(roi_index=0)
+        steps, aligned = vision.detect_holder(frame)
+        print(steps, aligned)
+        if aligned:
+            break
+        arduino.move_motors([[steps, 250, 1]])
+        await asyncio.sleep(.5)  # needed for system to settle
 
     return {'success': True}
 
@@ -137,6 +151,7 @@ COMMAND_HANDLER = {
     'create_camera': create_camera,
     'dump_frame': dump_frame,
     'dump_training_holder': dump_training_holder,
+    'align_holder': align_holder,
 
     # hardware
     'get_status': get_status,
@@ -171,11 +186,21 @@ async def server_handler(reader, writer):
         writer.write(response.encode())
 
 
-async def main():
+async def async_main():
     server = await asyncio.start_server(
         server_handler, '0.0.0.0', 2000)
     print('starting server')
     async with server:
         await server.serve_forever()
 
-asyncio.run(main())
+
+def main():
+    # mp.set_start_method('spawn')
+    # q = mp.Queue()
+    # p = mp.Process(target=foo, args=(q,))
+    # p.start()
+    asyncio.run(async_main())
+
+
+if __name__ == '__main__':
+    main()

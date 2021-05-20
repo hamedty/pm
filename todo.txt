@@ -6,6 +6,7 @@ run rail
 run 102
 script process
 ---------------------
+multiprocess vision
 encoder / soft limit stop
 logging (rpi/server)
 debug vision
