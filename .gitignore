@@ -7,3 +7,4 @@ __pycache__
 *.clf
 *.mp4
 *.npz
+.ipynb_checkpoints

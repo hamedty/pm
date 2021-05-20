@@ -65,7 +65,8 @@ class Node(object):
             await self.scp_from('~/data/holder.png', './dump/holder.png')
         elif command['verb'] == 'dump_training_holder':
             random_string = generate_random_string()
-            await self.send_command({'verb': 'set_valves', 'valves': [1]}, assert_success=True)
+            await self.send_command({'verb': 'set_valves', 'valves': [0, 1]}, assert_success=True)
+            await asyncio.sleep(1)
             command['folder_name'] = random_string
             command['step_per_rev'] = 16 * 200
 
@@ -82,6 +83,7 @@ class Node(object):
             folder_name_dst = '../dataset/holder_%02d_%s' % (
                 self.ip_short, random_string)
 
+            await self.send_command({'verb': 'set_valves', 'valves': [0, 0]}, assert_success=True)
             await self.scp_from(folder_name_src, folder_name_dst)
 
         else:

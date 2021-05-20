@@ -46,7 +46,7 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER; //"";
+  $scope.command_text_area = COMMAND_TEMPLATE_MOVE_MOTORS; //"";
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
@@ -108,7 +108,9 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
     'verb': 'move_motors',\n\
     'moves': [\n\
-        [500, 250, 0],\n\
+        [0, 250, 0],\n\
+        [0, 250, 0],\n\
+        [0, 250, 0],\n\
         [500, 250, 0],\n\
     ]\n\
 }"

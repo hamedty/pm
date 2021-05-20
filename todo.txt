@@ -1,18 +1,19 @@
-annotaion
-collect data set
-
+run model
+fix 101 problems - microswitches
+process for Dosing
 run 2nd robot
 run rail
-train / run
+run 102
 script process
 ---------------------
 encoder / soft limit stop
+logging (rpi/server)
+debug vision
+vision: auto roi / zero index
 handle microstep
 emergency stop
 handle WS restart
 make sure pin status on homing
 trajectory
 double trajectory
-vision: camera config
-logging (rpi/server)
 script whole process

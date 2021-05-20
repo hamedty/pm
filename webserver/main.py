@@ -40,4 +40,4 @@ def create_server(system=None):
         (r'/static/(.*)', tornado.web.StaticFileHandler,
          {'path': STATIC_PATH_DIR})
     ], debug=True)
-    app.listen(8888)
+    app.listen(8080)
