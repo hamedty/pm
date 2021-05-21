@@ -49,8 +49,13 @@ class Node(object):
         return res == 0
 
     async def connect(self):
-        if not self._socket_reader:
-            reader, writer = await asyncio.open_connection(self.ip, 2000)
+        while not self._socket_reader:
+            try:
+                reader, writer = await asyncio.open_connection(self.ip, 2000)
+            except:
+                await asyncio.sleep(.5)
+                print('retrying to connect to', self.ip)
+                continue
             self._socket_reader = reader
             self._socket_writer = writer
             self.set_status(message='socket connected')
@@ -122,13 +127,17 @@ class Node(object):
             current_time = time.time()
             timeout = 0.5
             if current_time - last_status_time > timeout:
+                if not self._socket_reader:
+                    await asyncio.sleep(timeout)
+                    continue
                 success, data = await self.send_command({'verb': 'get_status'})
                 if success:
                     self.set_status(**data['status'])
-                else:
-                    self.set_status(message='get status failed', data=data)
-            else:
-                await asyncio.sleep(timeout - (current_time - last_status_time))
+                    continue
+                self.set_status(message='get status failed', data=data)
+                continue
+
+            await asyncio.sleep(timeout - (current_time - last_status_time))
 
     async def send_command_reset_arduino(self):
         command = {
@@ -158,11 +167,13 @@ class Node(object):
         self._status = dict(**kwargs, time=time.time())
 
     def get_status(self):
-        data = {'connected': bool(self._socket_reader)}
+        data = {'connected': bool(self._socket_reader), 'age': 0}
+
         if data['connected']:
             data.update(self._status)
-        data['age'] = time.time() - data['time']
-        del data['time']
+            data['age'] = time.time() - data['time']
+            del data['time']
+
         return data
 
     def get_actions(self):

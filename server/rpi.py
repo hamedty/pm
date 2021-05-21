@@ -122,7 +122,7 @@ async def align_holder(command):
 async def get_status(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
     if arduino is None:
-        status = {'message': 'object not created'}
+        status = {'message': 'arduino not created'}
     else:
         status = arduino.get_status()
     return {'success': True, 'status': status}

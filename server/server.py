@@ -37,11 +37,14 @@ class System(object):
 
     async def connect(self):
         for node in self.nodes:
-            res = await node.connect()
-            if res:
-                await node.send_command_config_arduino()
-                await node.send_command_create_camera()
-                asyncio.create_task(node.loop())
+            asyncio.create_task(self.setup_node(node))
+
+    async def setup_node(self, node):
+        asyncio.create_task(node.loop())
+        res = await node.connect()
+        if res:
+            await node.send_command_config_arduino()
+            await node.send_command_create_camera()
 
     def register_ws(self, ws):
         self.send_architecture(ws)
@@ -87,11 +90,11 @@ class System(object):
 async def main():
     SYSTEM = System(ALL_NODES)
     webserver.create_server(SYSTEM)
+    print(1)
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
+    print(2)
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    # task2 = asyncio.create_task(SYSTEM.valves())
     await task1
-    await task2
 
 asyncio.run(main())

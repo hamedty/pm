@@ -22,7 +22,7 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
-        $scope.nodes[3].selected = true;
+        // $scope.nodes[3].selected = true;
         break;
       case 'status_update':
         $scope.update_node_status(message.payload);
