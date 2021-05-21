@@ -2,11 +2,16 @@ var app = angular.module('app', ['ngWebSocket']);
 
 app.factory('ws', function($websocket) {
   // Open a WebSocket connection
-  var dataStream = $websocket("ws://" + location.host + "/ws");
+  var dataStream = $websocket("ws://" + location.host + "/ws", null, {
+    reconnectIfNotNormalClose: true
+  });
 
   var methods = {
     onMessage: function(cb) {
       dataStream.onMessage(cb)
+    },
+    onClose: function(cb) {
+      dataStream.onClose(cb)
     },
     get: function(data) {
       dataStream.send(JSON.stringify(data));
@@ -17,7 +22,10 @@ app.factory('ws', function($websocket) {
 })
 
 app.controller('app_controller', function($scope, ws) {
+  $scope.no_connection = true;
+
   ws.onMessage(function(message) {
+    $scope.no_connection = false;
     message = JSON.parse(message.data)
     switch (message.type) {
       case 'architecture':
@@ -31,6 +39,14 @@ app.controller('app_controller', function($scope, ws) {
         console.log(message);
     }
   });
+
+  ws.onClose(function() {
+    console.log('connection closed');
+    $scope.no_connection = true;
+    $scope.nodes = [];
+    $scope.nodes_status = [];
+  });
+
   $scope.update_node_status = function(nodes_status) {
     // now = Date.parse(new Date()) / 1000.
     // nodes_status.forEach(x => {

@@ -90,9 +90,7 @@ class System(object):
 async def main():
     SYSTEM = System(ALL_NODES)
     webserver.create_server(SYSTEM)
-    print(1)
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
-    print(2)
 
     task1 = asyncio.create_task(SYSTEM.loop())
     await task1
