@@ -97,21 +97,33 @@ async def dump_training_dosing(command):
     return {'success': True}
 
 
-async def align_holder(command):
+async def align(command):
     arduino = ARDUINOS[0]
-    camera = CAMERAS['holder']
+    component = command['component']  # holder / dosing
+    camera = CAMERAS[component]
 
-    arduino.set_valves([0, 1])
+    if component == 'dosing':
+        valves = [1]
+        detector = vision.detect_dosing
+    else:
+        valves = [None, 1]
+        detector = vision.detect_holder
+
+    arduino.set_valves(valves)
     await asyncio.sleep(.5)
 
     while True:
         frame = camera.get_frame(roi_index=0)
-        steps, aligned = vision.detect_holder(frame)
+        steps, aligned = detector(frame)
         print(steps, aligned)
         if aligned:
             break
 
-        arduino.move_motors([[int(steps), 250, 1]])
+        if component == 'dosing':
+            arduino.move_motors([[0, 0, 0], [0, 0, 0], [int(steps), 250, 1]])
+        else:
+            arduino.move_motors([[int(steps), 250, 1]])
+
         delay = abs(steps) * 250 * 2 * 1e-6 + .2
         await asyncio.sleep(delay)  # needed for system to settle
 
@@ -194,7 +206,7 @@ COMMAND_HANDLER = {
     'dump_training_holder': dump_training_holder,
     'dump_training_dosing': dump_training_dosing,
 
-    'align_holder': align_holder,
+    'align': align,
 
     # hardware
     'get_status': get_status,

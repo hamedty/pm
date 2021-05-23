@@ -58,7 +58,7 @@ def create_camera(index):
         'holder': {'brightness': 150, },
     }
     roi = {
-        'dosing': [{'x0': 294, 'dx': 167, 'y0': 169, 'dy': 169}, ],
+        'dosing': [{'x0': 141, 'dx': 243, 'y0': 50, 'dy': 205}, ],
         'holder': [{'x0': 294, 'dx': 167, 'y0': 169, 'dy': 169}, ],
     }
 
