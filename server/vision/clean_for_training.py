@@ -4,7 +4,7 @@ import numpy as np
 import annotaion
 
 nodes = annotaion.aligning.keys()
-componenets = ['holder']  # , 'dosing']
+componenets = ['dosing']  # ,['holder', 'dosing']
 for node in nodes:
     for component in componenets:
         roi = annotaion.aligning[node][component + '_roi']

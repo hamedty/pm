@@ -12,37 +12,40 @@ BASE_PATH = os.path.dirname(SERVER_PATH)
 DATASET_PATH = os.path.join(BASE_PATH, 'dataset')
 MODELS_PATH = os.path.join(BASE_PATH, 'models')
 
-# def train_dosing():
-#     name = 'dosing'
-#     FPR = 400.0
-#     CPR = 100.0
-#
-#     files = glob.glob(DATA_PATH + '/frames_%s_*.npy' % name)
-#     X = [np.load(file) for file in files]
-#     for x in X:
-#         print(x.shape)
-#         assert x.shape[0] == X[0].shape[0]
-#         assert x.shape[0] % FPR == 0
-#     X = np.concatenate(X)
-#     print(X.shape)
-#
-#     y = np.arange(X.shape[0]) / (FPR / CPR)
-#     y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
-#
-#     start_back = (135.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
-#     end_back = (295.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
-#
-#     selected = ((end_back - 5) < y) * (y < (start_back + 5))
-#     X = X[selected].copy()
-#     y = y[selected].copy()
-#
-#     y[y > start_back] = 40
-#     y[y < end_back] = 40
-#
-#     plt.plot(y)
-#     plt.show()
-#     # raise
-#     train(CPR, X, y, name)
+
+def train_dosing(node, CPR=100.0):
+    component = 'dosing'
+    files = glob.glob(DATASET_PATH + '/%s_%03d_*/data.npz' % (component, node))
+    print(files)
+    y = []
+    X = []
+    for file in files:
+        file = np.load(file)
+        print(len(file['indices']))
+        y.append(file['indices'])
+        X.append(file['images'])
+    y = np.concatenate(y)
+    X = np.concatenate(X)
+    print(y.shape)
+    print(X.shape)
+
+    y = y * CPR
+    y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
+
+    start_back = (115.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
+    end_back = (285.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
+
+    selected = ((end_back - 5) < y) * (y < (start_back + 5))
+    X = X[selected].copy()
+    y = y[selected].copy()
+
+    y[y > start_back] = int(CPR / 2) - 1
+    y[y < end_back] = int(CPR / 2) - 1
+
+    # plt.plot(y)
+    # plt.show()
+
+    train(CPR, X, y, '%s_%03d' % (component, node))
 
 
 def train_holder(node, CPR=100.0):
@@ -101,8 +104,8 @@ def train(C, X, y, name):
 
 
 def main():
-    train_holder(101)
-    # train_dosing()
+    # train_holder(101)
+    train_dosing(101)
 
 
 if __name__ == '__main__':

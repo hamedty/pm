@@ -1,17 +1,13 @@
-mizan home kardan kam ast ro m4 vasate rah kam miad
-21500 az home
-
 vision for Dosing
 script process
 ---------------------
+emergency stop
 multiprocess vision model runner
 encoder / soft limit stop
 logging (rpi/server)
 debug vision
 vision: auto roi / zero index
 handle microstep
-emergency stop
-handle WS restart
 make sure pin status on homing
 trajectory
 double trajectory
