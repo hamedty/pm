@@ -196,7 +196,13 @@ async def move_motors(command):
 
 async def home(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
-    arduino.home(command['axis'])
+    command_id = arduino.home(command['axis'])
+    while not arduino.fence[command_id]:
+        await asyncio.sleep(.002)
+    response = arduino.fence[command_id]
+    # motor_status_index = 0
+    # response[]
+    del arduino.fence[command_id]
     return {'success': True}
 
 COMMAND_HANDLER = {

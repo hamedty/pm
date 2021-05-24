@@ -97,17 +97,29 @@ class Node(object):
 
             await self.send_command({'verb': 'set_valves', 'valves': [0]}, assert_success=True)
             await self.scp_from(folder_name_src, folder_name_dst)
+        elif command['verb'] == 'dance':
+            value = int(command.get('value', 1))
+            command = {
+                'verb': 'move_motors',
+                'moves': [
+                    [0, 250, 0],
+                    [0, 250, 0],
+                    [64 * value, 22, 0],
+                    [-11 * value, 128, 0],
+                ]
+            }
+            await self.send_command(command)
 
         else:
             await self.send_command(command)
 
     async def send_command(self, command, assert_success=False):
-        command = json.dumps(command) + '\n'
+        command_str = json.dumps(command) + '\n'
+        command_str = command_str.encode()
         if self.lock is None:
             self.lock = asyncio.Lock()
-
         async with self.lock:
-            self._socket_writer.write(command.encode())
+            self._socket_writer.write(command_str)
             line = await self._socket_reader.readline()
 
         try:
@@ -155,13 +167,6 @@ class Node(object):
 
     async def send_command_create_camera(self):
         return
-
-    async def send_command_set_valves(self, valves):
-        command = {
-            'verb': 'set_valves',
-            'valves': valves,
-        }
-        return await self.send_command(command)
 
     def set_status(self, **kwargs):
         self._status = dict(**kwargs, time=time.time())

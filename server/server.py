@@ -77,14 +77,28 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
-    async def valves(self):
-        while True:
-            for i in range(10):
-                for node in self.nodes[:2]:
-                    valves = [0] * 10
-                    valves[i] = 1
-                    await node.send_command_set_valves(valves)
-                await asyncio.sleep(1)
+    async def script(self):
+        robot_1 = ALL_NODES_DICT['Robot 1']
+        station_1 = ALL_NODES_DICT['Station 1']
+        rail = ALL_NODES_DICT['Rail']
+
+        while 'm4-main' not in station_1.get_status().get('data', {}):
+            await asyncio.sleep(.01)
+
+        while 'm1' not in robot_1.get_status().get('data', {}):
+            await asyncio.sleep(.01)
+
+        while 'm' not in rail.get_status().get('data', {}):
+            await asyncio.sleep(.01)
+
+        print(1)
+        await station_1.send_command({'verb': 'home', 'axis': 3})
+        print(2)
+
+        await robot_1.send_command({'verb': 'home', 'axis': 1})
+        print(3)
+
+        await robot_1.send_command({'verb': 'home', 'axis': 0})
 
 
 async def main():
@@ -93,6 +107,9 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
+    task2 = asyncio.create_task(SYSTEM.script())
     await task1
+    await task2
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -1,13 +1,16 @@
+rail setup
+wait in rpi for fence??? then status would reply
+more meaningful message from rpi
 script process
----------------------
+encoder error + soft limit stop
+trajectory
 emergency stop
+---------------------
 multiprocess vision model runner
-encoder / soft limit stop
 logging (rpi/server)
 debug vision
 vision: auto roi / zero index
 handle microstep
 make sure pin status on homing
-trajectory
 double trajectory
 script whole process

@@ -72,8 +72,9 @@ app.controller('app_controller', function($scope, ws) {
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
     'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
     'align dosing': COMMAND_TEMPLATE_ALIGN_DOSING,
-
+    'dance': COMMAND_TEMPLATE_DANCE,
   }
+
   $scope.select_template = function(name) {
     $scope.command_text_area = $scope.COMMAND_TEMPLATES[name];
   }
@@ -141,3 +142,4 @@ COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
 }"
 COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder'}"
 COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing'}"
+COMMAND_TEMPLATE_DANCE = "{'verb': 'dance', 'value': 1}"

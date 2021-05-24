@@ -27,7 +27,8 @@ class Arduino(object):
         self.usb_index = usb_index
         self._open_port()
         self.lock = Lock()
-        self._last_command_id = 0
+        self._last_command_id = 1
+        self.fence = {}
         self.RESPONSE_FORMAT = ''.join([i[0] for i in _.ResponseHeader])
         self.receive_thread = None
         self.set_status(message='usb port opened')
@@ -64,6 +65,23 @@ class Arduino(object):
             try:
                 ret = self._serial_read()
                 response = struct.unpack(self.RESPONSE_FORMAT, ret)
+
+                response_dict = {}
+                for i, j in _.ResponseHeader:
+                    response_dict[j] = response[]
+                ResponseHeader = [
+                    (uint16_t, 'response_code'),
+                    (uint16_t, 'payload_size'),
+                    (uint32_t, 'command_id'),
+                    (int32_t * ENCODER_NO, 'encoders'),
+                    (uint8_t * INPUTS_NO, 'di_status'),
+                    (uint8_t * 2, None),
+                    (uint8_t * MOTORS_NO, 'motor_status'),
+                ]
+
+                command_id = response[2]
+                if command_id in self.fence:
+                    self.fence[command_id] = response
                 self.set_status(data=response)
             except:
                 self.set_status(message='receive failed.',
@@ -73,7 +91,8 @@ class Arduino(object):
         self._last_command_id += 1
         return self._last_command_id
 
-    def send_command(self, data):
+    def send_command(self, data, command_id):
+        self.fence[command_id] = 0
         self.lock.acquire()
         self._send_command(data)
         self.lock.release()
@@ -113,8 +132,8 @@ class Arduino(object):
 
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_DEFINE_VALVE, _.DefineValve, payload)
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id
 
     def set_valves(self, value):
         value = list(value) + (_.VALVES_NO - len(value)) * [None]
@@ -128,8 +147,8 @@ class Arduino(object):
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_SET_VALVE, _.SetValve, payload)
 
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id
 
     def define_di(self, pins):
         pins = list(pins) + (_.INPUTS_NO - len(pins)) * [_.INVALID_PIN]
@@ -139,8 +158,8 @@ class Arduino(object):
 
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_DEFINE_DI, _.DefineDI, payload)
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id
 
     def define_motor(self, motor_definition):
         payload = {
@@ -164,8 +183,8 @@ class Arduino(object):
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_DEFINE_MOTOR, _.DefineMotor, payload)
 
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id
 
     def move_motors(self, motor_moves):
         # motor_moves = [(step0, delay0, blocking0), ...]
@@ -184,8 +203,8 @@ class Arduino(object):
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_MOVE_MOTOR, _.MoveMotor, payload)
 
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id
 
     async def move_motors_async(self, motor_moves):
         self.move_motors(motor_moves)
@@ -198,5 +217,5 @@ class Arduino(object):
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_HOME_MOTOR, _.HomeMotor, payload)
 
-        self.send_command(packet)
-        return packet, command_id
+        self.send_command(packet, command_id)
+        return command_id

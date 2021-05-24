@@ -1,8 +1,11 @@
 import pickle
 import cv2
 
-clf_dosing = pickle.load(open('/home/pi/models/dosing.clf', 'rb'))
-clf_holder = pickle.load(open('/home/pi/models/holder.clf', 'rb'))
+try:
+    clf_dosing = pickle.load(open('/home/pi/models/dosing.clf', 'rb'))
+    clf_holder = pickle.load(open('/home/pi/models/holder.clf', 'rb'))
+except:
+    pass  # robot and rail
 
 
 def detect_dosing(frame):

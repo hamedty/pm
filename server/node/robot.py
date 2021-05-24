@@ -42,6 +42,8 @@ class Robot(Node):
         super(Robot, self).__init__(name, ip)
 
     async def send_command(self, command):
+        if command['verb'] != 'get_status':
+            print(command)
         command.update(arduino_index=self.arduino_id)
         return await super(Robot, self).send_command(command)
 
@@ -50,6 +52,8 @@ class Robot(Node):
             data = kwargs['data']
             data = data[3:-2]
             data = dict(zip(['enc1', 'enc2', 'di1', 'di2', 'm1', 'm2'], data))
+            data['enc1'] = int(data['enc1'] / 1.5)
+            data['enc2'] = int(data['enc2'] / 1.5)
             kwargs['data'] = data
         super(Robot, self).set_status(**kwargs)
 
