@@ -1,10 +1,13 @@
+build and upload trajectory
+encoder error + soft limit stop
 don't run motor if not homed (or if override - go_steps)
-define go_location() and use it from outside if not override
-absoloute positions + encoder error + soft limit stop
+trajectory and speed up
+better non blocking motor run with fence return and status update
+intial encoder value using redis
 rail jack setup
-script process
-trajectory
+fullfill valve and encoder condition before move
 emergency stop
+better vision
 ---------------------
 multiprocess vision model runner
 logging (rpi/server)
@@ -13,4 +16,3 @@ vision: auto roi / zero index
 handle microstep
 make sure pin status on homing
 double trajectory
-script whole process

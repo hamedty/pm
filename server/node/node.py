@@ -104,8 +104,8 @@ class Node(object):
                 'moves': [
                     [],
                     [],
-                    [64 * value, 99, 0],
-                    [-11 * value, 576, 0],
+                    [64 * value + command.get('extra_m3', 0), 99, 0],
+                    [-11 * value, 576, 1],
                 ]
             }
             await self.send_command(command)

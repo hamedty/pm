@@ -153,7 +153,7 @@ class System(object):
 
         print('prepare dosing')
         H_ALIGNING = 21500
-        H_PUSH = 22800
+        H_PUSH = 23000
         H_PUSH_BACK = H_PUSH - 500
         H_GRIPP = 23700
 
@@ -163,6 +163,7 @@ class System(object):
         await station_1.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 0]})
         await asyncio.sleep(.3)
         await station_1.send_command({'verb': 'set_valves', 'valves': [1]})
+        await asyncio.sleep(.2)
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH, 150, 1, 1]]})
         await asyncio.sleep(.2)
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH_BACK, 150, 1, 1]]})
@@ -170,7 +171,7 @@ class System(object):
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_GRIPP, 150, 1, 1]]})
         await asyncio.sleep(.1)
         await station_1.send_command({'verb': 'set_valves', 'valves': [1, None, 0, 1]})
-        await asyncio.sleep(.1)
+        await asyncio.sleep(.3)
         await station_1.send_command_scenario({'verb': 'dance', 'value': 100})
         await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 0, 0, 1]})
         await align_holder
@@ -187,18 +188,19 @@ class System(object):
         await asyncio.sleep(.2)
         await station_1.send_command({'verb': 'set_valves', 'valves': [1, 0, 0, 0, 0]})
         await asyncio.sleep(.2)
-        await station_1.send_command_scenario({'verb': 'dance', 'value': -100})
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [-100, 99, 1], ]})
+        await station_1.send_command_scenario({'verb': 'dance', 'value': -100, 'extra_m3': -100})
+        await asyncio.sleep(.2)
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_DELIVER, 150, 1, 1]]})
         await robot_1.goto(y=Y_DELIVER)
         await robot_1.goto(x=X_DELIVER)
         await robot_1.send_command({'verb': 'set_valves', 'valves': [1]})
+        await asyncio.sleep(.2)
         await station_1.send_command({'verb': 'set_valves', 'valves': [0]})
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_CLEAR, 150, 1, 1]]})
 
         print('Capping')
         X_CAPPING = 8200
-        Y_CAPPING_1 = 8000
+        Y_CAPPING_1 = 7000
 
         await robot_1.goto(x=X_CAPPING)
         await robot_1.goto(y=Y_CAPPING_1)
@@ -211,9 +213,9 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    task2 = asyncio.create_task(SYSTEM.script())
+    # task2 = asyncio.create_task(SYSTEM.script())
     await task1
-    await task2
+    # await task2
 
 if __name__ == '__main__':
     asyncio.run(main())
