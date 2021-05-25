@@ -72,6 +72,7 @@ typedef struct MoveMotor {
   int32_t steps[MOTORS_NO];
   int32_t delay[MOTORS_NO];
   bool    block[MOTORS_NO];
+  bool    absolute[MOTORS_NO];
 } MoveMotor;
 
 # define COMMAND_TYPE_HOME_MOTOR 41

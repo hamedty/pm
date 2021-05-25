@@ -90,15 +90,119 @@ class System(object):
 
         while 'm' not in rail.get_status().get('data', {}):
             await asyncio.sleep(.01)
+        print('Home Everything')
+        await asyncio.gather(
+            station_1.send_command({'verb': 'set_valves', 'valves': [0] * 5}),
+            robot_1.send_command({'verb': 'set_valves', 'valves': [0] * 10}),
+            asyncio.sleep(.5)
+        )
 
-        print(1)
-        await station_1.send_command({'verb': 'home', 'axis': 3})
-        print(2)
+        await asyncio.gather(
+            station_1.send_command({'verb': 'home', 'axis': 3}),
+            robot_1.send_command({'verb': 'home', 'axis': 1}),
+            robot_1.send_command({'verb': 'home', 'axis': 0}),
+        )
 
-        await robot_1.send_command({'verb': 'home', 'axis': 1})
-        print(3)
+        print('Take robot to starting point')
+        X = 8000
+        Y = 16500
+        await robot_1.goto(y=Y)
+        await robot_1.goto(x=X)
 
-        await robot_1.send_command({'verb': 'home', 'axis': 0})
+        print('lets go grab input')
+        X = 45500
+        Y1 = 0
+        Y2 = 12500
+        await robot_1.goto(x=X)
+        await robot_1.goto(y=Y1)
+        await robot_1.send_command(
+            {'verb': 'set_valves', 'valves': [1, 0, 0, 0, 0, 1]})
+        await asyncio.sleep(1)
+
+        await robot_1.goto(y=Y2)
+
+        print('put input into station')
+        X = 60000
+        Y1 = 3200
+        Y2 = 1400
+        Y3 = Y1
+        await asyncio.gather(
+            robot_1.goto(x=X),
+            station_1.send_command(
+                {'verb': 'set_valves', 'valves': [0, 0, 0, 1]}),
+        )
+        await robot_1.goto(y=Y1)
+        await robot_1.send_command(
+            {'verb': 'set_valves', 'valves': [0, 0, 0, 0, 0, 0]})
+        await asyncio.sleep(.5)
+
+        print('press holder in')
+
+        await robot_1.send_command(
+            {'verb': 'set_valves', 'valves': [0, 0, 0, 0, 0, 1]})
+        await robot_1.goto(y=Y2)
+        await asyncio.sleep(.2)
+        await robot_1.goto(y=Y3)
+
+        print('Move back for station to work')
+        X = 47000
+        move_robot_back = asyncio.create_task(robot_1.goto(x=X))
+        align_holder = asyncio.create_task(station_1.send_command(
+            {'verb': 'align', 'component': 'holder'}))
+        await move_robot_back
+
+        print('prepare dosing')
+        H_ALIGNING = 21500
+        H_PUSH = 22800
+        H_PUSH_BACK = H_PUSH - 500
+        H_GRIPP = 23700
+
+        await station_1.send_command({'verb': 'move_motors', 'moves': [
+            [], [], [], [H_ALIGNING, 150, 1, 1]]})
+        await station_1.send_command({'verb': 'align', 'component': 'dosing'})
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 0]})
+        await asyncio.sleep(.3)
+        await station_1.send_command({'verb': 'set_valves', 'valves': [1]})
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH, 150, 1, 1]]})
+        await asyncio.sleep(.2)
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH_BACK, 150, 1, 1]]})
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 1]})
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_GRIPP, 150, 1, 1]]})
+        await asyncio.sleep(.1)
+        await station_1.send_command({'verb': 'set_valves', 'valves': [1, None, 0, 1]})
+        await asyncio.sleep(.1)
+        await station_1.send_command_scenario({'verb': 'dance', 'value': 100})
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 0, 0, 1]})
+        await align_holder
+
+        print('press')
+        H_DELIVER = 4000
+        X_DELIVER = 59800
+        Y_DELIVER = 16700
+        H_CLEAR = 2000
+        await asyncio.sleep(.1)
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 1]})
+        await asyncio.sleep(1)
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 0]})
+        await asyncio.sleep(.2)
+        await station_1.send_command({'verb': 'set_valves', 'valves': [1, 0, 0, 0, 0]})
+        await asyncio.sleep(.2)
+        await station_1.send_command_scenario({'verb': 'dance', 'value': -100})
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [-100, 99, 1], ]})
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_DELIVER, 150, 1, 1]]})
+        await robot_1.goto(y=Y_DELIVER)
+        await robot_1.goto(x=X_DELIVER)
+        await robot_1.send_command({'verb': 'set_valves', 'valves': [1]})
+        await station_1.send_command({'verb': 'set_valves', 'valves': [0]})
+        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_CLEAR, 150, 1, 1]]})
+
+        print('Capping')
+        X_CAPPING = 8200
+        Y_CAPPING_1 = 8000
+
+        await robot_1.goto(x=X_CAPPING)
+        await robot_1.goto(y=Y_CAPPING_1)
+        await robot_1.send_command({'verb': 'set_valves', 'valves': [0]})
 
 
 async def main():

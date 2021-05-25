@@ -67,21 +67,18 @@ class Arduino(object):
                 response = struct.unpack(self.RESPONSE_FORMAT, ret)
 
                 response_dict = {}
+                reading_index = 0
                 for i, j in _.ResponseHeader:
-                    response_dict[j] = response[]
-                ResponseHeader = [
-                    (uint16_t, 'response_code'),
-                    (uint16_t, 'payload_size'),
-                    (uint32_t, 'command_id'),
-                    (int32_t * ENCODER_NO, 'encoders'),
-                    (uint8_t * INPUTS_NO, 'di_status'),
-                    (uint8_t * 2, None),
-                    (uint8_t * MOTORS_NO, 'motor_status'),
-                ]
+                    key = j
+                    value = response[reading_index: reading_index + len(i)]
+                    reading_index += len(i)
+                    if len(value) == 1:
+                        value = value[0]
+                    response_dict[key] = value
 
                 command_id = response[2]
                 if command_id in self.fence:
-                    self.fence[command_id] = response
+                    self.fence[command_id] = response_dict
                 self.set_status(data=response)
             except:
                 self.set_status(message='receive failed.',
@@ -189,15 +186,22 @@ class Arduino(object):
     def move_motors(self, motor_moves):
         # motor_moves = [(step0, delay0, blocking0), ...]
         # make sure length is equal to MOTORS_NO
+
+        # no_steps, delay = 150, blocking, no encoder
+        default_motor_move = [0, 150, 1, 0]
+
         motor_moves = list(motor_moves) + (_.MOTORS_NO -
-                                           len(motor_moves)) * [[0, 0, 0]]
+                                           len(motor_moves)) * [[0, 0, 0, 0]]
+        for motor_move in motor_moves:
+            motor_move += default_motor_move[len(motor_move):]
 
         # transpose
-        steps, delay, blocking = list(map(list, zip(*motor_moves)))
+        steps, delay, blocking, absolute = list(map(list, zip(*motor_moves)))
         payload = {
             'steps': steps,
             'delay': delay,
             'block': blocking,
+            'absolute': absolute,
         }
 
         packet, command_id = self._build_single_packet(

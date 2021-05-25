@@ -17,6 +17,7 @@ class Rail(Robot):
                 'home_retract': 400,
                 'has_encoder': True,
                 'encoder_no': 0,
+                'encoder_ratio': 1,
             },
         ],
         'di': [48],

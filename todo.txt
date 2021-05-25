@@ -1,8 +1,8 @@
-rail setup
-wait in rpi for fence??? then status would reply
-more meaningful message from rpi
+don't run motor if not homed (or if override - go_steps)
+define go_location() and use it from outside if not override
+absoloute positions + encoder error + soft limit stop
+rail jack setup
 script process
-encoder error + soft limit stop
 trajectory
 emergency stop
 ---------------------

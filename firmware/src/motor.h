@@ -49,10 +49,14 @@ public:
                 );
   void set_isr(void (*isr)());
   void set_timer();
-  void set_encoder(Encoder *, uint32_t);
+  void set_encoder(Encoder *, int32_t);
   void set_microstep(uint32_t);
   void set_homing_params(uint32_t, uint32_t, uint32_t);
   void     home();
+  uint32_t go_abs(int32_t  position,
+                  uint32_t delay,
+                  bool     block);
+
   uint32_t go_steps(int32_t  steps,
                     uint32_t delay,
                     bool     block);
@@ -143,9 +147,15 @@ void Motor::set_timer() {
   this->timer.attachInterrupt(this->isr_ptr);
 }
 
-void Motor::set_encoder(Encoder *enc, uint32_t _encoder_ratio) {
-  encoder       = enc;
-  encoder_ratio = _encoder_ratio;
+void Motor::set_encoder(Encoder *enc, int32_t encoder_ratio) {
+  if (this->encoder == enc) return;
+
+  encoder = enc;
+
+  if (enc) { // encoder in not NULL
+    this->_status        = homeing_failed;
+    this->encoder->ratio = encoder_ratio;
+  }
 }
 
 void Motor::set_homing_params(uint32_t _course,
@@ -156,7 +166,27 @@ void Motor::set_homing_params(uint32_t _course,
   this->home_retract = _home_retract;
 }
 
-uint32_t Motor::go_steps(int32_t steps_raw, uint32_t delay, bool block) {
+uint32_t Motor::go_abs(int32_t  position,
+                       uint32_t delay,
+                       bool     block) {
+  if (
+    (this->_status == not_defined)
+    || (this->_status == running)
+    || (this->_status == homeing_failed)
+    ) return 0;
+
+  if (this->encoder == NULL) return 0;
+
+
+  int32_t cur_pos     = this->encoder->read();
+  int32_t to_go_enc   = position - cur_pos;
+  int32_t to_go_steps = to_go_enc;
+  return this->go_steps(to_go_steps, delay, block);
+}
+
+uint32_t Motor::go_steps(int32_t  steps_raw,
+                         uint32_t delay,
+                         bool     block) {
   if (this->_status == not_defined) return 0;
 
   this->_status = running;

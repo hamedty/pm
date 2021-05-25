@@ -6,6 +6,7 @@ public:
 
   bool index; // Encoder 0(2,13) or 1(5,4)
   bool initialized = false;
+  int32_t ratio    = 1;
   Encoder(bool index) {
     this->index = index;
   }
@@ -40,12 +41,16 @@ public:
     }
   }
 
-  uint32_t read() {
+  int32_t read() {
+    int32_t value;
+
     if (this->index == 0) {
-      return REG_TC0_CV0;
+      value = REG_TC0_CV0;
     } else {
-      return REG_TC2_CV0;
+      value = REG_TC2_CV0;
     }
+    value = value / this->ratio;
+    return value;
   }
 };
 

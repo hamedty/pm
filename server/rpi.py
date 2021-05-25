@@ -8,6 +8,7 @@ import threading
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
+import arduino_constants as _
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
@@ -190,7 +191,11 @@ async def set_valves(command):
 
 async def move_motors(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
-    arduino.move_motors(command['moves'])
+    command_id = arduino.move_motors(command['moves'])
+    while not arduino.fence[command_id]:
+        await asyncio.sleep(.002)
+    response = arduino.fence[command_id]
+    # success = (response[motor_status][command['axis']] == _.MOTOR_STATUS_HOMED)
     return {'success': True}
 
 
@@ -200,10 +205,9 @@ async def home(command):
     while not arduino.fence[command_id]:
         await asyncio.sleep(.002)
     response = arduino.fence[command_id]
-    # motor_status_index = 0
-    # response[]
+    success = (response[motor_status][command['axis']] == _.MOTOR_STATUS_HOMED)
     del arduino.fence[command_id]
-    return {'success': True}
+    return {'success': success}
 
 COMMAND_HANDLER = {
     # vision

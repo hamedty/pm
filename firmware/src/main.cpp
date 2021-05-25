@@ -152,10 +152,16 @@ void process_command(const CommandHeader *command_header) {
     MoveMotor *payload = (MoveMotor *)payload_buffer;
 
     for (uint8_t motor_index = 0; motor_index < MOTORS_NO; motor_index++) {
-      if (payload->steps[motor_index]) {
-        motors[motor_index]->go_steps(payload->steps[motor_index],
-                                      payload->delay[motor_index],
-                                      payload->block[motor_index]);
+      if (payload->absolute[motor_index]) {
+        motors[motor_index]->go_abs(payload->steps[motor_index],
+                                    payload->delay[motor_index],
+                                    payload->block[motor_index]);
+      } else {
+        if (payload->steps[motor_index]) {
+          motors[motor_index]->go_steps(payload->steps[motor_index],
+                                        payload->delay[motor_index],
+                                        payload->block[motor_index]);
+        }
       }
     }
 

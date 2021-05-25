@@ -48,6 +48,7 @@ class Station(Node):
                 'microstep': 2500,
                 'has_encoder': True,
                 'encoder_no': 0,
+                'encoder_ratio': 3,
             },
         ],
         'di': [
@@ -69,7 +70,7 @@ class Station(Node):
             data = data[3:-2]
             data = dict(
                 zip(['enc', 'enc2', 'di-jack', 'di-gate', 'm1-holder', 'm2', 'm3-dosing', 'm4-main'], data))
-            data['enc'] = round(data['enc'] / 3.0)
+            # data['enc'] = round(data['enc'] / 3.0)
             del data['enc2']
             del data['m2']
             kwargs['data'] = data
