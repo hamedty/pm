@@ -215,17 +215,14 @@ class System(object):
             while 'm1' not in robot_1.get_status().get('data', {}):
                 await asyncio.sleep(.01)
             print(2)
-            curve = {
-                'index': 0,
-                'curve_a': curve_maker.calc_curve2(
-                    Vmax=80 * 1000,
-                    Amax=5000 * 1000,
-                    J=100 * 1000 * 1000 * 1000,
-                    A0=40 * 1000,
-                    V0=12 * 1000,
-                ),
-                'curve_d': [500, 10],
-            }
+            curve = curve_maker.calc_curve(
+                Vmax=80 * 1000,
+                Amax=5000 * 1000,
+                J=100 * 1000 * 1000 * 1000,
+                A0=40 * 1000,
+                V0=12 * 1000,
+                min_delay=19,
+            )
 
             print('-------------------------------------------')
             print((sum(curve['curve_a'][1::2]) + sum(curve['curve_d']
