@@ -2,7 +2,7 @@ import time
 import os
 import sys
 import json
-
+import traceback
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
 
@@ -209,33 +209,38 @@ class System(object):
         await robot_1.send_command({'verb': 'set_valves', 'valves': [0]})
 
     async def script2(self):
-        while 'm1' not in robot_1.get_status().get('data', {}):
-            await asyncio.sleep(.01)
+        try:
+            robot_1 = ALL_NODES_DICT['Robot 1']
+            print(1)
+            while 'm1' not in robot_1.get_status().get('data', {}):
+                await asyncio.sleep(.01)
+            print(2)
+            curve = {
+                'index': 0,
+                'curve_a': curve_maker.calc_curve2(
+                    Vmax=80 * 1000,
+                    Amax=5000 * 1000,
+                    J=100 * 1000 * 1000 * 1000,
+                    A0=40 * 1000,
+                    V0=12 * 1000,
+                ),
+                'curve_d': [500, 10],
+            }
 
-        curve = {
-            'index': 0,
-            'curve_a': curve_maker.calc_curve2(
-                Vmax=50 * 1000,
-                Amax=30 * 1000,
-                J=100 * 1000,
-                V0=10 * 1000,
-                A0=10 * 1000,
-            ),
-            'curve_d': [50, 10],
-        }
+            print('-------------------------------------------')
+            print((sum(curve['curve_a'][1::2]) + sum(curve['curve_d']
+                                                     [1::2])) / 2, curve['curve_a'][0], curve['curve_a'][-2])
 
-        print('-------------------------------------------')
-        print((sum(curve['curve_a'][1::2]) + sum(curve['curve_d']
-                                                 [1::2])) / 2, curve['curve_a'][0], curve['curve_a'][-2])
+            await robot_1.send_command({'verb': 'home', 'axis': 1}),
+            await robot_1.send_command({'verb': 'define_trajectory', 'data': curve})
 
-        await robot_1.send_command({'verb': 'home', 'axis': 1}),
-        await robot_1.send_command({'verb': 'define_trajectory', 'data': curve})
-
-        await robot_1.send_command(
-            ({'verb': 'move_motors', 'moves': [[], [30000, 150, 1, 1]]}))
-        await asyncio.sleep(.5)
-        await robot_1.send_command(
-            ({'verb': 'move_motors', 'moves': [[], [1, 150, 1, 1]]}))
+            await robot_1.send_command(
+                ({'verb': 'move_motors', 'moves': [[], [30000, 150, 1, 1]]}))
+            await asyncio.sleep(.5)
+            await robot_1.send_command(
+                ({'verb': 'move_motors', 'moves': [[], [1, 150, 1, 1]]}))
+        except:
+            print(traceback.format_exc())
 
 
 async def main():

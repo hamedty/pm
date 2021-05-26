@@ -83,30 +83,61 @@ def calc_curve(Vmax, Amax, Jmax, V0=0, A0=0, reverse=False):
     return periods, distance
 
 
-def calc_curve2(Vmax, Amax, J, V0=0, A0=0):
-    t_reaching_Amax = np.roots([J, A0 - Amax])[0]
+def calc_curve2(Vmax, Amax, J, V0, A0):
+    t_reaching_Amax = np.roots([J, A0 - Amax])[-1]
 
     t = t_reaching_Amax
-    v__t_reaching_Amax = V0 + A0 * t + .5 * J * t**2
-    print('length', t_reaching_Amax, 'vmax', v__t_reaching_Amax)
-    XT_t = [0]
-    while XT_t[-1] < t_reaching_Amax:
-        r = np.roots([J / 6.0, A0 / 2.0, V0, -len(XT_t)])
-        XT_t.append(np.real(r[-1]))
+    v__t_reaching_Amax = .5 * J * t**2 + A0 * t + V0
+
+    dt_gliding_a = (Vmax - v__t_reaching_Amax) / float(Amax)
+    assert dt_gliding_a > 0
+
+    # print(t_reaching_Amax, v__t_reaching_Amax, dt_gliding_a)
+
+    XT_t__1 = [0]
+    while XT_t__1[-1] < t_reaching_Amax:
+        r = np.roots([J / 6.0, A0 / 2, V0, -len(XT_t__1)])
+        XT_t__1.append(np.real(r[-1]))
     # print(XT_t)
 
-    #plt.plot(XT_t, range(len(XT_t)))
+    XT_t__2 = [0]
+    A = Amax
+    V = v__t_reaching_Amax
+    while XT_t__2[-1] < dt_gliding_a:
+        r = np.roots([A / 2., V, -len(XT_t__2)])
+        XT_t__2.append(np.real(r[-1]))
+    XT_t__2 = XT_t__2[1:] + XT_t__1[-1]
+    '''
+    XT_t__3 = [0]
+    A = Amax
+    V = v__t_reaching_Amax + Amax * dt_gliding_a
+    while XT_t__3[-1] < t_reaching_Amax :
+        r = np.roots([-J/6.0, A/2., V, -len(XT_t__3)])
+        XT_t__3.append(np.real(r[-1]))
+
+
+
+    XT_t__3 = XT_t__3[1:] + XT_t__2[-1]
+    '''
+    XT_t = np.concatenate([XT_t__1, XT_t__2])
+
+    # plt.plot(XT_t, range(len(XT_t)))
+    # plt.show()
+
     delays = np.round(np.diff(XT_t) * 1e6)
     delay_change = np.where(delays[:-1] != delays[1:])[0] + 1
     curve = []
     for i in delay_change:
-        print(int(delays[i - 1]), i)
-        curve.append(int(delays[i - 1]))
-        curve.append(i)
-    print(int(delays[i - 1]) - 1, 1)
-    curve.append(int(delays[-1]))
-    curve.append(1)
-    return(curve)
+        # print(int(delays[i-1]), i)
+        if(19 < delays[i - 1] < 200):
+            curve.append(int(delays[i - 1]))
+            curve.append(int(i))
+    #print(int(delays[i-1]) - 1, 1)
+    # curve.append(int(curve[-2]))
+    # curve.append(1)
+    # print(curve)
+    # print(sum(curve[1::2]))
+    return curve
 
 
 def create_hfile(acceleration, deceleration, distance=0):
