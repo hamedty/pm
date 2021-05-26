@@ -2,6 +2,7 @@
 #include "DueTimer.h"
 #include "encoder.h"
 #include <base.h>
+#include "trajectories.h"
 
 #ifndef Motor_h
 # define Motor_h
@@ -53,14 +54,17 @@ public:
   void set_microstep(uint32_t);
   void set_homing_params(uint32_t, uint32_t, uint32_t);
   void     home();
-  uint32_t go_abs(int32_t  position,
+  uint32_t go_abs(uint32_t position,
                   uint32_t delay,
                   bool     block);
 
   uint32_t go_steps(int32_t  steps,
                     uint32_t delay,
                     bool     block);
-  bool     limit_not_reached_p() {
+
+  uint32_t go_steps_trajectory(int32_t);
+
+  bool limit_not_reached_p() {
     return (pin_limit_p == INVALID_PIN) || !digitalRead(pin_limit_p);
   }
 
@@ -166,7 +170,7 @@ void Motor::set_homing_params(uint32_t _course,
   this->home_retract = _home_retract;
 }
 
-uint32_t Motor::go_abs(int32_t  position,
+uint32_t Motor::go_abs(uint32_t position,
                        uint32_t delay,
                        bool     block) {
   if (
@@ -178,10 +182,22 @@ uint32_t Motor::go_abs(int32_t  position,
   if (this->encoder == NULL) return 0;
 
 
-  int32_t cur_pos     = this->encoder->read();
-  int32_t to_go_enc   = position - cur_pos;
+  int32_t cur_pos = this->encoder->read();
+
+  if (position < 0) position = 0;
+
+  if (position > this->course) position = this->course;
+
+  int32_t to_go_enc   = (int32_t)position - cur_pos;
   int32_t to_go_steps = to_go_enc;
-  return this->go_steps(to_go_steps, delay, block);
+
+
+  Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
+
+  if (((abs(to_go_steps) << 1) >
+       (trajectory->distance_a + trajectory->distance_d + 5)) &&
+      block) return this->go_steps_trajectory(to_go_steps);
+  else return this->go_steps(to_go_steps, delay, block);
 }
 
 uint32_t Motor::go_steps(int32_t  steps_raw,
@@ -199,6 +215,70 @@ uint32_t Motor::go_steps(int32_t  steps_raw,
   this->timer.start(delay);
 
   if (block) while (this->_status == running);
+  return 0;
+}
+
+uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
+  Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
+
+
+  this->_status = running;
+  this->_dir    = steps_raw > 0;
+  digitalWrite(this->pin_dir, this->_dir);
+  uint32_t steps = abs(steps_raw) << 1;
+
+  bool value = 0;
+  bool lnrn, lnrp, lnr;
+
+  uint8_t   mode  = 0; // enum accel 0 , deaccel 1 , glide 2, done 4
+  uint16_t  delay = 0;
+  uint16_t  count = 0;
+  uint16_t *ptr   = trajectory->curve_a;
+
+  while (steps) {
+    lnrn = this->limit_not_reached_n();
+    lnrp = this->limit_not_reached_p();
+    lnr  = (_dir || lnrn) && (!_dir || lnrp);
+
+    if (!lnr) break;
+
+    if (count == 0) {
+      if (mode < 2) {
+        delay = *ptr;
+        count = *(ptr + 1);
+        ptr   = ptr + 2;
+      } else {
+        count = steps - trajectory->distance_d;
+        ptr   = trajectory->curve_d;
+        mode  = 1;
+      }
+
+      if ((mode == 0) && (ptr == (trajectory->curve_a + trajectory->len_a)))
+      {
+        mode = 2;
+      }
+    }
+    value = !value;
+    digitalWrite(this->pin_pulse, value);
+    steps--;
+    count--;
+    delayMicroseconds(delay);
+  }
+
+
+  if (!lnrn) {
+    this->_status = limit_reached_n;
+  }
+
+  if (!lnrp) {
+    this->_status = limit_reached_p;
+  }
+
+  if (!steps) {
+    this->_status = idle;
+  }
+
+
   return 0;
 }
 

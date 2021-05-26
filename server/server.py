@@ -6,6 +6,8 @@ import json
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
 
+import curve_maker
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 PARENT_PATH = os.path.dirname(PATH)
 sys.path.insert(0, PARENT_PATH)
@@ -206,6 +208,35 @@ class System(object):
         await robot_1.goto(y=Y_CAPPING_1)
         await robot_1.send_command({'verb': 'set_valves', 'valves': [0]})
 
+    async def script2(self):
+        while 'm1' not in robot_1.get_status().get('data', {}):
+            await asyncio.sleep(.01)
+
+        curve = {
+            'index': 0,
+            'curve_a': curve_maker.calc_curve2(
+                Vmax=50 * 1000,
+                Amax=30 * 1000,
+                J=100 * 1000,
+                V0=10 * 1000,
+                A0=10 * 1000,
+            ),
+            'curve_d': [50, 10],
+        }
+
+        print('-------------------------------------------')
+        print((sum(curve['curve_a'][1::2]) + sum(curve['curve_d']
+                                                 [1::2])) / 2, curve['curve_a'][0], curve['curve_a'][-2])
+
+        await robot_1.send_command({'verb': 'home', 'axis': 1}),
+        await robot_1.send_command({'verb': 'define_trajectory', 'data': curve})
+
+        await robot_1.send_command(
+            ({'verb': 'move_motors', 'moves': [[], [30000, 150, 1, 1]]}))
+        await asyncio.sleep(.5)
+        await robot_1.send_command(
+            ({'verb': 'move_motors', 'moves': [[], [1, 150, 1, 1]]}))
+
 
 async def main():
     SYSTEM = System(ALL_NODES)
@@ -213,9 +244,9 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    # task2 = asyncio.create_task(SYSTEM.script())
+    task2 = asyncio.create_task(SYSTEM.script2())
+    await task2
     await task1
-    # await task2
 
 if __name__ == '__main__':
     asyncio.run(main())

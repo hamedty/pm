@@ -183,6 +183,35 @@ class Arduino(object):
         self.send_command(packet, command_id)
         return command_id
 
+    def define_trajectory(self, data):
+        format = [
+            (_.int32_t, 'index'),
+            (_.int32_t, 'zero'),
+            (_.uint32_t, 'len_a'),
+            (_.uint32_t, 'distance_a'),
+            (_.int32_t, 'zero'),
+            (_.uint32_t, 'len_d'),
+            (_.uint32_t, 'distance_d'),
+            (_.uint16_t * len(data['curve_a']), 'curve_a'),
+            (_.uint16_t * len(data['curve_d']), 'curve_d'),
+        ]
+
+        data = {
+            'index': data['index'],
+            'zero': 0,
+            'len_a': len(data['curve_a']),
+            'len_d': len(data['curve_d']),
+            'distance_a': sum(data['curve_a'][1::2]),
+            'distance_d': sum(data['curve_d'][1::2]),
+            'curve_a': data['curve_a'],
+            'curve_d': data['curve_d'],
+        }
+        packet, command_id = self._build_single_packet(
+            _.COMMAND_TYPE_DEFINE_TRAJECTORY, format, data)
+
+        self.send_command(packet, command_id)
+        return command_id
+
     def move_motors(self, motor_moves):
         # motor_moves = [(step0, delay0, blocking0), ...]
         # make sure length is equal to MOTORS_NO

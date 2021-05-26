@@ -30,7 +30,7 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
-        // $scope.nodes[3].selected = true;
+        $scope.nodes[0].selected = true;
         break;
       case 'status_update':
         $scope.update_node_status(message.payload);
@@ -62,7 +62,7 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = COMMAND_TEMPLATE_ALIGN_DOSING; //"";
+  $scope.command_text_area = COMMAND_TEMPLATE_MOVE_MOTORS; //"";
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
@@ -128,9 +128,9 @@ COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
     'verb': 'move_motors',\n\
     'moves': [\n\
         [0, 250, 0],\n\
+        [50000, 250, 1, 1],\n\
         [0, 250, 0],\n\
         [0, 250, 0],\n\
-        [500, 250, 0],\n\
     ]\n\
 }"
 

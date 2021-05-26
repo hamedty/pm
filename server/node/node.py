@@ -54,7 +54,7 @@ class Node(object):
                 reader, writer = await asyncio.open_connection(self.ip, 2000)
             except:
                 await asyncio.sleep(.5)
-                print('retrying to connect to', self.ip)
+                # print('retrying to connect to', self.ip)
                 continue
             self._socket_reader = reader
             self._socket_writer = writer

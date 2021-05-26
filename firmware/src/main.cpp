@@ -38,26 +38,27 @@ void loop() {
 }
 
 void process_commands(const uint8_t *buffer_in, size_t size) {
-  const uint8_t *rptr = buffer_in;
-  uint32_t bytes_left = size;
-
-  while (bytes_left) {
-    if (bytes_left < sizeof(CommandHeader)) {
-      send_response(RESPONSE_CODE_BAD_DATA, 0);
-      return;
-    }
-
-    CommandHeader *command_header = (CommandHeader *)buffer_in;
-
-    if (bytes_left < sizeof(CommandHeader) + command_header->payload_size) {
-      send_response(RESPONSE_CODE_BAD_PAYLOAD, command_header->command_id);
-      return;
-    }
-
-    process_command(command_header);
-    rptr       = rptr + sizeof(CommandHeader) + command_header->payload_size;
-    bytes_left = buffer_in + size - rptr;
-  }
+  // const uint8_t *rptr = buffer_in;
+  // uint32_t bytes_left = size;
+  //
+  // while (bytes_left) {
+  //   if (bytes_left < sizeof(CommandHeader)) {
+  //     send_response(RESPONSE_CODE_BAD_DATA, 0);
+  //     return;
+  //   }
+  //
+  //   CommandHeader *command_header = (CommandHeader *)buffer_in;
+  //
+  //   if (bytes_left < sizeof(CommandHeader) + command_header->payload_size) {
+  //     send_response(RESPONSE_CODE_BAD_PAYLOAD, command_header->command_id);
+  //     return;
+  //   }
+  //
+  //   process_command(command_header);
+  //   rptr       = rptr + sizeof(CommandHeader) + command_header->payload_size;
+  //   bytes_left = buffer_in + size - rptr;
+  // }
+  process_command((const CommandHeader *)buffer_in);
 }
 
 void process_command(const CommandHeader *command_header) {
@@ -217,6 +218,7 @@ void process_command(const CommandHeader *command_header) {
 
   case COMMAND_TYPE_DEFINE_TRAJECTORY: // define_trajectory
   {
+    import_trajectory(payload_buffer);
     break;
   }
 

@@ -205,8 +205,15 @@ async def home(command):
     while not arduino.fence[command_id]:
         await asyncio.sleep(.002)
     response = arduino.fence[command_id]
-    success = (response[motor_status][command['axis']] == _.MOTOR_STATUS_HOMED)
+    #success =  (response['motor_status'][command['axis']] == _.MOTOR_STATUS_HOMED)
+    success = True
     del arduino.fence[command_id]
+    return {'success': success}
+
+
+async def define_trajectory(command):
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
+    arduino.define_trajectory(command['data'])
     return {'success': success}
 
 COMMAND_HANDLER = {
@@ -226,6 +233,9 @@ COMMAND_HANDLER = {
     'set_valves': set_valves,
     'move_motors': move_motors,
     'home': home,
+
+    # trajectory
+    'define_trajectory': define_trajectory,
 }
 
 
