@@ -230,9 +230,11 @@ class System(object):
 
             await robot_1.send_command({'verb': 'home', 'axis': 1}),
             await robot_1.send_command({'verb': 'define_trajectory', 'data': curve})
-
+            t0 = time.time()
             await robot_1.send_command(
-                ({'verb': 'move_motors', 'moves': [[], [30000, 150, 1, 1]]}))
+                ({'verb': 'move_motors', 'moves': [[], [60000, 150, 1, 1]]}))
+            t1 = time.time()
+            print(t1 - t0)
             await asyncio.sleep(.5)
             await robot_1.send_command(
                 ({'verb': 'move_motors', 'moves': [[], [1, 150, 1, 1]]}))

@@ -54,7 +54,7 @@ public:
   void set_microstep(uint32_t);
   void set_homing_params(uint32_t, uint32_t, uint32_t);
   void     home();
-  uint32_t go_abs(uint32_t position,
+  uint32_t go_abs(int32_t  position,
                   uint32_t delay,
                   bool     block);
 
@@ -170,7 +170,7 @@ void Motor::set_homing_params(uint32_t _course,
   this->home_retract = _home_retract;
 }
 
-uint32_t Motor::go_abs(uint32_t position,
+uint32_t Motor::go_abs(int32_t  position,
                        uint32_t delay,
                        bool     block) {
   if (
@@ -186,16 +186,15 @@ uint32_t Motor::go_abs(uint32_t position,
 
   if (position < 0) position = 0;
 
-  if (position > this->course) position = this->course;
+  if (position > (int32_t)this->course) position = (int32_t)this->course;
 
-  int32_t to_go_enc   = (int32_t)position - cur_pos;
+  int32_t to_go_enc   = position - cur_pos;
   int32_t to_go_steps = to_go_enc;
 
 
   Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
 
-  if (((abs(to_go_steps) << 1) >
-       (trajectory->distance_a + trajectory->distance_d + 5)) &&
+  if ((abs(to_go_steps) > (trajectory->distance_a  + 5)) &&
       block) return this->go_steps_trajectory(to_go_steps);
   else return this->go_steps(to_go_steps, delay, block);
 }
@@ -225,14 +224,14 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
   this->_status = running;
   this->_dir    = steps_raw > 0;
   digitalWrite(this->pin_dir, this->_dir);
-  uint32_t steps = abs(steps_raw) << 1;
+  uint32_t steps = ((uint32_t)abs(steps_raw)) << 1;
 
   bool value = 0;
   bool lnrn, lnrp, lnr;
 
   uint8_t   mode  = 0; // enum accel 0 , deaccel 1 , glide 2, done 4
   uint16_t  delay = 0;
-  uint16_t  count = 0;
+  uint32_t  count = 0;
   uint16_t *ptr   = trajectory->curve_a;
 
   while (steps) {
@@ -243,14 +242,23 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
     if (!lnr) break;
 
     if (count == 0) {
-      if (mode < 2) {
+      if (mode == 0) {
         delay = *ptr;
         count = *(ptr + 1);
         ptr   = ptr + 2;
-      } else {
-        count = steps - trajectory->distance_d;
-        ptr   = trajectory->curve_d;
-        mode  = 1;
+      }
+
+      if (mode == 1) {
+        delay = *ptr;
+        count = *(ptr + 1);
+        ptr   = ptr - 2;
+      }
+
+      if (mode == 2) {
+        count = steps - trajectory->distance_a;
+        ptr   = trajectory->curve_a + trajectory->len_a - 2;
+        delay--;
+        mode = 1;
       }
 
       if ((mode == 0) && (ptr == (trajectory->curve_a + trajectory->len_a)))

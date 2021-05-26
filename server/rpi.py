@@ -214,7 +214,7 @@ async def home(command):
 async def define_trajectory(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.define_trajectory(command['data'])
-    return {'success': success}
+    return {'success': True}
 
 COMMAND_HANDLER = {
     # vision

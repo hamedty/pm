@@ -1,7 +1,8 @@
-build and upload trajectory
+y axis
+yet faster trajectory
+run script fast
 encoder error + soft limit stop
 don't run motor if not homed (or if override - go_steps)
-trajectory and speed up
 better non blocking motor run with fence return and status update
 intial encoder value using redis
 rail jack setup
