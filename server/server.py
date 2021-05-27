@@ -189,7 +189,7 @@ class System(object):
         await robot_1.goto(y=Y_CAPPING_1)
         await robot_1.send_command({'verb': 'set_valves', 'valves': [0]})
 
-    async def script2(self):
+    async def speed_test(self):
         try:
             node = ALL_NODES_DICT['Rail']
             print(1)
@@ -211,6 +211,54 @@ class System(object):
         except:
             print(traceback.format_exc())
 
+    async def move_rail(self):
+        try:
+            node = ALL_NODES_DICT['Rail']
+            print(1)
+            while 'm' not in node.get_status().get('data', {}):
+                await asyncio.sleep(.01)
+
+            # await node.send_command({'verb': 'set_valves', 'valves': [0, 0]})
+            # await asyncio.sleep(.5)
+            # await node.send_command({'verb': 'home', 'axis': 0}),
+            # await node.send_command(({'verb': 'move_motors', 'moves': [[40000, 300, 1, 1]]}))
+
+            while True:
+                X_PARK = 40000
+                X1 = 20000
+                X2 = 24000  # 60000
+                DELAY_MOTOR = .001
+                DELAY_FIXED_JACK = 0.7
+                DELAY_MOVING_JACK = 0.7
+
+                await node.send_command(({'verb': 'move_motors', 'moves': [[X1, 300, 1, 1]]}))
+                await asyncio.sleep(DELAY_MOTOR)
+
+                await node.send_command({'verb': 'set_valves', 'valves': [0, 1]})
+                await asyncio.sleep(DELAY_MOVING_JACK)
+
+                await node.send_command({'verb': 'set_valves', 'valves': [1, 1]})
+                await asyncio.sleep(DELAY_FIXED_JACK)
+
+                await node.send_command(({'verb': 'move_motors', 'moves': [[X2, 300, 1, 1]]}))
+                await asyncio.sleep(DELAY_MOTOR)
+
+                await node.send_command({'verb': 'set_valves', 'valves': [0, 1]})
+                await asyncio.sleep(DELAY_FIXED_JACK)
+
+                await node.send_command({'verb': 'set_valves', 'valves': [0, 0]})
+                await asyncio.sleep(DELAY_MOVING_JACK)
+
+                await node.send_command(({'verb': 'move_motors', 'moves': [[X_PARK, 300, 1, 1]]}))
+                await asyncio.sleep(DELAY_MOTOR)
+                input('repeat?')
+
+            # t0 = time.time()
+            # t1 = time.time()
+            # print(t1 - t0)
+        except:
+            print(traceback.format_exc())
+
 
 async def main():
     SYSTEM = System(ALL_NODES)
@@ -219,7 +267,7 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    # task2 = asyncio.create_task(SYSTEM.script())
+    # task2 = asyncio.create_task(SYSTEM.script3())
     # await task2
     await task1
 

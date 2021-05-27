@@ -1,10 +1,10 @@
-rail jack setup
+yet faster trajectory
+Architectural changes:
   encoder error + soft limit stop
   systems interlock - not move until other is out of reach
   don't run motor if not homed (or if override - go_steps)
   fullfill valve and encoder condition before move
   better non blocking motor run with fence return and status update
-yet faster trajectory
 run script fast
 intial encoder value using redis
 emergency stop

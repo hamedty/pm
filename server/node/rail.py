@@ -13,9 +13,9 @@ class Rail(Robot):
                 'pin_dir': 16,
                 'pin_limit_n': 48,
                 'microstep': 2500,
-                'course': 78000,
+                'course': 76100,  # 80000
                 'homing_delay': 200,
-                'home_retract': 400,
+                'home_retract': 200,
                 'has_encoder': True,
                 'encoder_no': 0,
                 'encoder_ratio': 2,
@@ -25,6 +25,7 @@ class Rail(Robot):
 
     }
     curves = [CURVE_RAIL]
+    center_point = 40000
 
     def set_status(self, **kwargs):
         if 'data' in kwargs:
