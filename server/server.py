@@ -87,15 +87,15 @@ class System(object):
         )
 
         print('Take robot to starting point')
-        X = 8000
-        Y = 16500
+        X = 8000 / 2
+        Y = 16500 / 2
         await robot_1.goto(y=Y)
         await robot_1.goto(x=X)
 
         print('lets go grab input')
-        X = 45500
+        X = 45500 / 2
         Y1 = 0
-        Y2 = 12500
+        Y2 = 12500 / 2
         await robot_1.goto(x=X)
         await robot_1.goto(y=Y1)
         await robot_1.send_command(
@@ -105,9 +105,9 @@ class System(object):
         await robot_1.goto(y=Y2)
 
         print('put input into station')
-        X = 60000
-        Y1 = 3200
-        Y2 = 1350
+        X = 60000 / 2
+        Y1 = 3200 / 2
+        Y2 = 1350 / 2
         Y3 = Y1
         await asyncio.gather(
             robot_1.goto(x=X),
@@ -128,7 +128,7 @@ class System(object):
         await robot_1.goto(y=Y3)
 
         print('Move back for station to work')
-        X = 47000
+        X = 47000 / 2
         move_robot_back = asyncio.create_task(robot_1.goto(x=X))
         align_holder = asyncio.create_task(station_1.send_command(
             {'verb': 'align', 'component': 'holder'}))
@@ -161,8 +161,8 @@ class System(object):
 
         print('press')
         H_DELIVER = 4000
-        X_DELIVER = 59800
-        Y_DELIVER = 16700
+        X_DELIVER = 59800 / 2
+        Y_DELIVER = 16700 / 2
         H_CLEAR = 2000
         await asyncio.sleep(.1)
         await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 1]})
@@ -182,8 +182,8 @@ class System(object):
         await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_CLEAR, 150, 1, 1]]})
 
         print('Capping')
-        X_CAPPING = 8200
-        Y_CAPPING_1 = 7000
+        X_CAPPING = 8200 / 2
+        Y_CAPPING_1 = 7000 / 2
 
         await robot_1.goto(x=X_CAPPING)
         await robot_1.goto(y=Y_CAPPING_1)
@@ -219,17 +219,17 @@ class System(object):
             while 'm1' not in node.get_status().get('data', {}):
                 await asyncio.sleep(.01)
             print(2)
-            await node.send_command({'verb': 'home', 'axis': 1}),
+            await node.send_command({'verb': 'home', 'axis': 0}),
 
             t0 = time.time()
             await node.send_command(
-                ({'verb': 'move_motors', 'moves': [[], [30000, 300, 1, 1]]}))
+                ({'verb': 'move_motors', 'moves': [[9000, 300, 1, 1]]}))
             t1 = time.time()
             print(t1 - t0)
 
             await asyncio.sleep(.5)
             await node.send_command(
-                ({'verb': 'move_motors', 'moves': [[], [1, 300, 1, 1]]}))
+                ({'verb': 'move_motors', 'moves': [[1, 300, 1, 1]]}))
         except:
             print(traceback.format_exc())
 
@@ -289,8 +289,8 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    task2 = asyncio.create_task(SYSTEM.speed_test_robot())
-    await task2
+    # task2 = asyncio.create_task(SYSTEM.speed_test_robot())
+    # await task2
     await task1
 
 if __name__ == '__main__':

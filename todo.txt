@@ -1,15 +1,15 @@
-yet faster trajectory
 Architectural changes:
-  encoder error + soft limit stop
-  systems interlock - not move until other is out of reach
-  don't run motor if not homed (or if override - go_steps)
-  fullfill valve and encoder condition before move
+  if you manually move motor, then ignores homing failed
+  return error if motor has not reached position
   better non blocking motor run with fence return and status update
-run script fast
-intial encoder value using redis
+  fullfill valve and encoder condition before move - systems interlock - not move until other is out of reach
 emergency stop
-better vision
+run script fast
+yet faster trajectory
+full script running continuesly
 ---------------------
+better vision
+intial encoder value using redis
 multiprocess vision model runner
 logging (rpi/server)
 debug vision

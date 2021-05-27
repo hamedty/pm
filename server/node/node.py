@@ -199,3 +199,14 @@ class Node(object):
             {'verb': 'toggle_valve', 'params': 'int'},
 
         ]
+
+
+MOTOR_STATUS_ENUM = [
+    'Not Defined',
+    'Idle',
+    'Running',
+    'Limit + Reached ',
+    'Limit - Reached ',
+    'Homed',
+    'Homing Failed',
+]
