@@ -77,6 +77,8 @@ class Arduino(object):
                     response_dict[key] = value
 
                 command_id = response[2]
+                # if command_id != 0:
+                #     print(response_dict)
                 if command_id in self.fence:
                     self.fence[command_id] = response_dict
                 self.set_status(data=response)

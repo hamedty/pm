@@ -250,12 +250,12 @@ async def server_handler(reader, writer):
 
         try:
             data = json.loads(data.decode())
-            print('command:', data)
+            # print('command:', data)
             response = await COMMAND_HANDLER[data['verb']](data)
         except:
             response = {'success': False, 'traceback': traceback.format_exc()}
 
-        print('response', response)
+        # print('response', response)
         response = json.dumps(response) + '\n'
 
         writer.write(response.encode())

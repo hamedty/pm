@@ -219,6 +219,34 @@ void process_command(const CommandHeader *command_header) {
   case COMMAND_TYPE_DEFINE_TRAJECTORY: // define_trajectory
   {
     import_trajectory(payload_buffer);
+
+    // uint16_t *ptr;
+    // send_response((RESPONSE_CODE)100, TRAJECTORIES_1D[0].len_a);
+    // send_response((RESPONSE_CODE)101, TRAJECTORIES_1D[0].len_d);
+    // send_response((RESPONSE_CODE)102, TRAJECTORIES_1D[0].distance_a);
+    // send_response((RESPONSE_CODE)103, TRAJECTORIES_1D[0].distance_d);
+    // send_response((RESPONSE_CODE)104,              50 + success);
+    //
+    // ptr = TRAJECTORIES_1D[0].curve_a;
+    // send_response((RESPONSE_CODE)200,               (uint32_t)(*ptr));
+    // send_response((RESPONSE_CODE)201,               (uint32_t)(*(ptr +
+    //   1)));
+    //
+    // ptr = TRAJECTORIES_1D[0].curve_a + TRAJECTORIES_1D[0].len_a - 2;
+    // uint16_t value = *ptr;
+    // send_response((RESPONSE_CODE)202, value);
+    // ptr++;
+    // value = *ptr;
+    //
+    // send_response((RESPONSE_CODE)203, value);
+    //
+    // ptr = (uint16_t *)payload_buffer;
+    // ptr = ptr + 2;                            // index
+    // ptr = ptr + 12;                           // trajectory struct
+    // ptr = ptr + TRAJECTORIES_1D[0].len_a - 2; // end of curve_a
+    //
+    // send_response((RESPONSE_CODE)204, *ptr);
+    // send_response((RESPONSE_CODE)205, *(ptr +   1));
     break;
   }
 
