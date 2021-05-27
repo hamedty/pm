@@ -1,5 +1,6 @@
 from .robot import Robot
 from .robot import ROBOT_1_IP
+from .trajectory import CURVE_RAIL
 
 
 class Rail(Robot):
@@ -12,17 +13,18 @@ class Rail(Robot):
                 'pin_dir': 16,
                 'pin_limit_n': 48,
                 'microstep': 2500,
-                'course': 200000,
+                'course': 78000,
                 'homing_delay': 200,
                 'home_retract': 400,
                 'has_encoder': True,
                 'encoder_no': 0,
-                'encoder_ratio': 1,
+                'encoder_ratio': 2,
             },
         ],
         'di': [48],
 
     }
+    curves = [CURVE_RAIL]
 
     def set_status(self, **kwargs):
         if 'data' in kwargs:

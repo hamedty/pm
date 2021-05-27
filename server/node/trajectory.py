@@ -64,3 +64,32 @@ def calc_curve(Vmax, Amax, J, V0, A0, min_delay):
     }
 
     return curve
+
+
+CURVE_STATION = calc_curve(
+    Vmax=80 * 1000,
+    Amax=5000 * 1000,
+    J=100 * 1000 * 1000 * 1000,
+    A0=40 * 1000,
+    V0=12 * 1000,
+    min_delay=19,
+)
+
+
+CURVE_ROBOT = calc_curve(
+    Vmax=80 * 1000,
+    Amax=5000 * 1000,
+    J=100 * 1000 * 1000 * 1000,
+    A0=40 * 1000,
+    V0=12 * 1000,
+    min_delay=19,
+)
+
+CURVE_RAIL = calc_curve(
+    Vmax=80 * 1000,
+    Amax=6000 * 1000,
+    J=100 * 1000 * 1000 * 1000,
+    A0=600 * 1000,
+    V0=10 * 1000,
+    min_delay=25,
+)

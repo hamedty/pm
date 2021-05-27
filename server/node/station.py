@@ -1,4 +1,5 @@
 from .node import Node
+from .trajectory import CURVE_STATION
 
 
 class Station(Node):
@@ -57,6 +58,7 @@ class Station(Node):
         ],
 
     }
+    curves = [CURVE_STATION]
 
     async def send_command_create_camera(self):
         command = {

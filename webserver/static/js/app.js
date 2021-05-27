@@ -30,7 +30,7 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
-        $scope.nodes[0].selected = true;
+        $scope.nodes[2].selected = true;
         break;
       case 'status_update':
         $scope.update_node_status(message.payload);
@@ -127,10 +127,7 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
     'verb': 'move_motors',\n\
     'moves': [\n\
-        [0, 250, 0],\n\
-        [50000, 250, 1, 1],\n\
-        [0, 250, 0],\n\
-        [0, 250, 0],\n\
+        [10000, 250, 1, 1],\n\
     ]\n\
 }"
 

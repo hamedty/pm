@@ -6,30 +6,11 @@ import traceback
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
 
-import curve_maker
-
 PATH = os.path.dirname(os.path.abspath(__file__))
 PARENT_PATH = os.path.dirname(PATH)
 sys.path.insert(0, PARENT_PATH)
 
 import webserver.main as webserver  # nopep8
-
-# CHECK_GREEN = '\033[92m✓\033[0m'
-# CROSS_RED = '\033[91m✖\033[0m'
-#
-#
-# async def call_all_wrapper(func, timeout=None):
-#     result = await asyncio.gather(*[asyncio.wait_for(func(node), timeout=timeout) for node in ALL_NODES], return_exceptions=True)
-#     for i in range(N):
-#         print('\t%s: ' % ALL_NODES[i].ip, end='')
-#         if result[i] == True:
-#             print(CHECK_GREEN, repr(result[i]))
-#         else:
-#             print(CROSS_RED, repr(result[i]))
-#     return result
-#
-# result = await call_all_wrapper(lambda x: x.ping(), timeout=5)
-# assert(all(result))
 
 
 class System(object):
@@ -126,7 +107,7 @@ class System(object):
         print('put input into station')
         X = 60000
         Y1 = 3200
-        Y2 = 1400
+        Y2 = 1350
         Y3 = Y1
         await asyncio.gather(
             robot_1.goto(x=X),
@@ -210,34 +191,23 @@ class System(object):
 
     async def script2(self):
         try:
-            robot_1 = ALL_NODES_DICT['Robot 1']
+            node = ALL_NODES_DICT['Rail']
             print(1)
-            while 'm1' not in robot_1.get_status().get('data', {}):
+            while 'm' not in node.get_status().get('data', {}):
                 await asyncio.sleep(.01)
             print(2)
-            curve = curve_maker.calc_curve(
-                Vmax=80 * 1000,
-                Amax=5000 * 1000,
-                J=100 * 1000 * 1000 * 1000,
-                A0=40 * 1000,
-                V0=12 * 1000,
-                min_delay=19,
-            )
+            await asyncio.sleep(2)
+            await node.send_command({'verb': 'home', 'axis': 0}),
 
-            print('-------------------------------------------')
-            print((sum(curve['curve_a'][1::2]) + sum(curve['curve_d']
-                                                     [1::2])) / 2, curve['curve_a'][0], curve['curve_a'][-2])
-
-            await robot_1.send_command({'verb': 'home', 'axis': 1}),
-            await robot_1.send_command({'verb': 'define_trajectory', 'data': curve})
             t0 = time.time()
-            await robot_1.send_command(
-                ({'verb': 'move_motors', 'moves': [[], [60000, 150, 1, 1]]}))
+            await node.send_command(
+                ({'verb': 'move_motors', 'moves': [[74000, 300, 1, 1]]}))
             t1 = time.time()
             print(t1 - t0)
+
             await asyncio.sleep(.5)
-            await robot_1.send_command(
-                ({'verb': 'move_motors', 'moves': [[], [1, 150, 1, 1]]}))
+            await node.send_command(
+                ({'verb': 'move_motors', 'moves': [[1, 300, 1, 1]]}))
         except:
             print(traceback.format_exc())
 
@@ -248,8 +218,9 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    task2 = asyncio.create_task(SYSTEM.script2())
-    await task2
+
+    # task2 = asyncio.create_task(SYSTEM.script())
+    # await task2
     await task1
 
 if __name__ == '__main__':

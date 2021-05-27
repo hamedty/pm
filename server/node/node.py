@@ -163,7 +163,14 @@ class Node(object):
             'verb': 'config_arduino',
             'hw_config': self.hw_config,
         }
-        return await self.send_command(command)
+        await self.send_command(command)
+
+        for curve in self.curves:
+            command = {
+                'verb': 'define_trajectory',
+                'data': curve,
+            }
+            await self.send_command(command)
 
     async def send_command_create_camera(self):
         return
