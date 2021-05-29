@@ -77,7 +77,7 @@ class Station(Node):
             del data['enc2']
             del data['m2']
             data['m1-holder'] = MOTOR_STATUS_ENUM[data['m1-holder']]
-            data['m2-dosing'] = MOTOR_STATUS_ENUM[data['m2-dosing']]
+            data['m3-dosing'] = MOTOR_STATUS_ENUM[data['m3-dosing']]
             data['m4-main'] = MOTOR_STATUS_ENUM[data['m4-main']]
 
             kwargs['data'] = data

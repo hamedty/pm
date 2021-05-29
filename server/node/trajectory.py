@@ -82,8 +82,8 @@ CURVE_ROBOT = calc_curve(
     J=3 * 1000 * 1000 * 1000,
     A0=300 * 1000,
     V0=5 * 1000,
-    min_delay=37,
-    # min_delay=30,
+    # min_delay=37,
+    min_delay=30,
 )
 extention = [
     # [30, 200],
