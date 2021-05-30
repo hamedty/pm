@@ -1,6 +1,5 @@
 from .node import Node
 from .trajectory import CURVE_STATION
-from .node import MOTOR_STATUS_ENUM
 
 
 class Station(Node):
@@ -76,9 +75,9 @@ class Station(Node):
             # data['enc'] = round(data['enc'] / 3.0)
             del data['enc2']
             del data['m2']
-            data['m1-holder'] = MOTOR_STATUS_ENUM[data['m1-holder']]
-            data['m3-dosing'] = MOTOR_STATUS_ENUM[data['m3-dosing']]
-            data['m4-main'] = MOTOR_STATUS_ENUM[data['m4-main']]
+            # data['m1-holder'] = MOTOR_STATUS_ENUM[data['m1-holder']]
+            # data['m3-dosing'] = MOTOR_STATUS_ENUM[data['m3-dosing']]
+            # data['m4-main'] = MOTOR_STATUS_ENUM[data['m4-main']]
 
             kwargs['data'] = data
         super(Station, self).set_status(**kwargs)

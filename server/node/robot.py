@@ -1,5 +1,4 @@
 from .node import Node
-from .node import MOTOR_STATUS_ENUM
 from .trajectory import CURVE_ROBOT
 
 # 1600 pulse  / rev
@@ -58,8 +57,8 @@ class Robot(Node):
             data = data[3:-2]
             data = dict(zip(['enc1', 'enc2', 'di1', 'di2', 'm1', 'm2'], data))
 
-            data['m1'] = MOTOR_STATUS_ENUM[data['m1']]
-            data['m2'] = MOTOR_STATUS_ENUM[data['m2']]
+            # data['m1'] = MOTOR_STATUS_ENUM[data['m1']]
+            # data['m2'] = MOTOR_STATUS_ENUM[data['m2']]
 
             kwargs['data'] = data
         super(Robot, self).set_status(**kwargs)

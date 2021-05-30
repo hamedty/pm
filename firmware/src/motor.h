@@ -7,9 +7,10 @@
 
 #ifndef Motor_h
 # define Motor_h
-enum MotorStatus { not_defined, idle, running, limit_reached_p, limit_reached_n,
-                   homed, homeing_failed };
 
+# define STATUS_DEFINED 1
+# define STATUS_POS_LOST 2
+# define STATUS_RUNNING 4
 
 class Motor {
 public:
@@ -35,7 +36,7 @@ public:
   uint32_t homing_delay;
   uint32_t home_retract;
 
-  volatile MotorStatus _status = not_defined;
+  volatile uint32_t _status = 0;
   volatile int32_t _steps;
   volatile bool _value;
   volatile bool _dir;
@@ -115,7 +116,7 @@ void Motor::set_pins(uint8_t pin_pulse,
 
   if (pin_microstep_2 != INVALID_PIN) pinMode(pin_microstep_2,   OUTPUT);
 
-  this->_status = idle;
+  this->_status |= STATUS_DEFINED;
 }
 
 void Motor::set_microstep(uint32_t _microstep) {
@@ -156,7 +157,7 @@ void Motor::set_encoder(Encoder *enc, int32_t encoder_ratio) {
   encoder = enc;
 
   if (enc) { // encoder in not NULL
-    this->_status        = homeing_failed;
+    this->_status       |= STATUS_POS_LOST;
     this->encoder->ratio = encoder_ratio;
   }
 }
@@ -171,27 +172,11 @@ void Motor::set_homing_params(uint32_t _course,
 
 void Motor::move_motor(MoveMotor *command)
 {
-  // # define MOVE_MOTOR_FLAGS_ENABLED 1
-  // # define MOVE_MOTOR_FLAGS_BLOCK 2
-  // # define MOVE_MOTOR_FLAGS_ABSOLUTE 4
-  // typedef struct MoveMotor {
-  //   int32_t  steps;
-  //   int32_t  delay;
-  //   uint32_t flags; // block - absolute
-  //   uint32_t settling_delay;
-  //   uint32_t telorance_soft;
-  //   uint32_t telorance_hard;
-  // } MoveMotor;
-
   if (CHECK_FLAG(command->flags, MOVE_MOTOR_FLAGS_ABSOLUTE)) {
     // absolute move - move will be certainly blocking
     if (this->encoder == NULL) return;
 
-    if (
-      (this->_status == not_defined)
-      || (this->_status == running)
-      || (this->_status == homeing_failed)
-      ) return;
+    if (this->_status != STATUS_DEFINED) return;  // if everything else, ignore
 
     int32_t position = command->steps;
 
@@ -238,26 +223,33 @@ void Motor::go_abs(int32_t  position,
 void Motor::go_steps(int32_t  steps_raw,
                      uint32_t delay_,
                      bool     block) {
-  if (this->_status == not_defined) return;
+  if (!CHECK_FLAG(this->_status, STATUS_DEFINED)) return;
 
-  this->_status = running;
-  this->_dir    = steps_raw > 0;
-  this->_steps  = abs(steps_raw) << 1;
-  this->_value  = 0;
+  if (CHECK_FLAG(this->_status, STATUS_RUNNING)) return;
+
+  this->_status |= STATUS_RUNNING;
+  this->_dir     = steps_raw > 0;
+  this->_steps   = abs(steps_raw) << 1;
+  this->_value   = 0;
 
   digitalWrite(this->pin_dir, this->_dir);
 
   this->timer.start(delay_);
 
-  if (block) while (this->_status == running);
+  if (block) while (CHECK_FLAG(this->_status, STATUS_RUNNING));
 }
 
 void Motor::go_steps_trajectory(int32_t steps_raw) {
+  if (!CHECK_FLAG(this->_status, STATUS_DEFINED)) return;
+
+  // if (CHECK_FLAG(this->_status, STATUS_RUNNING)) return;
+
+
+  this->_status |= STATUS_RUNNING;
+
   Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
 
-
-  this->_status = running;
-  this->_dir    = steps_raw > 0;
+  this->_dir = steps_raw > 0;
   digitalWrite(this->pin_dir, this->_dir);
   uint32_t steps = ((uint32_t)abs(steps_raw)) << 1;
 
@@ -308,55 +300,44 @@ void Motor::go_steps_trajectory(int32_t steps_raw) {
     delayMicroseconds(delay_);
   }
 
-
-  if (!lnrn) {
-    this->_status = limit_reached_n;
-  }
-
-  if (!lnrp) {
-    this->_status = limit_reached_p;
-  }
-
-  if (!steps) {
-    this->_status = idle;
-  }
+  this->_status &= (~STATUS_RUNNING);
 }
 
 void Motor::home() {
   if (!this->course) return;
 
-  if ((this->_status == not_defined) || (this->_status == running)) return;
+  if (!CHECK_FLAG(this->_status, STATUS_DEFINED)) return;
 
-  if ((this->_status == limit_reached_n) || (this->_status == homed) ||
-      (!this->limit_not_reached_n()))
+  if (CHECK_FLAG(this->_status, STATUS_RUNNING)) return;
+
+  if (!(this->limit_not_reached_n()))
   {
-    this->go_steps((int32_t)((float)this->course * 0.1), this->homing_delay,
+    this->go_steps((int32_t)((float)this->course * 0.05), this->homing_delay,
                    true);
 
     if (!this->limit_not_reached_n()) {
-      this->_status = homeing_failed;
+      this->_status |= STATUS_POS_LOST;
       return;
     }
   }
 
-  this->go_steps((int32_t)((float)this->course * -1.5), this->homing_delay,
+  this->go_steps((int32_t)((float)this->course * -1.1), this->homing_delay,
                  true);
 
-  if (this->_status != limit_reached_n) {
-    this->_status = homeing_failed;
+  if (this->limit_not_reached_n()) {
+    this->_status |= STATUS_POS_LOST;
     return;
   }
   delay(200);
   this->go_steps((int32_t)(this->home_retract), this->homing_delay * 5, true);
 
-  if (this->_status != idle) {
-    this->_status = homeing_failed;
-    return;
+  if (this->limit_not_reached_n() && this->limit_not_reached_p()) {
+    this->_status &= (~STATUS_POS_LOST);
+
+    if (this->encoder) this->encoder->reset();
+  } else {
+    this->_status |= STATUS_POS_LOST;
   }
-
-  this->_status = homed;
-
-  if (this->encoder) this->encoder->reset();
 }
 
 void Motor::isr() {
@@ -373,22 +354,8 @@ void Motor::isr() {
     return;
   }
   this->timer.stop();
-  this->_steps = 0;
-
-  if (!lnrn) {
-    this->_status = limit_reached_n;
-    return;
-  }
-
-  if (!lnrp) {
-    this->_status = limit_reached_p;
-    return;
-  }
-
-  if (!steps) {
-    this->_status = idle;
-    return;
-  }
+  this->_steps   = 0;
+  this->_status &= (~STATUS_RUNNING);
 }
 
 Motor Motor0;

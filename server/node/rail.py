@@ -1,7 +1,6 @@
 from .robot import Robot
 from .robot import ROBOT_1_IP
 from .trajectory import CURVE_RAIL
-from .node import MOTOR_STATUS_ENUM
 
 
 class Rail(Robot):
@@ -37,7 +36,7 @@ class Rail(Robot):
             del data['di2']
             del data['enc2']
             del data['m2']
-            data['m'] = MOTOR_STATUS_ENUM[data['m']]
+            # data['m'] = MOTOR_STATUS_ENUM[data['m']]
             kwargs['data'] = data
         super(Robot, self).set_status(**kwargs)
 

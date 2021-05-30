@@ -167,6 +167,7 @@ class Node(object):
         await self.send_command(command)
 
         for curve in self.curves:
+            print(curve)
             command = {
                 'verb': 'define_trajectory',
                 'data': curve,
@@ -200,14 +201,3 @@ class Node(object):
             {'verb': 'toggle_valve', 'params': 'int'},
 
         ]
-
-
-MOTOR_STATUS_ENUM = [
-    'Not Defined',
-    'Idle',
-    'Running',
-    'Limit + Reached ',
-    'Limit - Reached ',
-    'Homed',
-    'Homing Failed',
-]
