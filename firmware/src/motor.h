@@ -3,11 +3,13 @@
 #include "encoder.h"
 #include <base.h>
 #include "trajectories.h"
+#include "communication.h"
 
 #ifndef Motor_h
 # define Motor_h
 enum MotorStatus { not_defined, idle, running, limit_reached_p, limit_reached_n,
                    homed, homeing_failed };
+
 
 class Motor {
 public:
@@ -53,16 +55,16 @@ public:
   void set_encoder(Encoder *, int32_t);
   void set_microstep(uint32_t);
   void set_homing_params(uint32_t, uint32_t, uint32_t);
-  void     home();
-  uint32_t go_abs(int32_t  position,
-                  uint32_t delay,
-                  bool     block);
+  void home();
+  void move_motor(MoveMotor *command);
+  void go_abs(int32_t  position,
+              uint32_t delay_);
 
-  uint32_t go_steps(int32_t  steps,
-                    uint32_t delay,
-                    bool     block);
+  void go_steps(int32_t  steps,
+                uint32_t delay_,
+                bool     block);
 
-  uint32_t go_steps_trajectory(int32_t);
+  void go_steps_trajectory(int32_t);
 
   bool limit_not_reached_p() {
     return (pin_limit_p == INVALID_PIN) || !digitalRead(pin_limit_p);
@@ -74,9 +76,6 @@ public:
 
   void isr();
   void (*isr_ptr)();
-
-  // uint32_t go_steps(int         steps,
-  //                   Trajectory *trajectory);
 };
 
 
@@ -170,39 +169,76 @@ void Motor::set_homing_params(uint32_t _course,
   this->home_retract = _home_retract;
 }
 
-uint32_t Motor::go_abs(int32_t  position,
-                       uint32_t delay,
-                       bool     block) {
-  if (
-    (this->_status == not_defined)
-    || (this->_status == running)
-    || (this->_status == homeing_failed)
-    ) return 0;
+void Motor::move_motor(MoveMotor *command)
+{
+  // # define MOVE_MOTOR_FLAGS_ENABLED 1
+  // # define MOVE_MOTOR_FLAGS_BLOCK 2
+  // # define MOVE_MOTOR_FLAGS_ABSOLUTE 4
+  // typedef struct MoveMotor {
+  //   int32_t  steps;
+  //   int32_t  delay;
+  //   uint32_t flags; // block - absolute
+  //   uint32_t settling_delay;
+  //   uint32_t telorance_soft;
+  //   uint32_t telorance_hard;
+  // } MoveMotor;
 
-  if (this->encoder == NULL) return 0;
+  if (CHECK_FLAG(command->flags, MOVE_MOTOR_FLAGS_ABSOLUTE)) {
+    // absolute move - move will be certainly blocking
+    if (this->encoder == NULL) return;
 
+    if (
+      (this->_status == not_defined)
+      || (this->_status == running)
+      || (this->_status == homeing_failed)
+      ) return;
 
-  int32_t cur_pos = this->encoder->read();
+    int32_t position = command->steps;
 
-  if (position < 0) position = 0;
+    if (position < 0) position = 0;
 
-  if (position > (int32_t)this->course) position = (int32_t)this->course;
+    if (position > (int32_t)this->course) position = (int32_t)this->course;
 
+    this->go_abs(position, command->delay);
+
+    if (command->settling_delay > 0) delay(command->settling_delay);
+    int32_t cur_pos     = this->encoder->read();
+    int32_t to_go_enc   = position - cur_pos;
+    int32_t to_go_steps = to_go_enc;
+
+    if (abs(to_go_steps) > command->telorance_hard) return;
+
+    if (abs(to_go_steps) < command->telorance_soft) return;
+
+    this->go_steps(to_go_steps, command->delay, 1);
+
+    if (command->settling_delay > 0) delay(command->settling_delay);
+    return;
+  } else {
+    // relative move - no encoder check
+    bool block = CHECK_FLAG(command->flags, MOVE_MOTOR_FLAGS_BLOCK);
+    this->go_steps(command->steps, command->delay, block);
+  }
+}
+
+void Motor::go_abs(int32_t  position,
+                   uint32_t delay_) {
+  int32_t cur_pos     = this->encoder->read();
   int32_t to_go_enc   = position - cur_pos;
   int32_t to_go_steps = to_go_enc;
 
 
   Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
 
-  if ((abs(to_go_steps) > (trajectory->distance_a  + 5)) &&
-      block) return this->go_steps_trajectory(to_go_steps);
-  else return this->go_steps(to_go_steps, delay, block);
+  if (abs(to_go_steps) > (trajectory->distance_a  + 5)) this->go_steps_trajectory(
+      to_go_steps);
+  else this->go_steps(to_go_steps, delay_, 1);
 }
 
-uint32_t Motor::go_steps(int32_t  steps_raw,
-                         uint32_t delay,
-                         bool     block) {
-  if (this->_status == not_defined) return 0;
+void Motor::go_steps(int32_t  steps_raw,
+                     uint32_t delay_,
+                     bool     block) {
+  if (this->_status == not_defined) return;
 
   this->_status = running;
   this->_dir    = steps_raw > 0;
@@ -211,13 +247,12 @@ uint32_t Motor::go_steps(int32_t  steps_raw,
 
   digitalWrite(this->pin_dir, this->_dir);
 
-  this->timer.start(delay);
+  this->timer.start(delay_);
 
   if (block) while (this->_status == running);
-  return 0;
 }
 
-uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
+void Motor::go_steps_trajectory(int32_t steps_raw) {
   Trajectory_1d *trajectory = &TRAJECTORIES_1D[0];
 
 
@@ -229,10 +264,10 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
   bool value = 0;
   bool lnrn, lnrp, lnr;
 
-  uint8_t   mode  = 0; // enum accel 0 , deaccel 1 , glide 2, done 4
-  uint16_t  delay = 0;
-  uint32_t  count = 0;
-  uint16_t *ptr   = trajectory->curve_a;
+  uint8_t   mode   = 0; // enum accel 0 , deaccel 1 , glide 2, done 4
+  uint16_t  delay_ = 0;
+  uint32_t  count  = 0;
+  uint16_t *ptr    = trajectory->curve_a;
 
   while (steps) {
     lnrn = this->limit_not_reached_n();
@@ -243,21 +278,21 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
 
     if (count == 0) {
       if (mode == 0) {
-        delay = *ptr;
-        count = *(ptr + 1);
-        ptr   = ptr + 2;
+        delay_ = *ptr;
+        count  = *(ptr + 1);
+        ptr    = ptr + 2;
       }
 
       if (mode == 1) {
-        delay = *ptr;
-        count = *(ptr + 1);
-        ptr   = ptr - 2;
+        delay_ = *ptr;
+        count  = *(ptr + 1);
+        ptr    = ptr - 2;
       }
 
       if (mode == 2) {
         count = steps - trajectory->distance_a;
         ptr   = trajectory->curve_a + trajectory->len_a - 2;
-        delay--;
+        delay_--;
         mode = 1;
       }
 
@@ -270,7 +305,7 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
     digitalWrite(this->pin_pulse, value);
     steps--;
     count--;
-    delayMicroseconds(delay);
+    delayMicroseconds(delay_);
   }
 
 
@@ -285,9 +320,6 @@ uint32_t Motor::go_steps_trajectory(int32_t steps_raw) {
   if (!steps) {
     this->_status = idle;
   }
-
-
-  return 0;
 }
 
 void Motor::home() {
@@ -307,7 +339,8 @@ void Motor::home() {
     }
   }
 
-  this->go_steps((int32_t)((float)this->course * -1.5), this->homing_delay, true);
+  this->go_steps((int32_t)((float)this->course * -1.5), this->homing_delay,
+                 true);
 
   if (this->_status != limit_reached_n) {
     this->_status = homeing_failed;
@@ -379,7 +412,6 @@ void m3_isr() {
   Motor3.isr();
 }
 
-# define MOTORS_NO 4
 Motor *motors[MOTORS_NO] = {
   &Motor0,
   &Motor1,

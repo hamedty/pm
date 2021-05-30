@@ -96,10 +96,17 @@ class Arduino(object):
         self._send_command(data)
         self.lock.release()
 
-    def _build_single_packet(self, command_type, packet_format, payload):
+    def _pack_bytes(self, packet_format, payload):
         format = ''.join([i[0] for i in packet_format])
         data = flatten([payload[i[1]] for i in packet_format if i[1]])
         payload = struct.pack(format, *data)
+        return payload
+
+    def _build_single_packet(self, command_type, packet_format, payload):
+
+        # pack payload if packet_format is not None
+        if packet_format is not None:
+            payload = self._pack_bytes(packet_format, payload)
 
         command_id = self._get_command_id()
         header = {
@@ -215,34 +222,48 @@ class Arduino(object):
         return command_id
 
     def move_motors(self, motor_moves):
-        # motor_moves = [(step0, delay0, blocking0), ...]
-        # make sure length is equal to MOTORS_NO
+        # motor_moves = [{step0, delay0, blocking0, absolute, settling_delay, telorance_soft, telorance_hard}, ...]
+        # COMMAND_TYPE_MOVE_MOTOR = 4
+        # MoveMotor = [
+        #     (int32_t, 'steps'),
+        #     (int32_t, 'delay'),
+        #     (uint32_t, 'flags'),
+        #     (uint32_t, 'settling_delay'),
+        #     (uint32_t, 'telorance_soft'),
+        #     (uint32_t, 'telorance_hard'),
+        # ]
+        # MOVE_MOTOR_FLAGS_ENABLED = 1
+        # MOVE_MOTOR_FLAGS_BLOCK = 2
+        # MOVE_MOTOR_FLAGS_ABSOLUTE = 4
 
-        # no_steps, delay = 150, blocking, no encoder
-        default_motor_move = [0, 150, 1, 0]
+        motor_moves = list(motor_moves) + \
+            (_.MOTORS_NO - len(motor_moves)) * [{}]
 
-        motor_moves = list(motor_moves) + (_.MOTORS_NO -
-                                           len(motor_moves)) * [[0, 0, 0, 0]]
-        for motor_move in motor_moves:
-            motor_move += default_motor_move[len(motor_move):]
+        payload = b''
+        for motor in motor_moves:
+            if not len(motor):
+                flags = 0
+            else:
+                flags = _.MOVE_MOTOR_FLAGS_ENABLED  # enable
+            if motor.get('blocking'):
+                flags += _.MOVE_MOTOR_FLAGS_BLOCK
+            if motor.get('absolute'):
+                flags += _.MOVE_MOTOR_FLAGS_ABSOLUTE
 
-        # transpose
-        steps, delay, blocking, absolute = list(map(list, zip(*motor_moves)))
-        payload = {
-            'steps': steps,
-            'delay': delay,
-            'block': blocking,
-            'absolute': absolute,
-        }
+            payload += self._pack_bytes(_.MoveMotor, {
+                'steps': motor.get('steps', 0),
+                'delay': motor.get('delay', 250),
+                'flags': flags,
+                'settling_delay': motor.get('settling_delay', 0),
+                'telorance_soft': motor.get('telorance_soft', 40),
+                'telorance_hard': motor.get('telorance_hard', 1000),
+            })
 
         packet, command_id = self._build_single_packet(
-            _.COMMAND_TYPE_MOVE_MOTOR, _.MoveMotor, payload)
+            _.COMMAND_TYPE_MOVE_MOTOR, None, payload)
 
         self.send_command(packet, command_id)
         return command_id
-
-    async def move_motors_async(self, motor_moves):
-        self.move_motors(motor_moves)
 
     def home(self, axis):
         payload = {

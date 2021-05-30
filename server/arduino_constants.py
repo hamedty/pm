@@ -67,11 +67,17 @@ DefineMotor = [
 
 COMMAND_TYPE_MOVE_MOTOR = 4
 MoveMotor = [
-    (int32_t * MOTORS_NO, 'steps'),
-    (int32_t * MOTORS_NO, 'delay'),
-    (bool * MOTORS_NO,    'block'),
-    (bool * MOTORS_NO,    'absolute'),
+    (int32_t, 'steps'),
+    (int32_t, 'delay'),
+    (uint32_t, 'flags'),
+    (uint32_t, 'settling_delay'),
+    (uint32_t, 'telorance_soft'),
+    (uint32_t, 'telorance_hard'),
 ]
+MOVE_MOTOR_FLAGS_ENABLED = 1
+MOVE_MOTOR_FLAGS_BLOCK = 2
+MOVE_MOTOR_FLAGS_ABSOLUTE = 4
+
 
 COMMAND_TYPE_HOME_MOTOR = 41
 HomeMotor = [

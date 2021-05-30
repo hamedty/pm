@@ -65,16 +65,15 @@ class Robot(Node):
         super(Robot, self).set_status(**kwargs)
 
     async def goto(self, x=None, y=None):
-        delay = 300
         if x is not None:
-            x = [x, 300, 1, 1]
+            x = {'steps': x, 'absolute': 1}
         else:
-            x = []
+            x = {}
 
         if y is not None:
-            y = [y, 300, 1, 1]
+            y = {'steps': y, 'absolute': 1}
         else:
-            y = []
+            y = {}
         return await self.send_command({'verb': 'move_motors', 'moves': [y, x]})
 
 

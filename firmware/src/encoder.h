@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include "communication.h"
+
 #ifndef Encoder_h
 # define Encoder_h
 class Encoder {
@@ -54,7 +56,6 @@ public:
   }
 };
 
-# define ENCODER_NO 2
 Encoder encoders[ENCODER_NO] = {
   Encoder(0),
   Encoder(1),

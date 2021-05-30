@@ -102,10 +102,11 @@ class Node(object):
             command = {
                 'verb': 'move_motors',
                 'moves': [
-                    [],
-                    [],
-                    [64 * value + command.get('extra_m3', 0), 99, 0],
-                    [-11 * value, 576, 1],
+                    {},
+                    {},
+                    {'steps': 64 * value +
+                        command.get('extra_m3', 0), 'delay': 99},
+                    {'steps': -11 * value, 'delay': 576, 'blocking': 1},
                 ]
             }
             await self.send_command(command)

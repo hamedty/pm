@@ -1,10 +1,14 @@
 #include <Arduino.h>
-#include "motor.h"
-#include "gpio.h"
-#include "encoder.h"
 
 #ifndef Communication_h
 # define Communication_h
+
+# define CHECK_FLAG(var, flag) ((var) & (flag))
+
+# define MOTORS_NO 4
+# define VALVES_NO 10
+# define INPUTS_NO 2
+# define ENCODER_NO 2
 
 enum RESPONSE_CODE {
   RESPONSE_CODE_SUCCESS,          // 0
@@ -68,12 +72,21 @@ typedef struct DefineMotor {
 } DefineMotor;
 
 # define COMMAND_TYPE_MOVE_MOTOR 4
+# define MOVE_MOTOR_FLAGS_ENABLED 1
+# define MOVE_MOTOR_FLAGS_BLOCK 2
+# define MOVE_MOTOR_FLAGS_ABSOLUTE 4
 typedef struct MoveMotor {
-  int32_t steps[MOTORS_NO];
-  int32_t delay[MOTORS_NO];
-  bool    block[MOTORS_NO];
-  bool    absolute[MOTORS_NO];
+  int32_t  steps;
+  int32_t  delay;
+  uint32_t flags; // block - absolute
+  uint32_t settling_delay;
+  uint32_t telorance_soft;
+  uint32_t telorance_hard;
 } MoveMotor;
+
+typedef struct MoveMotors {
+  MoveMotor move_motor[MOTORS_NO];
+} MoveMotors;
 
 # define COMMAND_TYPE_HOME_MOTOR 41
 typedef struct HomeMotor {

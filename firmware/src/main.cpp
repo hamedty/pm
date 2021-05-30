@@ -146,24 +146,18 @@ void process_command(const CommandHeader *command_header) {
 
   case COMMAND_TYPE_MOVE_MOTOR: // move_motor
   {
-    if (command_header->payload_size != sizeof(MoveMotor)) {
-      send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, command_header->command_id);
+    if (command_header->payload_size != sizeof(MoveMotors)) {
+      send_response(RESPONSE_CODE_BAD_PAYLOAD_SIZE, sizeof(MoveMotors));
       return;
     }
-    MoveMotor *payload = (MoveMotor *)payload_buffer;
+    MoveMotors *payload = (MoveMotors *)payload_buffer;
 
     for (uint8_t motor_index = 0; motor_index < MOTORS_NO; motor_index++) {
-      if (payload->absolute[motor_index]) {
-        motors[motor_index]->go_abs(payload->steps[motor_index],
-                                    payload->delay[motor_index],
-                                    payload->block[motor_index]);
-      } else {
-        if (payload->steps[motor_index]) {
-          motors[motor_index]->go_steps(payload->steps[motor_index],
-                                        payload->delay[motor_index],
-                                        payload->block[motor_index]);
-        }
-      }
+      MoveMotor *motor_payload = &(payload->move_motor[motor_index]);
+
+      if (CHECK_FLAG(motor_payload->flags,
+                     MOVE_MOTOR_FLAGS_ENABLED)) motors[motor_index]->move_motor(
+          motor_payload);
     }
 
     break;

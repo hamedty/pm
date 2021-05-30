@@ -60,7 +60,7 @@ async def dump_training_holder(command):
 
         if (frame_no + webcam_buffer_length) < no_frames:
             await asyncio.sleep(.033)  # wait for one frame to scan
-            arduino.move_motors([[steps, 250, 0]])
+            arduino.move_motors([{'steps': steps, 'delay': 250}])
             delay = abs(steps) * 250 * 2 * 1e-6 + .25
             await asyncio.sleep(delay)  # needed for system to settle
 
@@ -91,7 +91,7 @@ async def dump_training_dosing(command):
 
         if (frame_no + webcam_buffer_length) < no_frames:
             await asyncio.sleep(.033)  # wait for one frame to scan
-            arduino.move_motors([[0, 0, 0], [0, 0, 0], [-steps, 250, 0]])
+            arduino.move_motors([{}, {}, {'steps': -steps, 'delay': 250}])
             delay = abs(steps) * 250 * 2 * 1e-6 + .25
             await asyncio.sleep(delay)  # needed for system to settle
 
@@ -121,9 +121,11 @@ async def align(command):
             break
 
         if component == 'dosing':
-            arduino.move_motors([[0, 0, 0], [0, 0, 0], [int(steps), 250, 1]])
+            arduino.move_motors(
+                [{}, {}, {'steps': int(steps), 'delay': 250, 'blocking': 1}])
         else:
-            arduino.move_motors([[int(steps), 250, 1]])
+            arduino.move_motors(
+                [{'steps': int(steps), 'delay': 250, 'blocking': 1}])
 
         delay = abs(steps) * 250 * 2 * 1e-6 + .2
         await asyncio.sleep(delay)  # needed for system to settle
@@ -253,6 +255,8 @@ async def server_handler(reader, writer):
             # print('command:', data)
             response = await COMMAND_HANDLER[data['verb']](data)
         except:
+            trace = traceback.format_exc()
+            print(trace)
             response = {'success': False, 'traceback': traceback.format_exc()}
 
         # print('response', response)

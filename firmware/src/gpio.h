@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <base.h>
+#include "communication.h"
 
 #ifndef Gpio_h
 # define Gpio_h
@@ -31,8 +32,6 @@ public:
   }
 };
 
-# define VALVES_NO 10
-# define INPUTS_NO 2
 
 Gpio valves[VALVES_NO] = {
   Gpio(OUTPUT), // 0
