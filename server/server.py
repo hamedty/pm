@@ -36,11 +36,13 @@ class System(object):
     def deregister_ws(self, ws):
         self._ws.remove(ws)
 
-    async def message_from_ws(self, message):
+    async def message_from_ws(self, ws, message):
         print(message)
         for node_name in message['selected_nodes']:
             node = ALL_NODES_DICT[node_name]
-            await node.send_command_scenario(message['form'])
+            response = await node.send_command_scenario(message['form'])
+            message = {'type': 'response', 'payload': response}
+            ws.write_message(json.dumps(message))
 
     def send_architecture(self, ws):
         message = [{

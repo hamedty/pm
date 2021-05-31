@@ -193,12 +193,44 @@ async def set_valves(command):
 
 async def move_motors(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
-    command_id = arduino.move_motors(command['moves'])
+    command_id, motor_moves_clean = arduino.move_motors(command['moves'])
     while not arduino.fence[command_id]:
         await asyncio.sleep(.002)
     response = arduino.fence[command_id]
-    # success = (response[motor_status][command['axis']] == _.MOTOR_STATUS_HOMED)
-    return {'success': True}
+    del arduino.fence[command_id]
+
+    success = True
+    message = ''
+
+    for motor_index in range(len(motor_moves_clean)):  # for every motor in command
+        motor_move = motor_moves_clean[motor_index]
+        enabled = motor_move['flags'] & _.MOVE_MOTOR_FLAGS_ENABLED
+        if not enabled:
+            continue
+        absolute = motor_move['flags'] & _.MOVE_MOTOR_FLAGS_ABSOLUTE
+        if not absolute:
+            continue
+
+        # motor_moves = [{telorance_soft, telorance_hard}, ...]
+        has_encoder = arduino._hw_config['motors'][motor_index]['has_encoder']
+        encoder_no = arduino._hw_config['motors'][motor_index]['encoder_no']
+
+        if not has_encoder:
+            success = False
+            message += 'Motor Index: %d, Message: %s\n' % (
+                motor_index, 'Absolute move requested while motor has no encoder')
+            continue
+
+        current_position = response['encoders'][encoder_no]
+        requested_position = motor_move['steps']
+        diversion = abs(requested_position - current_position)
+        telorance_soft = motor_move['telorance_soft']
+        if diversion >= telorance_soft:
+            success = False
+            message += 'Motor Index: %d, Message: %s\n' % (
+                motor_index, 'error is above soft threashold')
+
+    return {'success': success, 'message': message}
 
 
 async def home(command):
@@ -207,10 +239,10 @@ async def home(command):
     while not arduino.fence[command_id]:
         await asyncio.sleep(.002)
     response = arduino.fence[command_id]
-    #success =  (response['motor_status'][command['axis']] == _.MOTOR_STATUS_HOMED)
-    success = True
     del arduino.fence[command_id]
-    return {'success': success}
+    motor_status = response['motor_status'][command['axis']]
+    success = (motor_status == _.MOTOR_STATUS_DEFINED)
+    return {'success': success, 'message': 'Motor Status: %d' % motor_status}
 
 
 async def define_trajectory(command):
@@ -257,7 +289,7 @@ async def server_handler(reader, writer):
         except:
             trace = traceback.format_exc()
             print(trace)
-            response = {'success': False, 'traceback': traceback.format_exc()}
+            response = {'success': False, 'message': traceback.format_exc()}
 
         # print('response', response)
         response = json.dumps(response) + '\n'

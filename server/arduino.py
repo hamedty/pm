@@ -28,6 +28,7 @@ class Arduino(object):
         self._open_port()
         self.lock = Lock()
         self._last_command_id = 1
+        self._hw_config = {'motors': {}}
         self.fence = {}
         self.RESPONSE_FORMAT = ''.join([i[0] for i in _.ResponseHeader])
         self.receive_thread = None
@@ -185,7 +186,7 @@ class Arduino(object):
             'homing_delay': motor_definition.get('homing_delay', 500),
             'home_retract': motor_definition.get('home_retract', 500),
         }
-
+        self._hw_config['motors'][payload['motor_no']] = payload
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_DEFINE_MOTOR, _.DefineMotor, payload)
 
@@ -223,23 +224,12 @@ class Arduino(object):
 
     def move_motors(self, motor_moves):
         # motor_moves = [{step0, delay0, blocking0, absolute, settling_delay, telorance_soft, telorance_hard}, ...]
-        # COMMAND_TYPE_MOVE_MOTOR = 4
-        # MoveMotor = [
-        #     (int32_t, 'steps'),
-        #     (int32_t, 'delay'),
-        #     (uint32_t, 'flags'),
-        #     (uint32_t, 'settling_delay'),
-        #     (uint32_t, 'telorance_soft'),
-        #     (uint32_t, 'telorance_hard'),
-        # ]
-        # MOVE_MOTOR_FLAGS_ENABLED = 1
-        # MOVE_MOTOR_FLAGS_BLOCK = 2
-        # MOVE_MOTOR_FLAGS_ABSOLUTE = 4
 
         motor_moves = list(motor_moves) + \
             (_.MOTORS_NO - len(motor_moves)) * [{}]
-
+        motor_moves_clean = []
         payload = b''
+
         for motor in motor_moves:
             if not len(motor):
                 flags = 0
@@ -249,21 +239,22 @@ class Arduino(object):
                 flags += _.MOVE_MOTOR_FLAGS_BLOCK
             if motor.get('absolute'):
                 flags += _.MOVE_MOTOR_FLAGS_ABSOLUTE
-
-            payload += self._pack_bytes(_.MoveMotor, {
+            motor_move_clean = {
                 'steps': motor.get('steps', 0),
                 'delay': motor.get('delay', 250),
                 'flags': flags,
                 'settling_delay': motor.get('settling_delay', 0),
                 'telorance_soft': motor.get('telorance_soft', 40),
                 'telorance_hard': motor.get('telorance_hard', 1000),
-            })
+            }
+            motor_moves_clean.append(motor_move_clean)
+            payload += self._pack_bytes(_.MoveMotor, motor_move_clean)
 
         packet, command_id = self._build_single_packet(
             _.COMMAND_TYPE_MOVE_MOTOR, None, payload)
 
         self.send_command(packet, command_id)
-        return command_id
+        return command_id, motor_moves_clean
 
     def home(self, axis):
         payload = {

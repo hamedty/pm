@@ -109,10 +109,10 @@ class Node(object):
                     {'steps': -11 * value, 'delay': 576, 'blocking': 1},
                 ]
             }
-            await self.send_command(command)
+            return await self.send_command(command)
 
         else:
-            await self.send_command(command)
+            return await self.send_command(command)
 
     async def send_command(self, command, assert_success=False):
         command_str = json.dumps(command) + '\n'

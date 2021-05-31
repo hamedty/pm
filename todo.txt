@@ -1,10 +1,8 @@
-Architectural changes:
-  return error if motor has not reached position
-  better non blocking motor run with fence return and status update
-  fullfill valve and encoder condition before move - systems interlock - not move until other is out of reach
+fullfill valve and encoder condition before move - systems interlock - not move until other is out of reach
 emergency stop
 run script fast
 manipulate pins directly for motor pulse
+better non blocking motor run with fence return and status update
 yet faster trajectory
 full script running continuesly
 ---------------------

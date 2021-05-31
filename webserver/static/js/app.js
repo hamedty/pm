@@ -35,6 +35,9 @@ app.controller('app_controller', function($scope, ws) {
       case 'status_update':
         $scope.update_node_status(message.payload);
         break;
+      case 'response':
+        console.log(message['payload'][1]);
+        break;
       default:
         console.log(message);
     }
