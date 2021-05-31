@@ -1,9 +1,12 @@
-fullfill valve and encoder condition before move - systems interlock - not move until other is out of reach
+run script fast + assert
+assert and event - systems interlock - not move until other is out of reach
+
 emergency stop
-run script fast
-manipulate pins directly for motor pulse
-better non blocking motor run with fence return and status update
-yet faster trajectory
+
+  manipulate pins directly for motor pulse
+  better non blocking motor run with fence return and status update
+  yet faster trajectory
+
 full script running continuesly
 ---------------------
 better vision

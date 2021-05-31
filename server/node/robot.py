@@ -38,6 +38,7 @@ class Robot(Node):
                 'encoder_ratio': 6,
             },
         ],
+        'di': [49, 48]
     }
     curves = [CURVE_ROBOT]
 
