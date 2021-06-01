@@ -2,12 +2,15 @@ run script fast + assert
 assert and event - systems interlock - not move until other is out of reach
 
 emergency stop
+prepare all 10 nodes
+vision for 10 nodes
 
   manipulate pins directly for motor pulse
   better non blocking motor run with fence return and status update
   yet faster trajectory
 
 full script running continuesly
+reset encoder before and after retract to make sure encoder works
 ---------------------
 better vision
 intial encoder value using redis

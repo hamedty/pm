@@ -36,13 +36,10 @@ class System(object):
     def deregister_ws(self, ws):
         self._ws.remove(ws)
 
-    async def message_from_ws(self, ws, message):
-        print(message)
-        for node_name in message['selected_nodes']:
-            node = ALL_NODES_DICT[node_name]
-            response = await node.send_command_scenario(message['form'])
-            message = {'type': 'response', 'payload': response}
-            ws.write_message(json.dumps(message))
+    async def message_from_ws(self, ws, message_in):
+        response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_scenario(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
+        message_out = {'type': 'response', 'payload': response}
+        ws.write_message(json.dumps(message_out))
 
     def send_architecture(self, ws):
         message = [{
@@ -62,7 +59,7 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
-    async def script(self):
+    async def main_script(self):
         robot_1 = ALL_NODES_DICT['Robot 1']
         station_1 = ALL_NODES_DICT['Station 1']
         rail = ALL_NODES_DICT['Rail']

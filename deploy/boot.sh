@@ -3,7 +3,7 @@
 # reset arduino
 sleep 5
 raspi-gpio set 21 dl
-sleep 1
+sleep 5
 raspi-gpio set 21 dh
 
 sudo rmmod uvcvideo
