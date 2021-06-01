@@ -46,11 +46,11 @@ class Robot(Node):
         self.arduino_id = arduino_id
         super(Robot, self).__init__(name, ip)
 
-    async def send_command(self, command):
+    async def send_command(self, command, **kwargs):
         if command['verb'] != 'get_status':
             print(command)
         command.update(arduino_index=self.arduino_id)
-        return await super(Robot, self).send_command(command)
+        return await super(Robot, self).send_command(command, **kwargs)
 
     def set_status(self, **kwargs):
         if 'data' in kwargs:
@@ -64,7 +64,7 @@ class Robot(Node):
             kwargs['data'] = data
         super(Robot, self).set_status(**kwargs)
 
-    async def goto(self, x=None, y=None):
+    async def goto(self, x=None, y=None, **kwargs):
         if x is not None:
             x = {'steps': x, 'absolute': 1}
         else:
@@ -74,7 +74,10 @@ class Robot(Node):
             y = {'steps': y, 'absolute': 1}
         else:
             y = {}
-        return await self.send_command({'verb': 'move_motors', 'moves': [y, x]})
+        return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
+
+    def ready_for_command(self):
+        return 'm2' in self._status.get('data', {})
 
 
 ROBOT_1_IP = '192.168.44.100'

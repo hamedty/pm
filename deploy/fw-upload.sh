@@ -22,7 +22,7 @@
 # done
 
 
-for i in 103
+for i in 108
 do
   echo 192.168.44.$i
   ssh pi@192.168.44.$i "sudo systemctl stop rpi.service"

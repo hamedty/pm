@@ -45,7 +45,7 @@ class Station(Node):
                 'pin_limit_n': 28,
                 'course': 24000,
                 'homing_delay': 200,
-                'home_retract': 100,
+                'home_retract': 300,
                 'microstep': 2500,
                 'has_encoder': True,
                 'encoder_no': 0,
@@ -81,6 +81,9 @@ class Station(Node):
 
             kwargs['data'] = data
         super(Station, self).set_status(**kwargs)
+
+    def ready_for_command(self):
+        return 'm4-main' in self._status.get('data', {})
 
 
 STATIONS = [

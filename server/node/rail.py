@@ -1,3 +1,4 @@
+import asyncio
 from .robot import Robot
 from .robot import ROBOT_1_IP
 from .trajectory import CURVE_RAIL
@@ -39,6 +40,25 @@ class Rail(Robot):
             # data['m'] = MOTOR_STATUS_ENUM[data['m']]
             kwargs['data'] = data
         super(Robot, self).set_status(**kwargs)
+
+    def ready_for_command(self):
+        return 'm' in self._status.get('data', {})
+
+    async def goto(self, y):
+        return await super(Rail, self).goto(y=y)
+
+    async def is_homed(self, telorance=50):
+        home_pos = 40000
+        while True:
+            cur_status = self.get_status()
+            age = cur_status['age']
+            if age < 0.3:
+                break
+            await asyncio.sleep(.005)
+
+        cur_pos = cur_status['data']['enc']
+        diversion = abs(cur_pos - home_pos)
+        assert (diversion < telorance), diversion
 
 
 RAILS = [
