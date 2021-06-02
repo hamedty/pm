@@ -53,7 +53,7 @@ class Station(Node):
             },
         ],
         'di': [
-            22,  # jack verification
+            28,  # jack verification
             24,  # gate verification
         ],
 

@@ -1,24 +1,35 @@
 import glob
 import cv2
 import numpy as np
-import annotaion
+import json
 
-nodes = annotaion.aligning.keys()
-componenets = ['dosing']  # ,['holder', 'dosing']
-for node in nodes:
+
+def load_data():
+    with open('annotaion.json') as f:
+        data = json.loads(f.read())
+    return data
+
+
+data = load_data()
+
+nodes = list(data.keys())
+nodes.sort()
+componenets = ['holder']  # ,['holder', 'dosing']
+
+for node in nodes[1:]:
     for component in componenets:
-        roi = annotaion.aligning[node][component + '_roi']
+        roi = data[node][component + '_roi']
         x0 = roi['x0']
         x1 = roi['x0'] + roi['dx']
         y0 = roi['y0']
         y1 = roi['y0'] + roi['dy']
 
-        for dataset_name in annotaion.aligning[node][component]:
+        for dataset_name in data[node][component]:
             IMAGES = []
             INDICES = []
 
-            dataset_dict = annotaion.aligning[node][component][dataset_name]
-            path = '../../dataset/%s_%d_%s_192.168.44.%d' % (
+            dataset_dict = data[node][component][dataset_name]
+            path = '../../dataset/%s_%s_%s_192.168.44.%s' % (
                 component, node, dataset_name, node)
             files = glob.glob(path + '/*.png')
             files.sort()

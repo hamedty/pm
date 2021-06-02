@@ -1,5 +1,4 @@
-annotate holder 2-5
-train holder 2-5
+test holder 2-5
 collect data dosing 2-5
 train dosing 2-5
 put full pen back in position

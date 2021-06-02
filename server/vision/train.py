@@ -104,8 +104,8 @@ def train(C, X, y, name):
 
 
 def main():
-    # train_holder(101)
-    train_dosing(101)
+    train_holder(105)
+    # train_dosing(101)
 
 
 if __name__ == '__main__':
