@@ -71,25 +71,25 @@ class System(object):
             while not node.ready_for_command():
                 await asyncio.sleep(.01)
 
-        print('Home Everything')
-        print('Home Everything - 1- robot')
+        # print('Home Everything')
+        # print('Home Everything - 1- robot')
         await robot_1.send_command({'verb': 'set_valves', 'valves': [0] * 10}, assert_success=True)
-        await robot_1.send_command({'verb': 'home', 'axis': 1}, assert_success=True)
-        await robot_1.send_command({'verb': 'home', 'axis': 0}, assert_success=True)
-
-        print('Home Everything - 2- stations and rail together')
-        tasks = []
-        for station in stations:
-            tasks.append(station.send_command(
-                {'verb': 'set_valves', 'valves': [0] * 5}, assert_success=True))
-            tasks.append(station.send_command(
-                {'verb': 'home', 'axis': 3}, assert_success=True))
-
-        tasks.append(rail.send_command(
-            {'verb': 'home', 'axis': 0}, assert_success=True))
-
-        await asyncio.gather(*tasks)
-        await rail.goto(D_STANDBY)
+        # await robot_1.send_command({'verb': 'home', 'axis': 1}, assert_success=True)
+        # await robot_1.send_command({'verb': 'home', 'axis': 0}, assert_success=True)
+        #
+        # print('Home Everything - 2- stations and rail together')
+        # tasks = []
+        # for station in stations:
+        #     tasks.append(station.send_command(
+        #         {'verb': 'set_valves', 'valves': [0] * 5}, assert_success=True))
+        #     tasks.append(station.send_command(
+        #         {'verb': 'home', 'axis': 3}, assert_success=True))
+        #
+        # tasks.append(rail.send_command(
+        #     {'verb': 'home', 'axis': 0}, assert_success=True))
+        #
+        # await asyncio.gather(*tasks)
+        # await rail.goto(D_STANDBY)
 
         while True:
             await rail.is_homed()
@@ -100,6 +100,7 @@ class System(object):
             await robot_1.goto(y=Y)
             await robot_1.goto(x=X)
 
+            input('continue?')
             print('lets go grab input')
             X = 22750
             Y1 = 0
@@ -113,21 +114,22 @@ class System(object):
 
             await robot_1.goto(y=Y2)
             print('put input into station')
-            X = 60000 / 2
-            Y1 = 3200 / 2
-            Y2 = 1350 / 2
+            X = 30000
+            Y1 = 1600
+            Y2 = 675
             Y3 = Y1
             # await asyncio.gather(
             #     robot_1.goto(x=X),
             #     station_1.send_command(
             #         {'verb': 'set_valves', 'valves': [0, 0, 0, 1]}),
             # )
+            await robot_1.goto(x=X)
             await robot_1.goto(y=Y1)
             await robot_1.send_command(
                 {'verb': 'set_valves', 'valves': [0] * 10})
             await asyncio.sleep(.5)
-            return
 
+            continue
             print('press holder in')
 
             await robot_1.send_command(
@@ -306,8 +308,8 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    task2 = asyncio.create_task(SYSTEM.main_script_wrapper())
-    await task2
+    # task2 = asyncio.create_task(SYSTEM.main_script_wrapper())
+    # await task2
     await task1
 
 if __name__ == '__main__':

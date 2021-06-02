@@ -4,6 +4,7 @@ import json
 import traceback
 import os
 import time
+import copy
 
 import string
 import uuid
@@ -21,6 +22,8 @@ class Node(object):
         self.name = name
         self.ip = ip
         self.ip_short = int(self.ip.split('.')[-1])
+        self.hw_config = copy.deepcopy(self.hw_config_base)
+
         self._socket_reader = None
         self.actions = []
         self.set_status(message='node instance created')

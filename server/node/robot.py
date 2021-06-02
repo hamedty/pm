@@ -8,7 +8,7 @@ class Robot(Node):
     type = 'robot'
     arduino_reset_pin = 2
     valves = [15, 16]
-    hw_config = {
+    hw_config_base = {
         'valves': [36, 39, 38, 41, 40, 43, 42, 45, 44, 47],
         'motors': [
             {  # AXIS 1 - Up & Down
@@ -71,17 +71,10 @@ class Robot(Node):
             x = {}
 
         if y is not None:
-            y = {'steps': y, 'absolute': 1}
+            y = {'steps': y, 'absolute': 1, 'telorance_soft': 1000}
         else:
             y = {}
         return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
 
     def ready_for_command(self):
         return 'm2' in self._status.get('data', {})
-
-
-ROBOT_1_IP = '192.168.44.100'
-ROBOTS = [
-    Robot('Robot 1', ROBOT_1_IP, 0),
-    Robot('Robot 2', ROBOT_1_IP, 1),
-]

@@ -27,9 +27,9 @@ async def create_camera(command):
 
 
 async def dump_frame(command):
-    await CAMERAS['holder'].dump_frame(
+    CAMERAS['holder'].dump_frame(
         filename=DATA_PATH + '/holder.png', roi_index=command.get('roi_index_holder'))
-    await CAMERAS['dosing'].dump_frame(
+    CAMERAS['dosing'].dump_frame(
         filename=DATA_PATH + '/dosing.png', roi_index=command.get('roi_index_dosing'))
     return {'success': True}
 

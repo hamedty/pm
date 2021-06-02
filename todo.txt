@@ -1,14 +1,14 @@
-run script fast + assert
+annotate holder 2-5
+train holder 2-5
+collect data dosing 2-5
+train dosing 2-5
+put full pen back in position
+
+test stations 6-10
+run script fast
 assert and event - systems interlock - not move until other is out of reach
-
 emergency stop
-prepare all 10 nodes
-vision for 10 nodes
-
-  manipulate pins directly for motor pulse
-  better non blocking motor run with fence return and status update
-  yet faster trajectory
-
+GRBL
 full script running continuesly
 reset encoder before and after retract to make sure encoder works
 ---------------------
@@ -18,6 +18,3 @@ multiprocess vision model runner
 logging (rpi/server)
 debug vision
 vision: auto roi / zero index
-handle microstep
-make sure pin status on homing
-double trajectory

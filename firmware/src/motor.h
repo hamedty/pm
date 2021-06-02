@@ -329,6 +329,9 @@ void Motor::home() {
     return;
   }
   delay(200);
+
+  // TODO: reset encoder and check if (this->encoder) this->encoder->reset();
+
   this->go_steps((int32_t)(this->home_retract), this->homing_delay * 5, true);
 
   if (this->limit_not_reached_n() && this->limit_not_reached_p()) {

@@ -1,12 +1,11 @@
 import asyncio
 from .robot import Robot
-from .robot import ROBOT_1_IP
 from .trajectory import CURVE_RAIL
 
 
 class Rail(Robot):
     type = 'rail'
-    hw_config = {
+    hw_config_base = {
         'valves': [47, 44],
         'motors': [
             {
@@ -59,8 +58,3 @@ class Rail(Robot):
         cur_pos = cur_status['data']['enc']
         diversion = abs(cur_pos - home_pos)
         assert (diversion < telorance), diversion
-
-
-RAILS = [
-    Robot('Rail 1', ROBOT_1_IP, 2),
-]

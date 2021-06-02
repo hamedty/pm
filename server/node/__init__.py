@@ -1,10 +1,8 @@
-from .station import STATIONS, Station
-from .robot import ROBOTS, Robot
-from .rail import RAILS, Rail
+from .station import Station
+from .robot import Robot
+from .rail import Rail
 
 
-ALL_NODES = STATIONS + ROBOTS + RAILS
-ALL_NODES = [node for node in ALL_NODES if node]
 ALL_NODES = [
     Robot('Robot 1', '192.168.44.100', 0),
     Robot('Robot 2', '192.168.44.100', 1),
@@ -25,3 +23,15 @@ ALL_NODES = [
 ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 
 assert len(ALL_NODES_DICT) == len(ALL_NODES)
+
+ALL_NODES_DICT['Station 1'].set_home_retract(3, 300 + 90)
+ALL_NODES_DICT['Station 1'].hw_config['di'][1] = 26
+ALL_NODES_DICT['Station 2'].set_home_retract(3, 300 + 0)
+ALL_NODES_DICT['Station 3'].set_home_retract(3, 300 + 324)
+ALL_NODES_DICT['Station 4'].set_home_retract(3, 300 + 84)
+ALL_NODES_DICT['Station 5'].set_home_retract(3, 300 + 390)
+ALL_NODES_DICT['Station 6'].set_home_retract(3, 300)
+ALL_NODES_DICT['Station 7'].set_home_retract(3, 300)
+ALL_NODES_DICT['Station 8'].set_home_retract(3, 300)
+ALL_NODES_DICT['Station 9'].set_home_retract(3, 300)
+ALL_NODES_DICT['Station 10'].set_home_retract(3, 300)
