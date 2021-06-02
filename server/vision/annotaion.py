@@ -39,9 +39,9 @@ aligning = {
     },
     104: {
         'holder': {
-            '501hj44e': {'zero': 40, },
-            'owa2vxk1': {'zero': 40, },
-            'srk2xdd7': {'zero': 40, },
+            '501hj44e': {'zero': 325, },
+            'owa2vxk1': {'zero': 92, },
+            'srk2xdd7': {'zero': 4, },
         },
         'holder_roi': {'x0': 238, 'dx': 178, 'y0': 144, 'dy': 163},
         'dosing': {
