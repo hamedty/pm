@@ -46,12 +46,9 @@
     },
     "102": {
         "dosing": {
-            "": {
-                "zero": 0
-            },
-            "2t56kmst": {},
-            "hiap5h2m": {},
-            "kroh91id": {}
+            "hiap5h2m": {
+                "zero": 200
+            }
         },
         "dosing_roi": {
             "dx": 243,
@@ -79,12 +76,7 @@
     },
     "103": {
         "dosing": {
-            "": {
-                "zero": 0
-            },
-            "e90kw1p6": {},
-            "v37w56tp": {},
-            "ycmirjtn": {}
+            "v37w56tp": {}
         },
         "dosing_roi": {
             "dx": 243,
@@ -112,12 +104,7 @@
     },
     "104": {
         "dosing": {
-            "": {
-                "zero": 0
-            },
-            "3zkhee0p": {},
-            "d95x0lzj": {},
-            "wac9p58s": {}
+            "d95x0lzj": {}
         },
         "dosing_roi": {
             "dx": 243,
@@ -145,16 +132,10 @@
     },
     "105": {
         "dosing": {
-            "": {
-                "zero": 0
-            },
             "beloyl2q": {
                 "zero": 200
             },
             "epo0t33h": {
-                "zero": 200
-            },
-            "qecq0fen": {
                 "zero": 200
             }
         },
