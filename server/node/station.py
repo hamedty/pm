@@ -1,5 +1,15 @@
 from .node import Node
 from .trajectory import CURVE_STATION
+import os
+import json
+
+PATH = os.path.dirname(os.path.abspath(__file__))
+SERVER_PATH = os.path.dirname(PATH)
+BASE_PATH = os.path.dirname(SERVER_PATH)
+VISION_ANNOTATION_FILE = os.path.join(BASE_PATH, 'models/annotaion.json')
+
+with open(VISION_ANNOTATION_FILE) as f:
+    VISION_ANNOTATION = json.loads(f.read())
 
 
 class Station(Node):
@@ -61,8 +71,12 @@ class Station(Node):
     curves = [CURVE_STATION]
 
     async def send_command_create_camera(self):
+        annotation_data = VISION_ANNOTATION[str(self.ip_short)]
+        roi = VISION_ANNOTATION
         command = {
             'verb': 'create_camera',
+            'dosing_roi': [annotation_data['dosing_roi']],
+            'holder_roi': [annotation_data['holder_roi']],
         }
         return await self.send_command(command)
 

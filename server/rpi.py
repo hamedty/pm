@@ -20,9 +20,11 @@ DATA_PATH = '/home/pi/data'
 
 async def create_camera(command):
     if 'holder' not in CAMERAS:
-        CAMERAS['holder'] = cheap_cam.create_camera('holder')
+        CAMERAS['holder'] = cheap_cam.create_camera(
+            'holder', command['holder_roi'])
     if 'dosing' not in CAMERAS:
-        CAMERAS['dosing'] = cheap_cam.create_camera('dosing')
+        CAMERAS['dosing'] = cheap_cam.create_camera(
+            'dosing', command['dosing_roi'])
     return {'success': True}
 
 

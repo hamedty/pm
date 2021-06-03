@@ -1,4 +1,4 @@
-for i in  106 107 108 109 110 #100 101 # 102
+for i in  104
 do
   echo 192.168.44.$i
   scp -rq /home/it/Desktop/PAM2060/server/ pi@192.168.44.$i:~/

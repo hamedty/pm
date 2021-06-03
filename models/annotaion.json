@@ -18,17 +18,8 @@
             "y0": 50
         },
         "holder": {
-            "3zw2fzaa": {
-                "zero": 320
-            },
-            "5aicayw5": {
-                "zero": 115
-            },
-            "b11gp8nm": {
-                "zero": 42
-            },
             "llcm8dee": {
-                "zero": 39
+                "zero": 40
             },
             "syrrjejq": {
                 "zero": 160
@@ -48,10 +39,7 @@
         "dosing": {
             "": {
                 "zero": 0
-            },
-            "2t56kmst": {},
-            "hiap5h2m": {},
-            "kroh91id": {}
+            }
         },
         "dosing_roi": {
             "dx": 243,
@@ -81,10 +69,7 @@
         "dosing": {
             "": {
                 "zero": 0
-            },
-            "e90kw1p6": {},
-            "v37w56tp": {},
-            "ycmirjtn": {}
+            }
         },
         "dosing_roi": {
             "dx": 243,
@@ -114,10 +99,7 @@
         "dosing": {
             "": {
                 "zero": 0
-            },
-            "3zkhee0p": {},
-            "d95x0lzj": {},
-            "wac9p58s": {}
+            }
         },
         "dosing_roi": {
             "dx": 243,
@@ -147,15 +129,6 @@
         "dosing": {
             "": {
                 "zero": 0
-            },
-            "beloyl2q": {
-                "zero": 200
-            },
-            "epo0t33h": {
-                "zero": 200
-            },
-            "qecq0fen": {
-                "zero": 200
             }
         },
         "dosing_roi": {

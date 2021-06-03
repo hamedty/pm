@@ -2,8 +2,8 @@ import pickle
 import cv2
 
 try:
-    clf_dosing = pickle.load(open('/home/pi/models/dosing.clf', 'rb'))
     clf_holder = pickle.load(open('/home/pi/models/holder.clf', 'rb'))
+    clf_dosing = pickle.load(open('/home/pi/models/dosing.clf', 'rb'))
 except:
     pass  # robot and rail
 

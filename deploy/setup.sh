@@ -7,6 +7,7 @@ done
 # ssh pi@192.168.44.$i "rm -r /home/pi/models/*"
 # ssh pi@192.168.44.$i "rm -r /home/pi/frame2.png"
 # ssh pi@192.168.44.$i "rm -r /home/pi/frame1.png"
+# ssh pi@192.168.44.$i "rm /home/pi/models/model_*"
 # scp -rq /home/it/Desktop/PAM2060/deploy/bashrc pi@192.168.44.$i:~/.bashrc
 # scp -rq /home/it/Desktop/PAM2060/deploy/boot.sh pi@192.168.44.$i:~/
 

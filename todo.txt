@@ -1,4 +1,3 @@
-test holder 2-5
 collect data dosing 2-5
 train dosing 2-5
 put full pen back in position
@@ -7,7 +6,7 @@ test stations 6-10
 run script fast
 assert and event - systems interlock - not move until other is out of reach
 emergency stop
-GRBL
+g2core
 full script running continuesly
 reset encoder before and after retract to make sure encoder works
 ---------------------

@@ -37,7 +37,7 @@ class CheapCam(CameraBase):
         imwrite(filename, frame)
 
 
-def create_camera(index):
+def create_camera(index, roi):
     v4l2_base = {
         'brightness': 110,
         'contrast': 48,
@@ -57,12 +57,8 @@ def create_camera(index):
         'dosing': {'brightness': 110, },
         'holder': {'brightness': 150, },
     }
-    roi = {
-        'dosing': [{'x0': 141, 'dx': 243, 'y0': 50, 'dy': 205}, ],
-        'holder': [{'x0': 294, 'dx': 167, 'y0': 169, 'dy': 169}, ],
-    }
 
     v4l2 = dict(v4l2_base)
     v4l2.update(v4l2_config[index])
 
-    return CheapCam(SERAIL_NOS[index], config={}, settings={'roi': roi[index]}, v4l2_config=v4l2)
+    return CheapCam(SERAIL_NOS[index], config={}, settings={'roi': roi}, v4l2_config=v4l2)
