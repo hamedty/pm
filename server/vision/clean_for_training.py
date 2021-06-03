@@ -14,7 +14,7 @@ data = load_data()
 
 nodes = list(data.keys())
 nodes.sort()
-componenets = ['holder']  # ,['holder', 'dosing']
+componenets = ['dosing']  # ,['holder', 'dosing']
 
 for node in nodes[1:]:
     for component in componenets:
