@@ -66,6 +66,10 @@ class Station(Node):
             28,  # jack verification
             24,  # gate verification
         ],
+        'points': {
+            'H_ALIGNING': 21500,
+            'H_PUSH': 22000,
+        }
 
     }
     curves = [CURVE_STATION]
@@ -101,3 +105,10 @@ class Station(Node):
 
     def set_home_retract(self, motor_index, value):
         self.hw_config['motors'][motor_index]['home_retract'] = value
+
+    def goto(self, location, **kwargs):
+        h = self.hw_config['points'][location]
+        move = {'steps': h, 'absolute': True}
+        move.update(kwargs)
+        moves = [{}, {}, {}, move]
+        return self.send_command({'verb': 'move_motors', 'moves': moves}, assert_success=True)

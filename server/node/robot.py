@@ -67,11 +67,13 @@ class Robot(Node):
     async def goto(self, x=None, y=None, **kwargs):
         if x is not None:
             x = {'steps': x, 'absolute': 1}
+            x.update(kwargs)
         else:
             x = {}
 
         if y is not None:
-            y = {'steps': y, 'absolute': 1, 'telorance_soft': 1000}
+            y = {'steps': y, 'absolute': 1, 'telorance_soft': 1000, 'delay': 500}
+            y.update(kwargs)
         else:
             y = {}
         return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
