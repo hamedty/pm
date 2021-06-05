@@ -1,11 +1,7 @@
-vision dosing / holder in good shape
-run script fast
 add rail to script
-
-test stations 6-10
 assert and event - systems interlock - not move until other is out of reach
-emergency stop
 g2core
+test stations 6-10
 full script running continuously
 reset encoder before and after retract to make sure encoder works
 ---------------------
