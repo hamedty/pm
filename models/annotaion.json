@@ -18,8 +18,17 @@
             "y0": 50
         },
         "holder": {
+            "3zw2fzaa": {
+                "zero": 320
+            },
+            "5aicayw5": {
+                "zero": 115
+            },
+            "b11gp8nm": {
+                "zero": 42
+            },
             "llcm8dee": {
-                "zero": 40
+                "zero": 39
             },
             "syrrjejq": {
                 "zero": 160
@@ -37,15 +46,21 @@
     },
     "102": {
         "dosing": {
-            "": {
-                "zero": 0
+            "blbmmgay": {
+                "zero": 200
+            },
+            "hiap5h2m": {
+                "zero": 190
+            },
+            "nk27mjp3": {
+                "zero": 211
             }
         },
         "dosing_roi": {
             "dx": 243,
-            "dy": 205,
+            "dy": 198,
             "x0": 141,
-            "y0": 50
+            "y0": 144
         },
         "holder": {
             "dag1aqju": {
@@ -67,15 +82,21 @@
     },
     "103": {
         "dosing": {
-            "": {
-                "zero": 0
+            "74uhk6mo": {
+                "zero": 285
+            },
+            "ncdig64k": {
+                "zero": 258
+            },
+            "v37w56tp": {
+                "zero": 232
             }
         },
         "dosing_roi": {
-            "dx": 243,
-            "dy": 205,
-            "x0": 228,
-            "y0": 50
+            "dx": 250,
+            "dy": 202,
+            "x0": 310,
+            "y0": 138
         },
         "holder": {
             "1y0t0lwu": {
@@ -97,15 +118,21 @@
     },
     "104": {
         "dosing": {
-            "": {
-                "zero": 0
+            "d95x0lzj": {
+                "zero": 287
+            },
+            "sfjgf2z6": {
+                "zero": 21
+            },
+            "zarai7v9": {
+                "zero": 363
             }
         },
         "dosing_roi": {
-            "dx": 243,
-            "dy": 205,
-            "x0": 141,
-            "y0": 50
+            "dx": 240,
+            "dy": 197,
+            "x0": 150,
+            "y0": 115
         },
         "holder": {
             "501hj44e": {
@@ -127,15 +154,21 @@
     },
     "105": {
         "dosing": {
-            "": {
-                "zero": 0
+            "75x6euad": {
+                "zero": 378
+            },
+            "beloyl2q": {
+                "zero": 301
+            },
+            "epo0t33h": {
+                "zero": 11
             }
         },
         "dosing_roi": {
             "dx": 243,
-            "dy": 205,
+            "dy": 198,
             "x0": 141,
-            "y0": 50
+            "y0": 144
         },
         "holder": {
             "576r9k2a": {

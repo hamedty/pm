@@ -26,19 +26,20 @@ assert len(ALL_NODES_DICT) == len(ALL_NODES)
 
 ALL_NODES_DICT['Station 1'].set_home_retract(3, 300 + 90 + 300)
 ALL_NODES_DICT['Station 1'].hw_config['di'][1] = 26
-ALL_NODES_DICT['Station 1'].hw_config['H_PUSH'] = 22500
+ALL_NODES_DICT['Station 1'].hw_config['points']['H_PUSH'] = 22500
 
 ALL_NODES_DICT['Station 2'].set_home_retract(3, 300 + 0)
-ALL_NODES_DICT['Station 2'].hw_config['H_PUSH'] = 22650
+ALL_NODES_DICT['Station 2'].hw_config['points']['H_PUSH'] = 22650
 
 ALL_NODES_DICT['Station 3'].set_home_retract(3, 300 + 324)
-ALL_NODES_DICT['Station 3'].hw_config['H_PUSH'] = 22770
+ALL_NODES_DICT['Station 3'].hw_config['points']['H_PUSH'] = 22770
 
 ALL_NODES_DICT['Station 4'].set_home_retract(3, 300 + 84)
-ALL_NODES_DICT['Station 4'].hw_config['H_PUSH'] = 22760
+ALL_NODES_DICT['Station 4'].hw_config['points']['H_PUSH'] = 22760
 
 ALL_NODES_DICT['Station 5'].set_home_retract(3, 300 + 390)
-ALL_NODES_DICT['Station 5'].hw_config['H_PUSH'] = 22710
+ALL_NODES_DICT['Station 5'].hw_config['points']['H_PUSH'] = 22710
+
 
 # ALL_NODES_DICT['Station 6'].set_home_retract(3, 300)
 # ALL_NODES_DICT['Station 7'].set_home_retract(3, 300)

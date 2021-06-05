@@ -1,8 +1,8 @@
 import asyncio
 
-D_STANDBY = 40000
-X_PARK = 0
-Y_PARK = 8250
+# D_STANDBY = 40000
+# X_PARK = 0
+# Y_PARK = 8250
 
 # Grab
 X_GRAB_IN = 22750
@@ -22,6 +22,27 @@ T_PLACE_IN_PRESS = 0.2
 
 # Start Station Process
 X_MOVE_SAFE_STATION = 23000
+T_DOSING_PUSH = 0.5
+T_DOSING_DANCE_UP_PRE = 0.3
+T_PRESS_PRE = 0.3
+T_PRESS = 1
+T_PRESS_POST = 0.3
+T_DOSING_DANCE_DOWN_PRE = 0.3
+T_DOSING_DANCE_DOWN_POST = 0.3
+
+# Deliver
+H_DELIVER = 4000
+X_DELIVER = X_PLACE_IN
+Y_DELIVER = 8350
+H_CLEAR = 2000
+T_DELIVER_PRE = 0.2
+T_DELIVER_POST = 0.2
+
+# Capping
+X_CAPPING = 4200
+Y_CAPPING_DOWN_1 = 1750
+Y_CAPPING_DOWN_2 = 0
+Y_CAPPING_UP = Y_GRAB_IN_UP_1
 
 
 async def main(system, ALL_NODES_DICT):
@@ -57,11 +78,7 @@ async def main(system, ALL_NODES_DICT):
 
     while True:
         # # await rail.is_homed()
-        #
-        # print('Take robot to starting point')
-        # await robot_1.goto(y=Y_PARK)
-        # await robot_1.goto(x=X_PARK)
-        #
+
         # input('continue?')
         # print('lets go grab input')
         # await robot_1.goto(y=Y_GRAB_IN_UP_1)
@@ -114,56 +131,59 @@ async def main(system, ALL_NODES_DICT):
         # H_GRIPP = 23700
 
         # await run_stations(stations, lambda s: s.goto('H_ALIGNING'))
-        # await station_1.send_command({'verb': 'align', 'component': 'dosing'})
-        await run_stations(stations, lambda x: x.send_command({'verb': 'align', 'component': 'dosing'}))
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'align', 'component': 'dosing'}))
 
-        return
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 0]}))
+        # await run_stations(stations, lambda s: s.goto('H_ALIGNING', -500))
+
         # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [1]}))
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 0]})
-        await asyncio.sleep(.3)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [1]})
-        await asyncio.sleep(.2)
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH, 150, 1, 1]]})
-        await asyncio.sleep(.2)
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_PUSH_BACK, 150, 1, 1]]})
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 1]})
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_GRIPP, 150, 1, 1]]})
-        await asyncio.sleep(.1)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [1, None, 0, 1]})
-        await asyncio.sleep(.3)
-        await station_1.send_command_scenario({'verb': 'dance', 'value': 100})
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 0, 0, 1]})
-        # await align_holders
+        # await run_stations(stations, lambda s: s.goto('H_PUSH'))
+        # await asyncio.sleep(T_DOSING_PUSH)
+        # await run_stations(stations, lambda s: s.goto('H_PUSH', -500))
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0, None, 0, 1]}))
+        # await run_stations(stations, lambda s: s.goto('H_PUSH', 700))
+        # # dance
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [1, None, 0, 1]}))
+        # await asyncio.sleep(T_DOSING_DANCE_UP_PRE)
+        # await run_stations(stations, lambda x: x.send_command_scenario({'verb': 'dance', 'value': 100}))
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0, 0, 0, 0, 1]}))
 
-        print('press')
-        H_DELIVER = 4000
-        X_DELIVER = 59800 / 2
-        Y_DELIVER = 16700 / 2
-        H_CLEAR = 2000
-        await asyncio.sleep(.1)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 1]})
-        await asyncio.sleep(1)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0, 0, 0]})
-        await asyncio.sleep(.2)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [1, 0, 0, 0, 0]})
-        await asyncio.sleep(.2)
-        await station_1.send_command_scenario({'verb': 'dance', 'value': -100, 'extra_m3': -100})
-        await asyncio.sleep(.2)
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_DELIVER, 150, 1, 1]]})
-        await robot_1.goto(y=Y_DELIVER)
-        await robot_1.goto(x=X_DELIVER)
-        await robot_1.send_command({'verb': 'set_valves', 'valves': [1]})
-        await asyncio.sleep(.2)
-        await station_1.send_command({'verb': 'set_valves', 'valves': [0]})
-        await station_1.send_command({'verb': 'move_motors', 'moves': [[], [], [], [H_CLEAR, 150, 1, 1]]})
+        # print('press')
+        # await asyncio.sleep(T_PRESS_PRE)
+        # # TODO: verify microswitch
+        # # await align_holders
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0, 0, 1]}))
+        # await asyncio.sleep(T_PRESS)
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0, 0, 0]}))
+        # await asyncio.sleep(T_PRESS_POST)
+        #
+        # print('dance back')
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [1, 0, 0, 0, 0]}))
+        # await asyncio.sleep(T_DOSING_DANCE_DOWN_PRE)
+        # await run_stations(stations, lambda x: x.send_command_scenario({'verb': 'dance', 'value': -100, 'extra_m3': -100}))
+        # await asyncio.sleep(T_DOSING_DANCE_DOWN_POST)
+
+        # print('deliver')
+        # await run_stations(stations, lambda s: s.goto(H_DELIVER))
+        # await robot_1.goto(y=Y_DELIVER)
+        # await robot_1.goto(x=X_DELIVER)
+        # await robot_1.send_command({'verb': 'set_valves', 'valves': [1] * 5})
+        # await asyncio.sleep(T_DELIVER_PRE)
+        # await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0]}))
+        # await asyncio.sleep(T_DELIVER_POST)
+        # await run_stations(stations, lambda s: s.goto(H_CLEAR))
 
         print('Capping')
-        X_CAPPING = 8200 / 2
-        Y_CAPPING_1 = 7000 / 2
-
-        await robot_1.goto(x=X_CAPPING)
-        await robot_1.goto(y=Y_CAPPING_1)
-        await robot_1.send_command({'verb': 'set_valves', 'valves': [0]})
+        # await robot_1.goto(x=X_CAPPING)
+        # await rail.send_command({'verb': 'set_valves', 'valves': [0, 1]})
+        # await rail.send_command({'verb': 'set_valves', 'valves': [1, 1]})
+        # await robot_1.goto(y=Y_CAPPING_DOWN_1)
+        # await rail.send_command({'verb': 'set_valves', 'valves': [1, 0]})
+        # await rail.send_command({'verb': 'set_valves', 'valves': [0, 0]})
+        # await robot_1.goto(y=Y_CAPPING_DOWN_2)
+        # await robot_1.send_command({'verb': 'set_valves', 'valves': [0] * 10})
+        # await robot_1.goto(y=Y_CAPPING_UP)
+        return
 
 
 def run_stations(stations, func):

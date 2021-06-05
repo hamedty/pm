@@ -1,18 +1,16 @@
-collect data dosing 2-5
-train dosing 2-5
-put full pen back in position
+vision dosing / holder in good shape
+run script fast
+add rail to script
 
 test stations 6-10
-run script fast
 assert and event - systems interlock - not move until other is out of reach
 emergency stop
 g2core
-full script running continuesly
+full script running continuously
 reset encoder before and after retract to make sure encoder works
 ---------------------
-better vision
-intial encoder value using redis
+better vision / debug vision
 multiprocess vision model runner
+intial machine status using redis
 logging (rpi/server)
-debug vision
 vision: auto roi / zero index

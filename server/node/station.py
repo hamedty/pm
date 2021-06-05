@@ -68,7 +68,7 @@ class Station(Node):
         ],
         'points': {
             'H_ALIGNING': 21500,
-            'H_PUSH': 22000,
+            'H_PUSH': 23000,
         }
 
     }
@@ -106,8 +106,11 @@ class Station(Node):
     def set_home_retract(self, motor_index, value):
         self.hw_config['motors'][motor_index]['home_retract'] = value
 
-    def goto(self, location, **kwargs):
-        h = self.hw_config['points'][location]
+    def goto(self, location, offset=0, **kwargs):
+        if isinstance(location, str):
+            h = self.hw_config['points'][location] + offset
+        else:
+            h = location
         move = {'steps': h, 'absolute': True}
         move.update(kwargs)
         moves = [{}, {}, {}, move]
