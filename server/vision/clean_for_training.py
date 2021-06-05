@@ -15,7 +15,7 @@ data = load_data()
 
 nodes = list(data.keys())
 nodes.sort()
-componenets = ['dosing']  # ,['holder', 'dosing']
+componenets = ['holder', 'dosing']
 
 
 def npz_valid(npz_filename, roi_in, zero_in):
