@@ -176,8 +176,8 @@ COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
 
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
-  'verb': 'dump_training_holder',\n\
-  'revs': 1,\n\
+  'verb': 'dump_training_dosing',\n\
+  'revs': 3,\n\
   'frames_per_rev': 400,\n\
 }"
 COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder'}"

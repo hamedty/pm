@@ -87,6 +87,9 @@ class Node(object):
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':
+            await self.goto('H_ALIGNING')
+            await asyncio.sleep(1)
+
             random_string = generate_random_string()
             await self.send_command({'verb': 'set_valves', 'valves': [1]}, assert_success=True)
             await asyncio.sleep(1)
@@ -99,7 +102,9 @@ class Node(object):
                 self.ip_short, random_string)
 
             await self.send_command({'verb': 'set_valves', 'valves': [0]}, assert_success=True)
+            await self.goto(4000)
             await self.scp_from(folder_name_src, folder_name_dst)
+
         elif command['verb'] == 'dance':
             value = int(command.get('value', 1))
             command = {
