@@ -1,9 +1,11 @@
-add rail to script
+timeout vision
+trajectory / g2core
 assert and event - systems interlock - not move until other is out of reach
-g2core
 test stations 6-10
 full script running continuously
 reset encoder before and after retract to make sure encoder works
+detect if holder and dosing not exist
+speed up script
 ---------------------
 better vision / debug vision
 multiprocess vision model runner

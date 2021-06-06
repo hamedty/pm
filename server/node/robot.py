@@ -1,6 +1,6 @@
 from .node import Node
 from .trajectory import CURVE_ROBOT
-
+import asyncio
 # 1600 pulse  / rev
 
 
@@ -38,7 +38,10 @@ class Robot(Node):
                 'encoder_ratio': 6,
             },
         ],
-        'di': [49, 48]
+        'di': [
+            51,  # limit switch Y Posetive
+            48,
+        ]
     }
     curves = [CURVE_ROBOT]
 
@@ -77,6 +80,16 @@ class Robot(Node):
         else:
             y = {}
         return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
+
+    async def move_all_the_way_up(self):
+        d = self.hw_config['motors'][0]['course'] * 1.1
+        command = {
+            'verb': 'move_motors',
+            'moves': [{'steps': d, 'delay': 300, 'blocking': 1}]
+        }
+        await self.send_command(command, assert_success=True)
+        await asyncio.sleep(.2)
+        assert self.get_status()['data']['di1']
 
     def ready_for_command(self):
         return 'm2' in self._status.get('data', {})

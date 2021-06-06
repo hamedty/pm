@@ -74,8 +74,8 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    # task2 = asyncio.create_task(SYSTEM.script_wrapper(scripts.main))
-    # await task2
+    task2 = asyncio.create_task(SYSTEM.script_wrapper(scripts.main))
+    await task2
     await task1
 
 if __name__ == '__main__':

@@ -240,12 +240,12 @@ class Arduino(object):
             if motor.get('absolute'):
                 flags += _.MOVE_MOTOR_FLAGS_ABSOLUTE
             motor_move_clean = {
-                'steps': motor.get('steps', 0),
-                'delay': motor.get('delay', 500),
+                'steps': int(motor.get('steps', 0)),
+                'delay': int(motor.get('delay', 500)),
                 'flags': flags,
-                'settling_delay': motor.get('settling_delay', 0),
-                'telorance_soft': motor.get('telorance_soft', 40),
-                'telorance_hard': motor.get('telorance_hard', 35000),
+                'settling_delay': int(motor.get('settling_delay', 0)),
+                'telorance_soft': int(motor.get('telorance_soft', 100)),
+                'telorance_hard': int(motor.get('telorance_hard', 35000)),
             }
             motor_moves_clean.append(motor_move_clean)
             payload += self._pack_bytes(_.MoveMotor, motor_move_clean)

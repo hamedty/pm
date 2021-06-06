@@ -134,12 +134,13 @@ class Node(object):
         try:
             line = json.loads(line)
             if assert_success:
-                assert line['success']
+                assert line['success'], line
             return line['success'], line
         except:
-            if assert_success:
-                raise
             trace = traceback.format_exc()
+            if assert_success:
+                print(trace)
+                raise
             return False, trace
 
     async def loop(self):
