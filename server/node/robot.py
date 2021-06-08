@@ -1,7 +1,5 @@
 from .node import Node
-from .trajectory import CURVE_ROBOT
 import asyncio
-# 1600 pulse  / rev
 
 
 class Robot(Node):
@@ -43,7 +41,6 @@ class Robot(Node):
             48,
         ]
     }
-    curves = [CURVE_ROBOT]
 
     def __init__(self, name, ip, arduino_id):
         self.arduino_id = arduino_id

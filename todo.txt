@@ -1,5 +1,3 @@
-update arduino.py/rpi.py/server.py
----------------------------------------------
 run script
 assert and event - systems interlock - not move until other is out of reach
 detect if holder and dosing not exist

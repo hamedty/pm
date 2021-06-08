@@ -29,6 +29,7 @@ class System(object):
         if res:
             await node.send_command_config_arduino()
             await node.send_command_create_camera()
+            node.boot = True
 
     def register_ws(self, ws):
         self.send_architecture(ws)
@@ -61,12 +62,14 @@ class System(object):
             await asyncio.sleep(.1)
 
     async def script_wrapper_always(self, func):
-        while True:
-            input('start?')
-            try:
-                await func(self, ALL_NODES_DICT)
-            except:
-                print(traceback.format_exc())
+        await func(self, ALL_NODES_DICT)
+
+        # while True:
+        #     input('start?')
+        #     try:
+        #         await func(self, ALL_NODES_DICT)
+        #     except:
+        #         print(traceback.format_exc())
 
 
 async def main():
@@ -76,8 +79,8 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    # task2 = asyncio.create_task(SYSTEM.script_wrapper_always(scripts.main))
-    # await task2
+    task2 = asyncio.create_task(SYSTEM.script_wrapper_always(scripts.test))
+    await task2
     await task1
 
 if __name__ == '__main__':

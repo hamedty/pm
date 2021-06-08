@@ -1,6 +1,5 @@
 import asyncio
 from .robot import Robot
-from .trajectory import CURVE_RAIL
 
 
 class Rail(Robot):
@@ -24,7 +23,6 @@ class Rail(Robot):
         'di': [48],
 
     }
-    curves = [CURVE_RAIL]
     center_point = 40000
 
     def set_status(self, **kwargs):

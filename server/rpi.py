@@ -104,15 +104,13 @@ async def align(command):
     arduino = ARDUINOS[0]
     component = command['component']  # holder / dosing
     camera = CAMERAS[component]
+    axis = {'holder': 'X', 'dosing': 'Y'}[component]
+    valve = {'holder': 'out2', 'dosing': 'out1'}[component]
+    detector = {'holder': vision.detect_holder,
+                'dosing': vision.detect_dosing}[component]
+    feed = command['speed']
 
-    if component == 'dosing':
-        valves = [1]
-        detector = vision.detect_dosing
-    else:
-        valves = [None, 1]
-        detector = vision.detect_holder
-
-    arduino.set_valves(valves)
+    arduino.send_dict({valve: 1})
     await asyncio.sleep(.5)
 
     for i in range(20):
@@ -122,17 +120,12 @@ async def align(command):
         if aligned:
             break
 
-        if component == 'dosing':
-            arduino.move_motors(
-                [{}, {}, {'steps': int(steps), 'delay': 250, 'blocking': 1}])
-        else:
-            arduino.move_motors(
-                [{'steps': int(steps), 'delay': 250, 'blocking': 1}])
-
-        delay = abs(steps) * 250 * 2 * 1e-6 + .2
+        arduino.send_raw('G10 L20 P1 %s0' % axis)
+        arduino.send_raw('G1 %s%d F%d' % (axis, steps, feed))
+        delay = abs(steps) / feed * 60  # TODO: Set this
         await asyncio.sleep(delay)  # needed for system to settle
 
-    arduino.set_valves([0, 0])
+    arduino.send_dict({valve: 0})
     return {'success': aligned}
 
 
@@ -178,18 +171,20 @@ async def reset_arduino(command):
 
 async def config_arduino(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
-    arduino.define_valves(command['hw_config']['valves'])
-    arduino.define_di(command['hw_config'].get('di', []))
-    for motor_no, motor in enumerate(command['hw_config']['motors']):
-        motor['motor_no'] = motor_no
-        arduino.define_motor(motor)
-
+    for key, value in command['g2core_config']:
+        arduino.send_dict({key: value})
     return {'success': True}
 
 
 async def set_valves(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
     arduino.set_valves(command['valves'])
+    return {'success': True}
+
+
+async def raw(command):
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
+    arduino.send_raw(command['data'])
     return {'success': True}
 
 
@@ -247,11 +242,6 @@ async def home(command):
     return {'success': success, 'message': 'Motor Status: %d' % motor_status}
 
 
-async def define_trajectory(command):
-    arduino = ARDUINOS[command.get('arduino_index', 0)]
-    arduino.define_trajectory(command['data'])
-    return {'success': True}
-
 COMMAND_HANDLER = {
     # vision
     'create_camera': create_camera,
@@ -266,12 +256,10 @@ COMMAND_HANDLER = {
     'create_arduino': create_arduino,
     'reset_arduino': reset_arduino,
     'config_arduino': config_arduino,
+    'raw': raw,
     'set_valves': set_valves,
     'move_motors': move_motors,
     'home': home,
-
-    # trajectory
-    'define_trajectory': define_trajectory,
 }
 
 

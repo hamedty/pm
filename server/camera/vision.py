@@ -12,7 +12,7 @@ def detect_dosing(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     cls = clf_dosing.predict([frame.flatten()])[0]
 
-    step_per_rev = 32 * 200
+    step_per_rev = 360
     class_per_rev = 100
     p = 1.0 / class_per_rev * step_per_rev
 
@@ -33,7 +33,7 @@ def detect_holder(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     cls = clf_holder.predict([frame.flatten()])[0]
 
-    step_per_rev = 32 * 200
+    step_per_rev = 360
     class_per_rev = 100
     p = 1.0 / class_per_rev * step_per_rev
 

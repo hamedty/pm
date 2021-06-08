@@ -18,11 +18,13 @@ def generate_random_string():
 
 class Node(object):
     def __init__(self, name, ip):
+        self.boot = False
         self.set_status(message='node instance creating')
         self.name = name
         self.ip = ip
         self.ip_short = int(self.ip.split('.')[-1])
         self.hw_config = copy.deepcopy(self.hw_config_base)
+        self.g2core_config = copy.deepcopy(self.g2core_config_base)
 
         self._socket_reader = None
         self.actions = []
@@ -32,13 +34,6 @@ class Node(object):
     async def ping(self):
         command = 'ping -c 1 -W 0.5'.split()
         command.append(self.ip)
-        while subprocess.call(command, stdout=subprocess.PIPE) != 0:
-            await asyncio.sleep(.5)
-        return True
-
-    async def scp_to(self, path_src, path_dst):
-        command = 'scp -r %s pi@%s:%s' % (path_src, self.ip, path_dst)
-        command = command.split()
         while subprocess.call(command, stdout=subprocess.PIPE) != 0:
             await asyncio.sleep(.5)
         return True
@@ -65,6 +60,9 @@ class Node(object):
 
         await self.send_command({'verb': 'create_arduino'})
         return True
+
+    async def send_command_raw(self, data):
+        return await self.send_command({'verb': 'raw', 'data': data})
 
     async def send_command_scenario(self, command):
         if command['verb'] == 'dump_frame':
@@ -171,23 +169,27 @@ class Node(object):
     async def send_command_config_arduino(self):
         command = {
             'verb': 'config_arduino',
-            'hw_config': self.hw_config,
+            'g2core_config': self.g2core_config,
         }
         await self.send_command(command)
 
-        for curve in self.curves:
-            print(curve)
-            command = {
-                'verb': 'define_trajectory',
-                'data': curve,
-            }
-            await self.send_command(command)
+    async def set_valves(self, values):
+        N = min(len(self.hw_config['valves']), len(values))
+        data = {}
+        for i in range(1, N + 1):
+            data[i] = values[i - 1]
+        data = {'out': data}
+        return await self.send_command_raw(json.dumps(data))
 
     async def send_command_create_camera(self):
         return
 
+    def ready_for_command(self):
+        return self.boot
+
     def set_status(self, **kwargs):
-        self._status = dict(**kwargs, time=time.time())
+        self._status = kwargs
+        self._status['time'] = time.time()
 
     def get_status(self):
         data = {'connected': bool(self._socket_reader), 'age': 0}
