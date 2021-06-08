@@ -60,7 +60,6 @@ async def main(system, ALL_NODES_DICT):
         while not node.ready_for_command():
             await asyncio.sleep(.01)
 
-    input('start?')
     print('Home Everything')
     print('Home Everything - 0- valves')
     await run_stations(stations, lambda x: x.send_command({'verb': 'set_valves', 'valves': [0] * 5}))
@@ -82,10 +81,9 @@ async def main(system, ALL_NODES_DICT):
     await rail.goto(D_STANDBY)
 
     while True:
-        print('start of loop')
+        input('repeat?')
         await rail.is_homed()
 
-        input('start of while?')
         print('lets go grab input')
         await robot_1.goto(y=Y_GRAB_IN_UP_1)
         await robot_1.goto(x=X_GRAB_IN)
@@ -125,7 +123,6 @@ async def main(system, ALL_NODES_DICT):
             do_station(stations, robot_1, rail, all_nodes),
             do_rail(stations, robot_1, rail, all_nodes)
         )
-        input('continue?')
 
         print('deliver')
         await run_stations(stations, lambda s: s.goto(H_DELIVER))
@@ -138,27 +135,18 @@ async def main(system, ALL_NODES_DICT):
         await run_stations(stations, lambda s: s.goto(H_CLEAR))
 
         print('Capping')
-        input('continue?')
 
         await robot_1.goto(x=X_CAPPING)
-        await rail.send_command({'verb': 'set_valves', 'valves': [0, 1]})
-        input('continue?')
 
+        await rail.send_command({'verb': 'set_valves', 'valves': [0, 1]})
         await asyncio.sleep(T_RAIL_MOVING_JACK)
         await rail.send_command({'verb': 'set_valves', 'valves': [1, 1]})
-        input('continue?')
 
         await robot_1.goto(y=Y_CAPPING_DOWN_1)
 
-        input('continue?')
-
         await rail.send_command({'verb': 'set_valves', 'valves': [0, 1]})
-        input('continue?')
-
         await asyncio.sleep(T_RAIL_FIXED_JACK)
         await rail.send_command({'verb': 'set_valves', 'valves': [0, 0]})
-
-        input('continue?')
 
         await robot_1.goto(y=Y_CAPPING_DOWN_2)
         await robot_1.send_command({'verb': 'set_valves', 'valves': [0] * 10})

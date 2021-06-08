@@ -60,11 +60,13 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
-    async def script_wrapper(self, func):
-        try:
-            await func(self, ALL_NODES_DICT)
-        except:
-            print(traceback.format_exc())
+    async def script_wrapper_always(self, func):
+        while True:
+            input('start?')
+            try:
+                await func(self, ALL_NODES_DICT)
+            except:
+                print(traceback.format_exc())
 
 
 async def main():
@@ -74,8 +76,8 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    task2 = asyncio.create_task(SYSTEM.script_wrapper(scripts.main))
-    await task2
+    # task2 = asyncio.create_task(SYSTEM.script_wrapper_always(scripts.main))
+    # await task2
     await task1
 
 if __name__ == '__main__':

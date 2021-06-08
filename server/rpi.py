@@ -115,7 +115,7 @@ async def align(command):
     arduino.set_valves(valves)
     await asyncio.sleep(.5)
 
-    while True:
+    for i in range(20):
         frame = camera.get_frame(roi_index=0)
         steps, aligned = detector(frame)
         print(steps, aligned)
@@ -133,7 +133,7 @@ async def align(command):
         await asyncio.sleep(delay)  # needed for system to settle
 
     arduino.set_valves([0, 0])
-    return {'success': True}
+    return {'success': aligned}
 
 
 async def get_status(command):

@@ -1,14 +1,7 @@
-timeout vision
-trajectory / g2core
+update arduino.py/rpi.py/server.py
+---------------------------------------------
+run script
 assert and event - systems interlock - not move until other is out of reach
-test stations 6-10
-full script running continuously
-reset encoder before and after retract to make sure encoder works
 detect if holder and dosing not exist
-speed up script
----------------------
-better vision / debug vision
-multiprocess vision model runner
-intial machine status using redis
-logging (rpi/server)
-vision: auto roi / zero index
+add stations 6-10 / robot 2
+sensor for rail jack
