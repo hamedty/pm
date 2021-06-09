@@ -61,8 +61,15 @@ class Node(object):
         await self.send_command({'verb': 'create_arduino'})
         return True
 
-    async def send_command_raw(self, data):
-        return await self.send_command({'verb': 'raw', 'data': data})
+    async def send_command_raw(self, data, wait=True):
+        command = {'verb': 'raw', 'data': data}
+        if wait:
+            command['wait'] = True
+        res = await self.send_command(command)
+        if wait:
+            return self.get_status()
+        else:
+            return res
 
     async def send_command_scenario(self, command):
         if command['verb'] == 'dump_frame':
@@ -131,6 +138,8 @@ class Node(object):
 
         try:
             line = json.loads(line)
+            if 'status' in line:
+                self.set_status(**line['status'])
             if assert_success:
                 assert line['success'], line
             return line['success'], line
@@ -151,10 +160,6 @@ class Node(object):
                     await asyncio.sleep(timeout)
                     continue
                 success, data = await self.send_command({'verb': 'get_status'})
-                if success:
-                    self.set_status(**data['status'])
-                    continue
-                self.set_status(message='get status failed', data=data)
                 continue
 
             await asyncio.sleep(timeout - (current_time - last_status_time))
@@ -170,6 +175,7 @@ class Node(object):
         command = {
             'verb': 'config_arduino',
             'g2core_config': self.g2core_config,
+            'hw_config': self.hw_config,
         }
         await self.send_command(command)
 

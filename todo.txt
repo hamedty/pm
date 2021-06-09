@@ -1,4 +1,8 @@
-run script
+confirm encoder value
+coupling shaft Y robot shol ast
+read inputs
+proper homing of robot
+---------------------------------------
 assert and event - systems interlock - not move until other is out of reach
 detect if holder and dosing not exist
 add stations 6-10 / robot 2

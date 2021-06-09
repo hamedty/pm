@@ -63,7 +63,7 @@ class Station(Node):
             'tn': 0,  # min travel
             'tm': 230,  # max travel
             'jm': 20000,  # max jerk
-            'jh': 3000,  # homing jerk
+            'jh': 20000,  # homing jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed

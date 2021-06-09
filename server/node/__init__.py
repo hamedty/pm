@@ -4,11 +4,11 @@ from .rail import Rail
 
 
 ALL_NODES = [
-    # Robot('Robot 1', '192.168.44.100', 0),
+    Robot('Robot 1', '192.168.44.100', 0),
     # Robot('Robot 2', '192.168.44.100', 1),
     # Rail('Rail', '192.168.44.100', 2),
 
-    Station('Station 1', '192.168.44.101'),
+    # Station('Station 1', '192.168.44.101'),
     # Station('Station 2', '192.168.44.102'),
     # Station('Station 3', '192.168.44.103'),
     # Station('Station 4', '192.168.44.104'),

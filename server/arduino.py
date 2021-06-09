@@ -3,6 +3,7 @@ import glob
 import traceback
 import serial
 import json
+import asyncio
 
 from multiprocessing import Lock
 
@@ -21,13 +22,13 @@ FILES = {
 class Arduino(object):
     def __init__(self, usb_index=None):
         self._status = {}
+        self._hw_config = {}
         self.set_status(message='object created')
         self.usb_index = usb_index
         self._open_port()
         self.lock = Lock()
         self._last_command_id = 1
         self._hw_config = {'motors': {}}
-        self.fence = {}
         self.receive_thread = None
         self.set_status(message='usb port opened')
 
@@ -39,52 +40,50 @@ class Arduino(object):
     def _close_port(self):
         self.ser.close()
 
-    def _serial_read(self):
-        return self.ser.readline()
-
     def _receive(self):
         while True:
             try:
-                ret = self._serial_read()
+                ret = self.ser.readline()
                 response = json.loads(ret)
-
-                # if command_id != 0:
-                #     print(response_dict)
-                # if command_id in self.fence:
-                #     self.fence[command_id] = response_dict
+                # print(ret)
                 self.set_status(data=response)
             except:
+                tb = traceback.format_exc()
+                print(tb)
                 self.set_status(message='receive failed.',
-                                traceback=traceback.format_exc())
+                                traceback=tb)
 
-    # def _get_command_id(self):
-    #     self._last_command_id += 1
-    #     return self._last_command_id
+    def _get_command_id(self):
+        self._last_command_id += 1
+        self._last_command_id %= 1000
+        return self._last_command_id
 
-    # def _build_single_packet(self, command_type, packet_format, payload):
-    #     command_id = self._get_command_id()
-
-    def send_command(self, data, command_id=None):
-        print('------------')
-        print(data)
-        # self.fence[command_id] = 0
+    def send_command(self, data):
+        command_id = self._get_command_id()
         self.lock.acquire()
+        data = data + '\n'
         self.ser.write(data.encode())
         self.lock.release()
 
-    def send_dict(self, data):
-        self.send_raw(json.dumps(data))
+    async def wait_for_status(self, status_code=3):
+        while self._status.get('stat', -1) != status_code:
+            await asyncio.sleep(0.001)
 
-    def send_raw(self, data):
-        self.send_command(data + '\n')
+    def set_status(self, message='', traceback='', data={}):
+        if 'enc1' in data:
+            self._status['enc1'] = data['enc1']
+            self._status['enc2'] = data['enc2']
+        for key in ('posx', 'posy', 'posz', 'stat', 'n', 'line', 'in'):
+            if key in data.get('sr', {}):
+                self._status[key] = data['sr'][key]
+        if message:
+            self._status['message'] = message
 
-    def set_status(self, **kwargs):
-        self._status.update(kwargs)
         self._status['time'] = time.time()
-        print(self._status)
 
     def get_status(self):
         d = dict(self._status)
+
         d['age'] = time.time() - d['time']
         del d['time']
         return d
