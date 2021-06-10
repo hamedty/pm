@@ -86,8 +86,8 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'posx': ['enc2', 480.0],
-            'posy': ['enc1', 480.0],
+            'x': ['enc2', 480.0, .1],  # encoder key, ratio, telorance
+            'y': ['enc1', 480.0, .1],
         }
 
     }
@@ -119,9 +119,6 @@ class Robot(Node):
         command.update(arduino_index=self.arduino_id)
         return await super(Robot, self).send_command(command, **kwargs)
 
-    def set_status(self, **kwargs):
-        super(Robot, self).set_status(**kwargs)
-
     async def goto(self, x=None, y=None):
         if x is not None:
             c = 'G0 X%d' % x
@@ -134,9 +131,11 @@ class Robot(Node):
         print(status)
 
         if x is not None:
-            assert abs(status['enc2'] / 480.0 - status['posx']) < 0.1
+            enc, ratio, telorance = self.hw_config['encoders']['x']
+            assert abs(status[enc] / ratio - status['posx']) < 0.1
         if y is not None:
-            assert abs(status['enc1'] / 480.0 - status['posy']) < 0.1
+            enc, ratio, telorance = self.hw_config['encoders']['y']
+            assert abs(status[enc] / ratio - status['posy']) < telorance
         return
 
     async def move_all_the_way_up(self):

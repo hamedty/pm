@@ -17,15 +17,14 @@ def detect_dosing(frame):
     p = 1.0 / class_per_rev * step_per_rev
 
     if cls <= 0:
-        steps = -cls * p
+        cls = -cls
     elif cls <= 33:
-        steps = (class_per_rev - cls) * p
+        cls = class_per_rev - cls
     else:
-        steps = 25 * p
+        cls = 25
 
-    aligned = abs(cls) < 3
-
-    steps = steps * -1  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    steps = -cls * p
+    aligned = bool(abs(cls) < 3)  # np.bool_ to bool
     return steps, aligned
 
 
@@ -38,5 +37,5 @@ def detect_holder(frame):
     p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p
-    aligned = abs(cls) < 3
+    aligned = (abs(cls) < 3)  # np.bool_ to bool
     return steps, aligned

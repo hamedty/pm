@@ -29,6 +29,8 @@ class Station(Node):
             'vm': 360000,  # max speed
             'fr': 360000,  # max feed rate
             'jm': 360000,  # max jerk
+            'tn': 0,  # min travel
+            'tm': 0,  # max travel
         }),
         ('out', {7: 1, 8: 1, 9: 1}),  # Microstepping enabled
 
@@ -45,6 +47,8 @@ class Station(Node):
             'vm': 360000,  # max speed
             'fr': 360000,  # max feed rate
             'jm': 360000,  # max jerk
+            'tn': 0,  # min travel
+            'tm': 0,  # max travel
         }),
         ('out', {10: 1, 11: 1, 12: 1}),  # Microstepping enabled
 
@@ -75,8 +79,8 @@ class Station(Node):
 
     hw_config_base = {
         'valves': {
-            'holder': 1,
-            'dosing': 2,
+            'dosing': 1,
+            'holder': 2,
             'main': 3,
             'dosing_base': 4,
             'gate': 5,
@@ -111,6 +115,11 @@ class Station(Node):
         #     data = kwargs['data']
         #     kwargs['data'] = data
         super(Station, self).set_status(**kwargs)
+
+    async def home(self):
+        await self.send_command_raw('G54', wait=False)
+        await self.send_command_raw('G28.2 Z0', wait=False)
+        await self.send_command_raw('G28.2 Z0')
 
     #
     # def set_home_retract(self, motor_index, value):

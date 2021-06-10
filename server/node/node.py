@@ -185,13 +185,13 @@ class Node(object):
         for i in range(1, N + 1):
             data[i] = values[i - 1]
         data = {'out': data}
-        return await self.send_command_raw(json.dumps(data))
+        return await self.send_command_raw(json.dumps(data), wait=False)
 
     async def send_command_create_camera(self):
         return
 
     def ready_for_command(self):
-        return self.boot
+        return 'stat' in self._status
 
     def set_status(self, **kwargs):
         self._status = kwargs

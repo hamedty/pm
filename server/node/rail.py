@@ -4,55 +4,51 @@ from .robot import Robot
 
 class Rail(Robot):
     type = 'rail'
+    arduino_reset_pin = 2
+
+    g2core_config_base = [
+        (1, {
+            'ma': 2,  # map to Z
+            'sa': 1.8,  # step angle 1.8
+            'tr': 5,  # travel per rev = 5mm
+            'mi': 2,  # microstep = 2
+            'po': 1,  # direction
+        }),
+        ('z', {
+            'am': 1,  # standard axis mode
+            'vm': 9000,  # max speed
+            'fr': 800000,  # max feed rate
+            'tn': 0,  # min travel
+            'tm': 800,  # max travel
+            'jm': 9000,  # max jerk
+            'jh': 9000,  # hominzg jerk
+            'hi': 1,  # home switch
+            'hd': 0,  # homing direction
+            'sv': 1000,  # home search speed
+            'lv': 200,  # latch speed
+            'zb': 1,  # zero backoff
+        }),
+        ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
+        ('di1ac', 1),
+        ('di1fn', 1),
+    ]
+
     hw_config_base = {
-        'valves': [47, 44],
-        'motors': [
-            {
-                'pin_pulse': 17,
-                'pin_dir': 16,
-                'pin_limit_n': 48,
-                'microstep': 2500,
-                'course': 76100,  # 80000
-                'homing_delay': 200,
-                'home_retract': 200,
-                'has_encoder': True,
-                'encoder_no': 0,
-                'encoder_ratio': 2,
-            },
-        ],
-        'di': [48],
+        'valves': {
+            'fixed': 1,
+            'moving': 2,
+        },
+        'di': {
+            'x-': 1,
+        },
+        'encoders': {
+            'z': ['enc2', 480.0, .1],  # encoder key, ratio, telorance
+        }
 
     }
-    center_point = 40000
-
-    def set_status(self, **kwargs):
-        if 'data' in kwargs:
-            data = kwargs['data']
-            data = data[3:-2]
-            data = dict(
-                zip(['enc', 'enc2', 'di-limit', 'di2', 'm', 'm2'], data))
-            del data['di2']
-            del data['enc2']
-            del data['m2']
-            # data['m'] = MOTOR_STATUS_ENUM[data['m']]
-            kwargs['data'] = data
-        super(Robot, self).set_status(**kwargs)
-
-    def ready_for_command(self):
-        return 'm' in self._status.get('data', {})
 
     async def goto(self, y):
         return await super(Rail, self).goto(y=y)
 
     async def is_homed(self, telorance=50):
-        home_pos = 40000
-        while True:
-            cur_status = self.get_status()
-            age = cur_status['age']
-            if age < 0.3:
-                break
-            await asyncio.sleep(.005)
-
-        cur_pos = cur_status['data']['enc']
-        diversion = abs(cur_pos - home_pos)
-        assert (diversion < telorance), diversion
+        return True

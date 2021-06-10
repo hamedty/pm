@@ -1,7 +1,10 @@
-confirm encoder value
+add station script
+add rail script
+add encoder checks to status update
 coupling shaft Y robot shol ast
 read inputs
 proper homing of robot
+better gcodes for arcs
 ---------------------------------------
 assert and event - systems interlock - not move until other is out of reach
 detect if holder and dosing not exist

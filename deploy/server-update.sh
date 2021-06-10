@@ -1,4 +1,4 @@
-for i in  100
+for i in  101
 do
   echo 192.168.44.$i
   rsync -az /home/it/Desktop/PAM2060/server/ pi@192.168.44.$i:~/server/

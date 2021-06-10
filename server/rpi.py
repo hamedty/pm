@@ -120,10 +120,10 @@ async def align(command):
         if aligned:
             break
 
+        await arduino.wait_for_status(set_status=5)
         arduino.send_command('G10 L20 P1 %s0' % axis)
         arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
-
-        waaaait
+        await arduino.wait_for_status()
 
     arduino.send_command(json.dumps({valve: 0}))
     return {'success': aligned}
