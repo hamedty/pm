@@ -117,8 +117,8 @@ class Station(Node):
         super(Station, self).set_status(**kwargs)
 
     async def home(self):
-        await self.send_command_raw('G54', wait=False)
-        await self.send_command_raw('G28.2 Z0', wait=False)
+        await self.send_command_raw('G54', wait=[])
+        await self.send_command_raw('G28.2 Z0', wait=[])
         await self.send_command_raw('G28.2 Z0')
 
     #

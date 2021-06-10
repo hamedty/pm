@@ -1,6 +1,8 @@
-add station script
-add rail script
 add encoder checks to status update
+proper robot homing (go up first)
+problem with station homing? hangs
+add rail jack checks
+working script
 coupling shaft Y robot shol ast
 read inputs
 proper homing of robot

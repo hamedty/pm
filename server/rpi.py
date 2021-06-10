@@ -154,7 +154,7 @@ async def config_arduino(command):
 async def raw(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
 
-    wait = command.get('wait', False)
+    wait = command.get('wait', [])
     if wait:
         await arduino.wait_for_status()
         arduino._status['stat'] = -1

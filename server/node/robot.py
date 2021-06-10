@@ -112,19 +112,22 @@ class Robot(Node):
         # assert limit switch bala nakhorde
 
         # assert Limit Switch Y+ == 1
-        await self.send_command_raw('G28.2 X0', wait=False)
+        await self.send_command_raw('G28.2 X0', wait=[])
         await self.send_command_raw('G28.2 Y0')
 
     async def send_command(self, command, **kwargs):
         command.update(arduino_index=self.arduino_id)
         return await super(Robot, self).send_command(command, **kwargs)
 
-    async def goto(self, x=None, y=None):
+    async def goto(self, x=None, y=None, z=None):
         if x is not None:
             c = 'G0 X%d' % x
 
         if y is not None:
             c = 'G0 Y%d' % y
+
+        if z is not None:
+            c = 'G0 Z%d' % z
 
         # return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
         status = await self.send_command_raw(c)
@@ -132,10 +135,16 @@ class Robot(Node):
 
         if x is not None:
             enc, ratio, telorance = self.hw_config['encoders']['x']
-            assert abs(status[enc] / ratio - status['posx']) < 0.1
+            assert abs(status[enc] / ratio - status['posx']
+                       ) < telorance, (status[enc], status['posx'])
         if y is not None:
             enc, ratio, telorance = self.hw_config['encoders']['y']
-            assert abs(status[enc] / ratio - status['posy']) < telorance
+            assert abs(status[enc] / ratio - status['posy']
+                       ) < telorance, (status[enc], status['posy'])
+        if z is not None:
+            enc, ratio, telorance = self.hw_config['encoders']['z']
+            assert abs(status[enc] / ratio - status['posz']
+                       ) < telorance, (status[enc], status['posz'])
         return
 
     async def move_all_the_way_up(self):

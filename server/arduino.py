@@ -65,8 +65,8 @@ class Arduino(object):
         self.ser.write(data.encode())
         self.lock.release()
 
-    async def wait_for_status(self, wait_status=3, set_status=None):
-        while self._status.get('stat', -1) != wait_status:
+    async def wait_for_status(self, wait_status=[3], set_status=None):
+        while self._status.get('stat', -1) not in wait_status:
             await asyncio.sleep(0.001)
         if set_status is not None:
             self._status['stat'] = set_status
