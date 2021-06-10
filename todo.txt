@@ -1,4 +1,4 @@
-add encoder checks to status update
+add encoder checks to status update - hw_config['encoders'] is there - if homed check
 proper robot homing (go up first)
 problem with station homing? hangs
 add rail jack checks

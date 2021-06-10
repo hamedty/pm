@@ -86,8 +86,8 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'x': ['enc2', 480.0, .1],  # encoder key, ratio, telorance
-            'y': ['enc1', 480.0, .1],
+            'posx': ['enc2', 480.0, .1],  # encoder key, ratio, telorance
+            'posy': ['enc1', 480.0, .1],
         }
 
     }
@@ -133,18 +133,16 @@ class Robot(Node):
         status = await self.send_command_raw(c)
         print(status)
 
-        if x is not None:
-            enc, ratio, telorance = self.hw_config['encoders']['x']
-            assert abs(status[enc] / ratio - status['posx']
-                       ) < telorance, (status[enc], status['posx'])
-        if y is not None:
-            enc, ratio, telorance = self.hw_config['encoders']['y']
-            assert abs(status[enc] / ratio - status['posy']
-                       ) < telorance, (status[enc], status['posy'])
-        if z is not None:
-            enc, ratio, telorance = self.hw_config['encoders']['z']
-            assert abs(status[enc] / ratio - status['posz']
-                       ) < telorance, (status[enc], status['posz'])
+        command = {'posx': x, 'posy': y, 'posz': z}
+        for key, value in command.items():
+            if value is None:
+                continue
+            enc, ratio, telorance = self.hw_config['encoders'][key]
+            enc_value = status[enc] / ratio
+            g2core_value = status[key]
+            diversion = abs(enc_value - g2core_value)
+            assert diversion < telorance, (enc_value, g2core_value)
+
         return
 
     async def move_all_the_way_up(self):

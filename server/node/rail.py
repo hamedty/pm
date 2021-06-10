@@ -50,7 +50,7 @@ class Rail(Robot):
             'z-': 1,
         },
         'encoders': {
-            'z': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
+            'posz': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
         }
 
     }

@@ -2,23 +2,9 @@ import time
 import asyncio
 
 
-# Grab
-X_GRAB_IN = 285
-Y_GRAB_IN_UP_1 = 78
-Y_GRAB_IN_DOWN = 0
-Y_GRAB_IN_UP_2 = Y_GRAB_IN_UP_1
-T_GRAB_IN = .5
-
 D_STANDBY = 250
 X_PARK = 0
 Y_PARK = 3000
-
-# Grab
-X_GRAB_IN = 284.5
-Y_GRAB_IN_UP_1 = 78
-Y_GRAB_IN_DOWN = 0
-Y_GRAB_IN_UP_2 = Y_GRAB_IN_UP_1
-T_GRAB_IN = .5
 
 # Place In
 X_PLACE_IN = 373
@@ -31,7 +17,7 @@ T_PLACE_IN_PRESS = 0.2
 
 # Start Station Process
 X_MOVE_SAFE_STATION = 287.5
-Y_MOVE_SAFE_STATION = Y_GRAB_IN_UP_1
+# Y_MOVE_SAFE_STATION = Y_GRAB_IN_UP_1
 T_DOSING_PUSH = 0.5
 T_DOSING_DANCE_UP_PRE = 0.3
 T_PRESS_PRE = 0.3
@@ -51,7 +37,7 @@ T_DELIVER_POST = 0.2
 X_CAPPING = 51.25
 Y_CAPPING_DOWN_1 = 22
 Y_CAPPING_DOWN_2 = 0
-Y_CAPPING_UP = Y_GRAB_IN_UP_1
+# Y_CAPPING_UP = Y_GRAB_IN_UP_1
 
 
 async def test(system, ALL_NODES_DICT):
@@ -76,7 +62,7 @@ async def test(system, ALL_NODES_DICT):
     await robot_1.home()
 
     print('Home Everything - 3- rail')
-    print(await rail.home())
+    await rail.home()
     await rail.goto(D_STANDBY)
 
     STATUS = {
@@ -91,10 +77,11 @@ async def test(system, ALL_NODES_DICT):
     # return
 
     ''' rail standalone test'''
-    t0 = time.time()
-    await do_rail(stations, robot_1, rail, all_nodes, STATUS)
-    print(time.time() - t0)
-    return
+    # while True:
+    #     input('again?')
+    #     t0 = time.time()
+    #     await do_rail(stations, robot_1, rail, all_nodes, STATUS)
+    #     print(time.time() - t0)
 
     while True:
         input('repeat?')
@@ -271,9 +258,9 @@ G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
-    # await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
+    await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
     await do_rail(stations, robot_1, rail, all_nodes, STATUS)
-    # await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
+    await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
 
 
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
@@ -307,12 +294,30 @@ async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
 async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
     print('lets go grab input')
 
-    await robot_1.goto(y=Y_GRAB_IN_UP_1)
-    await robot_1.goto(x=X_GRAB_IN)
-    await robot_1.goto(y=Y_GRAB_IN_DOWN)
-    await robot_1.set_valves([1] * 10)
-    await asyncio.sleep(T_GRAB_IN)
-    await robot_1.goto(y=Y_GRAB_IN_UP_2)
+    data = {}
+    data['Y_GRAB_IN_UP_1'] = 78
+    data['X_GRAB_IN'] = 284.5
+    data['Y_GRAB_IN_DOWN'] = 0
+    data['Y_GRAB_IN_UP_2'] = data['Y_GRAB_IN_UP_1']
+
+    data['FEED_Y_UP'] = 6000
+    data['FEED_Y_DOWN'] = 6000
+    data['FEED_X'] = 6000
+
+    data['T_GRAB_IN'] = 0.5
+
+    c = '''
+G1 Y%(Y_GRAB_IN_UP_1).2f F%(FEED_Y_UP)d
+G1 X%(X_GRAB_IN).2f F%(FEED_X)d
+G1 Y%(Y_GRAB_IN_DOWN).2f F%(FEED_Y_DOWN)d
+
+M100 ({out1: 1, out2: 1, out3: 1, out4: 1, out5: 1})
+M100 ({out6: 1, out7: 1, out8: 1, out9: 1, out10: 1})
+G4 P%(T_GRAB_IN).2f
+
+G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
+''' % data
+    await rail.send_command_raw(c)
 
 
 async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
@@ -320,7 +325,8 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     data['D_STANDBY'] = D_STANDBY
     data['D_MIN'] = data['D_STANDBY'] - 125
     data['D_MAX'] = data['D_MIN'] + 25
-    data['FEED_RAIL'] = 5000
+
+    data['FEED_RAIL'] = 6000
     data['T_RAIL_FIXED_JACK'] = .7
     data['T_RAIL_MOVING_JACK'] = .7
 
@@ -329,7 +335,7 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
 G1 Z%(D_MIN).2f F%(FEED_RAIL)d
 
 ; change jacks to moving
-M100 ({out9: 0, out10: 1})
+M100 ({out9: 1, out10: 0})
 G4 P%(T_RAIL_MOVING_JACK).2f
 M100 ({out9: 1, out10: 1})
 G4 P%(T_RAIL_FIXED_JACK).2f
@@ -338,7 +344,7 @@ G4 P%(T_RAIL_FIXED_JACK).2f
 G1 Z%(D_MAX).2f F%(FEED_RAIL)d
 
 ; change jacks to moving
-M100 ({out9: 0, out10: 1})
+M100 ({out9: 1, out10: 0})
 G4 P%(T_RAIL_FIXED_JACK).2f
 M100 ({out9: 0, out10: 0})
 G4 P%(T_RAIL_MOVING_JACK).2f

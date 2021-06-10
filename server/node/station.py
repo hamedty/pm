@@ -90,6 +90,9 @@ class Station(Node):
             'jack': 1,  # jack verification
             'gate': 2,  # gate verification
         },
+        'encoders': {
+            'posz': ['enc1', 300.0, .1],  # encoder key, ratio, telorance
+        },
         'points': {
             'H_ALIGNING': 21500,
             'H_PUSH': 23000,
@@ -120,17 +123,3 @@ class Station(Node):
         await self.send_command_raw('G54', wait=[])
         await self.send_command_raw('G28.2 Z0', wait=[])
         await self.send_command_raw('G28.2 Z0')
-
-    #
-    # def set_home_retract(self, motor_index, value):
-    #     self.hw_config['motors'][motor_index]['home_retract'] = value
-    #
-    # def goto(self, location, offset=0, **kwargs):
-    #     if isinstance(location, str):
-    #         h = self.hw_config['points'][location] + offset
-    #     else:
-    #         h = location
-    #     move = {'steps': h, 'absolute': True}
-    #     move.update(kwargs)
-    #     moves = [{}, {}, {}, move]
-    #     return self.send_command({'verb': 'move_motors', 'moves': moves}, assert_success=True)
