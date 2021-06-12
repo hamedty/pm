@@ -164,6 +164,10 @@ async def raw(command):
     if wait:
         await arduino.wait_for_status()
 
+    if arduino._encoder_check_enabled:
+        if not arduino._encoder_check_status:
+            return {'success': False, 'status': arduino.get_status()}
+
     return {'success': True, 'status': arduino.get_status()}
 
 
@@ -171,6 +175,7 @@ async def encoder_check_enable(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
     enable = command.get('enable', False)
     arduino._encoder_check_enabled = enable
+    arduino._encoder_check_status = True
 
 
 async def get_status(command):

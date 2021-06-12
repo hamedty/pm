@@ -45,6 +45,8 @@ async def test(system, ALL_NODES_DICT):
     stations = [ALL_NODES_DICT['Station %d' % (i + 1)] for i in range(1)]
     rail = ALL_NODES_DICT['Rail']
     all_nodes = stations + [robot_1, rail]
+
+    # All Nodes Ready?
     for node in all_nodes:
         while not node.ready_for_command():
             await asyncio.sleep(.01)
@@ -101,39 +103,81 @@ async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
 
 
 async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
-    pass
-    # print('deliver')
-    # # await run_stations(stations, lambda s: s.goto(H_DELIVER))
-    # await robot_1.goto(y=Y_DELIVER)
-    # await robot_1.goto(x=X_DELIVER)
-    # await robot_1.set_valves([1] * 5)
-    # await asyncio.sleep(T_DELIVER_PRE)
-    # # await run_stations(stations, lambda x: x.set_valves([0]))
-    # await asyncio.sleep(T_DELIVER_POST)
-    # # await run_stations(stations, lambda s: s.goto(H_CLEAR))
-    #
-    # print('put input into station')
-    # tasks = []
-    # for station in stations:
-    #     tasks.append(station.set_valves([0, 0, 0, 1]))
-    #
-    # tasks.append(robot_1.goto(x=X_PLACE_IN))
-    # await asyncio.gather(*tasks)
-    #
-    # await robot_1.goto(y=Y_PLACE_IN)
-    # await robot_1.set_valves([0] * 10)
-    # await asyncio.sleep(T_PLACE_IN_FALL)
-    #
-    # print('press holder in')
-    # await robot_1.set_valves([0] * 5 + [1] * 5)
-    # await asyncio.sleep(T_PLACE_IN_JACK_CLOSE)
-    # await robot_1.goto(y=Y_PLACE_IN_PRESS)
-    # await asyncio.sleep(T_PLACE_IN_PRESS)
-    # await robot_1.goto(y=Y_PLACE_IN_COMEOUT)
-    # await robot_1.set_valves([0] * 10)
-    #
-    # print('Move back for station to work')
-    # await robot_1.goto(x=X_MOVE_SAFE_STATION)
+    print('deliver')
+
+    data = {}
+    data['X_INPUT'] = 375
+    data['Y_INPUT_DOWN_1'] = 35
+    data['Y_INPUT_UP'] = 55
+    data['Y_INPUT_DOWN_3'] = 10
+    data['Y_INPUT_DOWN_2'] = data['Y_INPUT_DOWN_3'] + 10
+
+    data['FEED_X'] = 5000
+    data['FEED_Y_UP'] = 5000
+    data['FEED_Y_DOWN'] = 6000
+    data['FEED_Y_PRESS'] = 2000
+
+    data['T_INPUT_RELEASE'] = 0.5
+    data['T_HOLDER_JACK_CLOSE'] = 0.5
+
+    c = '''
+    G1 X%(X_INPUT).2f F%(FEED_X)d
+    G1 Y%(Y_INPUT_DOWN_1).2f F%(FEED_Y_DOWN)d
+    M100 ({out1: 0, out2: 0, out3: 0, out4: 0, out5: 0})
+    M100 ({out6: 0, out7: 0, out8: 0, out9: 0, out10: 0})
+    G4 P%(T_INPUT_RELEASE).2f
+
+    G1 Y%(Y_INPUT_UP).2f F%(FEED_Y_UP)d
+    M100 ({out6: 1, out7: 1, out8: 1, out9: 1, out10: 1})
+    G4 P%(T_HOLDER_JACK_CLOSE).2f
+    G1 Y%(Y_INPUT_DOWN_2).2f F%(FEED_Y_DOWN)d
+    G1 Y%(Y_INPUT_DOWN_3).2f F%(FEED_Y_PRESS)d
+    ''' % data
+
+    await robot_1.send_command_raw(c)
+
+    data = {}
+
+    data['Z_OUTPUT'] = 80
+    data['Y_OUTPUT'] = 70
+    data['Z_OUTPUT_SAFE'] = data['Z_OUTPUT'] - 20
+    data['X_OUTPUT_SAFE'] = 280
+
+    data['T_OUTPUT_GRIPP'] = 0.5
+    data['T_OUTPUT_RELEASE'] = 0.5
+
+    data['FEED_X'] = 5000
+    data['FEED_Y_UP'] = 5000
+    data['FEED_Z_DOWN'] = 25000
+    data['FEED_Z_UP'] = 15000
+
+    c = '''
+    G1 Z%(Z_OUTPUT).2f F%(FEED_Z_DOWN)d
+    ''' % data
+    await run_stations(stations, lambda x: x.send_command_raw(c))
+
+    c = '''
+    G1 Y%(Y_OUTPUT).2f F%(FEED_Y_UP)d
+    M100 ({out1: 1, out2: 1, out3: 1, out4: 1, out5: 1})
+    ''' % data
+    await robot_1.send_command_raw(c)
+
+    await asyncio.sleep(data['T_OUTPUT_GRIPP'])
+
+    c = '''
+    M100 ({out1: 0})
+    G4 P%(T_OUTPUT_RELEASE).2f
+    G1 Z%(Z_OUTPUT_SAFE).2f F%(FEED_Z_UP)d
+    ''' % data
+    await run_stations(stations, lambda x: x.send_command_raw(c))
+
+    c = '''
+    G1 X%(X_OUTPUT_SAFE).2f F%(FEED_X)d
+    ''' % data
+    await robot_1.send_command_raw(c)
+
+    # STATUS['robots_full'] = False
+    STATUS['stations_full'] = True
 
 
 async def do_station(stations, robot_1, rail, all_nodes, STATUS):
@@ -295,14 +339,14 @@ async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
     print('lets go grab input')
 
     data = {}
-    data['Y_GRAB_IN_UP_1'] = 78
+    data['Y_GRAB_IN_UP_1'] = 65
     data['X_GRAB_IN'] = 284.5
     data['Y_GRAB_IN_DOWN'] = 0
     data['Y_GRAB_IN_UP_2'] = data['Y_GRAB_IN_UP_1']
 
-    data['FEED_Y_UP'] = 6000
+    data['FEED_Y_UP'] = 5000
     data['FEED_Y_DOWN'] = 6000
-    data['FEED_X'] = 6000
+    data['FEED_X'] = 5000
 
     data['T_GRAB_IN'] = 0.5
 
@@ -318,6 +362,8 @@ G4 P%(T_GRAB_IN).2f
 G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
 ''' % data
     print(await robot_1.send_command_raw(c))
+
+    STATUS['robots_full'] = True
 
 
 async def do_rail(stations, robot_1, rail, all_nodes, STATUS):

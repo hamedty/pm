@@ -1,7 +1,8 @@
+complete do_cap
+working script
 proper robot homing (go up first)
 problem with station homing? hangs
 add rail jack checks
-working script
 coupling shaft Y robot shol ast
 read inputs
 proper homing of robot

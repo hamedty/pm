@@ -25,6 +25,7 @@ class Arduino(object):
         self._status = {}
         self._hw_config = {}
         self._encoder_check_enabled = False
+        self._encoder_check_status = True
         self.set_status(message='object created')
         self.usb_index = usb_index
         self._open_port()
@@ -75,6 +76,7 @@ class Arduino(object):
                 self.send_command('!')
                 self.send_command('%')
                 self.send_command('^d')
+                self._encoder_check_status = False
         if message:
             new_status['message'] = message
         if traceback:
