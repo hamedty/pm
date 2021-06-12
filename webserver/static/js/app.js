@@ -70,12 +70,16 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = COMMAND_TEMPLATE_MOVE_MOTORS; //"";
+  $scope.command_text_area = "{\n\
+    'verb': 'raw',\n\
+   'data': 'G28.2 X0'\n\
+}"
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
     'home motor': COMMAND_TEMPLATE_HOME_AXIS,
-    'move motors': COMMAND_TEMPLATE_MOVE_MOTORS,
+    'G-Code': COMMAND_TEMPLATE_GCODE,
+    'encoder check': COMMAND_TEMPLATE_ENCODER_CHECK,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
     'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
@@ -167,13 +171,11 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 
 
 
-COMMAND_TEMPLATE_MOVE_MOTORS = "{\n\
-    'verb': 'move_motors',\n\
-    'moves': [{},{},{},\n\
-        {'steps': 10000, 'absolute': 1},\n\
-    ]\n\
+COMMAND_TEMPLATE_GCODE = "{\n\
+    'verb': 'raw',\n\
+    'data': 'G0'\n\
 }"
-
+COMMAND_TEMPLATE_ENCODER_CHECK = "{'verb': 'encoder_check_enable', 'enable': true}"
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'verb': 'dump_training_dosing',\n\

@@ -91,7 +91,7 @@ class Station(Node):
             'gate': 2,  # gate verification
         },
         'encoders': {
-            'posz': ['enc1', 300.0, .1],  # encoder key, ratio, telorance
+            'posz': ['enc1', 300.0, .2],  # encoder key, ratio, telorance
         },
         'points': {
             'H_ALIGNING': 21500,

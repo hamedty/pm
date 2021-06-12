@@ -157,7 +157,7 @@ async def raw(command):
     wait = command.get('wait', [])
     if wait:
         await arduino.wait_for_status()
-        arduino._status['stat'] = -1
+        arduino._status['sr.stat'] = -1
     print(command)
     arduino.send_command(command['data'])
 
@@ -165,6 +165,12 @@ async def raw(command):
         await arduino.wait_for_status()
 
     return {'success': True, 'status': arduino.get_status()}
+
+
+async def encoder_check_enable(command):
+    arduino = ARDUINOS[command.get('arduino_index', 0)]
+    enable = command.get('enable', False)
+    arduino._encoder_check_enabled = enable
 
 
 async def get_status(command):
@@ -190,6 +196,7 @@ COMMAND_HANDLER = {
     'config_arduino': config_arduino,
     'raw': raw,
     'get_status': get_status,
+    'encoder_check_enable': encoder_check_enable,
 }
 
 

@@ -4,6 +4,7 @@ import traceback
 import serial
 import json
 import asyncio
+from collections import abc
 
 from multiprocessing import Lock
 
@@ -23,6 +24,7 @@ class Arduino(object):
     def __init__(self, usb_index=None):
         self._status = {}
         self._hw_config = {}
+        self._encoder_check_enabled = False
         self.set_status(message='object created')
         self.usb_index = usb_index
         self._open_port()
@@ -53,36 +55,33 @@ class Arduino(object):
                 self.set_status(message='receive failed.',
                                 traceback=tb)
 
-    def _get_command_id(self):
-        self._last_command_id += 1
-        self._last_command_id %= 1000
-        return self._last_command_id
-
     def send_command(self, data):
-        command_id = self._get_command_id()
         self.lock.acquire()
         data = data + '\n'
         self.ser.write(data.encode())
         self.lock.release()
 
     async def wait_for_status(self, wait_status=[3], set_status=None):
-        while self._status.get('stat', -1) not in wait_status:
+        while self._status.get('sr.stat', -1) not in wait_status:
             await asyncio.sleep(0.001)
         if set_status is not None:
-            self._status['stat'] = set_status
+            self._status['sr.stat'] = set_status
 
     def set_status(self, message='', traceback='', data={}):
-        print(data)
-        if 'enc1' in data:
-            self._status['enc1'] = data['enc1']
-            self._status['enc2'] = data['enc2']
-        for key in ('posx', 'posy', 'posz', 'stat', 'n', 'line', 'in'):
-            if key in data.get('sr', {}):
-                self._status[key] = data['sr'][key]
+        new_status = clean_dictionary(flatten(data))
+        if self._encoder_check_enabled:
+            if not self.encoder_check(new_status):
+                new_status['message'] = 'encoder check failed'
+                self.send_command('!')
+                self.send_command('%')
+                self.send_command('^d')
         if message:
-            self._status['message'] = message
+            new_status['message'] = message
+        if traceback:
+            new_status['traceback'] = traceback
 
-        self._status['time'] = time.time()
+        new_status['time'] = time.time()
+        self._status.update(new_status)
 
     def get_status(self):
         d = dict(self._status)
@@ -90,3 +89,69 @@ class Arduino(object):
         d['age'] = time.time() - d['time']
         del d['time']
         return d
+
+    def encoder_check(self, status):
+        # 'encoders': {
+        #     'posz': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
+        # }
+        for axis in self._hw_config['encoders']:
+            enc_key, ratio, telorance = self._hw_config['encoders'][axis]
+            axis_key = 'sr.' + axis
+            if axis_key in status:
+                g2core_location = status[axis_key]
+                encoder_location = status[enc_key] / float(ratio)
+                diversion = abs(encoder_location - g2core_location)
+                if status.get('sr.stat', -1) != 3:
+                    telorance = telorance * 10
+                if diversion > telorance:
+                    return False
+        return True
+
+
+def flatten(dictionary, parent_key=False, separator='.'):
+    items = []
+    for key, value in dictionary.items():
+        new_key = str(parent_key) + separator + key if parent_key else key
+        if isinstance(value, abc.MutableMapping):
+            items.extend(flatten(value, new_key, separator).items())
+        elif isinstance(value, list):
+            for k, v in enumerate(value):
+                items.extend(flatten({str(k + 1): v}, new_key).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+
+def clean_dictionary(dictionary):
+    new_dict = {}
+    for key in dictionary:
+        value = dictionary[key]
+        key = clean_key(key)
+        if key:
+            new_dict[key] = value
+    return new_dict
+
+
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'sr.stat'}
+
+
+def clean_key(key):
+    if key in GOOD_KEYS:
+        return key
+
+    if '.in.' in key:
+        return key.replace('.in.', '.in')
+    if key.startswith('r.in'):
+        return key
+
+    if '.out.' in key:
+        return key.replace('.out.', '.out')
+    if key.startswith('r.out'):
+        return key
+
+    if 'r.pos.' in key:
+        return key.replace('r.pos.', 'sr.pos')
+    if key.startswith('sr.pos'):
+        return key
+
+    return False

@@ -62,8 +62,8 @@ async def test(system, ALL_NODES_DICT):
     await robot_1.home()
 
     print('Home Everything - 3- rail')
-    await rail.home()
-    await rail.goto(D_STANDBY)
+    # await rail.home()
+    # await rail.goto(D_STANDBY)
 
     STATUS = {
         'stations_full': False,
@@ -92,6 +92,12 @@ async def test(system, ALL_NODES_DICT):
         )
 
         await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+
+
+async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
+    await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
+    # await do_rail(stations, robot_1, rail, all_nodes, STATUS)
+    await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
 
 
 async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
@@ -257,12 +263,6 @@ G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
     return
 
 
-async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
-    await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
-    await do_rail(stations, robot_1, rail, all_nodes, STATUS)
-    await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
-
-
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
     if not STATUS['stations_full']:
         return
@@ -317,7 +317,7 @@ G4 P%(T_GRAB_IN).2f
 
 G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
 ''' % data
-    await rail.send_command_raw(c)
+    print(await robot_1.send_command_raw(c))
 
 
 async def do_rail(stations, robot_1, rail, all_nodes, STATUS):

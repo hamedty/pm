@@ -86,8 +86,8 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'posx': ['enc2', 480.0, .1],  # encoder key, ratio, telorance
-            'posy': ['enc1', 480.0, .1],
+            'posx': ['enc2', 480.0, .2],  # encoder key, ratio, telorance
+            'posy': ['enc1', 480.0, .2],
         }
 
     }
@@ -112,8 +112,10 @@ class Robot(Node):
         # assert limit switch bala nakhorde
 
         # assert Limit Switch Y+ == 1
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
         await self.send_command_raw('G28.2 X0', wait=[])
         await self.send_command_raw('G28.2 Y0')
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
 
     async def send_command(self, command, **kwargs):
         command.update(arduino_index=self.arduino_id)
@@ -133,11 +135,12 @@ class Robot(Node):
         status = await self.send_command_raw(c)
         print(status)
 
-        command = {'posx': x, 'posy': y, 'posz': z}
+        command = {'sr.posx': x, 'sr.posy': y, 'sr.posz': z}
         for key, value in command.items():
             if value is None:
                 continue
-            enc, ratio, telorance = self.hw_config['encoders'][key]
+            enc, ratio, telorance = self.hw_config['encoders'][key.split(
+                '.')[-1]]
             enc_value = status[enc] / ratio
             g2core_value = status[key]
             diversion = abs(enc_value - g2core_value)
