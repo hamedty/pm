@@ -43,7 +43,7 @@ T_RAIL_MOVING_JACK = .7
 
 async def main(system, ALL_NODES_DICT):
     robot_1 = ALL_NODES_DICT['Robot 1']
-    stations = [ALL_NODES_DICT['Station %d' % (i + 1)] for i in range(1)]
+    stations = []  # [ALL_NODES_DICT['Station %d' % (i + 1)] for i in range(1)]
     rail = ALL_NODES_DICT['Rail']
     all_nodes = stations + [robot_1, rail]
 
@@ -62,10 +62,10 @@ async def main(system, ALL_NODES_DICT):
     # await run_stations(stations, lambda s: s.home())
     #
     # print('Home Everything - 2- robot')
-    # await robot_1.home()
+    await robot_1.home()
     #
     # print('Home Everything - 3- rail')
-    await rail.home()
+    # await rail.home()
     # await rail.goto(D_STANDBY, feed=6000)
 
     STATUS = {
@@ -83,8 +83,12 @@ async def main(system, ALL_NODES_DICT):
     while True:
         input('again?')
         t0 = time.time()
-        await do_rail(stations, robot_1, rail, all_nodes, STATUS)
-        print(time.time() - t0)
+        await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
+        # await robot_speed_test(robot_1)
+        print('pickup', time.time() - t0)
+        t0 = time.time()
+        await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
+        print('caping', time.time() - t0)
 
 
 # async def speed_test_station(self):
@@ -133,40 +137,114 @@ async def main(system, ALL_NODES_DICT):
 #         print(traceback.format_exc())
 
 
-async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
-    data = {}
-    data['D_STANDBY'] = D_STANDBY
-    data['D_MIN'] = data['D_STANDBY'] - 125
-    data['D_MAX'] = data['D_MIN'] + 25 * 10
+# async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
+#     data = {}
+#     data['D_STANDBY'] = D_STANDBY
+#     data['D_MIN'] = data['D_STANDBY'] - 125
+#     data['D_MAX'] = data['D_MIN'] + 25 * 10
+#
+#     data['FEED_RAIL_FREE'] = 9000
+#     data['FEED_RAIL_INTACT'] = 6000
+#     data['T_RAIL_JACK1'] = .4
+#     data['T_RAIL_JACK2'] = .7
+#
+#     c = '''
+# ; rail backward
+# G1 Z%(D_MIN).2f F%(FEED_RAIL_FREE)d
+#
+# ; change jacks to moving
+# M100 ({out9: 1, out10: 0})
+# G4 P%(T_RAIL_JACK1).2f
+# M100 ({out9: 1, out10: 1})
+# G4 P%(T_RAIL_JACK2).2f
+#
+# ; rail forward
+# G1 Z%(D_MAX).2f F%(FEED_RAIL_INTACT)d
+#
+# ; change jacks to moving
+# M100 ({out9: 1, out10: 0})
+# G4 P%(T_RAIL_JACK1).2f
+# M100 ({out9: 0, out10: 0})
+# G4 P%(T_RAIL_JACK2).2f
+#
+# ; rail park
+# G1 Z%(D_STANDBY).2f F%(FEED_RAIL_FREE)d
+# ''' % data
+#     print(await rail.send_command_raw(c))
 
-    data['FEED_RAIL_FREE'] = 9000
-    data['FEED_RAIL_INTACT'] = 6000
-    data['T_RAIL_JACK1'] = .4
-    data['T_RAIL_JACK2'] = .7
+
+async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
+    # if not STATUS['stations_full']:
+    #     return
+
+    print('Capping')
+
+    await robot_1.goto(x=X_CAPPING, feed=9000)
+
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(T_RAIL_MOVING_JACK)
+    await rail.set_valves([1, 1])
+
+    await robot_1.goto(y=Y_CAPPING_DOWN_1, feed=9000)
+
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(T_RAIL_FIXED_JACK)
+    await rail.set_valves([0, 0])
+
+    await robot_1.goto(y=Y_CAPPING_DOWN_2, feed=9000)
+    await robot_1.set_valves([0] * 10)
+    await robot_1.goto(y=Y_CAPPING_UP, feed=8000)
+
+    await robot_1.goto(x=X_PARK, feed=9000)
+    await robot_1.goto(y=Y_PARK, feed=9000)
+
+
+async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
+    print('lets go grab input')
+
+    data = {}
+    data['Y_GRAB_IN_UP_1'] = 65
+    data['X_GRAB_IN'] = 284.5
+    data['Y_GRAB_IN_DOWN'] = 0
+    data['Y_GRAB_IN_UP_2'] = data['Y_GRAB_IN_UP_1']
+
+    data['FEED_Y_UP'] = 8000
+    data['FEED_Y_DOWN'] = 9000
+    data['FEED_X'] = 9000
+
+    data['T_GRAB_IN'] = 0.5
 
     c = '''
-; rail backward
-G1 Z%(D_MIN).2f F%(FEED_RAIL_FREE)d
+G1 Y%(Y_GRAB_IN_UP_1).2f F%(FEED_Y_UP)d
+G1 X%(X_GRAB_IN).2f F%(FEED_X)d
+G1 Y%(Y_GRAB_IN_DOWN).2f F%(FEED_Y_DOWN)d
 
-; change jacks to moving
-M100 ({out9: 1, out10: 0})
-G4 P%(T_RAIL_JACK1).2f
-M100 ({out9: 1, out10: 1})
-G4 P%(T_RAIL_JACK2).2f
+M100 ({out1: 1, out2: 1, out3: 1, out4: 1, out5: 1})
+M100 ({out6: 1, out7: 1, out8: 1, out9: 1, out10: 1})
+G4 P%(T_GRAB_IN).2f
 
-; rail forward
-G1 Z%(D_MAX).2f F%(FEED_RAIL_INTACT)d
-
-; change jacks to moving
-M100 ({out9: 1, out10: 0})
-G4 P%(T_RAIL_JACK1).2f
-M100 ({out9: 0, out10: 0})
-G4 P%(T_RAIL_JACK2).2f
-
-; rail park
-G1 Z%(D_STANDBY).2f F%(FEED_RAIL_FREE)d
+G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
 ''' % data
-    print(await rail.send_command_raw(c))
+    await robot_1.send_command_raw(c)
+
+    STATUS['robots_full'] = True
+
+
+async def robot_speed_test(robot_1):
+    c = '''
+G1 Y30 F1000
+G1 X280 F9000
+G4 .1
+G1 X10 F9000
+'''
+
+    c = '''
+G1 Y105 F8000
+G4 .3
+G1 Y5 F9000
+'''
+
+    await robot_1.send_command_raw(c)
 
 
 def run_stations(stations, func):

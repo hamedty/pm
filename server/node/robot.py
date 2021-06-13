@@ -12,17 +12,17 @@ class Robot(Node):
             'ma': 0,  # map to X
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 2,  # microstep = 2
+            'mi': 4,  # microstep = 2
             'po': 1,  # direction
         }),
         ('x', {
             'am': 1,  # standard axis mode
-            'vm': 7000,  # max speed
+            'vm': 20000,  # max speed
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 400,  # max travel
             'jm': 6000,  # max jerk
-            'jh': 7000,  # hominzg jerk
+            'jh': 8000,  # hominzg jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
@@ -41,17 +41,17 @@ class Robot(Node):
             'ma': 1,  # map to Y
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 2,  # microstep = 2
+            'mi': 4,  # microstep = 2
             'po': 1,  # direction
         }),
         ('y', {
             'am': 1,  # standard axis mode
-            'vm': 6000,  # max speed
+            'vm': 20000,  # max speed
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 100,  # max travel
-            'jm': 4000,  # max jerk
-            'jh': 5000,  # homing jerk
+            'jm': 7000,  # max jerk
+            'jh': 8000,  # homing jerk
             'hi': 3,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
@@ -64,6 +64,8 @@ class Robot(Node):
         ('di4mo', 1),  # Limit Switch + - Mode = Active High - NC
         ('di4ac', 1),  # Limit Switch + - Action = Fast Stop
         ('di4fn', 1),  # Limit Switch + - Function = Limit
+        ('jt', 1.00),
+        ('gpa', 2),  # equivalent of G64
     ]
 
     hw_config_base = {

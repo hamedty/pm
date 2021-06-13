@@ -20,7 +20,7 @@ class Rail(Robot):
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 900,  # max travel
-            'jm': 3000,  # max jerk
+            'jm': 2500,  # max jerk
             'jh': 4000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
@@ -31,6 +31,7 @@ class Rail(Robot):
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di2ac', 1),
         ('di2fn', 1),
+        ('gpa', 2),  # equivalent of G64
     ]
 
     hw_config_base = {
