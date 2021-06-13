@@ -74,8 +74,8 @@ class Arduino(object):
             if not self.encoder_check(new_status):
                 new_status['message'] = 'encoder check failed'
                 self.send_command('!')
-                self.send_command('%')
-                self.send_command('^d')
+                time.sleep(.3)
+                self.send_command('\x04')
                 self._encoder_check_status = False
         if message:
             new_status['message'] = message

@@ -1,2 +1,2 @@
 from .main import main
-from .test import test
+from .speed_test import main as speed_test

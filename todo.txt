@@ -1,5 +1,6 @@
-complete do_cap
+encoder failure, yet not properly do the job
 working script
+recover encoder failure
 proper robot homing (go up first)
 problem with station homing? hangs
 add rail jack checks

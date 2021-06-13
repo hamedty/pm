@@ -11,16 +11,16 @@ class Rail(Robot):
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 2,  # microstep = 2
+            'mi': 8,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 4000,  # max speed
+            'vm': 10000,  # max speed
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 900,  # max travel
-            'jm': 4000,  # max jerk
+            'jm': 3000,  # max jerk
             'jh': 4000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
@@ -50,7 +50,7 @@ class Rail(Robot):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 320.0, .2],  # encoder key, ratio, telorance
+            'posz': ['enc1', 320.0, 1],  # encoder key, ratio, telorance
         }
 
     }
@@ -60,11 +60,15 @@ class Rail(Robot):
         return await super(Rail, self).set_valves(values)
 
     async def home(self):
-        await self.send_command_raw('G54', wait=[])
-        return await self.send_command_raw('G28.2 Z0', wait=[])
+        print(await self.send_command({'verb': 'encoder_check_enable', 'enable': False}))
 
-    async def goto(self, z):
-        return await super(Rail, self).goto(z=z)
+        print(await self.send_command_raw('G54', wait=[]))
+        print(await self.send_command_raw('G28.2 Z0', wait=[1, 3, 4]))
+
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
+
+    async def goto(self, z, feed):
+        return await super(Rail, self).goto(z=z, feed=feed)
 
     async def is_homed(self, telorance=50):
         return True

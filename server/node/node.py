@@ -125,7 +125,7 @@ class Node(object):
         else:
             return await self.send_command(command)
 
-    async def send_command(self, command, assert_success=False):
+    async def send_command(self, command, assert_success=True):
         command_str = json.dumps(command) + '\n'
         command_str = command_str.encode()
         if self.lock is None:
@@ -134,19 +134,12 @@ class Node(object):
             self._socket_writer.write(command_str)
             line = await self._socket_reader.readline()
 
-        try:
-            line = json.loads(line)
-            if 'status' in line:
-                self.set_status(**line['status'])
-            if assert_success:
-                assert line['success'], line
-            return line['success'], line
-        except:
-            trace = traceback.format_exc()
-            if assert_success:
-                print(trace)
-                raise
-            return False, trace
+        line = json.loads(line)
+        if 'status' in line:
+            self.set_status(**line['status'])
+        if assert_success:
+            assert line['success'], line
+        return line['success'], line
 
     async def loop(self):
         while True:

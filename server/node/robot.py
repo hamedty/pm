@@ -21,7 +21,7 @@ class Robot(Node):
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 400,  # max travel
-            'jm': 7000,  # max jerk
+            'jm': 6000,  # max jerk
             'jh': 7000,  # hominzg jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
@@ -50,7 +50,7 @@ class Robot(Node):
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 100,  # max travel
-            'jm': 5000,  # max jerk
+            'jm': 4000,  # max jerk
             'jh': 5000,  # homing jerk
             'hi': 3,  # home switch
             'hd': 0,  # homing direction
@@ -86,8 +86,8 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'posx': ['enc2', 480.0, .2],  # encoder key, ratio, telorance
-            'posy': ['enc1', 480.0, .2],
+            'posx': ['enc2', 480.0, 1.0],  # encoder key, ratio, telorance
+            'posy': ['enc1', 480.0, 1.0],
         }
 
     }
@@ -121,15 +121,18 @@ class Robot(Node):
         command.update(arduino_index=self.arduino_id)
         return await super(Robot, self).send_command(command, **kwargs)
 
-    async def goto(self, x=None, y=None, z=None):
+    async def goto(self, x=None, y=None, z=None, feed=None):
         if x is not None:
-            c = 'G0 X%d' % x
+            c = 'G1 X%d' % x
 
         if y is not None:
-            c = 'G0 Y%d' % y
+            c = 'G1 Y%d' % y
 
         if z is not None:
-            c = 'G0 Z%d' % z
+            c = 'G1 Z%d' % z
+
+        if feed is not None:
+            c += ' F%d' % feed
 
         # return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
         status = await self.send_command_raw(c)
