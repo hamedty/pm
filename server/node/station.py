@@ -46,7 +46,7 @@ class Station(Node):
             'am': 1,  # standard axis mode
             'vm': 360000,  # max speed
             'fr': 360000,  # max feed rate
-            'jm': 50000,  # max jerk
+            'jm': 200000,  # max jerk
             'tn': 0,  # min travel
             'tm': 0,  # max travel
         }),

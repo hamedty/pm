@@ -1,16 +1,11 @@
-encoder failure, yet not properly do the job
-working script
-recover encoder failure
+vision exception handling - detect if holder and dosing not exist
+recover encoder failure / encoder failure, yet not properly do the job
 proper robot homing (go up first)
-problem with station homing? hangs
 add rail jack checks
-coupling shaft Y robot shol ast
 read inputs
-proper homing of robot
 better gcodes for arcs
 ---------------------------------------
 relocation in middle based on encoder location
 assert and event - systems interlock - not move until other is out of reach
-detect if holder and dosing not exist
 add stations 6-10 / robot 2
 sensor for rail jack
