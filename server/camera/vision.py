@@ -37,5 +37,5 @@ def detect_holder(frame):
     p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p
-    aligned = (abs(cls) < 3)  # np.bool_ to bool
+    aligned = bool(abs(cls) < 3)  # np.bool_ to bool
     return steps, aligned

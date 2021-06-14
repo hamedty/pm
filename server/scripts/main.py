@@ -24,12 +24,12 @@ async def main(system, ALL_NODES_DICT):
         input('repeat?')
         t0 = time.time()
         await asyncio.gather(
-            # do_station(stations, robot_1, rail, all_nodes, STATUS),
-            do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
+            do_station(stations, robot_1, rail, all_nodes, STATUS),
+            # do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         t0 = time.time()
-        await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+        # await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
         print('exchange:', time.time() - t0)
 
 
@@ -52,10 +52,11 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await rail.set_valves([0] * 2)
 
     await run_stations(stations, lambda s: s.home())
-    await robot_1.home()
-    await rail.home()
+    await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
 
-    await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
+    # await robot_1.home()
+    # await rail.home()
+    # await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
@@ -160,13 +161,14 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
 
 
 async def do_station(stations, robot_1, rail, all_nodes, STATUS):
-    if not STATUS['stations_full']:
-        return
+    # if not STATUS['stations_full']:
+    #     return
 
+    await run_stations(stations, lambda x: x.set_valves([0, 1]))
     align_holders = []
     for station in stations:
         align_holders.append(station.send_command(
-            {'verb': 'align', 'component': 'holder', 'speed': 250}))
+            {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER}))
     align_holders = asyncio.gather(*align_holders)
     await align_holders
 
@@ -177,62 +179,64 @@ async def do_station(stations, robot_1, rail, all_nodes, STATUS):
     data = {}
     # go to aliging location
     data['H_ALIGNING'] = 230
-    data['FEED_ALIGNING'] = 20000
-    data['PAUSE_ALIGNING'] = 0.1
+    data['FEED_ALIGNING'] = FEED_Z_DOWN
 
     # Fall
-    data['PAUSE_FALL_DOSING'] = 0.1
+    data['PAUSE_FALL_DOSING'] = 0.05
 
     # Ready to push
-    data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 5
-    data['FEED_READY_TO_PUSH'] = 10000
-    data['PAUSE_READY_TO_PUSH'] = 0.1
+    data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 8
+    data['FEED_READY_TO_PUSH'] = FEED_Z_UP
+    data['PAUSE_READY_TO_PUSH'] = 0.05
 
     # Push
     data['H_PUSH'] = 239
-    data['FEED_PUSH'] = 2000
+    data['FEED_PUSH'] = FEED_Z_DOWN / 3.0
     data['PAUSE_PUSH'] = 0.1
     data['H_PUSH_BACK'] = data['H_PUSH'] - 5
-    data['FEED_PUSH_BACK'] = 10000
+    data['FEED_PUSH_BACK'] = FEED_Z_UP
 
     # Dance
-    data['PAUSE_JACK_PRE_DANCE_1'] = 0.1
-    data['PAUSE_JACK_PRE_DANCE_2'] = 0.1
-    data['PAUSE_JACK_PRE_DANCE_3'] = 0.1
-    data['H_PRE_DANCE'] = 246
-    data['FEED_PRE_DANCE'] = 15000
+    data['PAUSE_JACK_PRE_DANCE_1'] = 0.05
+    data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
+    data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
+    data['H_PRE_DANCE'] = 244
+    data['FEED_PRE_DANCE'] = FEED_Z_UP
 
-    data['H_DANCE'] = data['H_PRE_DANCE'] - 8
-    data['Y_DANCE'] = 360
-    data['FEED_DANCE'] = 200000
+    dance_rev = 1
+    data['H_DANCE'] = data['H_PRE_DANCE'] - (11 * dance_rev)
+    data['Y_DANCE'] = 360 * dance_rev
+    data['FEED_DANCE'] = FEED_DANCE
 
     # Press
-    data['PAUSE_PRESS1'] = 0.5
-    data['PAUSE_PRESS2'] = 0.6
+    data['PAUSE_PRESS0'] = 0.1
+    data['PAUSE_PRESS1'] = 0.3
+    data['PAUSE_PRESS2'] = 0.5
 
     # Dance Back
-    data['PAUSE_JACK_PRE_DANCE_BACK'] = .3
+    data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
     data['PAUSE_POST_DANCE_BACK'] = .3
 
-    data['H_DANCE_BACK'] = data['H_PRE_DANCE']
-    data['Y_DANCE_BACK'] = 0
+    dance_back_rev = -1.1
+    data['H_DANCE_BACK'] = data['H_DANCE'] - (11 * dance_back_rev)
+    data['Y_DANCE_BACK'] = data['Y_DANCE'] + 360 * dance_back_rev
     data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
     # Deliver
-    data['H_DELIVER'] = 40
-    data['FEED_DELIVER'] = 10000
+    data['H_DELIVER'] = 1
+    data['FEED_DELIVER'] = FEED_Z_UP
 
     c = '''
 ; go to aligning position
 G1 Z%(H_ALIGNING).2f F%(FEED_ALIGNING)d
-G4 P%(PAUSE_ALIGNING).2f
+M100 ({out1: 1})
 ''' % data
 
     await run_stations(stations, lambda s: s.send_command_raw(c))
     print(time.time() - t0)
     t0 = time.time()
 
-    await run_stations(stations, lambda x: x.send_command({'verb': 'align', 'component': 'dosing', 'speed': 25000}, assert_success=True))
+    await run_stations(stations, lambda x: x.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING}, assert_success=True))
     print(time.time() - t0)
     t0 = time.time()
 
@@ -263,20 +267,25 @@ G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
 G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
 
 ; press
-M100 ({out1: 0, out2: 0, out4: 0, out5: 1})
+M100 ({out1: 0, out2: 0, out4: 0})
+G4 P%(PAUSE_PRESS0).2f
+M100 ({out5: 1})
 G4 P%(PAUSE_PRESS1).2f
 M100 ({out3: 1})
 G4 P%(PAUSE_PRESS2).2f
 M100 ({out3: 0})
 
 ; dance back
-M100 ({out1: 1, out5: 0})
+M100 ({out1: 1, out4: 1, out5: 0})
 G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
 G1 Z%(H_DANCE_BACK).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
+M100 ({out4: 0})
 G4 P%(PAUSE_POST_DANCE_BACK).2f
 
 ; deliver
 G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
+M100 ({out4: 1})
+M100 ({out1: 0})
 ''' % data
 
     await run_stations(stations, lambda s: s.send_command_raw(c))

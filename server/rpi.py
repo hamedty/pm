@@ -84,9 +84,6 @@ async def align(command):
                 'dosing': vision.detect_dosing}[component]
     feed = command['speed']
 
-    arduino.send_command(json.dumps({valve: 1}))
-    await asyncio.sleep(.5)
-
     for i in range(20):
         frame = camera.get_frame(roi_index=0)
         steps, aligned = detector(frame)
