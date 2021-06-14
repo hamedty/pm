@@ -66,7 +66,7 @@ class Station(Node):
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 230,  # max travel
-            'jm': 20000,  # max jerk
+            'jm': 15000,  # max jerk
             'jh': 20000,  # homing jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction

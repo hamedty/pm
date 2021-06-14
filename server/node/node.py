@@ -75,11 +75,15 @@ class Node(object):
             await self.scp_from('~/data/dosing.png', './dump/dosing.png')
             await self.scp_from('~/data/holder.png', './dump/holder.png')
         elif command['verb'] == 'dump_training_holder':
-            random_string = generate_random_string()
-            await self.send_command({'verb': 'set_valves', 'valves': [0, 1]}, assert_success=True)
+            await self.set_valves([0, 1])
             await asyncio.sleep(1)
+
+            random_string = generate_random_string()
+            command['verb'] = 'dump_training'
+            command['component'] = 'holder'
+            command['speed'] = 10000
             command['folder_name'] = random_string
-            command['step_per_rev'] = 32 * 200
+
             await self.send_command(command, assert_success=True)
 
             folder_name_src = '~/data/%s' % random_string
@@ -90,37 +94,23 @@ class Node(object):
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':
-            await self.goto('H_ALIGNING')
+            await self.set_valves([1])
             await asyncio.sleep(1)
 
             random_string = generate_random_string()
-            await self.send_command({'verb': 'set_valves', 'valves': [1]}, assert_success=True)
-            await asyncio.sleep(1)
+            command['verb'] = 'dump_training'
+            command['component'] = 'dosing'
+            command['speed'] = 10000
             command['folder_name'] = random_string
-            command['step_per_rev'] = 32 * 200
+
             await self.send_command(command, assert_success=True)
 
             folder_name_src = '~/data/%s' % random_string
             folder_name_dst = '../dataset/dosing_%02d_%s' % (
                 self.ip_short, random_string)
 
-            await self.send_command({'verb': 'set_valves', 'valves': [0]}, assert_success=True)
-            await self.goto(4000)
+            await self.set_valves([0])
             await self.scp_from(folder_name_src, folder_name_dst)
-
-        elif command['verb'] == 'dance':
-            value = int(command.get('value', 1))
-            command = {
-                'verb': 'move_motors',
-                'moves': [
-                    {},
-                    {},
-                    {'steps': 64 * value +
-                        command.get('extra_m3', 0), 'delay': 99},
-                    {'steps': -11 * value, 'delay': 576, 'blocking': 1},
-                ]
-            }
-            return await self.send_command(command)
 
         else:
             return await self.send_command(command)
