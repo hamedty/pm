@@ -70,10 +70,7 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(data);
   }
 
-  $scope.command_text_area = "{\n\
-    'verb': 'raw',\n\
-   'data': 'G28.2 X0'\n\
-}"
+  $scope.command_text_area = COMMAND_TEMPLATE_GCODE
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
@@ -174,6 +171,8 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 COMMAND_TEMPLATE_GCODE = "{\n\
     'verb': 'raw',\n\
     'data': 'G0'\n\
+    'wait_start': [1,3,4],\n\
+    'wait_completion': true,\n\
 }"
 COMMAND_TEMPLATE_ENCODER_CHECK = "{'verb': 'encoder_check_enable', 'enable': true}"
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"

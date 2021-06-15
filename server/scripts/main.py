@@ -51,11 +51,11 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await robot_1.set_valves([0] * 10)
     await rail.set_valves([0] * 2)
 
-    # await run_stations(stations, lambda s: s.home())
-    # await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+    await run_stations(stations, lambda s: s.home())
+    await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
     await robot_1.home()
-    # await rail.home()
-    # await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
+    await rail.home()
+    await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):

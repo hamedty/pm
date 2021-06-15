@@ -164,7 +164,7 @@ def clean_key(key):
     if key.startswith('sr.pos'):
         return key
 
-    if 'r.stat' in key:
+    if key.startswith('r.stat'):
         return key.replace('r.stat', 'sr.stat')
 
     return False

@@ -33,8 +33,7 @@ class Rail(Robot):
         ('di2fn', 1),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'posx': False, 'posy': False,
-                'posz': True, 'vel': False, 'unit': False, 'stat': True}),
+        ('sr', {'line': True, 'stat': True, 'posz': True}),
         ('si', 250),  # also every 250ms
     ]
 
@@ -65,9 +64,10 @@ class Rail(Robot):
         return await super(Rail, self).set_valves(values)
 
     async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[])
         await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
-        await self.send_command_raw('G28.2 Z0')
+
+        await self.send_command_raw('!\n\x04', wait_start=[])
+        await self.send_command_raw('G28.2 Z0', wait_start=[3, 9])
         await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
 
     async def goto(self, z, feed):

@@ -77,8 +77,7 @@ class Station(Node):
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'posx': False, 'posy': False,
-                'posz': True, 'vel': False, 'unit': False, 'stat': True}),
+        ('sr', {'line': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]
 

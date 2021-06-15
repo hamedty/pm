@@ -67,8 +67,7 @@ class Robot(Node):
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'posx': True, 'posy': True,
-                'posz': False, 'vel': False, 'unit': False, 'stat': True}),
+        ('sr', {'line': True, 'posx': True, 'posy': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]
 

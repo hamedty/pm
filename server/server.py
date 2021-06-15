@@ -41,6 +41,7 @@ class System(object):
     async def message_from_ws(self, ws, message_in):
         response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_scenario(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
         message_out = {'type': 'response', 'payload': response}
+        print(message_out)
         ws.write_message(json.dumps(message_out))
 
     def send_architecture(self, ws):
@@ -82,7 +83,9 @@ async def main():
     task2 = asyncio.create_task(
         SYSTEM.script_wrapper_always(scripts.main))
     await task2
+
     await task1
+
 
 if __name__ == '__main__':
     asyncio.run(main())
