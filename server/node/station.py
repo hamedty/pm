@@ -105,7 +105,9 @@ class Station(Node):
     }
 
     async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[])
+        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
+        await asyncio.sleep(1)
+
         await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
         await self.send_command_raw('G28.2 Z0')
         await self.send_command({'verb': 'encoder_check_enable', 'enable': True})

@@ -14,7 +14,8 @@ async def main(system, ALL_NODES_DICT):
 
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
-    return
+    input('continue?')
+
     STATUS = {
         'stations_full': False,
         'robots_full': False,
@@ -24,7 +25,7 @@ async def main(system, ALL_NODES_DICT):
         input('repeat?')
         t0 = time.time()
         await asyncio.gather(
-            do_station(stations, robot_1, rail, all_nodes, STATUS),
+            # do_station(stations, robot_1, rail, all_nodes, STATUS),
             do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)

@@ -102,7 +102,8 @@ class Robot(Node):
         super(Robot, self).__init__(name, ip)
 
     async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[])
+        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
+        await asyncio.sleep(1)
 
         # assert limit switch bala nakhorde
         # await self.send_command_raw('G54')

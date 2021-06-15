@@ -71,7 +71,7 @@ class Arduino(object):
             await asyncio.sleep(0.001)
 
     async def wait_for_command_id(self, command_id):
-        while self._status.get('sr.line', -1) < command_id:
+        while (self._status.get('sr.line', -1) < command_id) and ((self._encoder_check_enabled == False) or (self._encoder_check_status == True)):
             await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):
