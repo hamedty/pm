@@ -8,7 +8,6 @@ import threading
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
-import arduino_constants as _
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
@@ -67,7 +66,10 @@ async def dump_training(command):
             await asyncio.sleep(.033)  # wait for one frame to scan
             arduino.send_command('G10 L20 P1 %s0' % axis)
             arduino.send_command('G1 %s%.02f F%d' % (axis, steps, feed))
-            await arduino.wait_for_status()
+            command_id = arduino.get_command_id()
+            arduino.send_command('N%d M0' % (command_id))
+            await arduino.wait_for_command_id(command_id)
+
             delay = .25
             await asyncio.sleep(delay)  # needed for system to settle
 
@@ -91,10 +93,8 @@ async def align(command):
         if aligned:
             break
 
-        # await arduino.wait_for_status(set_status=5)
         arduino.send_command('G10 L20 P1 %s0' % axis)
         arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
-        # await arduino.wait_for_status()
         await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
 
     arduino.send_command(json.dumps({valve: 0}))
@@ -126,23 +126,33 @@ async def config_arduino(command):
 async def raw(command):
     arduino = ARDUINOS[command.get('arduino_index', 0)]
 
-    wait = command.get('wait', [])
-    if wait:
-        await arduino.wait_for_status(wait_status=wait)
-        arduino._status['sr.stat'] = -1
-    print(command)
-    arduino.send_command(command['data'])
+    wait_start = command['wait_start']
+    wait_completion = command['wait_completion']
+    command_raw = command['data']
 
-    if wait:
-        await arduino.wait_for_status(wait_status=wait)
+    if wait_start:
+        await arduino.wait_for_status(wait_list=wait_start)
 
+    if wait_completion:
+        command_id = arduino.get_command_id()
+        command_raw = command_raw + '\nN%d M0' % command_id
+
+    arduino.send_command(command_raw)
+
+    if wait_completion:
+        await arduino.wait_for_command_id(command_id)
+
+    status = arduino.get_status()
     if arduino._encoder_check_enabled:
         if not arduino._encoder_check_status:
             arduino._encoder_check_enabled = False
             arduino._encoder_check_status = True
-            return {'success': False, 'status': arduino.get_status()}
+            return {'success': False, 'status': status}
 
-    return {'success': True, 'status': arduino.get_status()}
+    if status['f.2'] != 0:
+        return {'success': False, 'message': 'firmware status failed', 'status': status}
+
+    return {'success': True, 'status': status}
 
 
 async def encoder_check_enable(command):
@@ -158,7 +168,7 @@ async def get_status(command):
     if arduino is None:
         status = {'message': 'arduino not created'}
     else:
-        arduino.send_command('$')
+        arduino.send_command('{stat:n}')
         status = arduino.get_status()
     return {'success': True, 'status': status}
 

@@ -1,6 +1,7 @@
 from .node import Node
 import os
 import json
+import asyncio
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(PATH)
@@ -75,6 +76,10 @@ class Station(Node):
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
+        ('sv', 2),  # Status report enabled
+        ('sr', {'line': True, 'posx': False, 'posy': False,
+                'posz': True, 'vel': False, 'unit': False, 'stat': True}),
+        ('si', 250),  # also every 250ms
     ]
 
     hw_config_base = {
@@ -101,7 +106,10 @@ class Station(Node):
     }
 
     async def home(self):
-        return await self.send_command_raw('G28.2 Z0')
+        await self.send_command_raw('!\n\x04', wait_start=[])
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
+        await self.send_command_raw('G28.2 Z0')
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
 
     async def send_command_create_camera(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
@@ -118,8 +126,3 @@ class Station(Node):
         #     data = kwargs['data']
         #     kwargs['data'] = data
         super(Station, self).set_status(**kwargs)
-
-    async def home(self):
-        await self.send_command_raw('G54', wait=[])
-        await self.send_command_raw('G28.2 Z0', wait=[])
-        await self.send_command_raw('G28.2 Z0')

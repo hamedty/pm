@@ -66,6 +66,10 @@ class Robot(Node):
         ('di4fn', 1),  # Limit Switch + - Function = Limit
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64
+        ('sv', 2),  # Status report enabled
+        ('sr', {'line': True, 'posx': True, 'posy': True,
+                'posz': False, 'vel': False, 'unit': False, 'stat': True}),
+        ('si', 250),  # also every 250ms
     ]
 
     hw_config_base = {
@@ -99,6 +103,8 @@ class Robot(Node):
         super(Robot, self).__init__(name, ip)
 
     async def home(self):
+        await self.send_command_raw('!\n\x04', wait_start=[])
+
         # assert limit switch bala nakhorde
         # await self.send_command_raw('G54')
         # await self.send_command_raw('G10 L20 P1 Y0')
@@ -115,7 +121,7 @@ class Robot(Node):
 
         # assert Limit Switch Y+ == 1
         await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
-        await self.send_command_raw('G28.2 X0', wait=[])
+        await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
         await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
 
@@ -138,7 +144,6 @@ class Robot(Node):
 
         # return await self.send_command({'verb': 'move_motors', 'moves': [y, x]}, assert_success=True)
         status = await self.send_command_raw(c)
-        print(status)
 
         command = {'sr.posx': x, 'sr.posy': y, 'sr.posz': z}
         for key, value in command.items():

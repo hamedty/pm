@@ -26,11 +26,11 @@ class Arduino(object):
         self._hw_config = {}
         self._encoder_check_enabled = False
         self._encoder_check_status = True
-        self.set_status(message='object created')
         self.usb_index = usb_index
+        self.set_status(message='object created')
         self._open_port()
         self.lock = Lock()
-        self._last_command_id = 1
+        self._last_command_id = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
         self.set_status(message='usb port opened')
@@ -62,14 +62,22 @@ class Arduino(object):
         self.ser.write(data.encode())
         self.lock.release()
 
-    async def wait_for_status(self, wait_status=[3], set_status=None):
-        while self._status.get('sr.stat', -1) not in wait_status:
+    def get_command_id(self):
+        self._last_command_id += 1
+        return self._last_command_id
+
+    async def wait_for_status(self, wait_list):
+        while self._status.get('sr.stat', -1) not in wait_list:
             await asyncio.sleep(0.001)
-        if set_status is not None:
-            self._status['sr.stat'] = set_status
+
+    async def wait_for_command_id(self, command_id):
+        while self._status.get('sr.line', -1) < command_id:
+            await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):
-        new_status = clean_dictionary(flatten(data))
+        flatten_data = flatten(data)
+        new_status = clean_dictionary(flatten_data)
+
         if self._encoder_check_enabled:
             if not self.encoder_check(new_status):
                 new_status['message'] = 'encoder check failed'
@@ -134,7 +142,7 @@ def clean_dictionary(dictionary):
     return new_dict
 
 
-GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'sr.stat'}
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'sr.stat', 'sr.line', 'f.2'}
 
 
 def clean_key(key):
@@ -155,5 +163,8 @@ def clean_key(key):
         return key.replace('r.pos.', 'sr.pos')
     if key.startswith('sr.pos'):
         return key
+
+    if 'r.stat' in key:
+        return key.replace('r.stat', 'sr.stat')
 
     return False

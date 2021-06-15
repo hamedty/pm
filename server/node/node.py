@@ -61,10 +61,16 @@ class Node(object):
         await self.send_command({'verb': 'create_arduino'})
         return True
 
-    async def send_command_raw(self, data, wait=[3]):
-        command = {'verb': 'raw', 'data': data, 'wait': wait}
+    async def send_command_raw(self, data, wait_start=[1, 3, 4], wait_completion=True):
+        command = {
+            'verb': 'raw',
+            'data': data,
+            'wait_start': wait_start,
+            'wait_completion': wait_completion,
+        }
+
         res = await self.send_command(command)
-        if len(wait):
+        if wait_completion:
             return self.get_status()
         else:
             return res
@@ -166,7 +172,7 @@ class Node(object):
         for i in range(1, N + 1):
             data[i] = values[i - 1]
         data = {'out': data}
-        return await self.send_command_raw(json.dumps(data), wait=[])
+        return await self.send_command_raw(json.dumps(data), wait_start=[], wait_completion=False)
 
     async def send_command_create_camera(self):
         return

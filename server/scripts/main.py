@@ -14,7 +14,7 @@ async def main(system, ALL_NODES_DICT):
 
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
-
+    return
     STATUS = {
         'stations_full': False,
         'robots_full': False,
@@ -25,11 +25,11 @@ async def main(system, ALL_NODES_DICT):
         t0 = time.time()
         await asyncio.gather(
             do_station(stations, robot_1, rail, all_nodes, STATUS),
-            # do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
+            do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         t0 = time.time()
-        # await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+        await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
         print('exchange:', time.time() - t0)
 
 
@@ -51,10 +51,9 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await robot_1.set_valves([0] * 10)
     await rail.set_valves([0] * 2)
 
-    await run_stations(stations, lambda s: s.home())
-    await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
-
-    # await robot_1.home()
+    # await run_stations(stations, lambda s: s.home())
+    # await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+    await robot_1.home()
     # await rail.home()
     # await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
 
@@ -145,32 +144,43 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
     await asyncio.sleep(data['T_OUTPUT_GRIPP'])
 
     c = '''
-    M100 ({out1: 0})
+    M100 ({out1: 0, out2: 1})
     G4 P%(T_OUTPUT_RELEASE).2f
     G1 Z%(Z_OUTPUT_SAFE).2f F%(FEED_Z_UP)d
     ''' % data
     await run_stations(stations, lambda x: x.send_command_raw(c))
 
+    # Start Align Holder
+    create_station_holder_align_task(
+        stations, robot_1, rail, all_nodes, STATUS)
+
     c = '''
     G1 X%(X_OUTPUT_SAFE).2f F%(FEED_X)d
     ''' % data
     await robot_1.send_command_raw(c)
-
     # STATUS['robots_full'] = False
     STATUS['stations_full'] = True
 
 
-async def do_station(stations, robot_1, rail, all_nodes, STATUS):
-    # if not STATUS['stations_full']:
-    #     return
+ALIGN_HOLDER_TASK = None
 
-    await run_stations(stations, lambda x: x.set_valves([0, 1]))
+
+def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS):
+    global ALIGN_HOLDER_TASK
     align_holders = []
     for station in stations:
         align_holders.append(station.send_command(
             {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER}))
-    align_holders = asyncio.gather(*align_holders)
-    await align_holders
+    ALIGN_HOLDER_TASK = asyncio.gather(*align_holders)
+
+
+async def do_station(stations, robot_1, rail, all_nodes, STATUS):
+    if not STATUS['stations_full']:
+        return
+
+    # await create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
+    global ALIGN_HOLDER_TASK
+    await ALIGN_HOLDER_TASK
 
     print('prepare dosing')
 
@@ -285,7 +295,6 @@ G4 P%(PAUSE_POST_DANCE_BACK).2f
 ; deliver
 G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
 M100 ({out4: 1})
-M100 ({out1: 0})
 ''' % data
 
     await run_stations(stations, lambda s: s.send_command_raw(c))
@@ -364,7 +373,7 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     data = {}
     data['D_STANDBY'] = D_STANDBY
     data['D_MIN'] = data['D_STANDBY'] - 125
-    data['D_MAX'] = data['D_MIN'] + 25 * 10
+    data['D_MAX'] = data['D_MIN']  # + 25 * 10
 
     data['FEED_RAIL_FREE'] = FEED_RAIL_FREE
     data['FEED_RAIL_INTACT'] = FEED_RAIL_INTACT

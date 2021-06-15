@@ -32,6 +32,10 @@ class Rail(Robot):
         ('di2ac', 1),
         ('di2fn', 1),
         ('gpa', 2),  # equivalent of G64
+        ('sv', 2),  # Status report enabled
+        ('sr', {'line': True, 'posx': False, 'posy': False,
+                'posz': True, 'vel': False, 'unit': False, 'stat': True}),
+        ('si', 250),  # also every 250ms
     ]
 
     hw_config_base = {
@@ -61,11 +65,9 @@ class Rail(Robot):
         return await super(Rail, self).set_valves(values)
 
     async def home(self):
-        print(await self.send_command({'verb': 'encoder_check_enable', 'enable': False}))
-
-        print(await self.send_command_raw('G54', wait=[]))
-        print(await self.send_command_raw('G28.2 Z0', wait=[1, 3, 4]))
-
+        await self.send_command_raw('!\n\x04', wait_start=[])
+        await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
+        await self.send_command_raw('G28.2 Z0')
         await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
 
     async def goto(self, z, feed):
