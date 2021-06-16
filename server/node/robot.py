@@ -105,21 +105,6 @@ class Robot(Node):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
 
-        # assert limit switch bala nakhorde
-        # await self.send_command_raw('G54')
-        # await self.send_command_raw('G10 L20 P1 Y0')
-        # await self.send_command_raw('G1 Y10 F500')
-
-        # await self.send_command_raw('$clear')
-
-        # await self.send_command_raw('{lim:0}')
-        # await self.send_command_raw('G10 L20 P1 Y10')
-        # await self.send_command_raw('G1 Y0 F500')
-        # await self.send_command_raw('{lim:1}')
-
-        # assert limit switch bala nakhorde
-
-        # assert Limit Switch Y+ == 1
         await self.send_command({'verb': 'encoder_check_enable', 'enable': False})
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')

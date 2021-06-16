@@ -1,9 +1,8 @@
-recover encoder failure (G28.3 Z10)
-vision exception handling - detect if holder and dosing not exist
-proper robot homing (go up first)
+test station2 stand alone and set numbers
 more stations
 more robots
+recover encoder failure (G28.3 Z10)
+vision exception handling - detect if holder and dosing not exist
 add rail jack checks
-read inputs
+read inputs / event / systems interlock / assert
 better gcodes for arcs
-event / systems interlock / assert

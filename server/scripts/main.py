@@ -9,13 +9,12 @@ from .recipe import *
 # do_exchange
 
 
-async def main(system, ALL_NODES_DICT):
-    all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES_DICT)
+async def main(system, ALL_NODES):
+    all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
 
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
-    input('continue?')
-
+    return
     STATUS = {
         'stations_full': False,
         'robots_full': False,
@@ -34,10 +33,13 @@ async def main(system, ALL_NODES_DICT):
         print('exchange:', time.time() - t0)
 
 
-async def gather_all_nodes(system, ALL_NODES_DICT):
-    robot_1 = ALL_NODES_DICT['Robot 1']
-    stations = [ALL_NODES_DICT['Station %d' % (i + 1)] for i in range(1)]
-    rail = ALL_NODES_DICT['Rail']
+async def gather_all_nodes(system, ALL_NODES):
+    stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
+    robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
+    robot_1 = robots[0]
+    rails = [node for node in ALL_NODES if node.name.startswith('Rail')]
+    rail = rails[0]
+
     all_nodes = stations + [robot_1, rail]
 
     # All Nodes Ready?
@@ -54,9 +56,9 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
 
     await run_stations(stations, lambda s: s.home())
     await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
-    await robot_1.home()
-    await rail.home()
-    await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE)
+    # await robot_1.home()
+    # await rail.home()
+    # await rail.goto(D_STANDBY, feed=FEED_RAIL_FREE * .6)
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):

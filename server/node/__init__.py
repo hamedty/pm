@@ -9,7 +9,7 @@ ALL_NODES = [
     Rail('Rail', '192.168.44.100', 2),
 
     Station('Station 1', '192.168.44.101'),
-    # Station('Station 2', '192.168.44.102'),
+    Station('Station 2', '192.168.44.102'),
     # Station('Station 3', '192.168.44.103'),
     # Station('Station 4', '192.168.44.104'),
     # Station('Station 5', '192.168.44.105'),

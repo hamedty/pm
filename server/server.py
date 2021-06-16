@@ -63,7 +63,7 @@ class System(object):
             await asyncio.sleep(.1)
 
     async def script_wrapper_always(self, func):
-        await func(self, ALL_NODES_DICT)
+        await func(self, ALL_NODES)
 
         # while True:
         #     input('start?')
