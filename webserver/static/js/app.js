@@ -30,11 +30,11 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
-        $scope.nodes[0].selected = true;
-        // $scope.nodes[3].selected = true;
-        // $scope.nodes[4].selected = true;
-        // $scope.nodes[5].selected = true;
-        // $scope.nodes[6].selected = true;
+        $scope.nodes[2].selected = true;
+        $scope.nodes[3].selected = true;
+        $scope.nodes[4].selected = true;
+        $scope.nodes[5].selected = true;
+        $scope.nodes[6].selected = true;
         // $scope.nodes[7].selected = true;
         break;
       case 'status_update':

@@ -66,7 +66,7 @@ class Station(Node):
             'vm': 35000,  # max speed
             'fr': 800000,  # max feed rate
             'tn': 0,  # min travel
-            'tm': 230,  # max travel
+            'tm': 250,  # max travel
             'jm': 15000,  # max jerk
             'jh': 20000,  # homing jerk
             'hi': 1,  # home switch
@@ -97,11 +97,9 @@ class Station(Node):
         'encoders': {
             'posz': ['enc1', 300.0, .2],  # encoder key, ratio, telorance
         },
-        'points': {
-            'H_ALIGNING': 21500,
-            'H_PUSH': 23000,
-        }
-
+        'H_ALIGNING': 210,
+        'H_PUSH': 219,
+        'H_PRE_DANCE': 224,
     }
 
     async def home(self):
