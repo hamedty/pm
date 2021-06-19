@@ -41,21 +41,7 @@ def detect_holder(frame, offset):
     return steps, aligned
 
 
-def holder_present(frame, direction, x0, dx):
+def object_present(frame, threshold):
     threshold = 70
-    y_margin = 40
-    x_margin = 20
-
-    frame = frame[:, x0 + x_margin: x0 + dx - x_margin, :]
-    if direction == 'up':
-        frame = frame[:y_margin, :, :]
-    else:
-        frame = frame[-y_margin:, :, :]
-    value = frame.mean()
-    return bool(value > threshold)
-
-
-def dosing_present(frame):
-    threshold = 50
     value = frame.mean()
     return bool(value > threshold)

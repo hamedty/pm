@@ -19,7 +19,6 @@ async def main(system, ALL_NODES):
         'stations_full': False,
         'robots_full': False,
     }
-
     while True:
         input('repeat?')
         t0 = time.time()
@@ -54,8 +53,8 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await run_stations(stations, lambda x: x.set_valves([0] * 3))
     # await run_stations(stations, lambda x: x.set_valves([0] * 5))
     # input('go?')
-    await robot_1.set_valves([0] * 10)
-    await rail.set_valves([0] * 2)
+    # await robot_1.set_valves([0] * 10)
+    # await rail.set_valves([0] * 2)
 
     await run_stations(stations, lambda s: s.home())
     await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
@@ -168,16 +167,13 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
     STATUS['stations_full'] = True
 
 
-ALIGN_HOLDER_TASK = None
+ALIGN_HOLDER_TASK = {}
 
 
 def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS):
-    global ALIGN_HOLDER_TASK
-    align_holders = []
     for station in stations:
-        align_holders.append(station.send_command(
-            {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER}))
-    ALIGN_HOLDER_TASK = asyncio.gather(*align_holders)
+        ALIGN_HOLDER_TASK[station.name] = asyncio.create_task(station.send_command(
+            {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}))
 
 
 async def do_stations(stations, robot_1, rail, all_nodes, STATUS, standalone):
@@ -188,20 +184,20 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS, standalone):
         await run_stations(stations, lambda x: x.set_valves([0, 1]))
         create_station_holder_align_task(
             stations, robot_1, rail, all_nodes, STATUS)
-    global ALIGN_HOLDER_TASK
-    await ALIGN_HOLDER_TASK
 
-    print('prepare dosing')
     tasks = []
     for station in stations:
-        tasks.append(do_station(station, STATUS))
-    await asyncio.gather(*tasks)
+        tasks.append(do_station(station, STATUS,
+                                ALIGN_HOLDER_TASK[station.name]))
+
+    res = await asyncio.gather(*tasks)
+    print(res)
 
     if standalone:
         await run_stations(stations, lambda x: x.set_valves([0]))
 
 
-async def do_station(station, STATUS):
+async def do_station(station, STATUS, align_holder_task):
     t0 = time.time()
 
     data = {}
@@ -254,21 +250,13 @@ async def do_station(station, STATUS):
     data['H_DELIVER'] = 1
     data['FEED_DELIVER'] = FEED_Z_UP
 
-    c = '''
+    c_come_down = '''
 ; go to aligning position
 G1 Z%(H_ALIGNING).2f F%(FEED_ALIGNING)d
 M100 ({out1: 1})
 ''' % data
 
-    await station.send_command_raw(c)
-    print('aligning 1', station.ip, time.time() - t0)
-    t0 = time.time()
-
-    await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING})
-    print('aligning 2', station.ip, time.time() - t0)
-    t0 = time.time()
-
-    c = '''
+    c_process = '''
 ; release dosing
 M100 ({out1: 0, out4: 0})
 G4 P%(PAUSE_FALL_DOSING).2f
@@ -315,7 +303,41 @@ G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
 M100 ({out4: 1})
 ''' % data
 
-    await station.send_command_raw(c)
+    c_ignore = '''
+    G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
+    M100 ({out1: 0, out2: 0, out4: 1})
+    ''' % data
+
+    _, holder_res = await align_holder_task
+    if holder_res['exists'] and not holder_res['aligned']:
+        input('couldnt align holder, remove objects from %s' % station.name)
+        await station.send_command_raw(c_ignore)
+        return
+
+    await station.send_command_raw(c_come_down)
+    print('aligning 1', station.ip, time.time() - t0)
+    t0 = time.time()
+
+    _, dosgin_res = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10})
+
+    if dosgin_res['exists'] and not dosgin_res['aligned']:
+        await station.send_command_raw(c_ignore)
+        input('couldnt align dosing, remove objects from %s' % station.name)
+        return
+
+    if (not dosgin_res['exists']) and (not holder_res['exists']):
+        await station.send_command_raw(c_ignore)
+        return
+
+    if (not dosgin_res['exists']) or (not holder_res['exists']):
+        await station.send_command_raw(c_ignore)
+        input('a component is missing, remove objects from %s' % station.name)
+        return
+
+    print('aligning 2', station.ip, time.time() - t0)
+    t0 = time.time()
+
+    await station.send_command_raw(c_process)
     print('aligning 3', station.ip, time.time() - t0)
 
 

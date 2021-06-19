@@ -1,8 +1,6 @@
-vision exception handling - detect if holder and dosing not exist
-why Z motor cant handle two high speed together
 recover encoder failure (G28.3 Z10)
+event / systems interlock / read inputs / assert
+why Z motor cant handle two high speed together
 add rail jack checks
-read inputs / event / systems interlock / assert
-better gcodes for arcs
----------------------------------------------------
-gripper SD2 khareje mehvar ast
+better script / gcodes for arcs / check for inputs
+second half of machine

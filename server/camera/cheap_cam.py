@@ -16,9 +16,11 @@ class CheapCam(CameraBase):
         CAP_PROP_FRAME_WIDTH: 640,
         CAP_PROP_FRAME_HEIGHT: 480,
     }
+    LAST_FRAME = None
 
     def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_index=None):
-        frame = super().get_frame(pre_fetch)
+        if pre_fetch >= 0:
+            self.frame = super().get_frame(pre_fetch)
         if roi_index is not None:
             roi = self.settings['roi'][roi_index]
             x0 = roi['x0']
@@ -26,7 +28,7 @@ class CheapCam(CameraBase):
             y0 = roi['y0']
             y1 = roi['y0'] + roi['dy']
 
-            frame = frame[y0:y1, x0:x1, :]
+            frame = self.frame[y0:y1, x0:x1, :]
         return frame
 
     def dump_frame(self, roi_index=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):

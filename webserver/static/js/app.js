@@ -181,8 +181,8 @@ COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'revs': 3,\n\
   'frames_per_rev': 400,\n\
 }"
-COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder'}"
-COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing'}"
+COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder', 'retries': 10}"
+COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing', 'retries': 10}"
 COMMAND_TEMPLATE_DANCE = "{'verb': 'dance', 'value': 1}"
 
 

@@ -101,6 +101,7 @@ class Station(Node):
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
         'dosing_offset': 0,
+        'holder_webcam_direction': 'up',
     }
 
     async def home(self):
@@ -113,11 +114,24 @@ class Station(Node):
 
     async def send_command_create_camera(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
-        roi = VISION_ANNOTATION
+        roi_dosing = annotation_data['dosing_roi']
+        roi_dosing_presence = roi_dosing
+        roi_holder = annotation_data['holder_roi']
+
+        # ROI holder presence
+        x_margin = 20
+        y_margin = 40
+        x0 = roi_holder['x0'] + x_margin
+        dx = roi_holder['dx'] - 2 * x_margin
+        dy = y_margin
+        direction = self.hw_config['holder_webcam_direction']
+        y0 = 0 if (direction == 'up') else 480 - y_margin
+        roi_holder_presence = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
+
         command = {
             'verb': 'create_camera',
-            'dosing_roi': [annotation_data['dosing_roi']],
-            'holder_roi': [annotation_data['holder_roi']],
+            'dosing_roi': (roi_dosing, roi_dosing_presence),
+            'holder_roi': (roi_holder, roi_holder_presence),
         }
         return await self.send_command(command)
 

@@ -33,6 +33,7 @@ ALL_NODES_DICT['Station 2'].hw_config['H_ALIGNING'] = 227
 ALL_NODES_DICT['Station 2'].hw_config['H_PUSH'] = 237
 ALL_NODES_DICT['Station 2'].hw_config['H_PRE_DANCE'] = 244
 ALL_NODES_DICT['Station 2'].hw_config['dosing_offset'] = -2
+ALL_NODES_DICT['Station 2'].hw_config['holder_webcam_direction'] = 'down'
 
 ALL_NODES_DICT['Station 3'].hw_config['H_ALIGNING'] = 226
 ALL_NODES_DICT['Station 3'].hw_config['H_PUSH'] = 237
@@ -42,6 +43,7 @@ ALL_NODES_DICT['Station 4'].hw_config['H_ALIGNING'] = 226
 ALL_NODES_DICT['Station 4'].hw_config['H_PUSH'] = 238.5
 ALL_NODES_DICT['Station 4'].hw_config['H_PRE_DANCE'] = 245
 ALL_NODES_DICT['Station 4'].hw_config['dosing_offset'] = -2
+ALL_NODES_DICT['Station 4'].hw_config['holder_webcam_direction'] = 'down'
 
 ALL_NODES_DICT['Station 5'].hw_config['H_ALIGNING'] = 224
 ALL_NODES_DICT['Station 5'].hw_config['H_PUSH'] = 243

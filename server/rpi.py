@@ -84,12 +84,20 @@ async def align(command):
     valve = {'holder': 'out2', 'dosing': 'out1'}[component]
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
-
+    presence_threshold = {'holder': 70, 'dosing': 50}[component]
+    retries = command['retries']
     offset = arduino._hw_config.get(component + '_offset', 0)
     feed = command['speed']
 
-    for i in range(20):
+    aligned = False
+    exists = False
+    for i in range(retries):
         frame = camera.get_frame(roi_index=0)
+        if i == 0:  # check existance for the first time
+            frame2 = camera.get_frame(pre_fetch=-1, roi_index=1)
+            if not vision.object_present(frame2, presence_threshold):
+                break
+            exists = True
         steps, aligned = detector(frame, offset)
         print(steps, aligned)
         if aligned:
@@ -100,7 +108,7 @@ async def align(command):
         await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
 
     arduino.send_command(json.dumps({valve: 0}))
-    return {'success': aligned}
+    return {'success': True, 'aligned': aligned, 'exists': exists}
 
 
 async def create_arduino(command):
