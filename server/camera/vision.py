@@ -8,9 +8,9 @@ except:
     pass  # robot and rail
 
 
-def detect_dosing(frame):
+def detect_dosing(frame, offset):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cls = clf_dosing.predict([frame.flatten()])[0]
+    cls = clf_dosing.predict([frame.flatten()])[0] + offset
 
     step_per_rev = 360
     class_per_rev = 100
@@ -28,9 +28,9 @@ def detect_dosing(frame):
     return steps, aligned
 
 
-def detect_holder(frame):
+def detect_holder(frame, offset):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cls = clf_holder.predict([frame.flatten()])[0]
+    cls = clf_holder.predict([frame.flatten()])[0] + offset
 
     step_per_rev = 360
     class_per_rev = 100
@@ -39,3 +39,23 @@ def detect_holder(frame):
     steps = -cls * p
     aligned = bool(abs(cls) < 3)  # np.bool_ to bool
     return steps, aligned
+
+
+def holder_present(frame, direction, x0, dx):
+    threshold = 70
+    y_margin = 40
+    x_margin = 20
+
+    frame = frame[:, x0 + x_margin: x0 + dx - x_margin, :]
+    if direction == 'up':
+        frame = frame[:y_margin, :, :]
+    else:
+        frame = frame[-y_margin:, :, :]
+    value = frame.mean()
+    return bool(value > threshold)
+
+
+def dosing_present(frame):
+    threshold = 50
+    value = frame.mean()
+    return bool(value > threshold)

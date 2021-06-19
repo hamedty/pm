@@ -27,11 +27,12 @@ assert len(ALL_NODES_DICT) == len(ALL_NODES)
 ALL_NODES_DICT['Station 1'].hw_config['H_ALIGNING'] = 230
 ALL_NODES_DICT['Station 1'].hw_config['H_PUSH'] = 239
 ALL_NODES_DICT['Station 1'].hw_config['H_PRE_DANCE'] = 245
+ALL_NODES_DICT['Station 1'].hw_config['dosing_offset'] = -2
 
 ALL_NODES_DICT['Station 2'].hw_config['H_ALIGNING'] = 227
 ALL_NODES_DICT['Station 2'].hw_config['H_PUSH'] = 237
 ALL_NODES_DICT['Station 2'].hw_config['H_PRE_DANCE'] = 244
-
+ALL_NODES_DICT['Station 2'].hw_config['dosing_offset'] = -2
 
 ALL_NODES_DICT['Station 3'].hw_config['H_ALIGNING'] = 226
 ALL_NODES_DICT['Station 3'].hw_config['H_PUSH'] = 237
@@ -40,7 +41,8 @@ ALL_NODES_DICT['Station 3'].hw_config['H_PRE_DANCE'] = 244
 ALL_NODES_DICT['Station 4'].hw_config['H_ALIGNING'] = 226
 ALL_NODES_DICT['Station 4'].hw_config['H_PUSH'] = 238.5
 ALL_NODES_DICT['Station 4'].hw_config['H_PRE_DANCE'] = 245
+ALL_NODES_DICT['Station 4'].hw_config['dosing_offset'] = -2
 
 ALL_NODES_DICT['Station 5'].hw_config['H_ALIGNING'] = 224
-ALL_NODES_DICT['Station 5'].hw_config['H_PUSH'] = 244.5
+ALL_NODES_DICT['Station 5'].hw_config['H_PUSH'] = 243
 ALL_NODES_DICT['Station 5'].hw_config['H_PRE_DANCE'] = 244

@@ -84,11 +84,13 @@ async def align(command):
     valve = {'holder': 'out2', 'dosing': 'out1'}[component]
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
+
+    offset = arduino._hw_config.get(component + '_offset', 0)
     feed = command['speed']
 
     for i in range(20):
         frame = camera.get_frame(roi_index=0)
-        steps, aligned = detector(frame)
+        steps, aligned = detector(frame, offset)
         print(steps, aligned)
         if aligned:
             break

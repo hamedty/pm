@@ -2,7 +2,7 @@ import time
 import asyncio
 from .recipe import *
 
-# do_station, do_rail_n_robots
+# do_stations, do_rail_n_robots
 #               do_robots_cap
 #               do_rail
 #               do_robots_pickup
@@ -14,7 +14,7 @@ async def main(system, ALL_NODES):
 
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
-    return
+
     STATUS = {
         'stations_full': False,
         'robots_full': False,
@@ -24,12 +24,13 @@ async def main(system, ALL_NODES):
         input('repeat?')
         t0 = time.time()
         await asyncio.gather(
-            # do_station(stations, robot_1, rail, all_nodes, STATUS),
-            do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
+            do_stations(stations, robot_1, rail, all_nodes,
+                        STATUS, standalone=True),
+            # do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         t0 = time.time()
-        await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+        # await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
         print('exchange:', time.time() - t0)
 
 
@@ -50,7 +51,9 @@ async def gather_all_nodes(system, ALL_NODES):
 
 
 async def home_all_nodes(all_nodes, rail, robot_1, stations):
-    await run_stations(stations, lambda x: x.set_valves([0] * 5))
+    await run_stations(stations, lambda x: x.set_valves([0] * 3))
+    # await run_stations(stations, lambda x: x.set_valves([0] * 5))
+    # input('go?')
     await robot_1.set_valves([0] * 10)
     await rail.set_valves([0] * 2)
 
@@ -177,21 +180,33 @@ def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
     ALIGN_HOLDER_TASK = asyncio.gather(*align_holders)
 
 
-async def do_station(stations, robot_1, rail, all_nodes, STATUS):
-    if not STATUS['stations_full']:
+async def do_stations(stations, robot_1, rail, all_nodes, STATUS, standalone):
+    if (not STATUS['stations_full']) and (not standalone):
         return
 
-    # await create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
+    if standalone:
+        await run_stations(stations, lambda x: x.set_valves([0, 1]))
+        create_station_holder_align_task(
+            stations, robot_1, rail, all_nodes, STATUS)
     global ALIGN_HOLDER_TASK
     await ALIGN_HOLDER_TASK
 
     print('prepare dosing')
+    tasks = []
+    for station in stations:
+        tasks.append(do_station(station, STATUS))
+    await asyncio.gather(*tasks)
 
+    if standalone:
+        await run_stations(stations, lambda x: x.set_valves([0]))
+
+
+async def do_station(station, STATUS):
     t0 = time.time()
 
     data = {}
     # go to aliging location
-    data['H_ALIGNING'] = 230
+    data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
     data['FEED_ALIGNING'] = FEED_Z_DOWN
 
     # Fall
@@ -203,7 +218,7 @@ async def do_station(stations, robot_1, rail, all_nodes, STATUS):
     data['PAUSE_READY_TO_PUSH'] = 0.05
 
     # Push
-    data['H_PUSH'] = 239
+    data['H_PUSH'] = station.hw_config['H_PUSH']
     data['FEED_PUSH'] = FEED_Z_DOWN / 3.0
     data['PAUSE_PUSH'] = 0.1
     data['H_PUSH_BACK'] = data['H_PUSH'] - 5
@@ -213,7 +228,7 @@ async def do_station(stations, robot_1, rail, all_nodes, STATUS):
     data['PAUSE_JACK_PRE_DANCE_1'] = 0.05
     data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
     data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
-    data['H_PRE_DANCE'] = 244
+    data['H_PRE_DANCE'] = station.hw_config['H_PRE_DANCE']
     data['FEED_PRE_DANCE'] = FEED_Z_UP
 
     dance_rev = 1
@@ -245,12 +260,12 @@ G1 Z%(H_ALIGNING).2f F%(FEED_ALIGNING)d
 M100 ({out1: 1})
 ''' % data
 
-    await run_stations(stations, lambda s: s.send_command_raw(c))
-    print(time.time() - t0)
+    await station.send_command_raw(c)
+    print('aligning 1', station.ip, time.time() - t0)
     t0 = time.time()
 
-    await run_stations(stations, lambda x: x.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING}, assert_success=True))
-    print(time.time() - t0)
+    await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING})
+    print('aligning 2', station.ip, time.time() - t0)
     t0 = time.time()
 
     c = '''
@@ -300,10 +315,8 @@ G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
 M100 ({out4: 1})
 ''' % data
 
-    await run_stations(stations, lambda s: s.send_command_raw(c))
-    print(time.time() - t0)
-
-    return
+    await station.send_command_raw(c)
+    print('aligning 3', station.ip, time.time() - t0)
 
 
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):

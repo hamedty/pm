@@ -100,6 +100,7 @@ class Station(Node):
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
+        'dosing_offset': 0,
     }
 
     async def home(self):
