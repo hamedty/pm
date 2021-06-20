@@ -76,7 +76,6 @@ app.controller('app_controller', function($scope, ws) {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
     'home motor': COMMAND_TEMPLATE_HOME_AXIS,
     'G-Code': COMMAND_TEMPLATE_GCODE,
-    'encoder check': COMMAND_TEMPLATE_ENCODER_CHECK,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
     'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
@@ -174,7 +173,6 @@ COMMAND_TEMPLATE_GCODE = "{\n\
     'wait_start': [1,3,4],\n\
     'wait_completion': true,\n\
 }"
-COMMAND_TEMPLATE_ENCODER_CHECK = "{'verb': 'encoder_check_enable', 'enable': true}"
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'verb': 'dump_training_dosing',\n\

@@ -1,4 +1,4 @@
-recover encoder failure (G28.3 Z10)
+develop goto on RPI level
 event / systems interlock / read inputs / assert
 why Z motor cant handle two high speed together
 add rail jack checks

@@ -5,6 +5,7 @@ import serial
 import json
 import asyncio
 from collections import abc
+import queue
 
 from multiprocessing import Lock
 
@@ -24,15 +25,14 @@ class Arduino(object):
     def __init__(self, usb_index=None):
         self._status = {}
         self._hw_config = {}
-        self._encoder_check_enabled = False
-        self._encoder_check_status = True
         self.usb_index = usb_index
-        self.set_status(message='object created')
-        self._open_port()
         self.lock = Lock()
         self._last_command_id = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
+        self._status_out_queue = None
+        self.set_status(message='object created')
+        self._open_port()
         self.set_status(message='usb port opened')
 
     def _open_port(self):
@@ -45,16 +45,10 @@ class Arduino(object):
 
     def _receive(self):
         while True:
-            try:
-                ret = self.ser.readline()
-                response = json.loads(ret)
-                # print(ret)
-                self.set_status(data=response)
-            except:
-                tb = traceback.format_exc()
-                print(tb)
-                self.set_status(message='receive failed.',
-                                traceback=tb)
+            ret = self.ser.readline()
+            response = json.loads(ret)
+            # print(ret)
+            self.set_status(data=response)
 
     def send_command(self, data):
         clean_data = []
@@ -81,21 +75,12 @@ class Arduino(object):
             await asyncio.sleep(0.001)
 
     async def wait_for_command_id(self, command_id):
-        # and ((self._encoder_check_enabled == False) or (self._encoder_check_status == True)):
         while (self._status.get('sr.line', -1) < command_id):
             await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):
         flatten_data = flatten(data)
         new_status = clean_dictionary(flatten_data)
-
-        # if self._encoder_check_enabled:
-        #     if not self.encoder_check(new_status):
-        #         new_status['message'] = 'encoder check failed'
-        #         self.send_command('!')
-        #         time.sleep(.3)
-        #         self.send_command('\x04')
-        #         self._encoder_check_status = False
         if message:
             new_status['message'] = message
         if traceback:
@@ -103,6 +88,11 @@ class Arduino(object):
 
         new_status['time'] = time.time()
         self._status.update(new_status)
+        if self._status_out_queue is not None:
+            try:
+                self._status_out_queue.put(self.get_status(), block=False)
+            except queue.Full:
+                pass
 
     def get_status(self):
         d = dict(self._status)
@@ -122,11 +112,13 @@ class Arduino(object):
                 g2core_location = status[axis_key]
                 encoder_location = status[enc_key] / float(ratio)
                 diversion = abs(encoder_location - g2core_location)
-                if status.get('sr.stat', -1) != 3:
+                print(g2core_location, encoder_location,
+                      status.get('sr.stat', -1))
+                if status.get('sr.stat', -1) not in {1, 3, 4}:
                     telorance = telorance * 10
                 if diversion > telorance:
-                    return False
-        return True
+                    return '%s%.03f' % (axis[-1], encoder_location)
+        return ''
 
 
 def flatten(dictionary, parent_key=False, separator='.'):

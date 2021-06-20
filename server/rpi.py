@@ -4,7 +4,8 @@ import asyncio
 import time
 import subprocess
 import threading
-# import multiprocessing as mp
+import queue
+
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
@@ -111,12 +112,12 @@ async def align(command, _):
 
 async def create_arduino(command, _):
     arduino_index = command['arduino_index']
-
-    arduino = Arduino(arduino_index)
-    arduino.receive_thread = threading.Thread(target=arduino._receive)
-    arduino.receive_thread.start()
-
-    ARDUINOS[arduino_index] = arduino
+    if ARDUINOS.get(arduino_index) is None:
+        arduino = Arduino(arduino_index)
+        arduino.receive_thread = threading.Thread(
+            target=arduino._receive)
+        arduino.receive_thread.start()
+        ARDUINOS[arduino_index] = arduino
     return {'success': True}
 
 
@@ -148,11 +149,6 @@ async def raw(command, _):
         await arduino.wait_for_command_id(command_id)
 
     status = arduino.get_status()
-    if arduino._encoder_check_enabled:
-        if not arduino._encoder_check_status:
-            arduino._encoder_check_enabled = False
-            arduino._encoder_check_status = True
-            return {'success': False, 'status': status}
 
     if status['f.2'] != 0:
         return {'success': False, 'message': 'firmware status failed', 'status': status}
@@ -160,31 +156,28 @@ async def raw(command, _):
     return {'success': True, 'status': status}
 
 
-async def encoder_check_enable(command, _):
-    arduino = ARDUINOS[command['arduino_index']]
-
-    enable = command.get('enable', False)
-    arduino._encoder_check_enabled = enable
-    arduino._encoder_check_status = True
-    return {'success': True, 'status': arduino.get_status()}
-
-
 async def status_hook(command, writer):
     arduino_index = command['arduino_index']
-    while True:
-        await asyncio.sleep(0.25)
-        arduino = ARDUINOS[arduino_index]
-        if arduino:
-            status = arduino.get_status()
-        else:
-            status = {'message': 'arduino not created'}
 
+    while ARDUINOS.get(arduino_index) is None:
+        await asyncio.sleep(0.25)
+        status = {'message': 'arduino not created'}
         response = json.dumps(status) + '\n'
         writer.write(response.encode())
 
-        if arduino and status['age'] > 0.5:
+    arduino = ARDUINOS[arduino_index]
+    status_queue = queue.Queue()
+    arduino._status_out_queue = status_queue
+
+    while True:
+        try:
+            status = status_queue.get(timeout=0.5)
+        except queue.Empty:
             arduino.send_command('{stat:n}')
-            # TODO: this will overflow the bus, you must be sure the last one is responded
+            continue
+        status_queue.task_done()
+        response = json.dumps(status) + '\n'
+        writer.write(response.encode())
 
 
 COMMAND_HANDLER = {
@@ -199,7 +192,6 @@ COMMAND_HANDLER = {
     'create_arduino': create_arduino,
     'config_arduino': config_arduino,
     'raw': raw,
-    'encoder_check_enable': encoder_check_enable,
 
     # second channel - status
     'status_hook': status_hook,
