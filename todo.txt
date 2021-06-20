@@ -1,4 +1,4 @@
-communication be restart proof
+major bug
 replace G1 with goto
 event / systems interlock / read inputs / assert
 why Z motor cant handle two high speed together

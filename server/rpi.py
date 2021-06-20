@@ -208,6 +208,8 @@ async def status_hook(command, writer):
         status = {'message': 'arduino not created'}
         response = json.dumps(status) + '\n'
         writer.write(response.encode())
+        if writer.is_closing():
+            return {}
 
     arduino = ARDUINOS[arduino_index]
     status_queue = queue.Queue()
@@ -222,6 +224,8 @@ async def status_hook(command, writer):
         status_queue.task_done()
         response = json.dumps(status) + '\n'
         writer.write(response.encode())
+        if writer.is_closing():
+            return {}
 
 
 COMMAND_HANDLER = {
@@ -254,16 +258,18 @@ async def server_handler(reader, writer):
 
         try:
             data = json.loads(data.decode())
-            # print('command:', data)
+            print('command:', data)
             response = await COMMAND_HANDLER[data['verb']](data, writer)
         except:
             trace = traceback.format_exc()
             print(trace)
             response = {'success': False, 'message': traceback.format_exc()}
 
-        # print('response', response)
+        print('response', response)
         response = json.dumps(response) + '\n'
 
+        if writer.is_closing():
+            return
         writer.write(response.encode())
 
 

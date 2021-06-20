@@ -24,8 +24,8 @@ class System(object):
             asyncio.create_task(self.setup_node(node))
 
     async def setup_node(self, node):
-        asyncio.create_task(node.loop())
         res = await node.connect()
+        asyncio.create_task(node.loop())
         if res:
             await node.send_command_config_arduino()
             await node.send_command_create_camera()
