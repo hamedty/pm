@@ -5,7 +5,6 @@ import serial
 import json
 import asyncio
 from collections import abc
-import queue
 
 from multiprocessing import Lock
 
@@ -90,8 +89,8 @@ class Arduino(object):
         self._status.update(new_status)
         if self._status_out_queue is not None:
             try:
-                self._status_out_queue.put(self.get_status(), block=False)
-            except queue.Full:
+                self._status_out_queue.put_nowait(self.get_status())
+            except asyncio.QueueFull:
                 pass
 
     def get_status(self):

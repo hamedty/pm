@@ -4,7 +4,6 @@ import asyncio
 import time
 import subprocess
 import threading
-import queue
 
 import traceback
 from arduino import Arduino
@@ -210,15 +209,14 @@ async def status_hook(command, writer):
         writer.write(response.encode())
         if writer.is_closing():
             return {}
-
     arduino = ARDUINOS[arduino_index]
-    status_queue = queue.Queue()
+    status_queue = asyncio.Queue()
     arduino._status_out_queue = status_queue
 
     while True:
         try:
-            status = status_queue.get(timeout=0.5)
-        except queue.Empty:
+            status = await asyncio.wait_for(status_queue.get(), timeout=.5)
+        except asyncio.TimeoutError:
             arduino.send_command('{stat:n}')
             continue
         status_queue.task_done()
@@ -258,14 +256,14 @@ async def server_handler(reader, writer):
 
         try:
             data = json.loads(data.decode())
-            print('command:', data)
+            # print('command:', data)
             response = await COMMAND_HANDLER[data['verb']](data, writer)
         except:
             trace = traceback.format_exc()
             print(trace)
             response = {'success': False, 'message': traceback.format_exc()}
 
-        print('response', response)
+        # print('response', response)
         response = json.dumps(response) + '\n'
 
         if writer.is_closing():
