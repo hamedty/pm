@@ -97,10 +97,6 @@ class Robot(Node):
 
     }
 
-    def __init__(self, name, ip, arduino_id):
-        self.arduino_id = arduino_id
-        super(Robot, self).__init__(name, ip)
-
     async def home(self):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
@@ -109,10 +105,6 @@ class Robot(Node):
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
         await self.send_command({'verb': 'encoder_check_enable', 'enable': True})
-
-    async def send_command(self, command, **kwargs):
-        command.update(arduino_index=self.arduino_id)
-        return await super(Robot, self).send_command(command, **kwargs)
 
     async def goto(self, x=None, y=None, z=None, feed=None):
         if x is not None:

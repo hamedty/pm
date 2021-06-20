@@ -11,13 +11,13 @@ from camera import cheap_cam, vision
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
-ARDUINOS = [None] * 6
+ARDUINOS = {}
 CAMERAS = {}
 
 DATA_PATH = '/home/pi/data'
 
 
-async def create_camera(command):
+async def create_camera(command, _):
     if 'holder' not in CAMERAS:
         CAMERAS['holder'] = cheap_cam.create_camera(
             'holder', command['holder_roi'])
@@ -27,7 +27,7 @@ async def create_camera(command):
     return {'success': True}
 
 
-async def dump_frame(command):
+async def dump_frame(command, _):
     CAMERAS['holder'].dump_frame(
         filename=DATA_PATH + '/holder.png', roi_index=command.get('roi_index_holder'))
     CAMERAS['dosing'].dump_frame(
@@ -35,14 +35,12 @@ async def dump_frame(command):
     return {'success': True}
 
 
-async def dump_training(command):
-    arduino = ARDUINOS[0]
+async def dump_training(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
     component = command['component']  # holder / dosing
     feed = command['speed']
     camera = CAMERAS[component]
     axis = {'holder': 'X', 'dosing': 'Y'}[component]
-
-    arduino = ARDUINOS[0]
 
     os.system('rm -rf %s/*' % DATA_PATH)
     directory = os.path.join(DATA_PATH, command['folder_name'])
@@ -76,8 +74,8 @@ async def dump_training(command):
     return {'success': True}
 
 
-async def align(command):
-    arduino = ARDUINOS[0]
+async def align(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
     component = command['component']  # holder / dosing
     camera = CAMERAS[component]
     axis = {'holder': 'X', 'dosing': 'Y'}[component]
@@ -111,13 +109,10 @@ async def align(command):
     return {'success': True, 'aligned': aligned, 'exists': exists}
 
 
-async def create_arduino(command):
-    usb_index = command.get('arduino_index', None)
-    arduino_index = command.get('arduino_index', 0)
-    if ARDUINOS[arduino_index] is not None:
-        return {'success': True, 'message': 'already created'}
+async def create_arduino(command, _):
+    arduino_index = command['arduino_index']
 
-    arduino = Arduino(usb_index)
+    arduino = Arduino(arduino_index)
     arduino.receive_thread = threading.Thread(target=arduino._receive)
     arduino.receive_thread.start()
 
@@ -125,16 +120,16 @@ async def create_arduino(command):
     return {'success': True}
 
 
-async def config_arduino(command):
-    arduino = ARDUINOS[command.get('arduino_index', 0)]
+async def config_arduino(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
     arduino._hw_config = command['hw_config']
     for key, value in command['g2core_config']:
         command_id = arduino.send_command(json.dumps({key: value}))
     return {'success': True}
 
 
-async def raw(command):
-    arduino = ARDUINOS[command.get('arduino_index', 0)]
+async def raw(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
 
     wait_start = command['wait_start']
     wait_completion = command['wait_completion']
@@ -165,22 +160,32 @@ async def raw(command):
     return {'success': True, 'status': status}
 
 
-async def encoder_check_enable(command):
-    arduino = ARDUINOS[command.get('arduino_index', 0)]
+async def encoder_check_enable(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+
     enable = command.get('enable', False)
     arduino._encoder_check_enabled = enable
     arduino._encoder_check_status = True
     return {'success': True, 'status': arduino.get_status()}
 
 
-async def get_status(command):
-    arduino = ARDUINOS[command.get('arduino_index', 0)]
-    if arduino is None:
-        status = {'message': 'arduino not created'}
-    else:
-        arduino.send_command('{stat:n}')
-        status = arduino.get_status()
-    return {'success': True, 'status': status}
+async def status_hook(command, writer):
+    arduino_index = command['arduino_index']
+    while True:
+        await asyncio.sleep(0.25)
+        arduino = ARDUINOS[arduino_index]
+        if arduino:
+            status = arduino.get_status()
+        else:
+            status = {'message': 'arduino not created'}
+
+        response = json.dumps(status) + '\n'
+        writer.write(response.encode())
+
+        if arduino and status['age'] > 0.5:
+            arduino.send_command('{stat:n}')
+            # TODO: this will overflow the bus, you must be sure the last one is responded
+
 
 COMMAND_HANDLER = {
     # vision
@@ -194,8 +199,10 @@ COMMAND_HANDLER = {
     'create_arduino': create_arduino,
     'config_arduino': config_arduino,
     'raw': raw,
-    'get_status': get_status,
     'encoder_check_enable': encoder_check_enable,
+
+    # second channel - status
+    'status_hook': status_hook,
 }
 
 
@@ -211,7 +218,7 @@ async def server_handler(reader, writer):
         try:
             data = json.loads(data.decode())
             # print('command:', data)
-            response = await COMMAND_HANDLER[data['verb']](data)
+            response = await COMMAND_HANDLER[data['verb']](data, writer)
         except:
             trace = traceback.format_exc()
             print(trace)
@@ -232,10 +239,6 @@ async def async_main():
 
 
 def main():
-    # mp.set_start_method('spawn')
-    # q = mp.Queue()
-    # p = mp.Process(target=foo, args=(q,))
-    # p.start()
     asyncio.run(async_main())
 
 

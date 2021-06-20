@@ -57,9 +57,19 @@ class Arduino(object):
                                 traceback=tb)
 
     def send_command(self, data):
+        clean_data = []
+        for line in data.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if line[0] == ';':
+                continue
+            clean_data.append(line)
+        data = '\n'.join(clean_data) + '\n'
+        data = data.encode()
+
         self.lock.acquire()
-        data = data + '\n'
-        self.ser.write(data.encode())
+        self.ser.write(data)
         self.lock.release()
 
     def get_command_id(self):
@@ -71,20 +81,21 @@ class Arduino(object):
             await asyncio.sleep(0.001)
 
     async def wait_for_command_id(self, command_id):
-        while (self._status.get('sr.line', -1) < command_id) and ((self._encoder_check_enabled == False) or (self._encoder_check_status == True)):
+        # and ((self._encoder_check_enabled == False) or (self._encoder_check_status == True)):
+        while (self._status.get('sr.line', -1) < command_id):
             await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):
         flatten_data = flatten(data)
         new_status = clean_dictionary(flatten_data)
 
-        if self._encoder_check_enabled:
-            if not self.encoder_check(new_status):
-                new_status['message'] = 'encoder check failed'
-                self.send_command('!')
-                time.sleep(.3)
-                self.send_command('\x04')
-                self._encoder_check_status = False
+        # if self._encoder_check_enabled:
+        #     if not self.encoder_check(new_status):
+        #         new_status['message'] = 'encoder check failed'
+        #         self.send_command('!')
+        #         time.sleep(.3)
+        #         self.send_command('\x04')
+        #         self._encoder_check_status = False
         if message:
             new_status['message'] = message
         if traceback:

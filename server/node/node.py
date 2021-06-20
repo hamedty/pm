@@ -17,12 +17,13 @@ def generate_random_string():
 
 
 class Node(object):
-    def __init__(self, name, ip):
+    def __init__(self, name, ip, arduino_id=None):
         self.boot = False
         self.set_status(message='node instance creating')
         self.name = name
         self.ip = ip
         self.ip_short = int(self.ip.split('.')[-1])
+        self.arduino_id = arduino_id
         self.hw_config = copy.deepcopy(self.hw_config_base)
         self.g2core_config = copy.deepcopy(self.g2core_config_base)
 
@@ -50,12 +51,16 @@ class Node(object):
         while not self._socket_reader:
             try:
                 reader, writer = await asyncio.open_connection(self.ip, 2000)
+                reader2, writer2 = await asyncio.open_connection(self.ip, 2000)
             except:
                 await asyncio.sleep(.5)
                 # print('retrying to connect to', self.ip)
                 continue
             self._socket_reader = reader
             self._socket_writer = writer
+            self._socket2_reader = reader2
+            self._socket2_writer = writer2
+
             self.set_status(message='socket connected')
 
         await self.send_command({'verb': 'create_arduino'})
@@ -122,6 +127,7 @@ class Node(object):
             return await self.send_command(command)
 
     async def send_command(self, command, assert_success=True):
+        command['arduino_index'] = self.arduino_id
         command_str = json.dumps(command) + '\n'
         command_str = command_str.encode()
         if self.lock is None:
@@ -138,18 +144,15 @@ class Node(object):
         return line['success'], line
 
     async def loop(self):
+        command = {'verb': 'status_hook'}
+        command['arduino_index'] = self.arduino_id
+        command = json.dumps(command) + '\n'
+        command = command.encode()
+        self._socket2_writer.write(command)
         while True:
-            last_status_time = self._status['time']
-            current_time = time.time()
-            timeout = 0.5
-            if current_time - last_status_time > timeout:
-                if not self._socket_reader:
-                    await asyncio.sleep(timeout)
-                    continue
-                success, data = await self.send_command({'verb': 'get_status'})
-                continue
-
-            await asyncio.sleep(timeout - (current_time - last_status_time))
+            line = await self._socket2_reader.readline()
+            line = json.loads(line)
+            self.set_status(**line)
 
     async def send_command_reset_arduino(self):
         command = {
