@@ -101,24 +101,19 @@ class Arduino(object):
         del d['time']
         return d
 
-    def encoder_check(self, status):
+    def check_encoder(self, axis):  # axis = 'x'
         # 'encoders': {
         #     'posz': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
         # }
-        for axis in self._hw_config['encoders']:
-            enc_key, ratio, telorance = self._hw_config['encoders'][axis]
-            axis_key = 'sr.' + axis
-            if axis_key in status:
-                g2core_location = status[axis_key]
-                encoder_location = status[enc_key] / float(ratio)
-                diversion = abs(encoder_location - g2core_location)
-                print(g2core_location, encoder_location,
-                      status.get('sr.stat', -1))
-                if status.get('sr.stat', -1) not in {1, 3, 4}:
-                    telorance = telorance * 10
-                if diversion > telorance:
-                    return '%s%.03f' % (axis[-1], encoder_location)
-        return ''
+
+        enc_key, ratio, telorance = self._hw_config['encoders']['pos' + axis]
+        axis_key = 'sr.pos' + axis
+
+        g2core_location = self._status[axis_key]
+        encoder_location = self._status[enc_key] / float(ratio)
+        diversion = abs(encoder_location - g2core_location)
+        result = (diversion < telorance)
+        return result, g2core_location, encoder_location
 
 
 def flatten(dictionary, parent_key=False, separator='.'):

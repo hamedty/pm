@@ -69,8 +69,5 @@ class Rail(Robot):
 
         await self.send_command_raw('G28.2 Z0')
 
-    async def goto(self, z, feed):
-        return await super(Rail, self).goto(z=z, feed=feed)
-
     async def is_homed(self, telorance=50):
         return True

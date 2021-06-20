@@ -156,6 +156,50 @@ async def raw(command, _):
     return {'success': True, 'status': status}
 
 
+async def G1(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+    for a in ['x', 'y', 'z']:
+        if command.get(a) is not None:
+            axes = a
+            req_location = command[a]
+            break
+    feed = command['feed']
+    wait_start = {1, 3, 4}
+    retries = 5
+    # check current position is correct
+    result, g2core_location, encoder_location = arduino.check_encoder(axes)
+    if not result:
+        return {'success': False, 'message': 'current position is incorrect'}
+
+    for r in range(retries):
+        # command move
+        command_id = arduino.get_command_id()
+        command_raw = 'G1 %s%.2f F%d\nN%d M0' % (
+            axes, req_location, feed, command_id)
+        arduino.send_command(command_raw)
+        await arduino.wait_for_command_id(command_id)
+
+        # if encoder pos is correct return success
+        result, g2core_location, encoder_location = arduino.check_encoder(axes)
+        if result:
+            return {'success': True, 'status': arduino.get_status()}
+
+        # get latest position
+        await asyncio.sleep(.2)
+        command_id = arduino.get_command_id()
+        command_raw = '{pos%s:n}\nN%d M0' % (axes, command_id)
+        arduino.send_command(command_raw)
+        await arduino.wait_for_command_id(command_id)
+
+        # update position
+        result, g2core_location, encoder_location = arduino.check_encoder(axes)
+        command_raw = 'G28.3 %s%.03f' % (axes, encoder_location)
+        arduino.send_command(command_raw)
+        feed = .85 * feed
+
+    return {'success': False, 'message': 'Failed after many retries'}
+
+
 async def status_hook(command, writer):
     arduino_index = command['arduino_index']
 
@@ -192,6 +236,7 @@ COMMAND_HANDLER = {
     'create_arduino': create_arduino,
     'config_arduino': config_arduino,
     'raw': raw,
+    'G1': G1,
 
     # second channel - status
     'status_hook': status_hook,

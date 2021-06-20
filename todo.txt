@@ -1,4 +1,5 @@
-develop goto on RPI level
+communication be restart proof
+replace G1 with goto
 event / systems interlock / read inputs / assert
 why Z motor cant handle two high speed together
 add rail jack checks

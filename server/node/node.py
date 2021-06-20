@@ -180,6 +180,12 @@ class Node(object):
     async def send_command_create_camera(self):
         return
 
+    async def G1(self, **kwargs):
+        # kwargs: x, y, z, feed
+        command = {'verb': 'G1'}
+        command.update(kwargs)
+        return await self.send_command(command)
+
     def ready_for_command(self):
         return 'enc1' in self._status
 
