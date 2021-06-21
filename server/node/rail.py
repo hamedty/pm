@@ -33,7 +33,7 @@ class Rail(Robot):
         ('di2fn', 1),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'stat': True, 'posz': True}),
+        ('sr', {'line': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]
 

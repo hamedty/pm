@@ -70,11 +70,11 @@ class Arduino(object):
         return self._last_command_id
 
     async def wait_for_status(self, wait_list):
-        while self._status.get('sr.stat', -1) not in wait_list:
+        while self._status.get('r.stat', -1) not in wait_list:
             await asyncio.sleep(0.001)
 
     async def wait_for_command_id(self, command_id):
-        while (self._status.get('sr.line', -1) < command_id):
+        while (self._status.get('r.line', -1) < command_id):
             await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):
@@ -106,7 +106,7 @@ class Arduino(object):
         # }
 
         enc_key, ratio, telorance = self._hw_config['encoders']['pos' + axis]
-        axis_key = 'sr.pos' + axis
+        axis_key = 'r.pos' + axis
 
         g2core_location = self._status[axis_key]
         encoder_location = self._status[enc_key] / float(ratio)
@@ -139,13 +139,10 @@ def clean_dictionary(dictionary):
     return new_dict
 
 
-GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'sr.stat', 'sr.line', 'f.2'}
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.line'}
 
 
 def clean_key(key):
-    if key in GOOD_KEYS:
-        return key
-
     if '.in.' in key:
         return key.replace('.in.', '.in')
     if key.startswith('r.in'):
@@ -156,12 +153,18 @@ def clean_key(key):
     if key.startswith('r.out'):
         return key
 
-    if 'r.pos.' in key:
-        return key.replace('r.pos.', 'sr.pos')
-    if key.startswith('sr.pos'):
+    if key.startswith('r.sr.'):
+        key = key.replace('r.sr.', 'r.')
+
+    if key.startswith('sr.'):
+        key = key.replace('sr.', 'r.')
+
+    if '.pos.' in key:
+        return key.replace('.pos.', '.pos')
+    if key.startswith('r.pos'):
         return key
 
-    if key.startswith('r.stat'):
-        return key.replace('r.stat', 'sr.stat')
+    if key in GOOD_KEYS:
+        return key
 
     return False

@@ -169,7 +169,7 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 
 COMMAND_TEMPLATE_GCODE = "{\n\
     'verb': 'raw',\n\
-    'data': 'G0'\n\
+    'data': 'G0',\n\
     'wait_start': [1,3,4],\n\
     'wait_completion': true,\n\
 }"

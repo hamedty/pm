@@ -140,7 +140,7 @@ class Node(object):
         if 'status' in line:
             self.set_status(**line['status'])
         if assert_success:
-            assert line['success'], (line, self.ip)
+            assert line['success'], (line, self.ip, self.arduino_id)
         return line['success'], line
 
     async def loop(self):
@@ -198,8 +198,9 @@ class Node(object):
 
         if data['connected']:
             data.update(self._status)
-            data['age'] = time.time() - data['time']
+            #data['age'] = time.time() - data['time']
             del data['time']
+            del data['age']
 
         return data
 

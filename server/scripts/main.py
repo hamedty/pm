@@ -3,9 +3,9 @@ import asyncio
 from .recipe import *
 
 # do_stations, do_rail_n_robots
-#               do_robots_cap
-#               do_rail
-#               do_robots_pickup
+#                    do_robots_cap
+#                    do_rail
+#                    do_robots_pickup
 # do_exchange
 
 
@@ -15,15 +15,13 @@ async def main(system, ALL_NODES):
     await home_all_nodes(all_nodes, rail, robot_1, stations)
 
     STATUS = {
-        'stations_full': False,
         'robots_full': False,
     }
     while True:
         input('repeat?')
         t0 = time.time()
         await asyncio.gather(
-            # do_stations(stations, robot_1, rail, all_nodes,
-            #             STATUS, standalone=True),
+            do_stations(stations, robot_1, rail, all_nodes, STATUS),
             do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
@@ -55,7 +53,7 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await rail.set_valves([0] * 2)
 
     await run_stations(stations, lambda s: s.home())
-    await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+    # await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
 
     await robot_1.home()
     await rail.home()
@@ -139,8 +137,7 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
 
     await robot_1.G1(x=X_OUTPUT_SAFE, feed=FEED_X)
 
-    # STATUS['robots_full'] = False
-    STATUS['stations_full'] = True
+    STATUS['robots_full'] = True
 
 
 ALIGN_HOLDER_TASK = {}
@@ -152,11 +149,8 @@ def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
             {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}))
 
 
-async def do_stations(stations, robot_1, rail, all_nodes, STATUS, standalone):
-    if (not STATUS['stations_full']) and (not standalone):
-        return
-
-    if standalone:
+async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
+    if not ALIGN_HOLDER_TASK:
         await run_stations(stations, lambda x: x.set_valves([0, 1]))
         create_station_holder_align_task(
             stations, robot_1, rail, all_nodes, STATUS)
@@ -169,8 +163,7 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS, standalone):
     res = await asyncio.gather(*tasks)
     print(res)
 
-    if standalone:
-        await run_stations(stations, lambda x: x.set_valves([0]))
+    # await run_stations(stations, lambda x: x.set_valves([0]))
 
 
 async def do_station(station, STATUS, align_holder_task):
@@ -323,7 +316,7 @@ async def do_station(station, STATUS, align_holder_task):
 
 
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
-    if not STATUS['stations_full']:
+    if not STATUS['robots_full']:
         return
 
     print('Capping')
@@ -374,8 +367,6 @@ async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
     await asyncio.sleep(T_GRAB_IN)
 
     await robot_1.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
-
-    STATUS['robots_full'] = True
 
 
 async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
