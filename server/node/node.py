@@ -140,7 +140,7 @@ class Node(object):
         if 'status' in line:
             self.set_status(**line['status'])
         if assert_success:
-            assert line['success'], line
+            assert line['success'], (line, self.ip)
         return line['success'], line
 
     async def loop(self):

@@ -10,9 +10,7 @@ from .recipe import *
 
 
 async def main(system, ALL_NODES):
-    # all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
-    await gather_all_nodes(system, ALL_NODES)
-    return
+    all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
 
@@ -24,48 +22,44 @@ async def main(system, ALL_NODES):
         input('repeat?')
         t0 = time.time()
         await asyncio.gather(
-            do_stations(stations, robot_1, rail, all_nodes,
-                        STATUS, standalone=True),
-            # do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
+            # do_stations(stations, robot_1, rail, all_nodes,
+            #             STATUS, standalone=True),
+            do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         t0 = time.time()
-        # await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+        await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
         print('exchange:', time.time() - t0)
 
 
 async def gather_all_nodes(system, ALL_NODES):
     stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
-    # robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
-    # robot_1 = robots[0]
-    # rails = [node for node in ALL_NODES if node.name.startswith('Rail')]
-    # rail = rails[0]
+    robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
+    robot_1 = robots[0]
+    rails = [node for node in ALL_NODES if node.name.startswith('Rail')]
+    rail = rails[0]
 
-    all_nodes = stations  # + [robot_1, rail]
+    all_nodes = stations + [robot_1, rail]
 
     # All Nodes Ready?
     for node in all_nodes:
         while not node.ready_for_command():
             await asyncio.sleep(.01)
 
-    await run_stations(stations, lambda s: s.home())
-    await stations[0].G1(z=200, feed=45000)
-    return
     return all_nodes, rail, robot_1, stations
 
 
 async def home_all_nodes(all_nodes, rail, robot_1, stations):
-    await run_stations(stations, lambda x: x.set_valves([0] * 3))
-    # await run_stations(stations, lambda x: x.set_valves([0] * 5))
-    # input('go?')
-    # await robot_1.set_valves([0] * 10)
-    # await rail.set_valves([0] * 2)
+    await run_stations(stations, lambda x: x.set_valves([0] * 5))
+    await robot_1.set_valves([0] * 10)
+    await rail.set_valves([0] * 2)
 
     await run_stations(stations, lambda s: s.home())
     await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
-    # await robot_1.home()
-    # await rail.home()
-    # await rail.G1(D_STANDBY, feed=FEED_RAIL_FREE * .6)
+
+    await robot_1.home()
+    await rail.home()
+    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
@@ -85,89 +79,66 @@ async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
 async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
     print('deliver')
 
-    data = {}
-    data['X_INPUT'] = 375
-    data['Y_INPUT_DOWN_1'] = 35
-    data['Y_INPUT_UP'] = 55
-    data['Y_INPUT_DOWN_3'] = 10
-    data['Y_INPUT_DOWN_2'] = data['Y_INPUT_DOWN_3'] + 10
+    X_INPUT = 375
+    Y_INPUT_DOWN_1 = 35
+    Y_INPUT_UP = 55
+    Y_INPUT_DOWN_3 = 10
+    Y_INPUT_DOWN_2 = Y_INPUT_DOWN_3 + 10
+    Y_OUTPUT = 70
+    X_OUTPUT_SAFE = X_CAPPING
 
-    data['FEED_X'] = FEED_X
-    data['FEED_Y_UP'] = FEED_Y_UP
-    data['FEED_Y_DOWN'] = FEED_Y_DOWN
-    data['FEED_Y_PRESS'] = 3000
+    FEED_Y_PRESS = 3000
 
-    data['T_INPUT_RELEASE'] = 0.5
-    data['T_HOLDER_JACK_CLOSE'] = 0.5
-    data['T_PRE_PRESS'] = 0.2
-    data['T_POST_PRESS'] = 0.2
+    Z_OUTPUT = 80
+    Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
-    c = '''
-    G1 X%(X_INPUT).2f F%(FEED_X)d
-    G1 Y%(Y_INPUT_DOWN_1).2f F%(FEED_Y_DOWN)d
-    M100 ({out1: 0, out2: 0, out3: 0, out4: 0, out5: 0})
-    M100 ({out6: 0, out7: 0, out8: 0, out9: 0, out10: 0})
-    G4 P%(T_INPUT_RELEASE).2f
-    ''' % data
-    await robot_1.send_command_raw(c)
+    T_INPUT_RELEASE = 0.5
+    T_HOLDER_JACK_CLOSE = 0.5
+    T_PRE_PRESS = 0.2
+    T_POST_PRESS = 0.2
+    T_OUTPUT_GRIPP = 0.1
+    T_OUTPUT_RELEASE = 0.2
 
-    c_robot = '''
-    G1 Y%(Y_INPUT_UP).2f F%(FEED_Y_UP)d
-    M100 ({out6: 1, out7: 1, out8: 1, out9: 1, out10: 1})
-    G4 P%(T_HOLDER_JACK_CLOSE).2f
-    G1 Y%(Y_INPUT_DOWN_2).2f F%(FEED_Y_DOWN)d
-    G4 P%(T_PRE_PRESS).2f
-    G1 Y%(Y_INPUT_DOWN_3).2f F%(FEED_Y_PRESS)d
-    G4 P%(T_POST_PRESS).2f
-    ''' % data
+    await robot_1.G1(x=X_INPUT, feed=FEED_X)
+    await robot_1.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN)
+    await robot_1.set_valves([0] * 10)
+    await asyncio.sleep(T_INPUT_RELEASE)
 
-    data = {}
-    data['Z_OUTPUT'] = 80
-    data['FEED_Z_DOWN'] = FEED_Z_DOWN / 4.0
+    async def robot_press():
+        await robot_1.G1(y=Y_INPUT_UP, feed=FEED_Y_UP)
+        await robot_1.set_valves([0] * 5 + [1] * 5)
+        await asyncio.sleep(T_HOLDER_JACK_CLOSE)
+        await robot_1.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN)
+        await asyncio.sleep(T_PRE_PRESS)
+        await robot_1.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
+        await asyncio.sleep(T_POST_PRESS)
 
-    c_station = '''
-    G1 Z%(Z_OUTPUT).2f F%(FEED_Z_DOWN)d
-    ''' % data
+    async def station_down(station):
+        await station.G1(z=Z_OUTPUT, feed=FEED_Z_DOWN / 4.0)
+
     await asyncio.gather(
-        robot_1.send_command_raw(c_robot),
-        run_stations(stations, lambda x: x.send_command_raw(c_station)),
+        robot_press(),
+        run_stations(stations, lambda x: station_down(x)),
     )
 
-    data['Y_OUTPUT'] = 70
-    data['Z_OUTPUT_SAFE'] = data['Z_OUTPUT'] - 20
-    data['X_OUTPUT_SAFE'] = X_CAPPING
+    await robot_1.G1(y=Y_OUTPUT, feed=FEED_Y_UP)
+    await robot_1.set_valves([1] * 5)
 
-    data['T_OUTPUT_GRIPP'] = 0.1
-    data['T_OUTPUT_RELEASE'] = 0.2
+    await asyncio.sleep(T_OUTPUT_GRIPP)
 
-    data['FEED_X'] = FEED_X
-    data['FEED_Y_UP'] = FEED_Y_UP
-    data['FEED_Z_DOWN'] = FEED_Z_DOWN
-    data['FEED_Z_UP'] = FEED_Z_UP
+    async def station_release(station):
+        await station.set_valves([0, 1])
+        await asyncio.sleep(T_OUTPUT_RELEASE)
+        await station.G1(z=Z_OUTPUT_SAFE, feed=FEED_Z_UP)
 
-    c = '''
-    G1 Y%(Y_OUTPUT).2f F%(FEED_Y_UP)d
-    M100 ({out1: 1, out2: 1, out3: 1, out4: 1, out5: 1})
-    ''' % data
-    await robot_1.send_command_raw(c)
-
-    await asyncio.sleep(data['T_OUTPUT_GRIPP'])
-
-    c = '''
-    M100 ({out1: 0, out2: 1})
-    G4 P%(T_OUTPUT_RELEASE).2f
-    G1 Z%(Z_OUTPUT_SAFE).2f F%(FEED_Z_UP)d
-    ''' % data
-    await run_stations(stations, lambda x: x.send_command_raw(c))
+    await run_stations(stations, lambda x: station_release(x))
 
     # Start Align Holder
     create_station_holder_align_task(
         stations, robot_1, rail, all_nodes, STATUS)
 
-    c = '''
-    G1 X%(X_OUTPUT_SAFE).2f F%(FEED_X)d
-    ''' % data
-    await robot_1.send_command_raw(c)
+    await robot_1.G1(x=X_OUTPUT_SAFE, feed=FEED_X)
+
     # STATUS['robots_full'] = False
     STATUS['stations_full'] = True
 
@@ -233,7 +204,8 @@ async def do_station(station, STATUS, align_holder_task):
     data['FEED_PRE_DANCE'] = FEED_Z_UP
 
     dance_rev = 1
-    data['H_DANCE'] = data['H_PRE_DANCE'] - (11 * dance_rev)
+    charge_h = 0.1
+    data['H_DANCE'] = data['H_PRE_DANCE'] - ((11 + charge_h) * dance_rev)
     data['Y_DANCE'] = 360 * dance_rev
     data['FEED_DANCE'] = FEED_DANCE
 
@@ -246,96 +218,99 @@ async def do_station(station, STATUS, align_holder_task):
     data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
     data['PAUSE_POST_DANCE_BACK'] = .3
 
-    dance_back_rev = -1.1
-    data['H_DANCE_BACK'] = data['H_DANCE'] - (11 * dance_back_rev)
-    data['Y_DANCE_BACK'] = data['Y_DANCE'] + 360 * dance_back_rev
+    data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
+    data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
+    data['Y_DANCE_BACK'] = 0
+    data['Y_DANCE_BACK2'] = -40
     data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
     # Deliver
     data['H_DELIVER'] = 1
     data['FEED_DELIVER'] = FEED_Z_UP
 
-    c_come_down = '''
-; go to aligning position
-G1 Z%(H_ALIGNING).2f F%(FEED_ALIGNING)d
-M100 ({out1: 1})
-''' % data
-
     c_process = '''
-; release dosing
-M100 ({out1: 0, out4: 0})
-G4 P%(PAUSE_FALL_DOSING).2f
+        ; release dosing
+        M100 ({out1: 0, out4: 0})
+        G4 P%(PAUSE_FALL_DOSING).2f
 
-; ready to push
-G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
-M100 ({out1: 1})
-G4 P%(PAUSE_READY_TO_PUSH).2f
+        ; ready to push
+        G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
+        M100 ({out1: 1})
+        G4 P%(PAUSE_READY_TO_PUSH).2f
 
-; push and come back
-G1 Z%(H_PUSH).2f F%(FEED_PUSH)d
-G4 P%(PAUSE_PUSH).2f
-G1 Z%(H_PUSH_BACK).2f F%(FEED_PUSH_BACK)d
+        ; push and come back
+        G1 Z%(H_PUSH).2f F%(FEED_PUSH)d
+        G4 P%(PAUSE_PUSH).2f
+        G1 Z%(H_PUSH_BACK).2f F%(FEED_PUSH_BACK)d
 
-; prepare for dance
-M100 ({out1: 0, out4: 1})
-G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
-G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
-G4 P%(PAUSE_JACK_PRE_DANCE_2).2f
-M100 ({out1: 1})
-G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
+        ; prepare for dance
+        G10 L20 P1 Y0
+        M100 ({out1: 0, out4: 1})
+        G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
+        G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
+        G4 P%(PAUSE_JACK_PRE_DANCE_2).2f
+        M100 ({out1: 1})
+        G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
 
-; dance
-G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
+        ; dance
+        G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
 
-; press
-M100 ({out1: 0, out2: 0, out4: 0})
-G4 P%(PAUSE_PRESS0).2f
-M100 ({out5: 1})
-G4 P%(PAUSE_PRESS1).2f
-M100 ({out3: 1})
-G4 P%(PAUSE_PRESS2).2f
-M100 ({out3: 0})
+        ; press
+        M100 ({out1: 0, out2: 0, out4: 0})
+        G4 P%(PAUSE_PRESS0).2f
+        M100 ({out5: 1})
+        G4 P%(PAUSE_PRESS1).2f
+        M100 ({out3: 1})
+        G4 P%(PAUSE_PRESS2).2f
+        M100 ({out3: 0})
 
-; dance back
-M100 ({out1: 1, out4: 1, out5: 0})
-G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
-G1 Z%(H_DANCE_BACK).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
-M100 ({out4: 0})
-G4 P%(PAUSE_POST_DANCE_BACK).2f
+        ; dance back
+        M100 ({out1: 1, out4: 1, out5: 0})
+        G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
 
-; deliver
-G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
-M100 ({out4: 1})
-''' % data
-
-    c_ignore = '''
-    G1 Z%(H_DELIVER).2f F%(FEED_DELIVER)d
-    M100 ({out1: 0, out2: 0, out4: 1})
+        G1 Z%(H_DANCE_BACK).2f F5000
+        G1 Z%(H_DANCE_BACK2).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
+        G1 Y%(Y_DANCE_BACK2).2f F%(FEED_DANCE_BACK)d
+        M100 ({out4: 0})
+        G4 P%(PAUSE_POST_DANCE_BACK).2f
     ''' % data
 
+    async def ignore(station, data):
+        await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
+        await station.set_valves([0, 0, 0, 1, 0])
+
+    async def come_down(station, data):
+        await station.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
+        await station.set_valves([1])
+
+    async def deliver(station, data):
+        await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
+        await station.set_valves([None, None, None, 1])
+
     _, holder_res = await align_holder_task
+
     if holder_res['exists'] and not holder_res['aligned']:
         input('couldnt align holder, remove objects from %s' % station.name)
-        await station.send_command_raw(c_ignore)
+        await ignore(station, data)
         return
 
-    await station.send_command_raw(c_come_down)
+    await come_down(station, data)
     print('aligning 1', station.ip, time.time() - t0)
     t0 = time.time()
 
     _, dosgin_res = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10})
 
     if dosgin_res['exists'] and not dosgin_res['aligned']:
-        await station.send_command_raw(c_ignore)
+        await ignore(station, data)
         input('couldnt align dosing, remove objects from %s' % station.name)
         return
 
     if (not dosgin_res['exists']) and (not holder_res['exists']):
-        await station.send_command_raw(c_ignore)
+        await ignore(station, data)
         return
 
     if (not dosgin_res['exists']) or (not holder_res['exists']):
-        await station.send_command_raw(c_ignore)
+        await ignore(station, data)
         input('a component is missing, remove objects from %s' % station.name)
         return
 
@@ -343,6 +318,7 @@ M100 ({out4: 1})
     t0 = time.time()
 
     await station.send_command_raw(c_process)
+    await deliver(station, data)
     print('aligning 3', station.ip, time.time() - t0)
 
 
@@ -383,29 +359,21 @@ async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
     print('lets go grab input')
 
     data = {}
-    data['Y_GRAB_IN_UP_1'] = 65
-    data['X_GRAB_IN'] = 284.5
-    data['Y_GRAB_IN_DOWN'] = 0
-    data['Y_GRAB_IN_UP_2'] = data['Y_GRAB_IN_UP_1']
+    Y_GRAB_IN_UP_1 = 65
+    X_GRAB_IN = 284.5
+    Y_GRAB_IN_DOWN = 0
+    Y_GRAB_IN_UP_2 = Y_GRAB_IN_UP_1
 
-    data['FEED_Y_UP'] = FEED_Y_UP
-    data['FEED_Y_DOWN'] = FEED_Y_DOWN
-    data['FEED_X'] = FEED_X
+    T_GRAB_IN = 0.5
 
-    data['T_GRAB_IN'] = 0.5
+    await robot_1.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
+    await robot_1.G1(x=X_GRAB_IN, feed=FEED_X)
+    await robot_1.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
 
-    c = '''
-G1 Y%(Y_GRAB_IN_UP_1).2f F%(FEED_Y_UP)d
-G1 X%(X_GRAB_IN).2f F%(FEED_X)d
-G1 Y%(Y_GRAB_IN_DOWN).2f F%(FEED_Y_DOWN)d
+    await robot_1.set_valves([1] * 10)
+    await asyncio.sleep(T_GRAB_IN)
 
-M100 ({out1: 1, out2: 1, out3: 1, out4: 1, out5: 1})
-M100 ({out6: 1, out7: 1, out8: 1, out9: 1, out10: 1})
-G4 P%(T_GRAB_IN).2f
-
-G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
-''' % data
-    await robot_1.send_command_raw(c)
+    await robot_1.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
 
     STATUS['robots_full'] = True
 
@@ -413,39 +381,33 @@ G1 Y%(Y_GRAB_IN_UP_2).2f F%(FEED_Y_UP)d
 async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     task2 = asyncio.create_task(robot_1.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
 
-    data = {}
-    data['D_STANDBY'] = D_STANDBY
-    data['D_MIN'] = data['D_STANDBY'] - 125
-    data['D_MAX'] = data['D_MIN']  # + 25 * 10
+    D_MIN = D_STANDBY - 125
+    D_MAX = D_MIN  # + 25 * 10
 
-    data['FEED_RAIL_FREE'] = FEED_RAIL_FREE
-    data['FEED_RAIL_INTACT'] = FEED_RAIL_INTACT
-    data['T_RAIL_JACK1'] = .4
-    data['T_RAIL_JACK2'] = .7
+    T_RAIL_JACK1 = .4
+    T_RAIL_JACK2 = .7
 
-    c = '''
-; rail backward
-G1 Z%(D_MIN).2f F%(FEED_RAIL_FREE)d
+    # rail backward
+    await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
 
-; change jacks to moving
-M100 ({out9: 1, out10: 0})
-G4 P%(T_RAIL_JACK1).2f
-M100 ({out9: 1, out10: 1})
-G4 P%(T_RAIL_JACK2).2f
+    # change jacks to moving
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(T_RAIL_JACK1)
+    await rail.set_valves([1, 1])
+    await asyncio.sleep(T_RAIL_JACK2)
 
-; rail forward
-G1 Z%(D_MAX).2f F%(FEED_RAIL_INTACT)d
+    # rail forward
+    await rail.G1(z=D_MAX, feed=FEED_RAIL_INTACT)
 
-; change jacks to moving
-M100 ({out9: 1, out10: 0})
-G4 P%(T_RAIL_JACK1).2f
-M100 ({out9: 0, out10: 0})
-G4 P%(T_RAIL_JACK2).2f
+    # change jacks to moving
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(T_RAIL_JACK1)
+    await rail.set_valves([0, 0])
+    await asyncio.sleep(T_RAIL_JACK1)
 
-; rail park
-G1 Z%(D_STANDBY).2f F%(FEED_RAIL_FREE)d
-''' % data
-    await rail.send_command_raw(c)
+    # rail park
+    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
+
     await task2
 
 

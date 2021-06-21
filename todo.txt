@@ -1,5 +1,5 @@
-major bug
-replace G1 with goto
+what do you read on first move? should I query after home
+correct if intial position is wrong
 event / systems interlock / read inputs / assert
 why Z motor cant handle two high speed together
 add rail jack checks

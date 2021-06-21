@@ -167,6 +167,7 @@ async def G1(command, _):
     retries = 5
     # check current position is correct
     result, g2core_location, encoder_location = arduino.check_encoder(axes)
+    print(result, g2core_location, encoder_location)
     if not result:
         return {'success': False, 'message': 'current position is incorrect'}
 
@@ -180,6 +181,8 @@ async def G1(command, _):
 
         # if encoder pos is correct return success
         result, g2core_location, encoder_location = arduino.check_encoder(axes)
+        print(result, g2core_location, encoder_location)
+
         if result:
             return {'success': True, 'status': arduino.get_status()}
 
