@@ -1,34 +1,8 @@
-insert more details on the following error
-what do you read on first move? should I query after home
+vision2-5
+second half of machine
+board for feeder
 correct if intial position is wrong
-
-Traceback (most recent call last):
-  File "server.py", line 91, in <module>
-    asyncio.run(main())
-  File "/usr/lib/python3.8/asyncio/runners.py", line 43, in run
-    return loop.run_until_complete(main)
-  File "/usr/lib/python3.8/asyncio/base_events.py", line 608, in run_until_complete
-    return future.result()
-  File "server.py", line 85, in main
-    await task2
-  File "server.py", line 66, in script_wrapper_always
-    await func(self, ALL_NODES)
-  File "/home/it/Desktop/PAM2060/server/scripts/main.py", line 23, in main
-    await asyncio.gather(
-  File "/home/it/Desktop/PAM2060/server/scripts/main.py", line 69, in do_rail_n_robots
-    await do_rail(stations, robot_1, rail, all_nodes, STATUS)
-  File "/home/it/Desktop/PAM2060/server/scripts/main.py", line 402, in do_rail
-    await task2
-  File "/home/it/Desktop/PAM2060/server/node/node.py", line 187, in G1
-    return await self.send_command(command)
-  File "/home/it/Desktop/PAM2060/server/node/node.py", line 143, in send_command
-    assert line['success'], (line, self.ip, self.arduino_id)
-AssertionError: ({'success': False, 'message': 'current position is incorrect'}, '192.168.44.100', 0)
-
-
-
-event / systems interlock / read inputs / assert
 why Z motor cant handle two high speed together
 add rail jack checks
+event / systems interlock / read inputs / assert
 better script / gcodes for arcs / check for inputs
-second half of machine

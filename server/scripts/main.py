@@ -373,7 +373,7 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     task2 = asyncio.create_task(robot_1.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
 
     D_MIN = D_STANDBY - 125
-    D_MAX = D_MIN  # + 25 * 10
+    D_MAX = D_MIN + 25 * 1  # 10
 
     T_RAIL_JACK1 = .4
     T_RAIL_JACK2 = .7

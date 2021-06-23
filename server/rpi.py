@@ -169,7 +169,7 @@ async def G1(command, _):
     result, g2core_location, encoder_location = arduino.check_encoder(axes)
     print(result, g2core_location, encoder_location)
     if not result:
-        return {'success': False, 'message': 'current position is incorrect'}
+        return {'success': False, 'message': 'current position is incorrect g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
 
     for r in range(retries):
         # command move

@@ -109,6 +109,7 @@ class Station(Node):
         await asyncio.sleep(1)
 
         await self.send_command_raw('G28.2 Z0')
+        await self.send_command_raw('{stat:n}')
 
     async def send_command_create_camera(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]

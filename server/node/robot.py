@@ -103,3 +103,4 @@ class Robot(Node):
 
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
+        await self.send_command_raw('{stat:n}')

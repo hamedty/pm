@@ -68,6 +68,7 @@ class Rail(Robot):
         await asyncio.sleep(1)
 
         await self.send_command_raw('G28.2 Z0')
+        await self.send_command_raw('{stat:n}')
 
     async def is_homed(self, telorance=50):
         return True
