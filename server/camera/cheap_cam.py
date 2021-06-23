@@ -27,8 +27,9 @@ class CheapCam(CameraBase):
             x1 = roi['x0'] + roi['dx']
             y0 = roi['y0']
             y1 = roi['y0'] + roi['dy']
-
             frame = self.frame[y0:y1, x0:x1, :]
+        else:
+            frame = self.frame
         return frame
 
     def dump_frame(self, roi_index=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):

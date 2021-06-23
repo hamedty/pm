@@ -30,11 +30,11 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
-        $scope.nodes[2].selected = true;
-        $scope.nodes[3].selected = true;
-        $scope.nodes[4].selected = true;
-        $scope.nodes[5].selected = true;
-        $scope.nodes[6].selected = true;
+        // $scope.nodes[2].selected = true;
+        // $scope.nodes[3].selected = true;
+        // $scope.nodes[4].selected = true;
+        // $scope.nodes[5].selected = true;
+        // $scope.nodes[6].selected = true;
         // $scope.nodes[7].selected = true;
         break;
       case 'status_update':
@@ -175,7 +175,7 @@ COMMAND_TEMPLATE_GCODE = "{\n\
 }"
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
-  'verb': 'dump_training_dosing',\n\
+  'verb': 'dump_training_holder',\n\
   'revs': 3,\n\
   'frames_per_rev': 400,\n\
 }"

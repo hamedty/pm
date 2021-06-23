@@ -101,7 +101,7 @@ class Node(object):
             folder_name_dst = '../dataset/holder_%02d_%s' % (
                 self.ip_short, random_string)
 
-            await self.send_command({'verb': 'set_valves', 'valves': [0, 0]}, assert_success=True)
+            await self.set_valves([0, 0])
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':

@@ -8,6 +8,8 @@ from .recipe import *
 #                    do_robots_pickup
 # do_exchange
 
+stations_only = True
+
 
 async def main(system, ALL_NODES):
     all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
@@ -19,6 +21,7 @@ async def main(system, ALL_NODES):
     }
     while True:
         input('repeat?')
+        await asyncio.sleep(3)
         t0 = time.time()
         await asyncio.gather(
             do_stations(stations, robot_1, rail, all_nodes, STATUS),
@@ -53,7 +56,9 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
     await rail.set_valves([0] * 2)
 
     await run_stations(stations, lambda s: s.home())
-    # await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+    if stations_only:
+        await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+        return
 
     await robot_1.home()
     await rail.home()
@@ -61,6 +66,9 @@ async def home_all_nodes(all_nodes, rail, robot_1, stations):
 
 
 async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
+    if stations_only:
+        return
+
     t0 = time.time()
     await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
     print('do_robots_cap:', time.time() - t0)
@@ -75,6 +83,8 @@ async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
 
 
 async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
+    if stations_only:
+        return
     print('deliver')
 
     X_INPUT = 375
@@ -150,6 +160,7 @@ def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
 
 
 async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
+    global ALIGN_HOLDER_TASK
     if not ALIGN_HOLDER_TASK:
         await run_stations(stations, lambda x: x.set_valves([0, 1]))
         create_station_holder_align_task(
@@ -162,7 +173,7 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
 
     res = await asyncio.gather(*tasks)
     print(res)
-
+    ALIGN_HOLDER_TASK = {}
     # await run_stations(stations, lambda x: x.set_valves([0]))
 
 

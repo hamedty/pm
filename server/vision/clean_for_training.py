@@ -4,9 +4,18 @@ import numpy as np
 import json
 import os
 
+VISION_PATH = os.path.dirname(os.path.abspath(__file__))
+SERVER_PATH = os.path.dirname(VISION_PATH)
+BASE_PATH = os.path.dirname(SERVER_PATH)
+DATASET_PATH = os.path.join(BASE_PATH, 'dataset')
+MODELS_PATH = os.path.join(BASE_PATH, 'models')
+
+SRC_DATA = os.path.join(VISION_PATH, 'annotaion.json')
+DST_DATA = os.path.join(MODELS_PATH, 'annotaion.json')
+
 
 def load_data():
-    with open('annotaion.json') as f:
+    with open(SRC_DATA) as f:
         data = json.loads(f.read())
     return data
 
@@ -38,7 +47,7 @@ for node in nodes:
             INDICES = []
 
             dataset_dict = data[node][component][dataset_name]
-            path = '../../dataset/%s_%s_%s_192.168.44.%s' % (
+            path = DATASET_PATH + '/%s_%s_%s_192.168.44.%s' % (
                 component, node, dataset_name, node)
             npz_filename = path + '/data.npz'
             files = glob.glob(path + '/*.png')
