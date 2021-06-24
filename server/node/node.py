@@ -105,6 +105,9 @@ class Node(object):
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':
+            await self.set_valves([0, 0, 0, 1])
+            input('place pen')
+            await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
             await self.set_valves([1])
             await asyncio.sleep(1)
 
@@ -121,6 +124,7 @@ class Node(object):
                 self.ip_short, random_string)
 
             await self.set_valves([0])
+            await self.G1(z=1, feed=10000)
             await self.scp_from(folder_name_src, folder_name_dst)
 
         else:

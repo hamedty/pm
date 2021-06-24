@@ -78,6 +78,7 @@ app.controller('app_controller', function($scope, ws) {
     'G-Code': COMMAND_TEMPLATE_GCODE,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
+    'dump training dosing': COMMAND_TEMPLATE_DUMP_TRAINING_DOSING,
     'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
     'align dosing': COMMAND_TEMPLATE_ALIGN_DOSING,
     'dance': COMMAND_TEMPLATE_DANCE,
@@ -176,6 +177,11 @@ COMMAND_TEMPLATE_GCODE = "{\n\
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'verb': 'dump_training_holder',\n\
+  'revs': 3,\n\
+  'frames_per_rev': 400,\n\
+}"
+COMMAND_TEMPLATE_DUMP_TRAINING_DOSING = "{\n\
+  'verb': 'dump_training_dosing',\n\
   'revs': 3,\n\
   'frames_per_rev': 400,\n\
 }"

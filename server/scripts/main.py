@@ -21,7 +21,7 @@ async def main(system, ALL_NODES):
     }
     while True:
         input('repeat?')
-        await asyncio.sleep(3)
+        await asyncio.sleep(2)
         t0 = time.time()
         await asyncio.gather(
             do_stations(stations, robot_1, rail, all_nodes, STATUS),
@@ -172,9 +172,16 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
                                 ALIGN_HOLDER_TASK[station.name]))
 
     res = await asyncio.gather(*tasks)
-    print(res)
+    for station_index in range(len(stations)):
+        success, message = res[station_index]
+        station = stations[station_index]
+        if message:
+            input(station.name, message)
+
     ALIGN_HOLDER_TASK = {}
-    # await run_stations(stations, lambda x: x.set_valves([0]))
+    if stations_only:
+        await asyncio.sleep(2)
+        await run_stations(stations, lambda x: x.set_valves([0]))
 
 
 async def do_station(station, STATUS, align_holder_task):
@@ -232,53 +239,6 @@ async def do_station(station, STATUS, align_holder_task):
     data['H_DELIVER'] = 1
     data['FEED_DELIVER'] = FEED_Z_UP
 
-    c_process = '''
-        ; release dosing
-        M100 ({out1: 0, out4: 0})
-        G4 P%(PAUSE_FALL_DOSING).2f
-
-        ; ready to push
-        G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
-        M100 ({out1: 1})
-        G4 P%(PAUSE_READY_TO_PUSH).2f
-
-        ; push and come back
-        G1 Z%(H_PUSH).2f F%(FEED_PUSH)d
-        G4 P%(PAUSE_PUSH).2f
-        G1 Z%(H_PUSH_BACK).2f F%(FEED_PUSH_BACK)d
-
-        ; prepare for dance
-        G10 L20 P1 Y0
-        M100 ({out1: 0, out4: 1})
-        G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
-        G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
-        G4 P%(PAUSE_JACK_PRE_DANCE_2).2f
-        M100 ({out1: 1})
-        G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
-
-        ; dance
-        G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
-
-        ; press
-        M100 ({out1: 0, out2: 0, out4: 0})
-        G4 P%(PAUSE_PRESS0).2f
-        M100 ({out5: 1})
-        G4 P%(PAUSE_PRESS1).2f
-        M100 ({out3: 1})
-        G4 P%(PAUSE_PRESS2).2f
-        M100 ({out3: 0})
-
-        ; dance back
-        M100 ({out1: 1, out4: 1, out5: 0})
-        G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
-
-        G1 Z%(H_DANCE_BACK).2f F5000
-        G1 Z%(H_DANCE_BACK2).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
-        G1 Y%(Y_DANCE_BACK2).2f F%(FEED_DANCE_BACK)d
-        M100 ({out4: 0})
-        G4 P%(PAUSE_POST_DANCE_BACK).2f
-    ''' % data
-
     async def ignore(station, data):
         await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
         await station.set_valves([0, 0, 0, 1, 0])
@@ -291,12 +251,60 @@ async def do_station(station, STATUS, align_holder_task):
         await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
         await station.set_valves([None, None, None, 1])
 
+    async def process(station, data):
+        command = '''
+            ; release dosing
+            M100 ({out1: 0, out4: 0})
+            G4 P%(PAUSE_FALL_DOSING).2f
+
+            ; ready to push
+            G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
+            M100 ({out1: 1})
+            G4 P%(PAUSE_READY_TO_PUSH).2f
+
+            ; push and come back
+            G1 Z%(H_PUSH).2f F%(FEED_PUSH)d
+            G4 P%(PAUSE_PUSH).2f
+            G1 Z%(H_PUSH_BACK).2f F%(FEED_PUSH_BACK)d
+
+            ; prepare for dance
+            G10 L20 P1 Y0
+            M100 ({out1: 0, out4: 1})
+            G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
+            G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
+            G4 P%(PAUSE_JACK_PRE_DANCE_2).2f
+            M100 ({out1: 1})
+            G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
+
+            ; dance
+            G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
+
+            ; press
+            M100 ({out1: 0, out2: 0, out4: 0})
+            G4 P%(PAUSE_PRESS0).2f
+            M100 ({out5: 1})
+            G4 P%(PAUSE_PRESS1).2f
+            M100 ({out3: 1})
+            G4 P%(PAUSE_PRESS2).2f
+            M100 ({out3: 0})
+
+            ; dance back
+            M100 ({out1: 1, out4: 1, out5: 0})
+            G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
+
+            G1 Z%(H_DANCE_BACK).2f F5000
+            G1 Z%(H_DANCE_BACK2).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
+            G1 Y%(Y_DANCE_BACK2).2f F%(FEED_DANCE_BACK)d
+            M100 ({out4: 0})
+            G4 P%(PAUSE_POST_DANCE_BACK).2f
+        ''' % data
+        await station.send_command_raw(command)
+
     _, holder_res = await align_holder_task
 
     if holder_res['exists'] and not holder_res['aligned']:
-        input('couldnt align holder, remove objects from %s' % station.name)
         await ignore(station, data)
-        return
+        return 'couldnt align holder, remove objects'
 
     await come_down(station, data)
     print('aligning 1', station.ip, time.time() - t0)
@@ -306,24 +314,23 @@ async def do_station(station, STATUS, align_holder_task):
 
     if dosgin_res['exists'] and not dosgin_res['aligned']:
         await ignore(station, data)
-        input('couldnt align dosing, remove objects from %s' % station.name)
-        return
+        return False, 'couldnt align dosing, remove objects'
 
     if (not dosgin_res['exists']) and (not holder_res['exists']):
         await ignore(station, data)
-        return
+        return False, ''
 
     if (not dosgin_res['exists']) or (not holder_res['exists']):
         await ignore(station, data)
-        input('a component is missing, remove objects from %s' % station.name)
-        return
+        return False, 'a component is missing, remove objects'
 
     print('aligning 2', station.ip, time.time() - t0)
     t0 = time.time()
 
-    await station.send_command_raw(c_process)
+    await process(station, data)
     await deliver(station, data)
     print('aligning 3', station.ip, time.time() - t0)
+    return True, ''
 
 
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):

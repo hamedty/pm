@@ -2,25 +2,25 @@
     "101": {
         "dosing": {
             "5oi9cceg": {
-                "zero": 0
+                "zero": 2
             },
             "bir1fx9r": {
-                "zero": 0
+                "zero": 2
             },
             "lzaxirvg": {
-                "zero": 99
+                "zero": 100
             },
             "r7v162uk": {
-                "zero": 125
+                "zero": 127
             },
             "uudb8pve": {
                 "zero": 312
             },
             "viqh0t7a": {
-                "zero": 26
+                "zero": 27
             },
             "xfqa3ri2": {
-                "zero": 59
+                "zero": 61
             }
         },
         "dosing_roi": {
@@ -31,25 +31,25 @@
         },
         "holder": {
             "3zw2fzaa": {
-                "zero": 320
+                "zero": 317
             },
             "5aicayw5": {
-                "zero": 115
+                "zero": 112
             },
             "b11gp8nm": {
-                "zero": 42
+                "zero": 38
             },
             "ktcdjo18": {
-                "zero": 344
+                "zero": 340
             },
             "llcm8dee": {
-                "zero": 39
+                "zero": 37
             },
             "syrrjejq": {
-                "zero": 160
+                "zero": 157
             },
             "xetsno89": {
-                "zero": 369
+                "zero": 365
             }
         },
         "holder_roi": {
@@ -64,11 +64,8 @@
             "c182ed0w": {
                 "zero": 28
             },
-            "hfkwk8ym": {
-                "zero": 326
-            },
-            "idm75tp9": {
-                "zero": 133
+            "gvrnltqc": {
+                "zero": 328
             }
         },
         "dosing_roi": {
@@ -79,16 +76,16 @@
         },
         "holder": {
             "dag1aqju": {
-                "zero": 358
+                "zero": 366
             },
             "g8ldw78t": {
-                "zero": 8
+                "zero": 399
             },
             "m2g0fvki": {
-                "zero": 199
+                "zero": 207
             },
             "tk0cye9u": {
-                "zero": 50
+                "zero": 58
             }
         },
         "holder_roi": {
@@ -118,16 +115,16 @@
         },
         "holder": {
             "1y0t0lwu": {
-                "zero": 167
+                "zero": 165
             },
             "ah0acau7": {
-                "zero": 6
+                "zero": 3
             },
             "pytp79qc": {
-                "zero": 368
+                "zero": 367
             },
             "r3jjgj2a": {
-                "zero": 46
+                "zero": 44
             }
         },
         "holder_roi": {
@@ -160,13 +157,13 @@
         },
         "holder": {
             "501hj44e": {
-                "zero": 326
+                "zero": 329
             },
             "owa2vxk1": {
-                "zero": 95
+                "zero": 97
             },
             "srk2xdd7": {
-                "zero": 6
+                "zero": 9
             }
         },
         "holder_roi": {
@@ -199,13 +196,13 @@
         },
         "holder": {
             "576r9k2a": {
-                "zero": 192
+                "zero": 195
             },
             "y4iai7du": {
-                "zero": 244
+                "zero": 247
             },
             "z5tcpbav": {
-                "zero": 58
+                "zero": 61
             }
         },
         "holder_roi": {

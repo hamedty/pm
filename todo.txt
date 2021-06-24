@@ -1,8 +1,3 @@
-vision2-5
-second half of machine
+add halt and resume
 board for feeder
-correct if intial position is wrong
-why Z motor cant handle two high speed together
-add rail jack checks
-event / systems interlock / read inputs / assert
-better script / gcodes for arcs / check for inputs
+second half of machine
