@@ -47,7 +47,9 @@ async def dump_training(command, _):
     os.makedirs(directory)
 
     no_frames = command['revs'] * command['frames_per_rev']
-    steps = -360.0 / command['frames_per_rev']
+    steps = 360.0 / command['frames_per_rev']
+    if component == 'dosing':
+        steps = -steps
 
     webcam_buffer_length = 4
     for frame_no in range(-webcam_buffer_length, no_frames):
@@ -164,7 +166,7 @@ async def G1(command, _):
             break
     feed = command['feed']
     wait_start = {1, 3, 4}
-    retries = 5
+    retries = 10
     # check current position is correct
     result, g2core_location, encoder_location = arduino.check_encoder(axes)
     print(result, g2core_location, encoder_location)

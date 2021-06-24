@@ -103,4 +103,8 @@ class Robot(Node):
 
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
-        await self.send_command_raw('{stat:n}')
+
+        # reset encoder
+        await self.send_command_raw('G28.5')
+        await self.send_command_raw('G1 X1 F1000')
+        await self.send_command_raw('G1 X0 F1000')

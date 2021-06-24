@@ -8,7 +8,8 @@ from .recipe import *
 #                    do_robots_pickup
 # do_exchange
 
-stations_only = True
+stations_only = False
+rail_only = False
 
 
 async def main(system, ALL_NODES):
@@ -19,9 +20,12 @@ async def main(system, ALL_NODES):
     STATUS = {
         'robots_full': False,
     }
+    i = 1
     while True:
-        input('repeat?')
-        await asyncio.sleep(2)
+        if (i % 2) == 0:
+            input('repeat?')
+        i += 1
+        # await asyncio.sleep(2)
         t0 = time.time()
         await asyncio.gather(
             do_stations(stations, robot_1, rail, all_nodes, STATUS),
@@ -83,21 +87,21 @@ async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
 
 
 async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
-    if stations_only:
+    if stations_only or rail_only:
         return
     print('deliver')
 
     X_INPUT = 375
     Y_INPUT_DOWN_1 = 35
     Y_INPUT_UP = 55
-    Y_INPUT_DOWN_3 = 10
+    Y_INPUT_DOWN_3 = 7
     Y_INPUT_DOWN_2 = Y_INPUT_DOWN_3 + 10
-    Y_OUTPUT = 70
+    Y_OUTPUT = 80
     X_OUTPUT_SAFE = X_CAPPING
 
     FEED_Y_PRESS = 3000
 
-    Z_OUTPUT = 80
+    Z_OUTPUT = 70
     Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
     T_INPUT_RELEASE = 0.5
@@ -160,6 +164,8 @@ def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS)
 
 
 async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
+    if rail_only:
+        return
     global ALIGN_HOLDER_TASK
     if not ALIGN_HOLDER_TASK:
         await run_stations(stations, lambda x: x.set_valves([0, 1]))
@@ -176,7 +182,7 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
         success, message = res[station_index]
         station = stations[station_index]
         if message:
-            input(station.name, message)
+            input(station.name + message)
 
     ALIGN_HOLDER_TASK = {}
     if stations_only:
@@ -236,7 +242,7 @@ async def do_station(station, STATUS, align_holder_task):
     data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
     # Deliver
-    data['H_DELIVER'] = 1
+    data['H_DELIVER'] = .5
     data['FEED_DELIVER'] = FEED_Z_UP
 
     async def ignore(station, data):
@@ -304,7 +310,7 @@ async def do_station(station, STATUS, align_holder_task):
 
     if holder_res['exists'] and not holder_res['aligned']:
         await ignore(station, data)
-        return 'couldnt align holder, remove objects'
+        return False, 'couldnt align holder, remove objects'
 
     await come_down(station, data)
     print('aligning 1', station.ip, time.time() - t0)
@@ -334,6 +340,8 @@ async def do_station(station, STATUS, align_holder_task):
 
 
 async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
+    if rail_only:
+        return
     if not STATUS['robots_full']:
         return
 
@@ -367,6 +375,8 @@ async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
 
 
 async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
+    if rail_only:
+        return
     print('lets go grab input')
 
     data = {}
@@ -391,7 +401,7 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     task2 = asyncio.create_task(robot_1.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
 
     D_MIN = D_STANDBY - 125
-    D_MAX = D_MIN + 25 * 1  # 10
+    D_MAX = D_MIN + 25 * 5  # 10
 
     T_RAIL_JACK1 = .4
     T_RAIL_JACK2 = .7

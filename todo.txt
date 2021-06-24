@@ -1,3 +1,4 @@
-add halt and resume
-board for feeder
+feed 5 together from the other side
 second half of machine
+board for feeder
+add halt and resume

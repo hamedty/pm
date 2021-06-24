@@ -1,7 +1,7 @@
 import glob
 import os
 
-path = '/home/it/Desktop/PAM2060/dataset/holder_102_dag1aqju_192.168.44.102'
+path = '/home/it/Desktop/PAM2060/dataset/holder_103_rz3yxfi7_192.168.44.103'
 
 files = glob.glob(path + '/*.png')
 for f in files:

@@ -152,7 +152,7 @@ def main():
     nodes.sort()
     componenets = ['holder', 'dosing']
     res = []
-    with Pool(5) as pool:
+    with Pool(3) as pool:
         process_manager = Manager()
         write_lock = process_manager.Lock()
 

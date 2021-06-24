@@ -1,3 +1,5 @@
+read -n 1 -s -r -p "Press any key to continue"
+
 # for i in  100
 # do
 #   echo 192.168.44.$i
