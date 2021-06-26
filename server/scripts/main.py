@@ -14,24 +14,24 @@ rail_only = False
 
 async def main(system, ALL_NODES):
     all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
+    await system.system_running.wait()
     print('Home Everything')
     await home_all_nodes(all_nodes, rail, robot_1, stations)
 
     STATUS = {
         'robots_full': False,
     }
-    i = 1
     while True:
-        if (i % 2) == 0:
-            input('repeat?')
-        i += 1
-        # await asyncio.sleep(2)
+        await system.system_running.wait()
+
         t0 = time.time()
         await asyncio.gather(
             do_stations(stations, robot_1, rail, all_nodes, STATUS),
             do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
+        await system.system_running.wait()
+
         t0 = time.time()
         await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
         print('exchange:', time.time() - t0)

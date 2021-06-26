@@ -18,6 +18,8 @@ class System(object):
     def __init__(self, nodes):
         self.nodes = nodes
         self._ws = []
+        self.system_running = asyncio.Event()
+        self.system_running.set()
 
     async def connect(self):
         for node in self.nodes:
@@ -39,7 +41,10 @@ class System(object):
         self._ws.remove(ws)
 
     async def message_from_ws(self, ws, message_in):
-        response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_scenario(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
+        if message_in['selected_nodes']:
+            response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_scenario(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
+        else:
+            response = self.system_command_scenario(message_in['form'])
         message_out = {'type': 'response', 'payload': response}
         print(message_out)
         ws.write_message(json.dumps(message_out))
@@ -56,7 +61,11 @@ class System(object):
     async def loop(self):
         while True:
             message = [n.get_status() for n in self.nodes]
-            message = {'type': 'status_update', 'payload': message}
+            message = {
+                'type': 'status_update',
+                'nodes': message,
+                'system': self._get_status()
+            }
             message = json.dumps(message)
             for ws in self._ws:
                 ws.write_message(message)
@@ -64,13 +73,26 @@ class System(object):
 
     async def script_wrapper_always(self, func):
         await func(self, ALL_NODES)
-
         # while True:
         #     input('start?')
         #     try:
         #         await func(self, ALL_NODES_DICT)
         #     except:
         #         print(traceback.format_exc())
+
+    def _get_status(self):
+        status = {
+            'running': self.system_running.is_set()
+        }
+        return status
+
+    def system_command_scenario(self, form):
+        if 'system_running' in form:
+            if form['system_running']:
+                self.system_running.set()
+            else:
+                self.system_running.clear()
+        return {}
 
 
 async def main():
@@ -80,9 +102,9 @@ async def main():
 
     task1 = asyncio.create_task(SYSTEM.loop())
 
-    # task2 = asyncio.create_task(
-    #     SYSTEM.script_wrapper_always(scripts.main))
-    # await task2
+    task2 = asyncio.create_task(
+        SYSTEM.script_wrapper_always(scripts.main))
+    await task2
 
     await task1
 

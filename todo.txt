@@ -1,4 +1,3 @@
-feed 5 together from the other side
-second half of machine
-board for feeder
-add halt and resume
+Sat: feed 5 together from the other side
+Sun: second half of machine
+Mon: board for feeder

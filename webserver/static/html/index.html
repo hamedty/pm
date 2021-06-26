@@ -28,7 +28,15 @@
 
   <!-- <body> -->
   <div class="container">
-    <h1>PAM2060</h1>
+
+    <h1>
+      PAM2060
+      <div class='pull-right'>
+        <button class="btn btn-success btn-lg" ng-disabled="system_status.running" ng-click="send_system_status_running(1)">Start</button>
+        <button class="btn btn-danger btn-lg" ng-disabled="!system_status.running" ng-click="send_system_status_running(0)">Stop</button>
+      </div>
+    </h1>
+
     <hr />
 
     <table>

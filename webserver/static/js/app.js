@@ -38,10 +38,11 @@ app.controller('app_controller', function($scope, ws) {
         // $scope.nodes[7].selected = true;
         break;
       case 'status_update':
-        $scope.update_node_status(message.payload);
+        $scope.update_node_status(message.nodes);
+        $scope.update_system_status(message.system);
         break;
       case 'response':
-        console.log(message['payload'][1]);
+        console.log(message);
         break;
       default:
         console.log(message);
@@ -61,6 +62,10 @@ app.controller('app_controller', function($scope, ws) {
     //   delete x.age;
     // })
     $scope.nodes_status = nodes_status;
+  }
+
+  $scope.update_system_status = function(system_status) {
+    $scope.system_status = system_status;
   }
 
   $scope.send_command = function(command) {
@@ -144,6 +149,14 @@ app.controller('app_controller', function($scope, ws) {
     console.log(data)
     ws.get(data);
   }
+
+   $scope.send_system_status_running = function(value) {
+     data = {
+       form: {'system_running': value,},
+       selected_nodes: [],
+     }
+     ws.get(data);
+   }
 
 });
 
