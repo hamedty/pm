@@ -1,3 +1,11 @@
+Sun: prepare list of problems in stations stations
 Sat: feed 5 together from the other side
-Sun: second half of machine
+Mon: data collection for stations 6-10 and train
 Mon: board for feeder
+Tue: More extensive station 6-10 test
+---------------------------------------------
+R1H4 - broken and sticky
+R1D5 - doesn't open wide enough
+R1D2 - valve broken = g2core out4 - physical valve #7
+R2D9, R2D10 - missing
+R1Y Coupling - broken

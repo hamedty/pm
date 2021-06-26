@@ -19,7 +19,7 @@ class System(object):
         self.nodes = nodes
         self._ws = []
         self.system_running = asyncio.Event()
-        self.system_running.set()
+        # self.system_running.set()
 
     async def connect(self):
         for node in self.nodes:

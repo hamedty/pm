@@ -143,3 +143,6 @@ class Station(Node):
         #     data = kwargs['data']
         #     kwargs['data'] = data
         super(Station, self).set_status(**kwargs)
+
+    def set_robot(self, robot):
+        self._robot = robot

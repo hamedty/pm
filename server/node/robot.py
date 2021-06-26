@@ -97,6 +97,10 @@ class Robot(Node):
 
     }
 
+    def __init__(self, *args, **kwargs):
+        self._stations = set()
+        super().__init__(*args, **kwargs)
+
     async def home(self):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
@@ -106,5 +110,8 @@ class Robot(Node):
 
         # reset encoder
         await self.send_command_raw('G28.5')
-        await self.send_command_raw('G1 X1 F1000')
-        await self.send_command_raw('G1 X0 F1000')
+        await self.send_command_raw('G1 X1 Y1 F1000')
+        await self.send_command_raw('G1 X0 Y0 F1000')
+
+    def add_station(self, station):
+        self._stations.add(station)

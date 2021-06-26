@@ -5,7 +5,7 @@ from .recipe import *
 # do_stations, do_rail_n_robots
 #                    do_robots_cap
 #                    do_rail
-#                    do_robots_pickup
+#                    do_robot_pickup
 # do_exchange
 
 stations_only = False
@@ -13,10 +13,10 @@ rail_only = False
 
 
 async def main(system, ALL_NODES):
-    all_nodes, rail, robot_1, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await system.system_running.wait()
     print('Home Everything')
-    await home_all_nodes(all_nodes, rail, robot_1, stations)
+    await home_all_nodes(all_nodes, rail, robots, stations)
 
     STATUS = {
         'robots_full': False,
@@ -26,67 +26,66 @@ async def main(system, ALL_NODES):
 
         t0 = time.time()
         await asyncio.gather(
-            do_stations(stations, robot_1, rail, all_nodes, STATUS),
-            do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS)
+            do_stations(stations, robots, rail, all_nodes, STATUS),
+            do_rail_n_robots(stations, robots, rail, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         await system.system_running.wait()
 
         t0 = time.time()
-        await do_exchange(stations, robot_1, rail, all_nodes, STATUS)
+        await run_many(robots, lambda r: do_exchange(r._stations, r, rail, all_nodes, STATUS))
         print('exchange:', time.time() - t0)
 
 
 async def gather_all_nodes(system, ALL_NODES):
     stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
     robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
-    robot_1 = robots[0]
     rails = [node for node in ALL_NODES if node.name.startswith('Rail')]
     rail = rails[0]
 
-    all_nodes = stations + [robot_1, rail]
+    all_nodes = stations + robots + [rail]
 
     # All Nodes Ready?
     for node in all_nodes:
         while not node.ready_for_command():
             await asyncio.sleep(.01)
 
-    return all_nodes, rail, robot_1, stations
+    return all_nodes, rail, robots, stations
 
 
-async def home_all_nodes(all_nodes, rail, robot_1, stations):
-    await run_stations(stations, lambda x: x.set_valves([0] * 5))
-    await robot_1.set_valves([0] * 10)
+async def home_all_nodes(all_nodes, rail, robots, stations):
+    await run_many(stations, lambda x: x.set_valves([0] * 5))
+    await run_many(robots, lambda x: x.set_valves([0] * 10))
     await rail.set_valves([0] * 2)
 
-    await run_stations(stations, lambda s: s.home())
+    await run_many(stations, lambda s: s.home())
     if stations_only:
-        await run_stations(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
+        await run_many(stations, lambda x: x.set_valves([0, 0, 0, 1, 0, 0]))
         return
 
-    await robot_1.home()
+    await run_many(robots, lambda x: x.home())
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
 
 
-async def do_rail_n_robots(stations, robot_1, rail, all_nodes, STATUS):
+async def do_rail_n_robots(stations, robots, rail, all_nodes, STATUS):
     if stations_only:
         return
 
     t0 = time.time()
-    await do_robots_cap(stations, robot_1, rail, all_nodes, STATUS)
+    await do_robots_cap(stations, robots, rail, all_nodes, STATUS)
     print('do_robots_cap:', time.time() - t0)
 
     t0 = time.time()
-    await do_rail(stations, robot_1, rail, all_nodes, STATUS)
+    await do_rail(stations, robots, rail, all_nodes, STATUS)
     print('do_rail:', time.time() - t0)
 
     t0 = time.time()
-    await do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS)
-    print('do_robots_pickup:', time.time() - t0)
+    await run_many(robots, lambda r: do_robot_pickup(stations, r, rail, all_nodes, STATUS))
+    print('do_robot_pickup:', time.time() - t0)
 
 
-async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
+async def do_exchange(stations, robot, rail, all_nodes, STATUS):
     if stations_only or rail_only:
         return
     print('deliver')
@@ -111,18 +110,18 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
     T_OUTPUT_GRIPP = 0.1
     T_OUTPUT_RELEASE = 0.2
 
-    await robot_1.G1(x=X_INPUT, feed=FEED_X)
-    await robot_1.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN)
-    await robot_1.set_valves([0] * 10)
+    await robot.G1(x=X_INPUT, feed=FEED_X)
+    await robot.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN)
+    await robot.set_valves([0] * 10)
     await asyncio.sleep(T_INPUT_RELEASE)
 
     async def robot_press():
-        await robot_1.G1(y=Y_INPUT_UP, feed=FEED_Y_UP)
-        await robot_1.set_valves([0] * 5 + [1] * 5)
+        await robot.G1(y=Y_INPUT_UP, feed=FEED_Y_UP)
+        await robot.set_valves([0] * 5 + [1] * 5)
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
-        await robot_1.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN)
+        await robot.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN)
         await asyncio.sleep(T_PRE_PRESS)
-        await robot_1.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
+        await robot.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
         await asyncio.sleep(T_POST_PRESS)
 
     async def station_down(station):
@@ -130,11 +129,11 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
 
     await asyncio.gather(
         robot_press(),
-        run_stations(stations, lambda x: station_down(x)),
+        run_many(stations, lambda x: station_down(x)),
     )
 
-    await robot_1.G1(y=Y_OUTPUT, feed=FEED_Y_UP)
-    await robot_1.set_valves([1] * 5)
+    await robot.G1(y=Y_OUTPUT, feed=FEED_Y_UP)
+    await robot.set_valves([1] * 5)
 
     await asyncio.sleep(T_OUTPUT_GRIPP)
 
@@ -143,13 +142,13 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
         await asyncio.sleep(T_OUTPUT_RELEASE)
         await station.G1(z=Z_OUTPUT_SAFE, feed=FEED_Z_UP)
 
-    await run_stations(stations, lambda x: station_release(x))
+    await run_many(stations, lambda x: station_release(x))
 
     # Start Align Holder
     create_station_holder_align_task(
-        stations, robot_1, rail, all_nodes, STATUS)
+        stations, robot, rail, all_nodes, STATUS)
 
-    await robot_1.G1(x=X_OUTPUT_SAFE, feed=FEED_X)
+    await robot.G1(x=X_OUTPUT_SAFE, feed=FEED_X)
 
     STATUS['robots_full'] = True
 
@@ -157,20 +156,20 @@ async def do_exchange(stations, robot_1, rail, all_nodes, STATUS):
 ALIGN_HOLDER_TASK = {}
 
 
-def create_station_holder_align_task(stations, robot_1, rail, all_nodes, STATUS):
+def create_station_holder_align_task(stations, robots, rail, all_nodes, STATUS):
     for station in stations:
         ALIGN_HOLDER_TASK[station.name] = asyncio.create_task(station.send_command(
             {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}))
 
 
-async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
+async def do_stations(stations, robots, rail, all_nodes, STATUS):
     if rail_only:
         return
     global ALIGN_HOLDER_TASK
     if not ALIGN_HOLDER_TASK:
-        await run_stations(stations, lambda x: x.set_valves([0, 1]))
+        await run_many(stations, lambda x: x.set_valves([0, 1]))
         create_station_holder_align_task(
-            stations, robot_1, rail, all_nodes, STATUS)
+            stations, robots, rail, all_nodes, STATUS)
 
     tasks = []
     for station in stations:
@@ -187,7 +186,7 @@ async def do_stations(stations, robot_1, rail, all_nodes, STATUS):
     ALIGN_HOLDER_TASK = {}
     if stations_only:
         await asyncio.sleep(2)
-        await run_stations(stations, lambda x: x.set_valves([0]))
+        await run_many(stations, lambda x: x.set_valves([0]))
 
 
 async def do_station(station, STATUS, align_holder_task):
@@ -339,7 +338,7 @@ async def do_station(station, STATUS, align_holder_task):
     return True, ''
 
 
-async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
+async def do_robots_cap(stations, robots, rail, all_nodes, STATUS):
     if rail_only:
         return
     if not STATUS['robots_full']:
@@ -359,22 +358,23 @@ async def do_robots_cap(stations, robot_1, rail, all_nodes, STATUS):
 
     await asyncio.gather(
         swap_rail_jacks_1(rail),
-        robot_1.G1(x=X_CAPPING, feed=FEED_X),
+        run_many(robots, lambda r: r.G1(x=X_CAPPING, feed=FEED_X)),
     )
 
-    await robot_1.G1(y=Y_CAPPING_DOWN_1, feed=FEED_Y_DOWN)
+    await run_many(robots, lambda r: r.G1(y=Y_CAPPING_DOWN_1, feed=FEED_Y_DOWN))
 
     await asyncio.gather(
         swap_rail_jacks_2(rail),
-        robot_1.G1(y=Y_CAPPING_DOWN_2, feed=FEED_Y_CAPPING),
+        run_many(robots, lambda r: r.G1(
+            y=Y_CAPPING_DOWN_2, feed=FEED_Y_CAPPING))
     )
 
-    await robot_1.set_valves([0] * 10)
+    await run_many(robots, lambda r: r.set_valves([0] * 10))
 
-    await robot_1.G1(x=X_PARK, feed=FEED_X)
+    await run_many(robots, lambda r: r.G1(x=X_PARK, feed=FEED_X))
 
 
-async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
+async def do_robot_pickup(stations, robot, rail, all_nodes, STATUS):
     if rail_only:
         return
     print('lets go grab input')
@@ -387,18 +387,18 @@ async def do_robots_pickup(stations, robot_1, rail, all_nodes, STATUS):
 
     T_GRAB_IN = 0.5
 
-    await robot_1.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
-    await robot_1.G1(x=X_GRAB_IN, feed=FEED_X)
-    await robot_1.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
+    await robot.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
+    await robot.G1(x=X_GRAB_IN, feed=FEED_X)
+    await robot.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
 
-    await robot_1.set_valves([1] * 10)
+    await robot.set_valves([1] * 10)
     await asyncio.sleep(T_GRAB_IN)
 
-    await robot_1.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
+    await robot.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
 
 
-async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
-    task2 = asyncio.create_task(robot_1.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
+async def do_rail(stations, robots, rail, all_nodes, STATUS):
+    task2 = run_many(robots, lambda r: r.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
 
     D_MIN = D_STANDBY - 125
     D_MAX = D_MIN + 25 * 5  # 10
@@ -430,9 +430,9 @@ async def do_rail(stations, robot_1, rail, all_nodes, STATUS):
     await task2
 
 
-def run_stations(stations, func):
+def run_many(nodes, func):
     tasks = []
-    for station in stations:
-        tasks.append(func(station))
+    for node in nodes:
+        tasks.append(func(node))
 
     return asyncio.gather(*tasks)
