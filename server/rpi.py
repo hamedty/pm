@@ -201,7 +201,7 @@ async def G1(command, _):
         arduino.send_command(command_raw)
         feed = .85 * feed
 
-    return {'success': False, 'message': 'Failed after many retries'}
+    return {'success': False, 'message': 'Failed after many retries - g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
 
 
 async def status_hook(command, writer):

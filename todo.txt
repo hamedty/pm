@@ -1,11 +1,16 @@
-Sun: prepare list of problems in stations stations
-Sat: feed 5 together from the other side
+Mon: fix problems stations 6-10
 Mon: data collection for stations 6-10 and train
-Mon: board for feeder
-Tue: More extensive station 6-10 test
+Mon: adjust robot for stations 6-10
+Tue: add 48V PSU's
+Tue: feed 10 together from the other side
+Tue: board for feeder
+Tue: Extensive Testing
 ---------------------------------------------
-R1H4 - broken and sticky
-R1D5 - doesn't open wide enough
+SxD - new dosing grippers
 R1D2 - valve broken = g2core out4 - physical valve #7
-R2D9, R2D10 - missing
-R1Y Coupling - broken
+
+Aarebi:
+  1- Path for Compressed air and electricty
+  2- on/off key + valves + air gun
+  3- connection port to feeder skid
+  4- fans for cooling
