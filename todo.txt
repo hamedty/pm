@@ -1,8 +1,6 @@
-PWM motors infrastructure / spindle?
-valve 10 is broken
 encoder doesnt work in high speed
-write loop script
-middle air jack trigger
+pwm gradual speed up
+valve 10 is broken
 fix problems stations 6-10
 data collection for stations 6-10 and train
 adjust robot for stations 6-10
