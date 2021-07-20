@@ -1,6 +1,6 @@
-encoder doesnt work in high speed
+write script
 pwm gradual speed up
-valve 10 is broken
+----------------------
 fix problems stations 6-10
 data collection for stations 6-10 and train
 adjust robot for stations 6-10
