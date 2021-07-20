@@ -60,7 +60,7 @@ async def holder_feed(arduino, holder_lock):
         await asyncio.sleep(1.5)
 
         # H::1 bring finger down (7) and open sub-gate(4)
-        arduino._send_command("{out7: 1, out4: 0}")
+        arduino._send_command("{out7: 1, out8: 1, out4: 0, out5: 0}")
         await asyncio.sleep(.2)
 
         # H::2 - open main gate
@@ -75,45 +75,45 @@ async def holder_feed(arduino, holder_lock):
 async def holder_handover(arduino, holder_lock):
     async with holder_lock:
         # H::4 - close main gate again and close sub-gate
-        arduino._send_command("{out3: 0, out4: 1}")
+        arduino._send_command("{out3: 0, out4: 1, out5: 1}")
         await asyncio.sleep(.2)
 
         # H::5 - bring up finger
-        arduino._send_command("{out7: 0}")
+        arduino._send_command("{out7: 0, out8: 0}")
         await asyncio.sleep(.2)
 
 
 async def cartridge_feed(arduino, cartridge_lock):
     async with cartridge_lock:
         # rotate to upstream
-        arduino._send_command("G1 Y180 F100000")
+        arduino._send_command("G1 X180 Y180 F100000")
         await asyncio.sleep(.3)
 
         # bring jack down
-        arduino._send_command("{out9: 1}")
+        arduino._send_command("{out9: 1, out10: 1}")
         await asyncio.sleep(.2)
 
         # turn on vacuum
-        arduino._send_command("{out13: 1}")
+        arduino._send_command("{out13: 1, out14: 1}")
         await asyncio.sleep(.2)
 
         # bring jack down
-        arduino._send_command("{out9: 0}")
+        arduino._send_command("{out9: 0, out10: 0}")
         await asyncio.sleep(.2)
 
         # rotate to mid air
-        arduino._send_command("G1 Y90 F50000")
+        arduino._send_command("G1 X90 Y90 F50000")
         await asyncio.sleep(.05)
 
         # take jack up
-        arduino._send_command("{out9: 1}")
+        arduino._send_command("{out9: 1, out10: 1}")
         await asyncio.sleep(.4)
 
 
 async def cartridge_handover(arduino, cartridge_lock):
     async with cartridge_lock:
         # rotate to rail
-        arduino._send_command("G1 Y5 F50000")
+        arduino._send_command("G1 X5 Y5 F50000")
         await asyncio.sleep(.05)
         #
         # # take jack up
@@ -121,9 +121,9 @@ async def cartridge_handover(arduino, cartridge_lock):
         # await asyncio.sleep(.4)
 
         # bring jack down
-        arduino._send_command("{out9: 0}")
+        arduino._send_command("{out9: 0, out10: 0}")
         await asyncio.sleep(.2)
 
         # release vacuum
-        arduino._send_command("{out13: 0}")
+        arduino._send_command("{out13: 0, out14: 0}")
         await asyncio.sleep(.2)
