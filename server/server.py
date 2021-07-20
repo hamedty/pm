@@ -12,6 +12,7 @@ sys.path.insert(0, PARENT_PATH)
 
 import webserver.main as webserver  # nopep8
 import scripts
+import rpi_scripts  # for sake of reload
 
 
 class System(object):

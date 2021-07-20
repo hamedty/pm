@@ -2,37 +2,55 @@ import asyncio
 import time
 
 
-async def feeder_process(arduino):
+async def feeder_process(arduino, G1):
     t0 = time.time()
-    N = 10
+
     holder_lock = asyncio.Lock()
     holder_lock_rail = asyncio.Lock()
     cartridge_lock = asyncio.Lock()
     cartridge_lock_rail = asyncio.Lock()
 
-    for i in range(N):
+    for i in range(12):
         # rail must be stationary
-        t1 = asyncio.create_task(holder_handover(arduino, holder_lock))
-        t2 = asyncio.create_task(cartridge_handover(arduino, cartridge_lock))
+        t1 = t2 = None
+        if 10 >= i >= 1:
+            t1 = asyncio.create_task(holder_handover(arduino, holder_lock))
+        if 11 >= i >= 2:
+            t2 = asyncio.create_task(
+                cartridge_handover(arduino, cartridge_lock))
         await asyncio.sleep(.05)
 
         # rail can move
-        asyncio.create_task(holder_feed(arduino, holder_lock))
-        asyncio.create_task(cartridge_feed(arduino, cartridge_lock))
+        if 9 >= i >= 0:
+            asyncio.create_task(holder_feed(arduino, holder_lock))
+        if 10 >= i >= 1:
+            asyncio.create_task(cartridge_feed(arduino, cartridge_lock))
 
-        await t1
-        await t2
-        await move_rail(arduino, i + 1)
+        t1 is None or await t1
+        t2 is None or await t2
+        if 10 >= i >= 1:
+            await move_rail(arduino, G1, i)
+        else:
+            await asyncio.sleep(.05)
 
-    print((time.time() - t0) / N)
-    for j in range(14):
-        arduino._send_command("{out%d: 0}" % (j + 1))
+    print(time.time() - t0)
+
+    res = await G1({'arduino_index': None, 'z': 718, 'feed': 6000}, None)
+    assert res['success']
+    # input('handover?')
+    res = await G1({'arduino_index': None, 'z': 16, 'feed': 6000}, None)
+    assert res['success']
+    print(time.time() - t0)
 
 
-async def move_rail(arduino, index):
-    z = (index % 2) * 25 + 16
-    arduino._send_command("G1 Z%d F6000" % z)
-    await asyncio.sleep(0.6)
+async def move_rail(arduino, G1, index):
+    await asyncio.sleep(.05)
+    z = index * 25 + 16
+    print('going to Z:%d' % z)
+    res = await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
+    assert res['success']
+    # arduino._send_command("G1 Z%d F6000" % z)
+    # await asyncio.sleep(0.6)
 
 
 async def holder_feed(arduino, holder_lock):
@@ -95,7 +113,7 @@ async def cartridge_feed(arduino, cartridge_lock):
 async def cartridge_handover(arduino, cartridge_lock):
     async with cartridge_lock:
         # rotate to rail
-        arduino._send_command("G1 Y10 F50000")
+        arduino._send_command("G1 Y5 F50000")
         await asyncio.sleep(.05)
         #
         # # take jack up

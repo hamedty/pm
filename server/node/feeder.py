@@ -24,11 +24,11 @@ class Feeder(Node):
             'jm': 90000,  # max jerk
             'jh': 90000,  # hominzg jerk
             'hi': 1,  # home switch
-            # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
-            'sv': 5000,  # home search speed
-            'lv': 5000,  # latch speed
-            'zb': 5,  # zero backoff
+            'sv': 2000,  # home search speed
+            'lv': 500,  # latch speed
+            'lb': 10,  # latch backoff; if home switch is active at start
+            'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di1ac', 1),
@@ -51,11 +51,11 @@ class Feeder(Node):
             'jm': 90000,  # max jerk
             'jh': 90000,  # hominzg jerk
             'hi': 2,  # home switch
-            # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
-            'sv': 8000,  # home search speed
-            'lv': 8000,  # latch speed
-            'zb': 5,  # zero backoff
+            'sv': 2000,  # home search speed
+            'lv': 500,  # latch speed
+            'lb': 10,  # latch backoff; if home switch is active at start
+            'zb': 1,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di2ac', 1),
@@ -82,6 +82,7 @@ class Feeder(Node):
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
+            'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
         ('di3mo', 0),  # Homing Switch - Mode = Active Low - NO
@@ -126,14 +127,16 @@ class Feeder(Node):
     async def home(self):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
-
-        # cartridge pickers
+        #
+        # # cartridge pickers
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
-
-        # rail
+        #
+        # # rail
         await self.send_command_raw('G28.2 Z0')
-
-        # # reset encoder
+        #
+        # # # reset encoder
         await self.send_command_raw('G28.5')
-        await self.send_command_raw('G1 X12 Y12 Z16 F1000')
+        await self.send_command_raw('G10 P0 X3 Y3')
+        await self.send_command_raw('G1 Z16 F1000')
+        await self.send_command_raw('G1 X90 Y90 F20000')

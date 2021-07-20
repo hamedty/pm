@@ -1,3 +1,4 @@
+import importlib
 import os
 import json
 import asyncio
@@ -127,6 +128,7 @@ async def config_arduino(command, _):
     arduino._hw_config = command['hw_config']
     for key, value in command['g2core_config']:
         command_id = arduino.send_command(json.dumps({key: value}))
+    importlib.reload(rpi_scripts)
     return {'success': True}
 
 
@@ -206,7 +208,7 @@ async def G1(command, _):
 
 async def feeder_process(command, _):
     arduino = ARDUINOS[command['arduino_index']]
-    await rpi_scripts.feeder_process(arduino)
+    await rpi_scripts.feeder_process(arduino, G1)
     return {'success': True}
 
 

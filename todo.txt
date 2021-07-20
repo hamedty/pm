@@ -1,7 +1,3 @@
-proper homing
-send script over the air
-do 10 and go for handover and return
-write script
 pwm gradual speed up
 ----------------------
 fix problems stations 6-10

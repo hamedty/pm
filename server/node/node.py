@@ -47,6 +47,12 @@ class Node(object):
         res = subprocess.call(command, stdout=subprocess.PIPE)
         return res == 0
 
+    async def scp_to(self, path_src, path_dst):
+        command = 'scp -r %s pi@%s:%s' % (path_src, self.ip, path_dst)
+        command = command.split()
+        res = subprocess.call(command, stdout=subprocess.PIPE)
+        return res == 0
+
     async def connect(self):
         while not self._socket_reader:
             try:
@@ -166,6 +172,8 @@ class Node(object):
         return await self.send_command(command)
 
     async def send_command_config_arduino(self):
+        # to update scripts
+        await self.scp_to('./rpi_scripts.py', '~/server/')
         command = {
             'verb': 'config_arduino',
             'g2core_config': self.g2core_config,

@@ -9,7 +9,8 @@ async def main(system, ALL_NODES):
 
     await feeder.set_valves([0] * 14)
     await feeder.home()
-    # await feeder.send_command({'verb': 'feeder_process'})
+
+    await feeder.send_command({'verb': 'feeder_process'})
 
     # t0 = time.time()
     # for i in range(10):
