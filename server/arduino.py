@@ -58,7 +58,11 @@ class Arduino(object):
             if line[0] == ';':
                 continue
             clean_data.append(line)
-        data = '\n'.join(clean_data) + '\n'
+        data = '\n'.join(clean_data)
+        self._send_command(data)
+
+    def _send_command(self, data):
+        data += '\n'
         data = data.encode()
 
         self.lock.acquire()

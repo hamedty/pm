@@ -24,10 +24,11 @@ class Feeder(Node):
             'jm': 90000,  # max jerk
             'jh': 90000,  # hominzg jerk
             'hi': 1,  # home switch
+            # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
             'sv': 5000,  # home search speed
             'lv': 5000,  # latch speed
-            'zb': 1,  # zero backoff
+            'zb': 5,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di1ac', 1),
@@ -50,10 +51,11 @@ class Feeder(Node):
             'jm': 90000,  # max jerk
             'jh': 90000,  # hominzg jerk
             'hi': 2,  # home switch
+            # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
-            'sv': 5000,  # home search speed
-            'lv': 5000,  # latch speed
-            'zb': 1,  # zero backoff
+            'sv': 8000,  # home search speed
+            'lv': 8000,  # latch speed
+            'zb': 5,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di2ac', 1),
@@ -70,12 +72,13 @@ class Feeder(Node):
         ('z', {
             'am': 1,  # standard axis mode
             'vm': 20000,  # max speed
-            'fr': 800000,  # max feed rate
+            'fr': 20000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 719,  # max travel
             'jm': 20000,  # max jerk
             'jh': 8000,  # hominzg jerk
             'hi': 3,  # home switch
+            # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
@@ -133,5 +136,4 @@ class Feeder(Node):
 
         # # reset encoder
         await self.send_command_raw('G28.5')
-        await self.send_command_raw('G1 X16 F1000')
-        await self.send_command_raw('G1 X90 Y90 F10000')
+        await self.send_command_raw('G1 X12 Y12 Z16 F1000')

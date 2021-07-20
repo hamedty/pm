@@ -8,7 +8,7 @@ import threading
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
-
+import rpi_scripts
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
 ARDUINOS = {}
@@ -204,6 +204,12 @@ async def G1(command, _):
     return {'success': False, 'message': 'Failed after many retries - g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
 
 
+async def feeder_process(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+    await rpi_scripts.feeder_process(arduino)
+    return {'success': True}
+
+
 async def status_hook(command, writer):
     arduino_index = command['arduino_index']
 
@@ -244,6 +250,7 @@ COMMAND_HANDLER = {
     'config_arduino': config_arduino,
     'raw': raw,
     'G1': G1,
+    'feeder_process': feeder_process,
 
     # second channel - status
     'status_hook': status_hook,
