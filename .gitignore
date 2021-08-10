@@ -9,3 +9,4 @@ __pycache__
 *.npz
 .ipynb_checkpoints
 /models_bk/
+*.ods#

@@ -113,5 +113,7 @@ class Robot(Node):
         await self.send_command_raw('G1 X1 Y1 F1000')
         await self.send_command_raw('G1 X0 Y0 F1000')
 
+        self.homed = True
+
     def add_station(self, station):
         self._stations.add(station)

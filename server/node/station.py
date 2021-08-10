@@ -115,6 +115,8 @@ class Station(Node):
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
 
+        self.homed = True
+
     async def send_command_create_camera(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
         roi_dosing = annotation_data['dosing_roi']

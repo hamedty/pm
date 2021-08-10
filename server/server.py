@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import traceback
+import types
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
 
@@ -56,7 +57,11 @@ class System(object):
             'name': n.name,
             'actions': n.get_actions(),
         } for n in self.nodes]
-        message = {'type': 'architecture', 'payload': message}
+        message = {
+            'type': 'architecture',
+            'payload': message,
+            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType)],
+        }
         ws.write_message(json.dumps(message))
 
     async def loop(self):
@@ -72,7 +77,9 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
-    async def script_wrapper_always(self, func):
+    async def script_wrapper_always(self, func=None):
+        if func is None:
+            return
         await func(self, ALL_NODES)
         # while True:
         #     input('start?')
@@ -93,6 +100,9 @@ class System(object):
                 self.system_running.set()
             else:
                 self.system_running.clear()
+        if 'script' in form:
+            script = getattr(scripts, form['script'])
+            asyncio.create_task(self.script_wrapper_always(script))
         return {}
 
 
@@ -102,16 +112,15 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-
-    # task2 = asyncio.create_task(SYSTEM.script_wrapper_always(scripts.main))
-    # task2 = asyncio.create_task(
-    #     SYSTEM.script_wrapper_always(scripts.test_stations))
-    task2 = asyncio.create_task(
-        SYSTEM.script_wrapper_always(scripts.test_feeder))
-    await task2
-
+    await SYSTEM.script_wrapper_always(
+        # scripts.main
+        # scripts.test_stations
+        # scripts.test_dosing_feeder
+        # scripts.test_feeder
+    )
     await task1
 
 
 if __name__ == '__main__':
+
     asyncio.run(main())

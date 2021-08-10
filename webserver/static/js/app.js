@@ -30,6 +30,7 @@ app.controller('app_controller', function($scope, ws) {
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;
+        $scope.scripts = message.scripts;
         // $scope.nodes[2].selected = true;
         // $scope.nodes[3].selected = true;
         // $scope.nodes[4].selected = true;
@@ -158,6 +159,13 @@ app.controller('app_controller', function($scope, ws) {
      ws.get(data);
    }
 
+   $scope.run_script = function(script_name) {
+     data = {
+       form: {'script': script_name,},
+       selected_nodes: [],
+     }
+     ws.get(data);
+   }
 });
 
 
@@ -183,7 +191,7 @@ COMMAND_TEMPLATE_HOME_AXIS = "{\n\
 
 COMMAND_TEMPLATE_GCODE = "{\n\
     'verb': 'raw',\n\
-    'data': 'G0',\n\
+    'data': '{m1:100}',\n\
     'wait_start': [1,3,4],\n\
     'wait_completion': true,\n\
 }"

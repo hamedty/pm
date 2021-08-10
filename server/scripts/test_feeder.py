@@ -5,24 +5,23 @@ from .recipe import *
 
 async def main(system, ALL_NODES):
     feeder = await gather_feeder(system, ALL_NODES)
-    print('feeder ready')
 
     await feeder.set_valves([0] * 14)
-    await feeder.home()
+    await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
+    # await feeder.send_command_raw('{m4:60, m7:130}')  # Holder Upstream - Lift and long
+    if not feeder.homed:
+        await feeder.home()
+    else:
+        await feeder.G1(z=16, feed=1000)  # Holder Downstream
 
     await feeder.send_command({'verb': 'feeder_process'})
 
-    # t0 = time.time()
-    # for i in range(10):
-    #     await feeder.send_command_raw('G1 Z41 F6000')
-    #     await feeder.send_command_raw('G1 Z16 F6000')
-    # print(time.time() - t0)
-
 
 async def gather_feeder(system, ALL_NODES):
-    feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
+    for node in ALL_NODES:
+        while not node.ready_for_command():
+            await asyncio.sleep(.01)
 
-    while not feeder.ready_for_command():
-        await asyncio.sleep(.01)
+    feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
 
     return feeder

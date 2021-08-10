@@ -79,55 +79,17 @@
         </form>
       </div>
       <div class="col-md-6">
-        <h1> Shortcuts </h1>
-
-        <h4> Moves:</h4>
-
-        <div class="btn-group" role="group">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Home
-            <span class="caret"></span>
+        <h1> Scripts </h1>
+        <div class="btn-group" role="group" ng-repeat="script in scripts" ng-click="run_script(script)">
+          <button type="button" class="btn btn-default">
+            {{script}}
           </button>
-          <ul class="dropdown-menu">
-            <li ng-click="send_command_home(0)"><a href="#">Axis Vertical</a></li>
-            <li ng-click="send_command_home(1)"><a href="#">Axis Horizental</a></li>
-          </ul>
-        </div>
-
-        <div class="btn-group" role="group">
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            To Point
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-            <li ng-click="send_command_move('park_h')"><a href="#">0- Park Horizental</a></li>
-            <li ng-click="send_command_move('park_v')"><a href="#">1- Park Vertical</a></li>
-            <li ng-click="send_command_move('pickup_top')"><a href="#">2- Pick up Top</a></li>
-            <li ng-click="send_command_move('pickup_down')"><a href="#">3- Pick up Down</a></li>
-            <li ng-click="send_command_move('pickup_top2')"><a href="#">4- Pick up Top Again</a></li>
-            <li ng-click="send_command_move('in_station_up')"><a href="#">5- Close in station</a></li>
-            <li ng-click="send_command_move('in_station_down')"><a href="#">6- Down in Station</a></li>
-            <li ng-click="send_command_move('in_station_press_holder')"><a href="#">7- Press Holder In</a></li>
-            <li ng-click="send_command_move('in_station_exit')"><a href="#">8- Ready to come out</a></li>
-          </ul>
         </div>
 
 
 
-        <h4> Valves:</h4>
-        <div class="btn-group" role="group">
-          <button ng-repeat="n in [].constructor(10) track by $index" type="button" class="btn btn-primary">{{$index + 1}}</button>
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            All
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-            <li ng-click="send_command_valve([1,1,1,1,1,1,1,1,1,1])"><a href="#">Close All</a></li>
-            <li ng-click="send_command_valve([0,0,0,0,0,0,0,0,0,0])"><a href="#">Open All</a></li>
-            <li ng-click="send_command_valve([0,0,0,0,0,1,1,1,1,1])"><a href="#">Close Holders</a></li>
 
-          </ul>
-        </div>
+
 
 
       </div>

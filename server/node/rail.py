@@ -19,12 +19,12 @@ class Rail(Robot):
             'vm': 10000,  # max speed
             'fr': 10000,  # max feed rate
             'tn': 0,  # min travel
-            'tm': 900,  # max travel
+            'tm': 900,  # max travel -- 496
             'jm': 2500,  # max jerk
             'jh': 4000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 2000,  # home search speed
+            'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
             'zb': 1,  # zero backoff
         }),
@@ -75,5 +75,4 @@ class Rail(Robot):
         await self.send_command_raw('G1 Z0 F1000')
         await asyncio.sleep(1)
 
-    async def is_homed(self, telorance=50):
-        return True
+        self.homed = True

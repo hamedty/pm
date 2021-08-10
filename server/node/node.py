@@ -31,6 +31,7 @@ class Node(object):
         self.actions = []
         self.set_status(message='node instance created')
         self.lock = None
+        self.homed = False
 
     async def ping(self):
         command = 'ping -c 1 -W 0.5'.split()

@@ -129,14 +129,15 @@ class Feeder(Node):
         await asyncio.sleep(1)
         #
         # # cartridge pickers
-        await self.send_command_raw('G28.2 X0')
-        await self.send_command_raw('G28.2 Y0')
+        # await self.send_command_raw('G28.2 X0')
+        # await self.send_command_raw('G28.2 Y0')
         #
         # # rail
         await self.send_command_raw('G28.2 Z0')
         #
         # # # reset encoder
         await self.send_command_raw('G28.5')
-        await self.send_command_raw('G10 P0 X3 Y3')
+        # await self.send_command_raw('G10 P0 X3 Y3')
         await self.send_command_raw('G1 Z16 F1000')
-        await self.send_command_raw('G1 X90 Y90 F20000')
+        # await self.send_command_raw('G1 X45 Y45 F20000')
+        self.homed = True

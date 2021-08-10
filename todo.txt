@@ -1,4 +1,6 @@
-pwm gradual speed up
+check vaccum arm comes back
+if nodes downs, UI must react
+periodicly check motor mask
 ----------------------
 fix problems stations 6-10
 data collection for stations 6-10 and train
