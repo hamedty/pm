@@ -7,7 +7,7 @@ async def main(system, ALL_NODES):
     feeder = await gather_feeder(system, ALL_NODES)
 
     await feeder.set_valves([0] * 14)
-    await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
+    # await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
     # await feeder.send_command_raw('{m4:60, m7:130}')  # Holder Upstream - Lift and long
     if not feeder.homed:
         await feeder.home()

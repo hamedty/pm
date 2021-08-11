@@ -25,14 +25,14 @@ class Feeder(Node):
             'jh': 90000,  # hominzg jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
-            'sv': 2000,  # home search speed
+            'sv': 5000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
-            'zb': 1,  # zero backoff
+            'zb': 0,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di1ac', 1),
-        ('di1fn', 1),
+        ('di1ac', 0),
+        ('di1fn', 4),  # probe mode
 
         # Y - Cartridge Motor 2
         (2, {
@@ -52,14 +52,14 @@ class Feeder(Node):
             'jh': 90000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 2000,  # home search speed
+            'sv': 5000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
-            'zb': 1,  # zero backoff
+            'zb': 0,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di2ac', 1),
-        ('di2fn', 1),
+        ('di2ac', 0),
+        ('di2fn', 4),  # probe mode
 
         # Z - Rail Motor
         (3, {
@@ -80,7 +80,7 @@ class Feeder(Node):
             'hi': 3,  # home switch
             # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
-            'sv': 1000,  # home search speed
+            'sv': 2000,  # home search speed
             'lv': 200,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
@@ -128,16 +128,14 @@ class Feeder(Node):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
         #
-        # # cartridge pickers
-        # await self.send_command_raw('G28.2 X0')
-        # await self.send_command_raw('G28.2 Y0')
-        #
+        # cartridge pickers
+        await self.send_command_raw('G28.2 X0')
+        await self.send_command_raw('G28.2 Y0')
+
         # # rail
         await self.send_command_raw('G28.2 Z0')
         #
         # # # reset encoder
         await self.send_command_raw('G28.5')
-        # await self.send_command_raw('G10 P0 X3 Y3')
-        await self.send_command_raw('G1 Z16 F1000')
-        # await self.send_command_raw('G1 X45 Y45 F20000')
+        await self.send_command_raw('G1 Z16 F5000')
         self.homed = True

@@ -1,4 +1,4 @@
-check vaccum arm comes back
+motor/sensor mask
 if nodes downs, UI must react
 periodicly check motor mask
 ----------------------
