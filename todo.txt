@@ -1,4 +1,3 @@
-motor/sensor mask
 G1 failures?
 if nodes downs, UI must react
 periodicly check motor mask

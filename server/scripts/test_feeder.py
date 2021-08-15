@@ -22,7 +22,7 @@ async def main(system, ALL_NODES):
     await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
     # Holder Upstream - Lift and long
     # await feeder.send_command_raw('{m4:60, m7:130}')
-    await feeder.send_command_raw('{m5:100, m6:161}')  # Cartridge Conveyor
+    await feeder.send_command_raw('{m5:0, m6:161}')  # Cartridge Conveyor
 
     await feeder.send_command({'verb': 'feeder_process', 'N': N})
 
