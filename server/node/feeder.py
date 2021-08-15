@@ -11,55 +11,55 @@ class Feeder(Node):
         (1, {
             'ma': 0,  # map to X
             'sa': 1.8,  # step angle 1.8
-            'tr': 360,  # travel per rev = 5mm
-            'mi': 4,  # microstep = 4
+            'tr': 200,  # travel per rev - for simplicity
+            'mi': 16,  # microstep = 16
             'po': 1,  # direction
         }),
         ('x', {
             'am': 1,  # standard axis mode
-            'vm': 360 * 1000,  # max speed
-            'fr': 360 * 1000,  # max feed rate
+            'vm': 200 * 1000,  # max speed
+            'fr': 200 * 1000,  # max feed rate
             'tn': 0,  # min travel
-            'tm': 200,  # max travel
-            'jm': 90000,  # max jerk
-            'jh': 90000,  # hominzg jerk
+            'tm': 100,  # max travel
+            'jm': 50000,  # max jerk
+            'jh': 50000,  # hominzg jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
-            'sv': 5000,  # home search speed
+            'sv': 3000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 0,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di1ac', 0),
-        ('di1fn', 4),  # probe mode
+        ('di1fn', 1),  # limit mode
 
         # Y - Cartridge Motor 2
         (2, {
             'ma': 1,  # map to Y
             'sa': 1.8,  # step angle 1.8
-            'tr': 360,  # travel per rev = 5mm
-            'mi': 4,  # microstep = 4
+            'tr': 200,  # travel per rev - for simplicity
+            'mi': 16,  # microstep = 16
             'po': 1,  # direction
         }),
         ('y', {
             'am': 1,  # standard axis mode
-            'vm': 360 * 1000,  # max speed
-            'fr': 360 * 1000,  # max feed rate
-            'tn': 0,  # min travel
-            'tm': 200,  # max travel
-            'jm': 90000,  # max jerk
-            'jh': 90000,  # hominzg jerk
+            'vm': 200 * 1000,  # max speed
+            'fr': 200 * 1000,  # max feed rate
+            'tn': -1,  # min travel
+            'tm': 99,  # max travel
+            'jm': 50000,  # max jerk
+            'jh': 50000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 5000,  # home search speed
+            'sv': 3000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 0,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di2ac', 0),
-        ('di2fn', 4),  # probe mode
+        ('di2fn', 4),  # limit mode
 
         # Z - Rail Motor
         (3, {
@@ -129,7 +129,7 @@ class Feeder(Node):
         await asyncio.sleep(1)
         #
         # cartridge pickers
-        await self.send_command_raw('G28.2 X0')
+        # await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
 
         # # rail

@@ -208,7 +208,7 @@ async def G1(command, _):
 
 async def feeder_process(command, _):
     arduino = ARDUINOS[command['arduino_index']]
-    await rpi_scripts.feeder_process(arduino, G1)
+    await rpi_scripts.feeder_process(arduino, G1, command)
     return {'success': True}
 
 

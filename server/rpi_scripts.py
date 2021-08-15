@@ -2,25 +2,28 @@ import asyncio
 import time
 
 
-async def feeder_process(arduino, G1):
-    await cartridge_feed(arduino, None)
-    await cartridge_handover(arduino, None)
-    # arduino._send_command("{out2: 1}")
-    # await asyncio.sleep(.5)
-    # arduino._send_command("{out7: 1}")
-    #
-    # await asyncio.sleep(.5)
-    # for i in range(11):
-    #     z = 16 + 25 * (i + 1)
-    #     await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
-    #     if i > 9:
-    #         arduino._send_command("{out7: 0}")
-    #         await asyncio.sleep(0.25)
-    #
-    #     await asyncio.sleep(0.01)
-    # await G1({'arduino_index': None, 'z': 341, 'feed': 6000}, None)
+async def feeder_process(arduino, G1, command):
+    N = command.get('N', 10)
+    await asyncio.sleep(1)
 
-    return
+    arduino._send_command("{out2: 1}")
+    await asyncio.sleep(.5)
+    arduino._send_command("{out7: 1}")
+    await asyncio.sleep(.5)
+
+    for i in range(N + 1):
+        z = 16 + 25 * i
+        await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
+
+        if i > 0:
+            await cartridge_feed(arduino, None)
+            await cartridge_handover(arduino, None)
+        if i > (N - 2):
+            arduino._send_command("{out7: 0}")
+            await asyncio.sleep(0.25)
+        await asyncio.sleep(.5)
+
+    await G1({'arduino_index': None, 'z': 719, 'feed': 6000}, None)
 
 
 # async def feeder_process(arduino, G1):
@@ -107,31 +110,49 @@ async def feeder_process(arduino, G1):
 async def cartridge_feed(arduino, cartridge_lock):
     # async with cartridge_lock:
     # rotate to upstream
-    arduino._send_command("G1 Y180 F100000")
-    await asyncio.sleep(.3)
+
+    arduino._send_command("G1 Y99 F60000")
 
     # Vacuum
     arduino._send_command("{out9: 1, out13: 1}")  # bring jack down + Vacuum On
-    await asyncio.sleep(1)
+    await asyncio.sleep(.2)
 
     # Cartridge Pusher
     arduino._send_command("{out4: 1}")  # push cartridge forward
-    await asyncio.sleep(1)
-    arduino._send_command("{out4: 0}")  # pull cartridge pusher back
-    await asyncio.sleep(1)
+    await asyncio.sleep(.1)
 
     # bring jack up
-    arduino._send_command("{out9: 0, out10: 0}")
-    await asyncio.sleep(1)
+    arduino._send_command("{out9: 0}")  # bring jack up
+    await asyncio.sleep(.1)
+
+    # Cartridge Pusher back
+    arduino._send_command("{out4: 0}")  # pull cartridge pusher back
+    await asyncio.sleep(.05)
 
     # rotate to rail
-    arduino._send_command("G1 Y0 F50000")
-    await asyncio.sleep(1)
+    arduino._send_command("G1 Y10 F30000")
+    await asyncio.sleep(.05)
+    arduino._send_command("{out9: 1}")  # bring jack up in middle of air
+    await asyncio.sleep(.2)
+    arduino._send_command("G1 Y-.5 F30000")
+    await asyncio.sleep(.2)
 
 
 async def cartridge_handover(arduino, cartridge_lock):
     # async with cartridge_lock:
 
     # release vacuum
+    arduino._send_command("{out9: 0}")  # bring jack down at end
+    await asyncio.sleep(.1)
     arduino._send_command("{out13: 0}")
-    await asyncio.sleep(.2)
+    await asyncio.sleep(.1)
+
+    # command_id = arduino.get_command_id()
+    # command_raw = '''
+    #     G38.3 Y-100 F500
+    #     G10 L20 P1 Y0
+    #     M100 ({out13: 0})
+    #     N%d M0
+    #     ''' % command_id
+    # arduino.send_command(command_raw)
+    # await arduino.wait_for_command_id(command_id)
