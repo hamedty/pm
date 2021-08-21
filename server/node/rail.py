@@ -11,7 +11,7 @@ class Rail(Robot):
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 8,  # microstep = 2
+            'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {
@@ -19,8 +19,8 @@ class Rail(Robot):
             'vm': 10000,  # max speed
             'fr': 10000,  # max feed rate
             'tn': 0,  # min travel
-            'tm': 900,  # max travel -- 496
-            'jm': 2500,  # max jerk
+            'tm': 496,  # max travel -- 496
+            'jm': 1500,  # max jerk
             'jh': 4000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
@@ -29,8 +29,8 @@ class Rail(Robot):
             'zb': 1,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di2ac', 1),
-        ('di2fn', 1),
+        ('di2ac', 0),
+        ('di2fn', 0),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
         ('sr', {'line': True, 'posz': True, 'stat': True}),

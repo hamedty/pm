@@ -52,7 +52,7 @@ class Feeder(Node):
             'jh': 50000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 3000,  # home search speed
+            'sv': 1000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 0,  # zero backoff
@@ -134,8 +134,9 @@ class Feeder(Node):
 
         # # rail
         await self.send_command_raw('G28.2 Z0')
-        #
+
         # # # reset encoder
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z16 F5000')
+
         self.homed = True

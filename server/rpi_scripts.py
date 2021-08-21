@@ -4,7 +4,6 @@ import time
 
 async def feeder_process(arduino, G1, command):
     N = command.get('N', 10)
-    await asyncio.sleep(1)
 
     arduino._send_command("{out2: 1}")
     await asyncio.sleep(.5)
@@ -119,7 +118,7 @@ async def cartridge_feed(arduino, cartridge_lock):
 
     # Cartridge Pusher
     arduino._send_command("{out4: 1}")  # push cartridge forward
-    await asyncio.sleep(.1)
+    await asyncio.sleep(.2)
 
     # bring jack up
     arduino._send_command("{out9: 0}")  # bring jack up
@@ -134,7 +133,7 @@ async def cartridge_feed(arduino, cartridge_lock):
     await asyncio.sleep(.05)
     arduino._send_command("{out9: 1}")  # bring jack up in middle of air
     await asyncio.sleep(.2)
-    arduino._send_command("G1 Y-.5 F30000")
+    arduino._send_command("G1 Y.5 F30000")
     await asyncio.sleep(.2)
 
 

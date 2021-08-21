@@ -7,15 +7,12 @@ async def main(system, ALL_NODES):
     feeder, rail = await gather_feeder(system, ALL_NODES)
     print('nodes ready')
 
-    # for i in range(1, 10):
-    #     await feeder.send_command_raw('{m%d:0}' % i)  # Holder Downstream
-    #
-    # await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
-    # # Holder Upstream - Lift and long
-    # # await feeder.send_command_raw('{m4:60, m7:130}')
-    # await feeder.send_command_raw('{m4:60, m7:00}')
+    for i in range(1, 10):
+        await feeder.send_command_raw('{m%d:0}' % i)  # Holder Downstream
+
     await rail.home()
-    await rail.G1(z=200, feed=10000)
+    await rail.G1(z=50, feed=5000)
+    # await rail.send_command_raw('G1 Z50.00 F5000')
 
 
 async def gather_feeder(system, ALL_NODES):
