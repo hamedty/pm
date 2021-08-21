@@ -1,5 +1,4 @@
-bazoo ra home konad har seri
-G1 failures?
+stuck in home cycle
 if nodes downs, UI must react
 periodicly check motor mask
 ----------------------

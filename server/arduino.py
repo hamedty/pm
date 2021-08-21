@@ -30,6 +30,7 @@ class Arduino(object):
         self._hw_config = {'motors': {}}
         self.receive_thread = None
         self._status_out_queue = None
+        self._debug = False
         self.set_status(message='object created')
         self._open_port()
         self.set_status(message='usb port opened')
@@ -46,7 +47,8 @@ class Arduino(object):
         while True:
             ret = self.ser.readline()
             response = json.loads(ret)
-            # print(ret)
+            if self._debug:
+                print('response:', response)
             self.set_status(data=response)
 
     def send_command(self, data):
@@ -67,6 +69,8 @@ class Arduino(object):
 
         self.lock.acquire()
         self.ser.write(data)
+        if self._debug:
+            print('command', data)
         self.lock.release()
 
     def get_command_id(self):

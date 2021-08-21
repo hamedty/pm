@@ -161,6 +161,7 @@ async def raw(command, _):
 
 async def G1(command, _):
     arduino = ARDUINOS[command['arduino_index']]
+    arduino._debug = True
     for a in ['x', 'y', 'z']:
         if command.get(a) is not None:
             axes = a
@@ -173,6 +174,7 @@ async def G1(command, _):
     result, g2core_location, encoder_location = arduino.check_encoder(axes)
     print(result, g2core_location, encoder_location)
     if not result:
+        arduino._debug = False
         return {'success': False, 'message': 'current position is incorrect g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
 
     for r in range(retries):
@@ -188,6 +190,7 @@ async def G1(command, _):
         print(result, g2core_location, encoder_location)
 
         if result:
+            arduino._debug = False
             return {'success': True, 'status': arduino.get_status()}
 
         # get latest position
@@ -199,10 +202,14 @@ async def G1(command, _):
 
         # update position
         result, g2core_location, encoder_location = arduino.check_encoder(axes)
-        command_raw = 'G28.3 %s%.03f' % (axes, encoder_location)
+        command_id = arduino.get_command_id()
+        command_raw = 'G28.3 %s%.03f\nN%d M0' % (
+            axes, encoder_location, command_id)
         arduino.send_command(command_raw)
+        await arduino.wait_for_command_id(command_id)
         feed = .85 * feed
 
+    arduino._debug = False
     return {'success': False, 'message': 'Failed after many retries - g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
 
 

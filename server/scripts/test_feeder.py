@@ -6,7 +6,7 @@ from .recipe import *
 async def main(system, ALL_NODES):
     print('test feeder started')
 
-    N = 10
+    N = 4
     feeder, rail = await gather_feeder(system, ALL_NODES)
 
     await feeder.set_valves([0] * 14)
@@ -23,7 +23,7 @@ async def main(system, ALL_NODES):
 
     print('nodes ready and homed')
 
-    await feeder.send_command_raw('{m2:15, m3:15}')  # Holder Downstream
+    await feeder.send_command_raw('{m2:25, m3:25}')  # Holder Downstream
     # Holder Upstream - Lift and long
     await feeder.send_command_raw('{m4:60, m7:450}')
     await feeder.send_command_raw('{m5:0, m6:161}')  # Cartridge Conveyor
@@ -40,7 +40,10 @@ async def main(system, ALL_NODES):
     await rail.set_valves([1, 1])
     await asyncio.sleep(.6)
 
-    await rail.G1(z=25 * N - 1, feed=6000)  # Holder Downstream
+    # await rail.G1(z=25 * N + 1, feed=6000)  # Holder Downstream
+    # Holder Downstream
+    await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
+
     await rail.set_valves([1, 0])
     await asyncio.sleep(.6)
     await rail.set_valves([0, 0])
