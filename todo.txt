@@ -1,4 +1,5 @@
 stuck in home cycle
+rail encoder failure
 if nodes downs, UI must react
 periodicly check motor mask
 ----------------------

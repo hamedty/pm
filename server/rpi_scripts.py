@@ -131,7 +131,7 @@ async def cartridge_feed(arduino, cartridge_lock):
     arduino._send_command("G1 Y10 F6000")
     await asyncio.sleep(.05)
     arduino._send_command("{out9: 1}")  # bring jack up in middle of air
-    await asyncio.sleep(.2)
+    await asyncio.sleep(.5)
 
 
 async def cartridge_handover(arduino, cartridge_lock):
