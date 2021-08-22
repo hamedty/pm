@@ -140,3 +140,11 @@ class Feeder(Node):
         await self.send_command_raw('G1 Z16 F5000')
 
         self.homed = True
+
+    async def set_motors(self, *args):
+        # args = (1,30), (2,15) , ....
+        if not args:  # set all zero
+            args = list(zip(range(1, 10), [0] * 9))
+        command = ','.join(['m%d:%d' % (i, j) for i, j in args])
+        command = '{%s}' % command
+        await feeder.send_command_raw(command)

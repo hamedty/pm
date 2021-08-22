@@ -9,3 +9,6 @@ adjust robot for stations 6-10
 add 48V PSU's
 SxD - new dosing grippers
 R1D2 - valve broken = g2core out4 - physical valve #7
+
+
+response: {'er': {'fb': 101.03, 'st': 89, 'msg': 'State management assertion failure - cm_get_combined_state() undefined state'}}

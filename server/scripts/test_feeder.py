@@ -7,57 +7,57 @@ async def main(system, ALL_NODES):
     print('test feeder started')
 
     N = 10
+
     feeder, rail = await gather_feeder(system, ALL_NODES)
 
+    # Homing
     await feeder.set_valves([0] * 14)
     await rail.set_valves([0, 0])
+    await feeder.set_motors()
 
-    if not feeder.homed:
-        for i in range(1, 10):
-            await feeder.send_command_raw('{m%d:0}' % i)  # Holder Downstream
-        await feeder.home()
-        await rail.home()
-    else:
-        await feeder.G1(z=16, feed=6000)  # Holder Downstream
-        # await rail.G1(z=2, feed=6000)  # Holder Downstream
-        await rail.send_command_raw('G1 Z1 F1000')
+    await asyncio.gather(
+        feeder.home(),
+        rail.home()
+    )
 
     print('nodes ready and homed')
+    await system.system_running.wait()
 
-    await feeder.send_command_raw('{m2:25, m3:30}')  # Holder Downstream
-    # Holder Upstream - Lift and long
-    await feeder.send_command_raw('{m4:90, m7:720}')
-    await feeder.send_command_raw('{m6:160}')  # Cartridge Conveyor
+    # PWM Motors
+    await feeder.set_motors(
+        (2, 25), (3, 30),  # Holder Downstream
+        (4, 38), (7, 300),  # Holder Upstream - Lift and long conveyor
+        (6, 160),  # Cartridge Conveyor
+    )
     print('pwm motors started ')
 
-    await feeder.send_command({'verb': 'feeder_process', 'N': N})
+    while True:
+        await system.system_running.wait()
 
-    print('feeder process done')
+        await feeder.send_command({'verb': 'feeder_process', 'N': N})
+        print('feeder process done')
 
-    # hand over
-    await rail.set_valves([1, 0])
-    await asyncio.sleep(.6)
-    await feeder.set_valves([None, 0])
-    await rail.set_valves([1, 1])
-    await asyncio.sleep(.6)
+        # hand over
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(.6)
+        await feeder.set_valves([None, 0])
+        await rail.set_valves([1, 1])
+        await asyncio.sleep(.6)
 
-    # await rail.G1(z=25 * N + 1, feed=6000)  # Holder Downstream
-    # Holder Downstream
-    await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
+        # await rail.G1(z=25 * N + 1, feed=6000)
+        await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
 
-    await rail.set_valves([1, 0])
-    await asyncio.sleep(.6)
-    await rail.set_valves([0, 0])
-    await asyncio.sleep(.6)
-    print('everything done')
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(.6)
+        await rail.set_valves([0, 0])
+        await asyncio.sleep(1)
+        print('everything done')
 
-    # await feeder.home()
-    # await feeder.send_command_raw('G1 Y90 F50000')
-    # await asyncio.sleep(1)
-    # await feeder.send_command_raw('G1 Y5 F50000')
-    # await feeder.send_command_raw('G38.3 Y-100 F5000')
-    # await feeder.send_command_raw('G10 L20 P1 Y0')
-    # await feeder.send_command_raw('G1 Y90 F50000')
+        await asyncio.gather(
+            feeder.G1(z=16, feed=6000),  # Holder Downstream
+            # await rail.G1(z=2, feed=6000),  # Holder Downstream
+            rail.send_command_raw('G1 Z1 F1000')
+        )
 
 
 async def gather_feeder(system, ALL_NODES):
