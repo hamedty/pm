@@ -96,6 +96,7 @@ class Feeder(Node):
         ('sr', {'line': True, 'posx': True,
                 'posy': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
+        ('prbr', 't'),  # enable probing report
     ]
 
     hw_config_base = {
@@ -131,6 +132,7 @@ class Feeder(Node):
         # cartridge pickers
         # await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
+        await self.send_command_raw('G1 Y20 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
 
         # # rail
         await self.send_command_raw('G28.2 Z0')
