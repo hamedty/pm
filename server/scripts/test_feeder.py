@@ -48,8 +48,8 @@ async def main(system, ALL_NODES):
         await asyncio.sleep(.6)
 
         await system.system_running.wait()
-        # await rail.G1(z=25 * N + 1, feed=6000)
-        await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
+        await rail.G1(z=25 * N + 1, feed=5000)
+        # await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
 
         # phase 2
         await system.system_running.wait()
@@ -65,7 +65,8 @@ async def feeder1(feeder, N):
 
 
 async def rail1(rail, N):
-    await rail.send_command_raw('G1 Z1 F1000')
+    await rail.G1(z=1, feed=5000)
+    # await rail.send_command_raw('G1 Z1 F1000')
     print('rail is back')
 
 
