@@ -1,3 +1,4 @@
+N = 10
 # Basics
 D_STANDBY = 250
 FEED_X = 6500  # 8500

@@ -13,10 +13,10 @@ rail_only = False
 
 
 async def main(system, ALL_NODES):
-    all_nodes, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await system.system_running.wait()
     print('Home Everything')
-    await home_all_nodes(all_nodes, rail, robots, stations)
+    await home_all_nodes(all_nodes, feeder, rail, robots, stations)
 
     STATUS = {
         'robots_full': False,
@@ -40,23 +40,25 @@ async def main(system, ALL_NODES):
 async def gather_all_nodes(system, ALL_NODES):
     stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
     robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
-    rails = [node for node in ALL_NODES if node.name.startswith('Rail')]
-    rail = rails[0]
+    rail = [node for node in ALL_NODES if node.name.startswith('Rail')][0]
+    feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
 
-    all_nodes = stations + robots + [rail]
+    all_nodes = stations + robots + [rail, feeder]
 
     # All Nodes Ready?
     for node in all_nodes:
         while not node.ready_for_command():
             await asyncio.sleep(.01)
 
-    return all_nodes, rail, robots, stations
+    return all_nodes, feeder, rail, robots, stations
 
 
 async def home_all_nodes(all_nodes, rail, robots, stations):
     await run_many(stations, lambda x: x.set_valves([0] * 5))
     await run_many(robots, lambda x: x.set_valves([0] * 10))
     await rail.set_valves([0] * 2)
+    await feeder.set_motors()
+    await feeder.set_valves([0] * 14)
 
     await run_many(stations, lambda s: s.home())
     if stations_only:
@@ -66,6 +68,13 @@ async def home_all_nodes(all_nodes, rail, robots, stations):
     await run_many(robots, lambda x: x.home())
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    await feeder.home(),
+
+    await feeder.set_motors(
+        (2, 20), (3, 15),  # Holder Downstream
+        (4, 38), (7, 300),  # Holder Upstream - Lift and long conveyor
+        (6, 160),  # Cartridge Conveyor
+    )
 
 
 async def do_rail_n_robots(stations, robots, rail, all_nodes, STATUS):
