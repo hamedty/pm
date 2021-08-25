@@ -30,7 +30,7 @@ class Robot(Node):
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di1ac', 1),
+        ('di1ac', 0),
         ('di1fn', 1),
         ('di2mo', 1),  # Limit Switch + - Mode = Active High - NC
         ('di2ac', 2),  # Limit Switch + - Action = Fast Stop
@@ -59,7 +59,7 @@ class Robot(Node):
             'zb': 1,  # zero backoff
         }),
         ('di3mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di3ac', 1),
+        ('di3ac', 0),
         ('di3fn', 1),
         ('di4mo', 1),  # Limit Switch + - Mode = Active High - NC
         ('di4ac', 1),  # Limit Switch + - Action = Fast Stop

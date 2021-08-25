@@ -11,7 +11,7 @@ class Rail(Robot):
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 2,  # microstep = 2
+            'mi': 8,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {

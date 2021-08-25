@@ -4,7 +4,7 @@ from .recipe import *
 
 # do_stations, do_rail_n_robots
 #                    do_robots_cap
-#                    do_rail
+#                    do_rail     * wait for feeder and start feeder next round
 #                    do_robot_pickup
 # do_exchange
 
@@ -14,20 +14,22 @@ rail_only = False
 
 async def main(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
-    await system.system_running.wait()
+    # await system.system_running.wait()
     print('Home Everything')
     await home_all_nodes(all_nodes, feeder, rail, robots, stations)
 
     STATUS = {
         'robots_full': False,
+        'feeder_task': None,
     }
+    return
     while True:
         await system.system_running.wait()
 
         t0 = time.time()
         await asyncio.gather(
-            do_stations(stations, robots, rail, all_nodes, STATUS),
-            do_rail_n_robots(stations, robots, rail, all_nodes, STATUS)
+            do_stations(stations, robots, rail, feeder, all_nodes, STATUS),
+            do_rail_n_robots(stations, robots, rail, feeder, all_nodes, STATUS)
         )
         print('rail and robot:', time.time() - t0)
         await system.system_running.wait()
@@ -53,7 +55,7 @@ async def gather_all_nodes(system, ALL_NODES):
     return all_nodes, feeder, rail, robots, stations
 
 
-async def home_all_nodes(all_nodes, rail, robots, stations):
+async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
     await run_many(stations, lambda x: x.set_valves([0] * 5))
     await run_many(robots, lambda x: x.set_valves([0] * 10))
     await rail.set_valves([0] * 2)
@@ -75,18 +77,19 @@ async def home_all_nodes(all_nodes, rail, robots, stations):
         (4, 38), (7, 300),  # Holder Upstream - Lift and long conveyor
         (6, 160),  # Cartridge Conveyor
     )
+    return
 
 
-async def do_rail_n_robots(stations, robots, rail, all_nodes, STATUS):
+async def do_rail_n_robots(stations, robots, rail, feeder, all_nodes, STATUS):
     if stations_only:
         return
 
     t0 = time.time()
-    await do_robots_cap(stations, robots, rail, all_nodes, STATUS)
+    await do_robots_cap(stations, robots, rail, feeder, all_nodes, STATUS)
     print('do_robots_cap:', time.time() - t0)
 
     t0 = time.time()
-    await do_rail(stations, robots, rail, all_nodes, STATUS)
+    await do_rail(stations, robots, rail, feeder, all_nodes, STATUS)
     print('do_rail:', time.time() - t0)
 
     t0 = time.time()
@@ -94,7 +97,7 @@ async def do_rail_n_robots(stations, robots, rail, all_nodes, STATUS):
     print('do_robot_pickup:', time.time() - t0)
 
 
-async def do_exchange(stations, robot, rail, all_nodes, STATUS):
+async def do_exchange(stations, robot, rail, feeder, all_nodes, STATUS):
     if stations_only or rail_only:
         return
     print('deliver')
@@ -165,13 +168,13 @@ async def do_exchange(stations, robot, rail, all_nodes, STATUS):
 ALIGN_HOLDER_TASK = {}
 
 
-def create_station_holder_align_task(stations, robots, rail, all_nodes, STATUS):
+def create_station_holder_align_task(stations, robots, rail, feeder, all_nodes, STATUS):
     for station in stations:
         ALIGN_HOLDER_TASK[station.name] = asyncio.create_task(station.send_command(
             {'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}))
 
 
-async def do_stations(stations, robots, rail, all_nodes, STATUS):
+async def do_stations(stations, robots, rail, feeder, all_nodes, STATUS):
     if rail_only:
         return
     global ALIGN_HOLDER_TASK
@@ -347,7 +350,7 @@ async def do_station(station, STATUS, align_holder_task):
     return True, ''
 
 
-async def do_robots_cap(stations, robots, rail, all_nodes, STATUS):
+async def do_robots_cap(stations, robots, rail, feeder, all_nodes, STATUS):
     if rail_only:
         return
     if not STATUS['robots_full']:
@@ -383,7 +386,7 @@ async def do_robots_cap(stations, robots, rail, all_nodes, STATUS):
     await run_many(robots, lambda r: r.G1(x=X_PARK, feed=FEED_X))
 
 
-async def do_robot_pickup(stations, robot, rail, all_nodes, STATUS):
+async def do_robot_pickup(stations, robot, rail, feeder, all_nodes, STATUS):
     if rail_only:
         return
     print('lets go grab input')
@@ -406,11 +409,11 @@ async def do_robot_pickup(stations, robot, rail, all_nodes, STATUS):
     await robot.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
 
 
-async def do_rail(stations, robots, rail, all_nodes, STATUS):
+async def do_rail(stations, robots, rail, feeder, all_nodes, STATUS):
     task2 = run_many(robots, lambda r: r.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0))
 
-    D_MIN = D_STANDBY - 125
-    D_MAX = D_MIN + 25 * 5  # 10
+    D_MIN = D_STANDBY - 25 * N
+    D_MAX = D_STANDBY
 
     T_RAIL_JACK1 = .4
     T_RAIL_JACK2 = .7
@@ -418,9 +421,14 @@ async def do_rail(stations, robots, rail, all_nodes, STATUS):
     # rail backward
     await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
 
+    # wait for feeder to be ready
+    if STATUS['feeder_task']:
+        await STATUS['feeder_task']
+
     # change jacks to moving
     await rail.set_valves([1, 0])
     await asyncio.sleep(T_RAIL_JACK1)
+    await feeder.set_valves([None, 0])
     await rail.set_valves([1, 1])
     await asyncio.sleep(T_RAIL_JACK2)
 
@@ -433,10 +441,19 @@ async def do_rail(stations, robots, rail, all_nodes, STATUS):
     await rail.set_valves([0, 0])
     await asyncio.sleep(T_RAIL_JACK1)
 
+    # feeder can start its process
+    STATUS['feeder_task'] = asyncio.create_task(
+        do_feeder(stations, robots, rail, feeder, all_nodes, STATUS))
+
     # rail park
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
     await task2
+
+
+async def do_feeder(stations, robots, rail, feeder, all_nodes, STATUS):
+    await feeder.G1(z=16, feed=6000)
+    await feeder.send_command({'verb': 'feeder_process', 'N': N})
 
 
 def run_many(nodes, func):

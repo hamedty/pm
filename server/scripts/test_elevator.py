@@ -9,13 +9,14 @@ async def main(system, ALL_NODES):
 
     for i in range(1, 10):
         await feeder.send_command_raw('{m%d:0}' % i)  # Holder Downstream
-    await feeder.set_valves([0] * 14)
-
+    # await feeder.set_valves([0] * 14)
+    # await rail.set_valves([0] * 10)
+    # await asyncio.sleep(1)
     await rail.home()
-    for i in range(10):
-        await rail.G1(z=400, feed=6000)
+    for i in range(2):
+        await rail.G1(z=450, feed=8000)
         await asyncio.sleep(.5)
-        await rail.G1(z=10, feed=6000)
+        await rail.G1(z=10, feed=8000)
         await asyncio.sleep(.5)
 
 

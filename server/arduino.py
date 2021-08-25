@@ -147,7 +147,7 @@ def clean_dictionary(dictionary):
     return new_dict
 
 
-GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.line'}
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.line', 'er.st'}
 
 
 def clean_key(key):
