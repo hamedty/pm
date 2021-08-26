@@ -123,6 +123,12 @@ async def create_arduino(command, _):
     return {'success': True}
 
 
+async def restart_arduino(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+    arduino.restart()
+    return {'success': True}
+
+
 async def config_arduino(command, _):
     arduino = ARDUINOS[command['arduino_index']]
     arduino._hw_config = command['hw_config']
@@ -260,6 +266,7 @@ COMMAND_HANDLER = {
     'raw': raw,
     'G1': G1,
     'feeder_process': feeder_process,
+    'restart_arduino': restart_arduino,
 
     # second channel - status
     'status_hook': status_hook,

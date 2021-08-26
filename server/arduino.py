@@ -12,6 +12,10 @@ from multiprocessing import Lock
 def flatten(l): return sum(map(flatten, l), []) if isinstance(l, list) else [l]
 
 
+class HW_PANIC_EXCEPTION(Exception):
+    pass
+
+
 FILES = {
     None: '/dev/serial/by-id/usb-Synthetos_TinyG_v2_*',
     0: '/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0',
@@ -40,12 +44,23 @@ class Arduino(object):
         f = glob.glob(FILES[self.usb_index])[0]
         self.ser = serial.Serial(f)
 
+    def restart(self):
+        data = '\x18\n'.encode()
+        self.lock.acquire()
+        self.ser.write(data)
+        time.sleep(1)
+        self._open_port()
+        self.lock.release()
+
     def _close_port(self):
         self.ser.close()
 
     def _receive(self):
         while True:
-            ret = self.ser.readline()
+            try:
+                ret = self.ser.readline()
+            except:
+                time.sleep(.1)
             response = json.loads(ret)
             if self._debug:
                 print('response:', response)
@@ -83,6 +98,8 @@ class Arduino(object):
 
     async def wait_for_command_id(self, command_id):
         while (self._status.get('r.line', -1) < command_id):
+            if self._status.get('r.stat', -1) in {13}:
+                raise HW_PANIC_EXCEPTION()
             await asyncio.sleep(0.001)
 
     def set_status(self, message='', traceback='', data={}):

@@ -32,6 +32,6 @@ for i in  21
 do
   echo 192.168.44.$i
   rsync --delete -az /home/it/Desktop/PAM2060/server/ pi@192.168.44.$i:~/server/
-  ssh pi@192.168.44.$i "sudo systemctl restart rpi.service"
+  # ssh pi@192.168.44.$i "sudo systemctl restart rpi.service"
 done
 echo "Done"

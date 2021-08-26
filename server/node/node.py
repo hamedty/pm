@@ -165,13 +165,6 @@ class Node(object):
             line = json.loads(line)
             self.set_status(**line)
 
-    async def send_command_reset_arduino(self):
-        command = {
-            'verb': 'reset_arduino',
-            'pin': self.arduino_reset_pin,
-        }
-        return await self.send_command(command)
-
     async def send_command_config_arduino(self):
         # to update scripts
         await self.scp_to('./rpi_scripts.py', '~/server/')
@@ -181,6 +174,13 @@ class Node(object):
             'hw_config': self.hw_config,
         }
         await self.send_command(command)
+
+    async def restart_arduino(self):
+        command = {
+            'verb': 'restart_arduino',
+        }
+        await self.send_command(command)
+        await self.send_command_config_arduino()
 
     async def set_valves(self, values):
         N = min(len(self.hw_config['valves']), len(values))
@@ -240,5 +240,7 @@ class Node(object):
                 return
             except:
                 # reset arduino
-                await self.send_command_raw('\x18', wait_start=[], wait_completion=False)
+                print('repeating home - homming failed')
+                await self.restart_arduino()
+
         raise Exception('Homing Failed')
