@@ -101,10 +101,7 @@ class Robot(Node):
         self._stations = set()
         super().__init__(*args, **kwargs)
 
-    async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
-        await asyncio.sleep(1)
-
+    async def home_core(self):
         await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
 
@@ -112,8 +109,6 @@ class Robot(Node):
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 X1 Y1 F1000')
         await self.send_command_raw('G1 X0 Y0 F1000')
-
-        self.homed = True
 
     def add_station(self, station):
         self._stations.add(station)

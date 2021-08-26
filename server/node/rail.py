@@ -63,7 +63,7 @@ class Rail(Robot):
         values = [0] * 8 + values
         return await super(Rail, self).set_valves(values)
 
-    async def home(self):
+    async def home_core(self):
         await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
         await asyncio.sleep(1)
 

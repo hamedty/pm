@@ -104,18 +104,13 @@ class Station(Node):
         'holder_webcam_direction': 'up',
     }
 
-    async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
-        await asyncio.sleep(1)
-
+    async def home_core(self):
         await self.send_command_raw('G28.2 Z0')
 
         # reset encoder
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
-
-        self.homed = True
 
     async def send_command_create_camera(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]

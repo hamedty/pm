@@ -228,3 +228,17 @@ class Node(object):
             {'verb': 'toggle_valve', 'params': 'int'},
 
         ]
+
+    async def home(self):
+        RETRIES = 2
+        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
+        await asyncio.sleep(1)
+        for retry in range(RETRIES):
+            try:
+                await self.home_core()
+                self.homed = True
+                return
+            except:
+                # reset arduino
+                await self.send_command_raw('\x18', wait_start=[], wait_completion=False)
+        raise Exception('Homing Failed')

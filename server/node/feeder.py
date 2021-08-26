@@ -125,23 +125,17 @@ class Feeder(Node):
 
     }
 
-    async def home(self):
-        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
-        await asyncio.sleep(1)
-        #
+    async def home_core(self):
         # cartridge pickers
-        # await self.send_command_raw('G28.2 X0')
         await self.send_command_raw('G28.2 Y0')
         await self.send_command_raw('G1 Y20 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
 
-        # # rail
+        # rail
         await self.send_command_raw('G28.2 Z0')
 
-        # # # reset encoder
+        # reset encoder
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z16 F5000')
-
-        self.homed = True
 
     async def set_motors(self, *args):
         # args = (1,30), (2,15) , ....

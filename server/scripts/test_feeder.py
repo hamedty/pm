@@ -21,12 +21,13 @@ async def main(system, ALL_NODES):
     )
 
     print('nodes ready and homed')
+
     await system.system_running.wait()
 
     # PWM Motors
     await feeder.set_motors(
         (2, 20), (3, 15),  # Holder Downstream
-        (4, 38), (7, 300),  # Holder Upstream - Lift and long conveyor
+        (4, 38), (7, 230),  # Holder Upstream - Lift and long conveyor
         (6, 160),  # Cartridge Conveyor
     )
     print('pwm motors started ')

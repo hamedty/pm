@@ -1,6 +1,26 @@
+response: {'sr': {'line': 8, 'posx': 0, 'posy': 11.15617, 'posz': 16, 'stat': 7}, 'enc1': 7677}
+response: {'sr': {'line': 8, 'posx': 0, 'posy': 6.95669, 'posz': 16, 'stat': 7}, 'enc1': 7677}
+response: {'sr': {'line': 8, 'posx': 0, 'posy': 2.73221, 'posz': 16, 'stat': 7}, 'enc1': 7677}
+response: {'r': {}, 'f': [1, 0, 14], 'enc1': 7677}
+response: {'r': {}, 'f': [1, 0, 6], 'enc1': 7677}
+response: {'sr': {'line': 9, 'posx': 0, 'posy': 0, 'posz': 16, 'stat': 3}, 'enc1': 7677}
+command b'G28.2 Z0\nN10 M0\n'
+response: {'r': {}, 'f': [1, 0, 9], 'enc1': 7677}
+response: {'r': {}, 'f': [1, 0, 7], 'enc1': 7677}
+response: {'er': {'fb': 101.03, 'st': 89, 'msg': 'State management assertion failure - cm_get_combined_state() undefined state'}}
+response: {'sr': {'line': 9, 'posx': 0, 'posy': -0.9375, 'posz': 9.79861, 'stat': 13}, 'enc1': 4703}
+command b'{stat:n}\n'
+response: {'r': {'stat': 13}, 'f': [1, 0, 10], 'enc1': 4682}
+response: {'sr': {'line': 9, 'posx': 0, 'posy': 0, 'posz': 9.79861, 'stat': 13}, 'enc1': 4682}
+command b'{stat:n}\n'
+response: {'r': {'stat': 13}, 'f': [1, 0, 10], 'enc1': 4682}
+response: {'sr': {'line': 9, 'posx': 0, 'posy': 0, 'posz': 9.79861, 'stat': 13}, 'enc1': 4682}
+command b'{stat:n}\n'
+
+
 cartrdige feeding clear n is too much
 control motor for spacer
-feeder homing stucks in the middle (code 13)
+if homing (e.g. rail) failed, no exception raised
 robots home switch
 if nodes downs, UI must react
 periodicly check motor mask
