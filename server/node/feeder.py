@@ -96,7 +96,6 @@ class Feeder(Node):
         ('sr', {'line': True, 'posx': True,
                 'posy': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
-        ('prbr', 't'),  # enable probing report
     ]
 
     hw_config_base = {
