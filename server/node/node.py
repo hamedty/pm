@@ -92,6 +92,7 @@ class Node(object):
             await self.send_command(command)
             await self.scp_from('~/data/dosing.png', './dump/dosing.png')
             await self.scp_from('~/data/holder.png', './dump/holder.png')
+            self.draw_debug_dump()
         elif command['verb'] == 'dump_training_holder':
             await self.set_valves([0, 1])
             await asyncio.sleep(1)

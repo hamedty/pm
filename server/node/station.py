@@ -143,3 +143,6 @@ class Station(Node):
 
     def set_robot(self, robot):
         self._robot = robot
+
+    def draw_debug_dump(self):
+        pass
