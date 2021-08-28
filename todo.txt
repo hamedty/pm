@@ -1,6 +1,6 @@
-control motor for spacer
+debug frame work for vision
+----------------------
 cartrdige feeding clear n is too much
-if homing (e.g. rail) failed, no exception raised
 robots home switch
 if nodes downs, UI must react
 periodicly check motor mask

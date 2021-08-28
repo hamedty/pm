@@ -11,7 +11,7 @@ class Rail(Robot):
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
             'tr': 5,  # travel per rev = 5mm
-            'mi': 8,  # microstep = 2
+            'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {
@@ -64,9 +64,6 @@ class Rail(Robot):
         return await super(Rail, self).set_valves(values)
 
     async def home_core(self):
-        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
-        await asyncio.sleep(1)
-
         await self.send_command_raw('G28.2 Z0')
 
         # reset encoder
@@ -74,5 +71,3 @@ class Rail(Robot):
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
         await asyncio.sleep(1)
-
-        self.homed = True

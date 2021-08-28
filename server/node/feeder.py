@@ -127,21 +127,15 @@ class Feeder(Node):
 
     async def home_core(self):
         # cartridge pickers
-        print(1)
         await self.send_command_raw('G28.2 Y0')
-        print(2)
         await self.send_command_raw('G1 Y20 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
 
         # rail
-        print(3)
         await self.send_command_raw('G28.2 Z0')
 
         # reset encoder
-        print(4)
         await self.send_command_raw('G28.5')
-        print(5)
         await self.send_command_raw('G1 Z16 F5000')
-        print(6)
 
     async def set_motors(self, *args):
         # args = (1,30), (2,15) , ....

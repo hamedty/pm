@@ -22,7 +22,7 @@ async def main(system, ALL_NODES):
         'robots_full': False,
         'feeder_task': None,
     }
-    return
+
     while True:
         await system.system_running.wait()
 
@@ -77,7 +77,6 @@ async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
         (4, 38), (7, 300),  # Holder Upstream - Lift and long conveyor
         (6, 160),  # Cartridge Conveyor
     )
-    return
 
 
 async def do_rail_n_robots(stations, robots, rail, feeder, all_nodes, STATUS):
@@ -93,7 +92,7 @@ async def do_rail_n_robots(stations, robots, rail, feeder, all_nodes, STATUS):
     print('do_rail:', time.time() - t0)
 
     t0 = time.time()
-    await run_many(robots, lambda r: do_robot_pickup(stations, r, rail, all_nodes, STATUS))
+    await run_many(robots, lambda r: do_robot_pickup(stations, r, rail, feeder, all_nodes, STATUS))
     print('do_robot_pickup:', time.time() - t0)
 
 

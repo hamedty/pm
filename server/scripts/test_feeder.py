@@ -27,7 +27,7 @@ async def main(system, ALL_NODES):
     # PWM Motors
     await feeder.set_motors(
         (2, 20), (3, 15),  # Holder Downstream
-        (4, 38), (7, 230),  # Holder Upstream - Lift and long conveyor
+        (1, 250), (4, 38), (7, 230),  # Holder Upstream - Lift and long conveyor
         (6, 160),  # Cartridge Conveyor
     )
     print('pwm motors started ')

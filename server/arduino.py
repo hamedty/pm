@@ -31,6 +31,7 @@ class Arduino(object):
         self.usb_index = usb_index
         self.lock = Lock()
         self._last_command_id = 0
+        self.stat_code = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
         self._status_out_queue = None
@@ -50,6 +51,8 @@ class Arduino(object):
         self.ser.write(data)
         time.sleep(1)
         self._open_port()
+        self.stat_code = 0
+        self._last_command_id = 0
         self.lock.release()
 
     def _close_port(self):
@@ -101,10 +104,13 @@ class Arduino(object):
             if self._status.get('r.stat', -1) in {13}:
                 raise HW_PANIC_EXCEPTION()
             await asyncio.sleep(0.001)
+        if self.stat_code:
+            raise HW_PANIC_EXCEPTION(self.stat_code)
 
     def set_status(self, message='', traceback='', data={}):
         flatten_data = flatten(data)
         new_status = clean_dictionary(flatten_data)
+        self.stat_code = max(new_status.get('f.2', 0), self.stat_code)
         if message:
             new_status['message'] = message
         if traceback:
@@ -122,6 +128,7 @@ class Arduino(object):
         d = dict(self._status)
 
         d['age'] = time.time() - d['time']
+        d['stat_code'] = self.stat_code
         del d['time']
         return d
 

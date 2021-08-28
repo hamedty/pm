@@ -9,7 +9,7 @@ ALL_NODES = [
     # Robot('Robot 2', '192.168.44.100', arduino_id=1),
     Rail('Rail', '192.168.44.100', arduino_id=2),
 
-    # Station('Station 1', '192.168.44.101'),
+    Station('Station 1', '192.168.44.101'),
     # Station('Station 2', '192.168.44.102'),
     # Station('Station 3', '192.168.44.103'),
     # Station('Station 4', '192.168.44.104'),
@@ -26,10 +26,10 @@ ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 
 assert len(ALL_NODES_DICT) == len(ALL_NODES)
 
-# ALL_NODES_DICT['Station 1'].hw_config['H_ALIGNING'] = 230
-# ALL_NODES_DICT['Station 1'].hw_config['H_PUSH'] = 238
-# ALL_NODES_DICT['Station 1'].hw_config['H_PRE_DANCE'] = 244.5
-# ALL_NODES_DICT['Station 1'].hw_config['dosing_offset'] = -2
+ALL_NODES_DICT['Station 1'].hw_config['H_ALIGNING'] = 230
+ALL_NODES_DICT['Station 1'].hw_config['H_PUSH'] = 238
+ALL_NODES_DICT['Station 1'].hw_config['H_PRE_DANCE'] = 244.5
+ALL_NODES_DICT['Station 1'].hw_config['dosing_offset'] = -2
 #
 # ALL_NODES_DICT['Station 2'].hw_config['H_ALIGNING'] = 225
 # ALL_NODES_DICT['Station 2'].hw_config['H_PUSH'] = 237
