@@ -10,6 +10,8 @@ except:
 
 def detect_dosing(frame, offset):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.resize(frame, (int(
+        frame.shape[0] / 10), int(frame.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
     cls = clf_dosing.predict([frame.flatten()])[0] + offset
 
     step_per_rev = 360
@@ -30,6 +32,8 @@ def detect_dosing(frame, offset):
 
 def detect_holder(frame, offset):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.resize(frame, (int(
+        frame.shape[0] / 10), int(frame.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
     cls = clf_holder.predict([frame.flatten()])[0] + offset
 
     step_per_rev = 360

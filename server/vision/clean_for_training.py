@@ -28,13 +28,14 @@ componenets = ['holder', 'dosing']
 
 
 def npz_valid(npz_filename, roi_in, zero_in):
+    return False
     if not os.path.isfile(npz_filename):
         return False
     npz = np.load(npz_filename, allow_pickle=True)
     return (npz.get('roi') == roi) and (npz.get('zero') == zero_in)
 
 
-for node in nodes:
+for node in [nodes[0]]:
     for component in componenets:
         roi = data[node][component + '_roi']
         x0 = roi['x0']
@@ -63,6 +64,8 @@ for node in nodes:
             for filename in files:
                 image = cv2.imread(filename)[y0:y1, x0:x1, :]
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image = cv2.resize(image, (int(
+                    image.shape[0] / 10), int(image.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
                 IMAGES.append(image.flatten())
 
                 index = int(filename.split('/')[-1].split('_')[0]) - zero

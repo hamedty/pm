@@ -86,70 +86,102 @@ async def main(system, ALL_NODES):
     # await robot.G1(x=X_PARK, feed=FEED_X)
 
     ''' FEEDER '''
+    # await feeder.G1(z=16, feed=6000)
+    # await feeder.send_command({'verb': 'feeder_process', 'N': 10})
+
     ''' RAIL '''
+    # await robot.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0)
+    #
+    # D_MIN = D_STANDBY - 25 * 10
+    # D_MAX = D_STANDBY
+    # T_RAIL_JACK1 = .4
+    # T_RAIL_JACK2 = .7
+    #
+    # # rail backward
+    # await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
+    #
+    # # change jacks to moving
+    # await rail.set_valves([1, 0])
+    # await asyncio.sleep(T_RAIL_JACK1)
+    # await feeder.set_valves([None, 0])
+    # await rail.set_valves([1, 1])
+    # await asyncio.sleep(T_RAIL_JACK2)
+    #
+    # # rail forward
+    # await rail.G1(z=D_MAX, feed=FEED_RAIL_INTACT)
+    #
+    # # change jacks to moving
+    # await rail.set_valves([1, 0])
+    # await asyncio.sleep(T_RAIL_JACK1)
+    # await rail.set_valves([0, 0])
+    # await asyncio.sleep(T_RAIL_JACK1)
+    #
+    # # rail park
+    # await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
+
     ''' STATION '''
     # await station.set_valves([0, 1])
     # z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10})
     # print(z1, z2)
     # assert z2['aligned']
     #
-    data = {}
-    # go to aliging location
-    data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
-    data['FEED_ALIGNING'] = FEED_Z_DOWN
-
-    # Fall
-    data['PAUSE_FALL_DOSING'] = 0.05
-
-    # Ready to push
-    data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 8
-    data['FEED_READY_TO_PUSH'] = FEED_Z_UP
-    data['PAUSE_READY_TO_PUSH'] = 0.05
-
-    # Push
-    data['H_PUSH'] = station.hw_config['H_PUSH']
-    data['FEED_PUSH'] = FEED_Z_DOWN / 3.0
-    data['PAUSE_PUSH'] = 0.1
-    data['H_PUSH_BACK'] = data['H_PUSH'] - 5
-    data['FEED_PUSH_BACK'] = FEED_Z_UP
-
-    # Dance
-    data['PAUSE_JACK_PRE_DANCE_1'] = 0.05
-    data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
-    data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
-    data['H_PRE_DANCE'] = station.hw_config['H_PRE_DANCE']
-    data['FEED_PRE_DANCE'] = FEED_Z_UP
-
-    dance_rev = 1
-    charge_h = 0.1
-    data['H_DANCE'] = data['H_PRE_DANCE'] - ((11 + charge_h) * dance_rev)
-    data['Y_DANCE'] = 360 * dance_rev
-    data['FEED_DANCE'] = FEED_DANCE
-
-    # Press
-    data['PAUSE_PRESS0'] = 0.1
-    data['PAUSE_PRESS1'] = 0.3
-    data['PAUSE_PRESS2'] = 0.5
-
-    # Dance Back
-    data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
-    data['PAUSE_POST_DANCE_BACK'] = .3
-
-    data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
-    data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
-    data['Y_DANCE_BACK'] = 0
-    data['Y_DANCE_BACK2'] = -40
-    data['FEED_DANCE_BACK'] = data['FEED_DANCE']
-
-    # Deliver
-    data['H_DELIVER'] = .5
-    data['FEED_DELIVER'] = FEED_Z_UP
-
-    # await station.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
-    await station.set_valves([1])
-    z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 1})
-    print(z1, z2)
-    assert z2['aligned']
+    # data = {}
+    # # go to aliging location
+    # data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
+    # data['FEED_ALIGNING'] = FEED_Z_DOWN
+    #
+    # # Fall
+    # data['PAUSE_FALL_DOSING'] = 0.05
+    #
+    # # Ready to push
+    # data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 8
+    # data['FEED_READY_TO_PUSH'] = FEED_Z_UP
+    # data['PAUSE_READY_TO_PUSH'] = 0.05
+    #
+    # # Push
+    # data['H_PUSH'] = station.hw_config['H_PUSH']
+    # data['FEED_PUSH'] = FEED_Z_DOWN / 3.0
+    # data['PAUSE_PUSH'] = 0.1
+    # data['H_PUSH_BACK'] = data['H_PUSH'] - 5
+    # data['FEED_PUSH_BACK'] = FEED_Z_UP
+    #
+    # # Dance
+    # data['PAUSE_JACK_PRE_DANCE_1'] = 0.05
+    # data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
+    # data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
+    # data['H_PRE_DANCE'] = station.hw_config['H_PRE_DANCE']
+    # data['FEED_PRE_DANCE'] = FEED_Z_UP
+    #
+    # dance_rev = 1
+    # charge_h = 0.1
+    # data['H_DANCE'] = data['H_PRE_DANCE'] - ((11 + charge_h) * dance_rev)
+    # data['Y_DANCE'] = 360 * dance_rev
+    # data['FEED_DANCE'] = FEED_DANCE
+    #
+    # # Press
+    # data['PAUSE_PRESS0'] = 0.1
+    # data['PAUSE_PRESS1'] = 0.3
+    # data['PAUSE_PRESS2'] = 0.5
+    #
+    # # Dance Back
+    # data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
+    # data['PAUSE_POST_DANCE_BACK'] = .3
+    #
+    # data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
+    # data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
+    # data['Y_DANCE_BACK'] = 0
+    # data['Y_DANCE_BACK2'] = -40
+    # data['FEED_DANCE_BACK'] = data['FEED_DANCE']
+    #
+    # # Deliver
+    # data['H_DELIVER'] = .5
+    # data['FEED_DELIVER'] = FEED_Z_UP
+    #
+    # # await station.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
+    # await station.set_valves([1])
+    # z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 1})
+    # print(z1, z2)
+    # assert z2['aligned']
 
     #
     # command = '''
@@ -216,13 +248,13 @@ async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
     await robots[0].home()
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
-    # await feeder.home()
+    await feeder.home()
 
-    # await feeder.set_motors(
-    #     (2, 20), (3, 15),  # Holder Downstream
-    #     (1, 250), (4, 38), (7, 230),  # Holder Upstream - Lift and long conveyor
-    #     (6, 160),  # Cartridge Conveyor
-    # )
+    await feeder.set_motors(
+        (2, 4), (3, 3),  # Holder Downstream
+        (1, 23), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+        (6, 32),  # Cartridge Conveyor
+    )
 
 
 async def gather_all_nodes(system, ALL_NODES):

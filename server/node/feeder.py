@@ -140,6 +140,7 @@ class Feeder(Node):
         # args = (1,30), (2,15) , ....
         if not args:  # set all zero
             args = list(zip(range(1, 10), [0] * 9))
-        command = ','.join(['m%d:%d' % (i, j) for i, j in args])
+        command = ','.join(
+            ['m%d:%d' % (i, j) for i, j in args])
         command = '{%s}' % command
         await self.send_command_raw(command)

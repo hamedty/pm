@@ -148,7 +148,7 @@ def main():
     src_data = load_data(SRC_DATA)
     dst_data = load_data(DST_DATA)
 
-    nodes = list(src_data.keys())
+    nodes = [list(src_data.keys())[0]]
     nodes.sort()
     componenets = ['holder', 'dosing']
     res = []
@@ -162,9 +162,9 @@ def main():
                                   dst_data[node][component])
                 c2 = compare_dict(
                     src_data[node][component + '_roi'], dst_data[node][component + '_roi'])
-                if c1 and c2:
-                    print(node, component, 'mode is up to-date')
-                    continue
+                # if c1 and c2:
+                #     print(node, component, 'mode is up to-date')
+                #     continue
                 print(node, component, 'training model')
                 res.append(pool.apply_async(
                     train_generic, (node, component, write_lock)))
