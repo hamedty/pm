@@ -9,10 +9,8 @@ except:
 
 
 def detect_dosing(frame, offset):
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.resize(frame, (int(
-        frame.shape[0] / 10), int(frame.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
-    cls = clf_dosing.predict([frame.flatten()])[0] + offset
+    frame = prepare_frame(frame, 'dosing')
+    cls = clf_dosing.predict([frame])[0] + offset
 
     step_per_rev = 360
     class_per_rev = 100
@@ -31,10 +29,8 @@ def detect_dosing(frame, offset):
 
 
 def detect_holder(frame, offset):
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.resize(frame, (int(
-        frame.shape[0] / 10), int(frame.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
-    cls = clf_holder.predict([frame.flatten()])[0] + offset
+    frame = prepare_frame(frame, 'holder')
+    cls = clf_holder.predict([frame])[0] + offset
 
     step_per_rev = 360
     class_per_rev = 100
@@ -49,3 +45,23 @@ def object_present(frame, threshold):
     threshold = 70
     value = frame.mean()
     return bool(value > threshold)
+
+
+def prepare_frame(frame, component):
+    if component == 'dosing':
+        x_downsample = 10
+        y_downsample = 2
+    elif component == 'holder':
+        x_downsample = 2
+        y_downsample = 10
+    else:
+        raise
+
+    x_size = round(frame.shape[0] / x_downsample)
+    y_size = round(frame.shape[1] / y_downsample)
+
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_AREA)
+
+    frame = frame.flatten()
+    return frame

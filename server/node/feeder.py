@@ -119,7 +119,7 @@ class Feeder(Node):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 480.0, 1.0],  # encoder key, ratio, telorance
+            'posz': ['enc1', 480.0, 2.0],  # encoder key, ratio, telorance
         }
 
     }

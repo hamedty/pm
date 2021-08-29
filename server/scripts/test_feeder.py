@@ -26,9 +26,9 @@ async def main(system, ALL_NODES):
 
     # PWM Motors
     await feeder.set_motors(
-        (2, 20), (3, 15),  # Holder Downstream
-        (1, 250), (4, 38), (7, 230),  # Holder Upstream - Lift and long conveyor
-        (6, 160),  # Cartridge Conveyor
+        (2, 4), (3, 3),  # Holder Downstream
+        (1, 23), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+        (6, 32),  # Cartridge Conveyor
     )
     print('pwm motors started ')
 
@@ -66,13 +66,13 @@ async def feeder1(feeder, N):
 
 
 async def rail1(rail, N):
-    await rail.G1(z=1, feed=8000)
+    await rail.G1(z=1, feed=6000)
     # await rail.send_command_raw('G1 Z1 F1000')
     print('rail is back')
 
 
 async def feeder2(feeder, N):
-    await feeder.G1(z=16, feed=6000)
+    await feeder.G1(z=16, feed=4000)
     print('feeder is back')
 
 

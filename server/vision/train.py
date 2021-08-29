@@ -6,7 +6,7 @@ import cv2
 import matplotlib.pyplot as plt
 from sklearn import svm, calibration
 import pickle
-from multiprocessing import Pool, Manager
+import multiprocessing
 
 
 VISION_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -148,12 +148,12 @@ def main():
     src_data = load_data(SRC_DATA)
     dst_data = load_data(DST_DATA)
 
-    nodes = [list(src_data.keys())[0]]
+    nodes = list(src_data.keys())
     nodes.sort()
     componenets = ['holder', 'dosing']
     res = []
-    with Pool(3) as pool:
-        process_manager = Manager()
+    with multiprocessing.get_context('spawn').Pool(5) as pool:
+        process_manager = multiprocessing.Manager()
         write_lock = process_manager.Lock()
 
         for node in nodes:

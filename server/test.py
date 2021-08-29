@@ -5,19 +5,13 @@ class HW_PANIC_EXCEPTION(Exception):
     pass
 
 
-async def waiter(lock):
-    while True:
-        if not lock.locked():
-            await asyncio.sleep(.001)
-            continue
-        print('... got it!')
-        lock.release()
+async def f1():
+    await asyncio.sleep(1)
+    raise
 
 
-async def producer(lock):
-    while True:
-        input('print?')
-        await lock.acquire()
+async def f2():
+    await asyncio.sleep(1)
 
 
 async def main():
@@ -31,7 +25,8 @@ async def main():
     # Sleep for 1 second and set the event.
     # await waiter_task
     # await producer_task
-    raise HW_PANIC_EXCEPTION('asdasd')
+    # raise HW_PANIC_EXCEPTION('asdasd')
+    await asyncio.gather(f1(), f2())
 
 
 asyncio.run(main())

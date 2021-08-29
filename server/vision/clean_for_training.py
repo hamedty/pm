@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import json
 import os
+import matplotlib.pyplot as plt
 
 VISION_PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(VISION_PATH)
@@ -28,20 +29,40 @@ componenets = ['holder', 'dosing']
 
 
 def npz_valid(npz_filename, roi_in, zero_in):
-    return False
     if not os.path.isfile(npz_filename):
         return False
     npz = np.load(npz_filename, allow_pickle=True)
     return (npz.get('roi') == roi) and (npz.get('zero') == zero_in)
 
 
-for node in [nodes[0]]:
+def prepare_frame(frame, roi, component):
+    if component == 'dosing':
+        x_downsample = 10
+        y_downsample = 2
+    elif component == 'holder':
+        x_downsample = 2
+        y_downsample = 10
+    else:
+        raise
+
+    x0 = roi['x0']
+    x1 = roi['x0'] + roi['dx']
+    y0 = roi['y0']
+    y1 = roi['y0'] + roi['dy']
+    x_size = round(roi['dx'] / x_downsample)
+    y_size = round(roi['dy'] / y_downsample)
+
+    frame = frame[y0:y1, x0:x1, :]
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_LINEAR)
+
+    frame = frame.flatten()
+    return frame
+
+
+for node in nodes:
     for component in componenets:
         roi = data[node][component + '_roi']
-        x0 = roi['x0']
-        x1 = roi['x0'] + roi['dx']
-        y0 = roi['y0']
-        y1 = roi['y0'] + roi['dy']
 
         for dataset_name in data[node][component]:
             IMAGES = []
@@ -62,11 +83,9 @@ for node in [nodes[0]]:
                 continue
 
             for filename in files:
-                image = cv2.imread(filename)[y0:y1, x0:x1, :]
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                image = cv2.resize(image, (int(
-                    image.shape[0] / 10), int(image.shape[1] / 2)), interpolation=cv2.INTER_LINEAR)
-                IMAGES.append(image.flatten())
+                image = cv2.imread(filename)
+                image = prepare_frame(image, roi, component)
+                IMAGES.append(image)
 
                 index = int(filename.split('/')[-1].split('_')[0]) - zero
                 index = float(index % fpr) / fpr
