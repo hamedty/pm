@@ -7,18 +7,20 @@ async def feeder_process(arduino, G1, command):
 
     arduino._send_command("{out2: 1, out7: 1}")
     await asyncio.sleep(.3)
+    holder_shift_register = 0
     for i in range(N + 1):
         z = 16 + 25 * i
         await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
 
-        if i > 0:
+        if holder_shift_register:
             await cartridge_feed(arduino, None)
         if i > (N - 2):
             arduino._send_command("{out7: 0}")
-        if i > 0:
+        if holder_shift_register:
             await cartridge_handover(arduino, None)
 
         await asyncio.sleep(.5)
+        holder_shift_register = await detect_holder(arduino)
 
     await G1({'arduino_index': None, 'z': 719, 'feed': 6000}, None)
 
@@ -69,6 +71,15 @@ async def cartridge_repeat_home(arduino):
         ''' % command_id
     arduino.send_command(command_raw)
     await arduino.wait_for_command_id(command_id)
+
+
+async def detect_holder(arduino):
+    if 'r.in5' in arduino._status:
+        del arduino._status['r.in5']
+    arduino._send_command('{in5:n}')
+    while 'r.in5' not in arduino._status:
+        await asyncio.sleep(0.001)
+    return arduino._status['r.in5']
 
     # async def feeder_process(arduino, G1):
     #     t0 = time.time()

@@ -28,7 +28,7 @@ class Feeder(Node):
             'sv': 3000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
-            'zb': 0,  # zero backoff
+            'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di1ac', 0),
@@ -55,7 +55,7 @@ class Feeder(Node):
             'sv': 1000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
-            'zb': 0,  # zero backoff
+            'zb': 1,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
         ('di2ac', 0),
@@ -89,6 +89,9 @@ class Feeder(Node):
         ('di3ac', 1),
         ('di3fn', 1),
 
+        ('di5mo', 0),  # Holder Input - Mode = Active Low - NC
+        ('di5ac', 0),
+        ('di5fn', 0),
 
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64

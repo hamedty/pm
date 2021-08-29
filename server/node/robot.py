@@ -27,6 +27,7 @@ class Robot(Node):
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
+            'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
@@ -56,6 +57,7 @@ class Robot(Node):
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
+            'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
         ('di3mo', 1),  # Homing Switch - Mode = Active High - NC

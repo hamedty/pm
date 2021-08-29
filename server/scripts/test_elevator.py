@@ -237,14 +237,7 @@ async def main(system, ALL_NODES):
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
-    await stations[0].set_valves([0] * 5)
-    await robots[0].set_valves([0] * 10)
-    await rail.set_valves([0] * 2)
-    await feeder.set_motors()
-    await feeder.set_valves([0] * 14)
-
     await stations[0].home()
-
     await robots[0].home()
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)

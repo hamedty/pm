@@ -232,16 +232,14 @@ class Node(object):
 
     async def home(self):
         RETRIES = 2
-        await self.send_command_raw('!\n\x04', wait_start=[], wait_completion=False)
-        await asyncio.sleep(1)
+        self.homed = False
         for retry in range(RETRIES):
             try:
+                await self.restart_arduino()
+                await asyncio.sleep(1)
                 await self.home_core()
                 self.homed = True
                 return
             except:
-                # reset arduino
                 print('repeating home - homming failed')
-                await self.restart_arduino()
-
         raise Exception('Homing Failed')

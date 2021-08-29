@@ -11,10 +11,6 @@ async def main(system, ALL_NODES):
     feeder, rail = await gather_feeder(system, ALL_NODES)
 
     # Homing
-    await feeder.set_valves([0] * 14)
-    await rail.set_valves([0, 0])
-    await feeder.set_motors()
-
     await asyncio.gather(
         feeder.home(),
         rail.home()
@@ -43,13 +39,13 @@ async def main(system, ALL_NODES):
         # hand over
         await system.system_running.wait()
         await rail.set_valves([1, 0])
-        await asyncio.sleep(.6)
+        await asyncio.sleep(1)
         await feeder.set_valves([None, 0])
         await rail.set_valves([1, 1])
-        await asyncio.sleep(.6)
+        await asyncio.sleep(1)
 
         await system.system_running.wait()
-        await rail.G1(z=25 * N + 1, feed=8000)
+        await rail.G1(z=25 * N, feed=8000)
         # await rail.send_command_raw('G1 Z%d F1000' % (25 * N + 1))
 
         # phase 2
@@ -66,7 +62,7 @@ async def feeder1(feeder, N):
 
 
 async def rail1(rail, N):
-    await rail.G1(z=1, feed=6000)
+    await rail.G1(z=0, feed=6000)
     # await rail.send_command_raw('G1 Z1 F1000')
     print('rail is back')
 
@@ -78,7 +74,7 @@ async def feeder2(feeder, N):
 
 async def rail2(rail, N):
     await rail.set_valves([1, 0])
-    await asyncio.sleep(.6)
+    await asyncio.sleep(1)
     await rail.set_valves([0, 0])
     await asyncio.sleep(1)
     print('everything done')
