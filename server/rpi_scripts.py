@@ -22,7 +22,7 @@ async def feeder_process(arduino, G1, command):
         await asyncio.sleep(.5)
         holder_shift_register = await detect_holder(arduino)
 
-    await G1({'arduino_index': None, 'z': 719, 'feed': 6000}, None)
+    await G1({'arduino_index': None, 'z': 719, 'feed': 5000}, None)
 
 
 async def cartridge_feed(arduino, cartridge_lock):

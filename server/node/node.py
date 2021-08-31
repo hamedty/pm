@@ -239,6 +239,7 @@ class Node(object):
                 await asyncio.sleep(1)
                 await self.home_core()
                 self.homed = True
+                print('%s Homed!' % self.name)
                 return
             except:
                 print('repeating home - homming failed')

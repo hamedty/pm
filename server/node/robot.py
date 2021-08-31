@@ -101,6 +101,7 @@ class Robot(Node):
 
     def __init__(self, *args, **kwargs):
         self._stations = set()
+        self._stations_slot = [None] * 5
         super().__init__(*args, **kwargs)
 
     async def home_core(self):
@@ -112,5 +113,14 @@ class Robot(Node):
         await self.send_command_raw('G1 X1 Y1 F1000')
         await self.send_command_raw('G1 X0 Y0 F1000')
 
-    def add_station(self, station):
+    def add_station(self, station, index):
         self._stations.add(station)
+        self._stations_slot[index] = station
+
+    async def set_valves_grab_infeed(self):
+        mask = [0] * 5
+        for i in range(5):
+            if self._stations_slot:
+                mask[5 - i - 1] = 1
+        mask = mask * 2
+        await self.set_valves(mask)

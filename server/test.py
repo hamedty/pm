@@ -1,4 +1,5 @@
 import asyncio
+import aioconsole
 
 
 class HW_PANIC_EXCEPTION(Exception):
@@ -6,12 +7,15 @@ class HW_PANIC_EXCEPTION(Exception):
 
 
 async def f1():
-    await asyncio.sleep(1)
-    raise
+    line = await aioconsole.ainput('Is this your line? ')
+    print('---------', len(line))
+    # raise
 
 
 async def f2():
-    await asyncio.sleep(1)
+    for i in range(20):
+        print(i)
+        await asyncio.sleep(1)
 
 
 async def main():

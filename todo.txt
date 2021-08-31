@@ -1,6 +1,15 @@
-encoder feeder miss dade - res dakheili enable shavad
-debug frame work for vision
+vision kolan
+agar dosing too naioftad tashkhis bede
+if visin fail grace to continue
+--------------------
+control DC motors with PWM instead of timer
+homing rail
+vision debug frame work
+feeder home every time
+motor oralB
+log collection framework
 ----------------------
+feeder encoder disable resistor / max flt?
 cartrdige feeding clear n is too much
 robots home switch
 if nodes downs, UI must react
@@ -10,5 +19,4 @@ fix problems stations 6-10
 data collection for stations 6-10 and train
 adjust robot for stations 6-10
 add 48V PSU's
-SxD - new dosing grippers
 R1D2 - valve broken = g2core out4 - physical valve #7

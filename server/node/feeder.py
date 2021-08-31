@@ -123,6 +123,7 @@ class Feeder(Node):
         },
         'encoders': {
             'posz': ['enc1', 480.0, 2.0],  # encoder key, ratio, telorance
+            # Feed 10,000 @ 480 encoder = 80khz
         }
 
     }
