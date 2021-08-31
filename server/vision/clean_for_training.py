@@ -32,16 +32,16 @@ def npz_valid(npz_filename, roi_in, zero_in):
     if not os.path.isfile(npz_filename):
         return False
     npz = np.load(npz_filename, allow_pickle=True)
-    return (npz.get('roi') == roi) and (npz.get('zero') == zero_in)
+    return (npz.get('roi') == roi_in) and (npz.get('zero') == zero_in)
 
 
 def prepare_frame(frame, roi, component):
     if component == 'dosing':
-        x_downsample = 10
+        x_downsample = 8
         y_downsample = 2
     elif component == 'holder':
         x_downsample = 2
-        y_downsample = 10
+        y_downsample = 8
     else:
         raise
 
@@ -54,44 +54,53 @@ def prepare_frame(frame, roi, component):
 
     frame = frame[y0:y1, x0:x1, :]
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_LINEAR)
+    frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_AREA)
+
+    # plt.imshow(frame)
+    # plt.show()
+    # raise
 
     frame = frame.flatten()
     return frame
 
 
-for node in nodes:
-    for component in componenets:
-        roi = data[node][component + '_roi']
+def main():
+    for node in nodes:
+        for component in componenets:
+            roi = data[node][component + '_roi']
 
-        for dataset_name in data[node][component]:
-            IMAGES = []
-            INDICES = []
+            for dataset_name in data[node][component]:
+                IMAGES = []
+                INDICES = []
 
-            dataset_dict = data[node][component][dataset_name]
-            path = DATASET_PATH + '/%s_%s_%s_192.168.44.%s' % (
-                component, node, dataset_name, node)
-            npz_filename = path + '/data.npz'
-            files = glob.glob(path + '/*.png')
-            files.sort()
-            fpr = int(files[-1].split('/')[-1].split('_')[0]) + 1
-            zero = dataset_dict['zero']
-            print(path, fpr)
+                dataset_dict = data[node][component][dataset_name]
+                path = DATASET_PATH + '/%s_%s_%s_192.168.44.%s' % (
+                    component, node, dataset_name, node)
+                npz_filename = path + '/data.npz'
+                files = glob.glob(path + '/*.png')
+                files.sort()
+                fpr = int(files[-1].split('/')[-1].split('_')[0]) + 1
+                zero = dataset_dict['zero']
+                print(path, fpr)
 
-            if npz_valid(npz_filename, roi, zero):
-                print('npz is valid')
-                continue
+                if npz_valid(npz_filename, roi, zero):
+                    print('npz is valid')
+                    continue
 
-            for filename in files:
-                image = cv2.imread(filename)
-                image = prepare_frame(image, roi, component)
-                IMAGES.append(image)
+                for filename in files:
+                    image = cv2.imread(filename)
+                    image = prepare_frame(image, roi, component)
+                    IMAGES.append(image)
 
-                index = int(filename.split('/')[-1].split('_')[0]) - zero
-                index = float(index % fpr) / fpr
-                INDICES.append(index)
+                    index = int(filename.split('/')[-1].split('_')[0]) - zero
+                    index = float(index % fpr) / fpr
+                    INDICES.append(index)
 
-            IMAGES = np.array(IMAGES)
-            INDICES = np.array(INDICES)
-            np.savez_compressed(path + '/data.npz',
-                                images=IMAGES, indices=INDICES, roi=roi, zero=zero)
+                IMAGES = np.array(IMAGES)
+                INDICES = np.array(INDICES)
+                np.savez_compressed(path + '/data.npz',
+                                    images=IMAGES, indices=INDICES, roi=roi, zero=zero)
+
+
+if __name__ == '__main__':
+    main()

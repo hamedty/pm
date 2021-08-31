@@ -142,11 +142,11 @@ async def main(system, ALL_NODES):
         ''' STATION::Align Holder '''
         async def align_holder(station):
             await get_input(system, 'STATION::Align Holder')
-            # await station.set_valves([0, 1])
-            # z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10})
-            # print(z1, z2)
-            # if not z2['aligned']:
-            #     await aioconsole.ainput('aligining failed. align to continue')
+            await station.set_valves([0, 1])
+            z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
+            print(z1, z2)
+            if (not z1) or (not z2['aligned']):
+                await aioconsole.ainput('aligining failed. align to continue')
         await do_stations(stations, lambda s: align_holder(s))
 
         ''' STATION::Align Dosing '''
@@ -157,10 +157,10 @@ async def main(system, ALL_NODES):
             data['FEED_ALIGNING'] = FEED_Z_DOWN
             await station.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
             await station.set_valves([1])
-            # z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10})
-            # print(z1, z2)
-            # if not z2['aligned']:
-            #     await aioconsole.ainput('aligining failed. align to continue')
+            z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
+            print(z1, z2)
+            if (not z1) or (not z2['aligned']):
+                await aioconsole.ainput('aligining failed. align to continue')
         await do_stations(stations, lambda s: align_dosing(s))
 
         ''' STATION::Rest '''

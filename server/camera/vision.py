@@ -49,16 +49,16 @@ def object_present(frame, threshold):
 
 def prepare_frame(frame, component):
     if component == 'dosing':
-        x_downsample = 10
+        x_downsample = 8
         y_downsample = 2
     elif component == 'holder':
         x_downsample = 2
-        y_downsample = 10
+        y_downsample = 8
     else:
         raise
 
-    x_size = round(frame.shape[0] / x_downsample)
-    y_size = round(frame.shape[1] / y_downsample)
+    x_size = round(frame.shape[1] / x_downsample)
+    y_size = round(frame.shape[0] / y_downsample)
 
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_AREA)

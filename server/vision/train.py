@@ -17,6 +17,7 @@ MODELS_PATH = os.path.join(BASE_PATH, 'models')
 
 SRC_DATA = os.path.join(VISION_PATH, 'annotaion.json')
 DST_DATA = os.path.join(MODELS_PATH, 'annotaion.json')
+MAX_ITER = 10
 
 
 def train_generic(node, component, write_lock):
@@ -28,7 +29,7 @@ def train_generic(node, component, write_lock):
     update_data(node, component, write_lock)
 
 
-def train_dosing(node, CPR=100.0, max_iter=5):
+def train_dosing(node, CPR=100.0, max_iter=MAX_ITER):
     component = 'dosing'
     files = glob.glob(DATASET_PATH + '/%s_%03d_*/data.npz' % (component, node))
     print(files)
@@ -63,7 +64,7 @@ def train_dosing(node, CPR=100.0, max_iter=5):
     train(CPR, X, y, max_iter, '%s_%03d' % (component, node))
 
 
-def train_holder(node, CPR=100.0, max_iter=5):
+def train_holder(node, CPR=100.0, max_iter=MAX_ITER):
     component = 'holder'
     files = glob.glob(DATASET_PATH + '/%s_%03d_*/data.npz' % (component, node))
     y = []
@@ -162,9 +163,9 @@ def main():
                                   dst_data[node][component])
                 c2 = compare_dict(
                     src_data[node][component + '_roi'], dst_data[node][component + '_roi'])
-                # if c1 and c2:
-                #     print(node, component, 'mode is up to-date')
-                #     continue
+                if c1 and c2:
+                    print(node, component, 'mode is up to-date')
+                    continue
                 print(node, component, 'training model')
                 res.append(pool.apply_async(
                     train_generic, (node, component, write_lock)))

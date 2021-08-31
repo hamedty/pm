@@ -153,6 +153,8 @@ class Node(object):
             self.set_status(**line['status'])
         if assert_success:
             assert line['success'], (line, self.ip, self.arduino_id)
+        elif not line['success']:
+            print('send command silenly failed:', line)
         return line['success'], line
 
     async def loop(self):

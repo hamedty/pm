@@ -1,3 +1,4 @@
+import asyncio
 N = 10
 # Basics
 D_STANDBY = 250

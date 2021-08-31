@@ -1,6 +1,4 @@
-vision kolan
 agar dosing too naioftad tashkhis bede
-if visin fail grace to continue
 --------------------
 control DC motors with PWM instead of timer
 homing rail
