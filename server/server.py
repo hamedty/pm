@@ -116,8 +116,8 @@ async def main():
         # scripts.main
         # scripts.test_stations
         # scripts.test_dosing_feeder
-        # scripts.test_feeder
-        # scripts.test_elevator
+        # scripts.test_single
+        # scripts.test_main
     )
     await task1
 

@@ -39,22 +39,6 @@ async def main(system, ALL_NODES):
         print('exchange:', time.time() - t0)
 
 
-async def gather_all_nodes(system, ALL_NODES):
-    stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
-    robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
-    rail = [node for node in ALL_NODES if node.name.startswith('Rail')][0]
-    feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
-
-    all_nodes = stations + robots + [rail, feeder]
-
-    # All Nodes Ready?
-    for node in all_nodes:
-        while not node.ready_for_command():
-            await asyncio.sleep(.01)
-
-    return all_nodes, feeder, rail, robots, stations
-
-
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
     await run_many(stations, lambda x: x.set_valves([0] * 5))
     await run_many(robots, lambda x: x.set_valves([0] * 10))

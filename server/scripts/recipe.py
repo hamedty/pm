@@ -30,3 +30,19 @@ FEED_DANCE = 40000
 # Vision
 ALIGN_SPEED_DOSING = 25000
 ALIGN_SPEED_HOLDER = 25000
+
+
+async def gather_all_nodes(system, ALL_NODES):
+    stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
+    robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
+    rail = [node for node in ALL_NODES if node.name.startswith('Rail')][0]
+    feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
+
+    all_nodes = stations + robots + [rail, feeder]
+
+    # All Nodes Ready?
+    for node in all_nodes:
+        while not node.ready_for_command():
+            await asyncio.sleep(.01)
+
+    return all_nodes, feeder, rail, robots, stations
