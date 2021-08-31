@@ -30,10 +30,10 @@ async def main(system, ALL_NODES):
     while True:
         '''PICK UP'''
         await get_input(system, 'pick up')
-        Y_GRAB_IN_UP_1 = 65
+        Y_GRAB_IN_UP_1 = 75
         X_GRAB_IN = 284.5
         Y_GRAB_IN_DOWN = 0
-        Y_GRAB_IN_UP_2 = Y_GRAB_IN_UP_1
+        Y_GRAB_IN_UP_2 = 65
         T_GRAB_IN = 0.5
         await robot.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
         await robot.G1(x=X_GRAB_IN, feed=FEED_X)
@@ -103,7 +103,7 @@ async def main(system, ALL_NODES):
         await robot.G1(y=Y_CAPPING_DOWN_2, feed=FEED_Y_CAPPING)
         await robot.set_valves([0] * 10)
         await robot.G1(x=X_PARK, feed=FEED_X)
-        await robot.G1(y=Y_PARK, feed=FEED_Y_UP / 5.0)
+        await robot.G1(y=Y_PARK, feed=FEED_Y_UP)
 
         ''' FEEDER '''
         await get_input(system, 'feeder')
@@ -299,4 +299,8 @@ async def get_input(system, text):
 
 async def do_stations(stations, func):
     for station in stations:
-        await func(station)
+        try:
+            await func(station)
+        except:
+            print(traceback.format_exc())
+            await aioconsole.ainput('enter to continue')

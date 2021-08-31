@@ -1,11 +1,11 @@
 agar dosing too naioftad tashkhis bede
 --------------------
 control DC motors with PWM instead of timer
+log collection framework
 homing rail
 vision debug frame work
 feeder home every time
 motor oralB
-log collection framework
 ----------------------
 feeder encoder disable resistor / max flt?
 cartrdige feeding clear n is too much

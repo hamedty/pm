@@ -8,7 +8,7 @@
 # done
 
 # Stations
-for i in 101 #102 103 104 105
+for i in 101 102 103 104 105
 do
   echo 192.168.44.$i
   rsync --delete -az /home/it/Desktop/PAM2060/server/ pi@192.168.44.$i:~/server/

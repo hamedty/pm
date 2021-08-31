@@ -5,6 +5,7 @@ from .robot import Robot
 class Rail(Robot):
     type = 'rail'
     arduino_reset_pin = 2
+    HOMMING_RETRIES = 4
 
     g2core_config_base = [
         (1, {
