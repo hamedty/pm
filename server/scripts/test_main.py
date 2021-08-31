@@ -274,16 +274,16 @@ async def main(system, ALL_NODES):
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
     await do_stations(stations, lambda s: s.home())
-    await robots[0].home()
-    await rail.home()
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
-    await feeder.home()
-
-    await feeder.set_motors(
-        (2, 4), (3, 3),  # Holder Downstream
-        (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-        (6, 32), (8, 200)  # Cartridge Conveyor + OralB
-    )
+    # await robots[0].home()
+    # await rail.home()
+    # await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    # await feeder.home()
+    #
+    # await feeder.set_motors(
+    #     (2, 4), (3, 3),  # Holder Downstream
+    #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+    #     (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+    # )
 
 
 async def get_input(system, text):

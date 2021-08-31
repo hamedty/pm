@@ -47,3 +47,11 @@ async def gather_all_nodes(system, ALL_NODES):
             await asyncio.sleep(.01)
 
     return all_nodes, feeder, rail, robots, stations
+
+
+def run_many(nodes, func):
+    tasks = []
+    for node in nodes:
+        tasks.append(func(node))
+
+    return asyncio.gather(*tasks)

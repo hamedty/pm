@@ -437,11 +437,3 @@ async def do_rail(stations, robots, rail, feeder, all_nodes, STATUS):
 async def do_feeder(stations, robots, rail, feeder, all_nodes, STATUS):
     await feeder.G1(z=16, feed=6000)
     await feeder.send_command({'verb': 'feeder_process', 'N': N})
-
-
-def run_many(nodes, func):
-    tasks = []
-    for node in nodes:
-        tasks.append(func(node))
-
-    return asyncio.gather(*tasks)

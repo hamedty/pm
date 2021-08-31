@@ -1,20 +1,18 @@
+homing rail > smaller cap
 agar dosing too naioftad tashkhis bede
+fix problems stations 6-10
+data collection for stations 6-10 and train
+adjust robot for stations 6-10
+add 48V PSU's
 --------------------
-control DC motors with PWM instead of timer
+control holder DC motor with PWM instead of timer
 log collection framework
-homing rail
 vision debug frame work
 feeder home every time
 motor oralB
+feeder stop motors if didn't feed for a while
 ----------------------
 feeder encoder disable resistor / max flt?
 cartrdige feeding clear n is too much
 robots home switch
 if nodes downs, UI must react
-periodicly check motor mask
-----------------------
-fix problems stations 6-10
-data collection for stations 6-10 and train
-adjust robot for stations 6-10
-add 48V PSU's
-R1D2 - valve broken = g2core out4 - physical valve #7

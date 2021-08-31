@@ -13,12 +13,12 @@ ALL_NODES = [
     Station('Station 2', '192.168.44.102'),
     Station('Station 3', '192.168.44.103'),
     Station('Station 4', '192.168.44.104'),
-    # Station('Station 5', '192.168.44.105'),
-    # Station('Station 6', '192.168.44.106'),
-    # Station('Station 7', '192.168.44.107'),
-    # Station('Station 8', '192.168.44.108'),
-    # Station('Station 9', '192.168.44.109'),
-    # Station('Station 10', '192.168.44.110'),
+    Station('Station 5', '192.168.44.105'),
+    Station('Station 6', '192.168.44.106'),
+    Station('Station 7', '192.168.44.107'),
+    Station('Station 8', '192.168.44.108'),
+    Station('Station 9', '192.168.44.109'),
+    Station('Station 10', '192.168.44.110'),
     Feeder('Feeder 1', '192.168.44.21'),
 
 ]
