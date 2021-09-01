@@ -1,8 +1,10 @@
+multiprocessing -> start with homing
 homing rail > smaller cap
 agar dosing too naioftad tashkhis bede
 fix problems stations 6-10
 data collection for stations 6-10 and train
 adjust robot for stations 6-10
+led for holder input switch
 add 48V PSU's
 --------------------
 control holder DC motor with PWM instead of timer

@@ -7,15 +7,15 @@ class HW_PANIC_EXCEPTION(Exception):
 
 
 async def f1():
-    line = await aioconsole.ainput('Is this your line? ')
-    print('---------', len(line))
-    # raise
+    # line = await aioconsole.ainput('Is this your line? ')
+    # print('---------', len(line))
+    raise
 
 
 async def f2():
     for i in range(20):
         print(i)
-        await asyncio.sleep(1)
+        await asyncio.sleep(.01)
 
 
 async def main():
@@ -30,7 +30,8 @@ async def main():
     # await waiter_task
     # await producer_task
     # raise HW_PANIC_EXCEPTION('asdasd')
-    await asyncio.gather(f1(), f2())
+    z = await asyncio.gather(f1(), f2(), return_exceptions=True)
+    print(z)
 
 
 asyncio.run(main())

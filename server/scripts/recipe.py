@@ -1,5 +1,5 @@
 import asyncio
-N = 10
+N = 5
 # Basics
 D_STANDBY = 250
 FEED_X = 2000  # 6500  # 8500
