@@ -77,6 +77,7 @@ class Station(Node):
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
+        ('di4mo', 1),  # Homing Switch for Some - Mode = Active High - NC
         ('sv', 2),  # Status report enabled
         ('sr', {'line': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
@@ -96,7 +97,7 @@ class Station(Node):
             'gate': 2,  # gate verification
         },
         'encoders': {
-            'posz': ['enc1', 300.0, .2],  # encoder key, ratio, telorance
+            'posz': ['enc1', 300.0, .4],  # encoder key, ratio, telorance
         },
         'H_ALIGNING': 210,
         'H_PUSH': 219,

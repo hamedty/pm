@@ -1,37 +1,33 @@
 import asyncio
 import aioconsole
+import inspect
 
 
 class HW_PANIC_EXCEPTION(Exception):
     pass
 
 
-async def f1():
-    # line = await aioconsole.ainput('Is this your line? ')
-    # print('---------', len(line))
-    raise
-
-
-async def f2():
-    for i in range(20):
-        print(i)
-        await asyncio.sleep(.01)
+async def f(t, i):
+    await asyncio.sleep(t)
+    print(i)
 
 
 async def main():
-    # Create an Event object.
-    # lock = asyncio.Lock()
+    await gather(f(1, 1))
 
-    # Spawn a Task to wait until 'event' is set.
-    # producer_task = asyncio.create_task(producer(lock))
-    # waiter_task = asyncio.create_task(waiter(lock))
 
-    # Sleep for 1 second and set the event.
-    # await waiter_task
-    # await producer_task
-    # raise HW_PANIC_EXCEPTION('asdasd')
-    z = await asyncio.gather(f1(), f2(), return_exceptions=True)
-    print(z)
-
+async def gather(a):
+    print(1111)
+    if callable(a):
+        print()
+        if inspect.isawaitable(a):
+            await a
+        else:
+            a()
+    elif isinstance(a, list):
+        for i in a:
+            await gather(i)
+    elif isinstance(a, set):
+        await asyncio.gather(*[gather(i) for i in a])
 
 asyncio.run(main())

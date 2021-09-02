@@ -1,19 +1,22 @@
-multiprocessing -> start with homing
+vision works
+detect dosing existance before comming down, then if naioftad
+st6-10 Z locations
+st6-10 vision
+if vision response is "not exist", handle correctly
+ST4 encoder issue
+fill the rail command (5x2-4,5x2...12345x6, 12)
+multiprocessing generic function
+USB robot 1 is loose
 homing rail > smaller cap
-agar dosing too naioftad tashkhis bede
-fix problems stations 6-10
-data collection for stations 6-10 and train
-adjust robot for stations 6-10
+adjust robots locations and mechanical align
 led for holder input switch
 add 48V PSU's
---------------------
 control holder DC motor with PWM instead of timer
 log collection framework
 vision debug frame work
 feeder home every time
 motor oralB
 feeder stop motors if didn't feed for a while
-----------------------
 feeder encoder disable resistor / max flt?
 cartrdige feeding clear n is too much
 robots home switch
