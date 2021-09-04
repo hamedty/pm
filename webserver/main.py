@@ -6,7 +6,7 @@ import asyncio
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-
+from . import annotation
 PATH = os.path.dirname(os.path.abspath(__file__))
 STATIC_PATH_DIR = os.path.join(PATH, 'static')
 
@@ -17,6 +17,29 @@ class Index(tornado.web.RequestHandler):
         with open(filename) as f:
             content = f.read()
         self.finish(content)
+
+
+class Annotation(tornado.web.RequestHandler):
+    def get(self):
+        filename = os.path.join(STATIC_PATH_DIR, 'html/annotation.html')
+        with open(filename) as f:
+            content = f.read()
+        self.finish(content)
+
+
+class AnnotationApi(tornado.web.RequestHandler):
+    def get(self):
+        component = self.get_arguments("component")[0]
+        station = self.get_arguments("station")[0]
+        res = annotation.get(component, station)
+        self.write(res)
+
+    def post(self):
+        component = self.get_arguments("component")[0]
+        station = self.get_arguments("station")[0]
+        data = self.request.body
+        res = annotation.post(component, station, data)
+        self.write(res)
 
 
 class WebSocket(tornado.websocket.WebSocketHandler):
@@ -36,8 +59,12 @@ def create_server(system=None):
 
     app = tornado.web.Application([
         (r"/", Index),
+        (r"/annotation", Annotation),
+        (r"/annotation/api", AnnotationApi),
         (r"/ws", WebSocket),
         (r'/static/(.*)', tornado.web.StaticFileHandler,
-         {'path': STATIC_PATH_DIR})
+         {'path': STATIC_PATH_DIR}),
+        (r'/dataset/(.*)', tornado.web.StaticFileHandler,
+         {'path': annotation.DATASET_PATH})
     ], debug=True)
     app.listen(8080)

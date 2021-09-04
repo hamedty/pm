@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+  <meta charset="utf-8" />
+  <title>PM - PAM2060</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
+  <link href="/static/dependencies/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/index.css">
+
+  <script src="/static/dependencies/angular.min.js"></script>
+  <script src="/static/dependencies/jquery.min.js"></script>
+  <script src="/static/dependencies/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/static/dependencies/d3.min.js"></script>
+  <script src="/static/dependencies/moment.js"></script>
+
+  <script src="/static/js/annotation.js"></script>
+</head>
+
+<body ng-app="annotation_app" ng-controller="annotation_controller">
+  <div class="container-fluid">
+
+    <h1>
+      PAM2060 - Vision Annotation
+    </h1>
+
+    <hr />
+    <form class="form-inline" action="/action_page.php">
+      <div class="form-group">
+        <label for="email">Component:</label>
+        <select ng-model="component" ng-options="item for item in components"> </select>
+      </div>
+      <div class="form-group">
+        <label for="pwd">Station:</label>
+        <select ng-model="station" ng-options="item for item in stations"> </select>
+      </div>
+    </form>
+    <graph id="reference" ng-if="sets"></graph>
+
+    <div class="row">
+
+      <div class="col-md-3" ng-repeat="(set_name, zero) in sets">
+
+        <form>
+          <label>{{set_name}}:
+            <input type="number" name="input" ng-model="sets[set_name].zero" min="0" max="399" ng-change="update()">
+          </label>
+        </form>
+        <graph id="{{set_name}}" zero="{{sets[set_name].zero}}"></graph>
+      </div>
+
+
+
+    </div>
+  </div>
+
+
+</body>
+
+</html>
