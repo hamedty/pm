@@ -6,19 +6,19 @@ from .feeder import Feeder
 
 ALL_NODES = [
     Robot('Robot 1', '192.168.44.100', arduino_id=0),
-    # Robot('Robot 2', '192.168.44.100', arduino_id=1),
+    Robot('Robot 2', '192.168.44.100', arduino_id=1),
     Rail('Rail', '192.168.44.100', arduino_id=2),
 
     Station('Station 1', '192.168.44.101'),
-    Station('Station 2', '192.168.44.102'),
+    # Station('Station 2', '192.168.44.102'),
     Station('Station 3', '192.168.44.103'),
-    Station('Station 4', '192.168.44.104'),
-    Station('Station 5', '192.168.44.105'),
-    # Station('Station 6', '192.168.44.106'),
-    # Station('Station 7', '192.168.44.107'),
-    # Station('Station 8', '192.168.44.108'),
-    # Station('Station 9', '192.168.44.109'),
-    # Station('Station 10', '192.168.44.110'),
+    # Station('Station 4', '192.168.44.104'),
+    # Station('Station 5', '192.168.44.105'),
+    Station('Station 6', '192.168.44.106'),
+    Station('Station 7', '192.168.44.107'),
+    Station('Station 8', '192.168.44.108'),
+    Station('Station 9', '192.168.44.109'),
+    Station('Station 10', '192.168.44.110'),
     Feeder('Feeder 1', '192.168.44.21'),
 
 ]
@@ -52,7 +52,7 @@ if 'Station 4' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 238.5
     station.hw_config['H_PRE_DANCE'] = 245
-    station.hw_config['dosing_offset'] = -2
+    # station.hw_config['dosing_offset'] = -2
     station.hw_config['holder_webcam_direction'] = 'down'
 
 if 'Station 5' in ALL_NODES_DICT:
@@ -61,15 +61,45 @@ if 'Station 5' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 242
     station.hw_config['H_PRE_DANCE'] = 244
 
+if 'Station 6' in ALL_NODES_DICT:
+    station = ALL_NODES_DICT['Station 6']
+    station.hw_config['H_ALIGNING'] = 227
+    station.hw_config['H_PUSH'] = 240
+    station.hw_config['H_PRE_DANCE'] = 248
+    station.hw_config['holder_webcam_direction'] = 'down'
+
+
 if 'Station 7' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 7']
     assert station.g2core_config[7][0] == 'z'
     station.g2core_config[7][1]['hi'] = 4
+    station.hw_config['H_ALIGNING'] = 227
+    station.hw_config['H_PUSH'] = 239.5
+    station.hw_config['H_PRE_DANCE'] = 248
+
 
 if 'Station 8' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 8']
     assert station.g2core_config[7][0] == 'z'
     station.g2core_config[7][1]['hi'] = 4
+    station.hw_config['H_ALIGNING'] = 224
+    station.hw_config['H_PUSH'] = 236
+    station.hw_config['H_PRE_DANCE'] = 243.5
+    station.hw_config['holder_webcam_direction'] = 'down'
+
+if 'Station 9' in ALL_NODES_DICT:
+    station = ALL_NODES_DICT['Station 9']
+    station.hw_config['H_ALIGNING'] = 220
+    station.hw_config['H_PUSH'] = 232.5
+    station.hw_config['H_PRE_DANCE'] = 240
+
+
+if 'Station 10' in ALL_NODES_DICT:
+    station = ALL_NODES_DICT['Station 10']
+    station.hw_config['H_ALIGNING'] = 223
+    station.hw_config['H_PUSH'] = 234.5
+    station.hw_config['H_PRE_DANCE'] = 242
+    station.hw_config['holder_webcam_direction'] = 'down'
 
 for i in range(0, 10):
     station_id = 'Station %d' % (i + 1)
