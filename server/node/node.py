@@ -20,7 +20,6 @@ class Node(object):
     HOMMING_RETRIES = 2
 
     def __init__(self, name, ip, arduino_id=None):
-        self.boot = False
         self.set_status(message='node instance creating')
         self.name = name
         self.ip = ip
@@ -51,10 +50,10 @@ class Node(object):
         return res == 0
 
     async def scp_to(self, path_src, path_dst):
-        command = 'scp -r %s pi@%s:%s' % (path_src, self.ip, path_dst)
-        command = command.split()
-        res = subprocess.call(command, stdout=subprocess.PIPE)
-        return res == 0
+        command = 'rsync -az %s pi@%s:%s' % (path_src, self.ip, path_dst)
+        proc = await asyncio.create_subprocess_shell(command, stdout=subprocess.PIPE)
+        stdout, stderr = await proc.communicate()
+        assert proc.returncode == 0, proc.returncode
 
     async def connect(self):
         while not self._socket_reader:
@@ -173,7 +172,6 @@ class Node(object):
             self.set_status(**line)
 
     async def send_command_config_arduino(self):
-        # to update scripts
         await self.scp_to('./rpi_scripts.py', '~/server/')
         command = {
             'verb': 'config_arduino',

@@ -1,9 +1,7 @@
-detect dosing existance before comming down, then if naioftad
-st6-10 Z locations
-st6-10 vision
 if vision response is "not exist", handle correctly
 ST4 encoder issue
-fill the rail command (5x2-4,5x2...12345x6, 12)
+detect dosing existance before comming down, then if naioftad
+st6-10 vision
 multiprocessing generic function
 verify gate
 USB robot 1 is loose

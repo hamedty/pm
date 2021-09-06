@@ -1,38 +1,19 @@
 import asyncio
-import aioconsole
-import inspect
+import subprocess
 
 
-class HW_PANIC_EXCEPTION(Exception):
-    pass
-
-
-async def f(t, i):
-    await asyncio.sleep(t)
-    print(i)
-    if i == 2:
-        return i
-    raise
+async def scp_to(path_src, path_dst):
+    command = 'rsync -az %s pi@%s:%s' % (path_src, '192.168.44.101', path_dst)
+    print(command)
+    proc = await asyncio.create_subprocess_shell(command, stdout=subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
+    print(stdout)
+    print(stderr)
+    assert proc.returncode == 0, proc.returncode
 
 
 async def main():
-    z = await asyncio.gather(f(1, 1), f(.1, 2), return_exceptions=True)
-    print('z', z)
-
-
-async def gather(a):
-    print(1111)
-    if callable(a):
-        print()
-        if inspect.isawaitable(a):
-            await a
-        else:
-            a()
-    elif isinstance(a, list):
-        for i in a:
-            await gather(i)
-    elif isinstance(a, set):
-        await asyncio.gather(*[gather(i) for i in a])
+    await scp_to('./rpi_scripts.py', '~/server/')
 
 
 asyncio.run(main())
