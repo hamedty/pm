@@ -3,23 +3,29 @@ import time
 
 
 async def feeder_process(arduino, G1, command):
-    N = command['N']
+    holder_mask = command['mask']
+    N = len(holder_mask)
+    holder_mask.append(0)
 
-    arduino._send_command("{out2: 1, out7: 1}")
+    arduino._send_command("{out2: 1}")
     await asyncio.sleep(.3)
+
     holder_shift_register = 0
     for i in range(N + 1):
+        if not holder_mask[i]:
+            arduino._send_command("{out7: 0}")
+
         z = 16 + 25 * i
         await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
 
+        if holder_mask[i]:
+            arduino._send_command("{out7: 1}")
+
         if holder_shift_register:
             await cartridge_feed(arduino, None)
-        if i > (N - 2):
-            arduino._send_command("{out7: 0}")
-        if holder_shift_register:
             await cartridge_handover(arduino, None)
 
-        await asyncio.sleep(.5)
+        await asyncio.sleep(.3)
         holder_shift_register = await detect_holder(arduino)
 
     await G1({'arduino_index': None, 'z': 719, 'feed': 5000}, None)

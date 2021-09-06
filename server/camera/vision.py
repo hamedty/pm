@@ -24,7 +24,7 @@ def detect_dosing(frame, offset):
         cls = 25
 
     steps = -cls * p
-    aligned = bool(abs(cls) < 3)  # np.bool_ to bool
+    aligned = bool(abs(cls) < 2)  # np.bool_ to bool
     return steps, aligned
 
 
@@ -37,7 +37,7 @@ def detect_holder(frame, offset):
     p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p
-    aligned = bool(abs(cls) < 3)  # np.bool_ to bool
+    aligned = bool(abs(cls) < 1)  # np.bool_ to bool
     return steps, aligned
 
 
@@ -50,9 +50,9 @@ def object_present(frame, threshold):
 def prepare_frame(frame, component):
     if component == 'dosing':
         x_downsample = 8
-        y_downsample = 2
+        y_downsample = 1
     elif component == 'holder':
-        x_downsample = 2
+        x_downsample = 1
         y_downsample = 8
     else:
         raise

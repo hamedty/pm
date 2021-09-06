@@ -38,9 +38,9 @@ def npz_valid(npz_filename, roi_in, zero_in):
 def prepare_frame(frame, roi, component):
     if component == 'dosing':
         x_downsample = 8
-        y_downsample = 2
+        y_downsample = 1
     elif component == 'holder':
-        x_downsample = 2
+        x_downsample = 1
         y_downsample = 8
     else:
         raise

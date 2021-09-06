@@ -6,7 +6,7 @@ WEB_PATH = os.path.dirname(os.path.abspath(__file__))
 BASE_PATH = os.path.dirname(WEB_PATH)
 SERVER_PATH = os.path.join(BASE_PATH, 'server')
 VISION_PATH = os.path.join(SERVER_PATH, 'vision')
-DATASET_PATH = os.path.join(BASE_PATH, 'dataset_old')
+DATASET_PATH = os.path.join(BASE_PATH, 'dataset')
 MODELS_PATH = os.path.join(BASE_PATH, 'models')
 
 SRC_DATA = os.path.join(VISION_PATH, 'annotaion.json')
@@ -57,7 +57,9 @@ data_saved_json = ''
 list_all()
 
 
-def get(component, station):
+def get(component, station, list=True):
+    if list:
+        list_all()
     return {
         'sets': data[station][component],
         'roi': data[station][component + '_roi'],
@@ -69,4 +71,4 @@ def post(component, station, data_in):
     print(data_in)
     data[station][component] = data_in
     save_data()
-    return get(component, station)
+    return get(component, station, list=False)

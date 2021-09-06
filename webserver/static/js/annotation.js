@@ -30,6 +30,7 @@ annotation_app.controller('annotation_controller', function($scope, $http) {
     // console.log(data);
     $scope.sets = data.sets;
     $scope.roi = data.roi;
+    $scope.reference_id = $scope.component+$scope.station+JSON.stringify($scope.roi);
   }
 });
 
@@ -47,7 +48,7 @@ annotation_app.directive('graph', function(){
       url = '/dataset/reference/'+scope.component.toLowerCase()+'_192.168.44.'+scope.station+'.png';
     } else {
       zero = String(zero).padStart(3, '0')
-      url = '/dataset/'+scope.component.toLowerCase()+'_'+scope.station+'_' + id + '_192.168.44.'+scope.station+'/'+zero+'_01.png';
+      url = '/dataset/'+scope.component.toLowerCase()+'_'+scope.station+'_' + id + '_192.168.44.'+scope.station+'/'+zero+'_00.png';
     }
     image.src = url;
     image.onload = function(){
@@ -57,8 +58,15 @@ annotation_app.directive('graph', function(){
             0, 0,     // Place the result at 0, 0 in the canvas,
             scope.roi.dx*scale, scope.roi.dy*scale); // With as width / height: 100 * 100 (scale)
             ctx.beginPath();
-            ctx.moveTo(scope.roi.dx/2*scale, 0);
-            ctx.lineTo(scope.roi.dx/2*scale, scope.roi.dy*scale);
+            if (scope.component.toLowerCase() == 'dosing'){
+              ctx.moveTo(0, scope.roi.dy/2*scale);
+              ctx.lineTo(scope.roi.dx*scale, scope.roi.dy/2*scale);              
+
+            }
+            else {
+              ctx.moveTo(scope.roi.dx/2*scale, 0);
+              ctx.lineTo(scope.roi.dx/2*scale, scope.roi.dy*scale);
+            }
             ctx.strokeStyle = "red";
             ctx.stroke();
     }

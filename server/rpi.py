@@ -89,6 +89,7 @@ async def align(command, _):
     retries = command['retries']
     offset = arduino._hw_config.get(component + '_offset', 0)
     feed = command['speed']
+    steps_history = []
 
     aligned = False
     exists = False
@@ -101,6 +102,7 @@ async def align(command, _):
             exists = True
         steps, aligned = detector(frame, offset)
         print(steps, aligned)
+        steps_history.append(steps)
         if aligned:
             break
 
@@ -109,7 +111,7 @@ async def align(command, _):
         await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
 
     arduino.send_command(json.dumps({valve: 0}))
-    return {'success': True, 'aligned': aligned, 'exists': exists}
+    return {'success': True, 'aligned': aligned, 'exists': exists, 'steps_history': steps_history}
 
 
 async def create_arduino(command, _):

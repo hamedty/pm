@@ -115,9 +115,9 @@ class Node(object):
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':
-            if command.get('prepate'):
+            if command.get('prepare'):
                 await self.set_valves([0, 0, 0, 1])
-                input('place pen')
+                # input('place pen')
                 await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
             await self.set_valves([1])
             await asyncio.sleep(1)
@@ -135,7 +135,7 @@ class Node(object):
                 self.ip_short, random_string)
 
             await self.set_valves([0])
-            if command.get('prepate'):
+            if command.get('prepare'):
                 await self.G1(z=1, feed=10000)
             await self.scp_from(folder_name_src, folder_name_dst)
 
@@ -201,6 +201,8 @@ class Node(object):
         return
 
     async def G1(self, **kwargs):
+        # if not self.homed:
+        #     raise
         # kwargs: x, y, z, feed
         command = {'verb': 'G1'}
         command.update(kwargs)

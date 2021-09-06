@@ -198,13 +198,14 @@ COMMAND_TEMPLATE_GCODE = "{\n\
 COMMAND_TEMPLATE_DUMP_FRAME = "{'verb': 'dump_frame'}"
 COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER = "{\n\
   'verb': 'dump_training_holder',\n\
-  'revs': 3,\n\
+  'revs': 1,\n\
   'frames_per_rev': 400,\n\
 }"
 COMMAND_TEMPLATE_DUMP_TRAINING_DOSING = "{\n\
   'verb': 'dump_training_dosing',\n\
-  'revs': 3,\n\
+  'revs': 1,\n\
   'frames_per_rev': 400,\n\
+  'prepare': 1,\n\
 }"
 COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder', 'retries': 10}"
 COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing', 'retries': 10}"

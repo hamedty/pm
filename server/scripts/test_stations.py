@@ -18,8 +18,8 @@ async def main(system, ALL_NODES):
     # Motors
     # await run_many(stations, lambda x: x.set_valves([1, 1]))
 
-    # await move_rotary_motor(stations, axis='X', amount=360, feed=10000, count=15, delay=1)
-    await move_rotary_motor(stations, axis='X', amount=720, feed=30000, count=15, delay=1)
+    await move_rotary_motor(stations, axis='X', amount=360, feed=10000, count=5, delay=.1)
+    await move_rotary_motor(stations, axis='X', amount=720, feed=30000, count=5, delay=.2)
     # await move_rotary_motor(stations, axis='Y', amount=360, feed=10000, count=15, delay=1)
     # await move_rotary_motor(stations, axis='Y', amount=720, feed=30000, count=25, delay=.1)
 

@@ -8,6 +8,19 @@ async def main(system, ALL_NODES):
     print('Nodes Ready')
 
     station = stations[0]
+    robot = robots[0]
+    Y_GRAB_IN_UP_1 = 75
+    X_GRAB_IN = 284.5
+    Y_GRAB_IN_DOWN = 0
+    Y_GRAB_IN_UP_2 = 65
+    T_GRAB_IN = 0.5
+    # await robot.home()
+    # await robot.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
+    # await robot.G1(x=X_GRAB_IN, feed=FEED_X)
+    # await robot.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
+    # await robot.set_valves_grab_infeed()
+    # await asyncio.sleep(T_GRAB_IN)
+    # await robot.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
 
     ''' home '''
     # await station.home()
@@ -19,14 +32,14 @@ async def main(system, ALL_NODES):
     # print(z1, z2)
 
     ''' dosing '''
-    await station.G1(z=station.hw_config['H_ALIGNING'], feed=FEED_Z_DOWN)
-    await asyncio.sleep(.5)
-    await station.set_valves([1])
-    await asyncio.sleep(.5)
-
-    z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10})
-    print(z1, z2)
-    if z2['aligned']:
-        await station.set_valves([0])
-        await asyncio.sleep(.5)
-        await station.G1(z=10, feed=FEED_Z_UP)
+    # await station.G1(z=station.hw_config['H_ALIGNING'], feed=FEED_Z_DOWN)
+    # await asyncio.sleep(.5)
+    # await station.set_valves([1])
+    # await asyncio.sleep(.5)
+    #
+    # z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10})
+    # print(z1, z2)
+    # if z2['aligned']:
+    #     await station.set_valves([0])
+    #     await asyncio.sleep(.5)
+    #     await station.G1(z=10, feed=FEED_Z_UP)

@@ -10,10 +10,14 @@ class HW_PANIC_EXCEPTION(Exception):
 async def f(t, i):
     await asyncio.sleep(t)
     print(i)
+    if i == 2:
+        return i
+    raise
 
 
 async def main():
-    await gather(f(1, 1))
+    z = await asyncio.gather(f(1, 1), f(.1, 2), return_exceptions=True)
+    print('z', z)
 
 
 async def gather(a):

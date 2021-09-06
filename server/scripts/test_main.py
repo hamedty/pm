@@ -13,8 +13,16 @@ async def main(system, ALL_NODES):
     if a:
         print('homing')
         await home_all_nodes(all_nodes, feeder, rail, robots, stations)
-    for station in stations:
-        await station.set_valves([None, None, None, 1])
+
+    await do_stations(stations, lambda s: s.set_valves([0, 0, 0, 1, 0]))
+    await robot.set_valves([0] * 10)
+    # await feeder.set_motors(
+    #     (2, 4), (3, 3),  # Holder Downstream
+    #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+    #     (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+    # )
+    #
+    # await feeder_fill_line(system, feeder, rail)
 
     while True:
         '''PICK UP'''
@@ -33,10 +41,10 @@ async def main(system, ALL_NODES):
 
         '''EXCHANGE'''
         # await get_input(system, 'exchange')
-        X_INPUT = 375
+        X_INPUT = 373
         Y_INPUT_DOWN_1 = 35
         Y_INPUT_UP = 55
-        Y_INPUT_DOWN_3 = 7
+        Y_INPUT_DOWN_3 = 6
         Y_INPUT_DOWN_2 = Y_INPUT_DOWN_3 + 10
         Y_OUTPUT = 80
         X_OUTPUT_SAFE = X_CAPPING
@@ -73,7 +81,7 @@ async def main(system, ALL_NODES):
 
         await asyncio.sleep(T_OUTPUT_GRIPP)
 
-        await do_stations(stations, lambda s: s.set_valves([0, 1]))
+        # await do_stations(stations, lambda s: s.set_valves([0, 1]))
         await asyncio.sleep(T_OUTPUT_RELEASE)
         await do_stations(stations, lambda s: s.G1(z=Z_OUTPUT_SAFE, feed=FEED_Z_UP))
 
@@ -129,18 +137,20 @@ async def main(system, ALL_NODES):
         await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
         ''' STATION::Align Holder '''
+        await get_input(system, 'STATION::Align Holder')
+
         async def align_holder(station):
-            await get_input(system, 'STATION::Align Holder')
             await station.set_valves([0, 1])
             z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
             print(z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed. align to continue')
-        await do_stations(stations, lambda s: align_holder(s))
+        await do_stations(stations, lambda s: align_holder(s), simultanously=True)
 
         ''' STATION::Align Dosing '''
+        await get_input(system, 'STATION::Align Dosing')
+
         async def align_dosing(station):
-            await get_input(system, 'STATION::Align Dosing')
             data = {}
             data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
             data['FEED_ALIGNING'] = FEED_Z_DOWN
@@ -150,11 +160,12 @@ async def main(system, ALL_NODES):
             print(z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed. align to continue')
-        await do_stations(stations, lambda s: align_dosing(s))
+        await do_stations(stations, lambda s: align_dosing(s), simultanously=True)
 
         ''' STATION::Rest '''
+        await get_input(system, 'STATION::Rest')
+
         async def station_rest(station):
-            await get_input(system, 'STATION::Rest')
             data = {}
             # go to aliging location
             data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
@@ -191,8 +202,8 @@ async def main(system, ALL_NODES):
 
             # Press
             data['PAUSE_PRESS0'] = 0.1
-            data['PAUSE_PRESS1'] = 0.3
-            data['PAUSE_PRESS2'] = 0.5
+            data['PAUSE_PRESS1'] = 0.4
+            data['PAUSE_PRESS2'] = 0.8
 
             # Dance Back
             data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
@@ -201,7 +212,7 @@ async def main(system, ALL_NODES):
             data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
             data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
             data['Y_DANCE_BACK'] = 0
-            data['Y_DANCE_BACK2'] = -40
+            data['Y_DANCE_BACK2'] = -15
             data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
             # Deliver
@@ -258,21 +269,20 @@ async def main(system, ALL_NODES):
 
             await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
             await station.set_valves([None, None, None, 1])
-        await do_stations(stations, lambda s: station_rest(s))
+        await do_stations(stations, lambda s: station_rest(s), simultanously=True)
+
+        # async def release_result(station):
+        #     await get_input(system, 'STATION::Release')
+        #     await station.set_valves([0, 0, 0, 1])
+        # await do_stations(stations, lambda s: release_result(s), simultanously=False)
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
-    await do_stations(stations, lambda s: s.home(), simultanously=True)
-    # await robots[0].home()
-    # await rail.home()
-    # await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
-    # await feeder.home()
-    #
-    # await feeder.set_motors(
-    #     (2, 4), (3, 3),  # Holder Downstream
-    #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-    #     (6, 32), (8, 200)  # Cartridge Conveyor + OralB
-    # )
+    await do_stations(stations, lambda s: s.home())
+    await robots[0].home()
+    await rail.home()
+    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    await feeder.home()
 
 
 async def get_input(system, text):
@@ -286,11 +296,11 @@ async def get_input(system, text):
         raise
 
 
-async def do_stations(stations, func, simultanously=False):
+async def do_stations(stations, func, simultanously=True):
     if simultanously:
         res = await asyncio.gather(*[func(station) for station in stations], return_exceptions=True)
         for i in range(len(stations)):
-            if res[i]:
+            if isinstance(res[i], Exception):
                 print('error while running for %dth station' % (i + 1))
                 print(res[i])
                 await aioconsole.ainput('enter to continue')
@@ -301,3 +311,52 @@ async def do_stations(stations, func, simultanously=False):
             except:
                 print(traceback.format_exc())
                 await aioconsole.ainput('enter to continue')
+
+
+async def feeder_fill_line(system, feeder, rail):
+
+    async def internal(mask):
+        await get_input(system, 'filling line')
+        await feeder.G1(z=16, feed=5000)
+        await feeder.send_command({'verb': 'feeder_process', 'mask': mask})
+
+        ''' RAIL '''
+        # await get_input(system, 'rail')
+        D_MIN = D_STANDBY - 25 * len(mask)
+        D_MAX = D_STANDBY
+        T_RAIL_JACK1 = 1.5
+        T_RAIL_JACK2 = 1.5
+
+        # rail backward
+        await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
+
+        # change jacks to moving
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(T_RAIL_JACK1)
+        await feeder.set_valves([None, 0])
+        await rail.set_valves([1, 1])
+        await asyncio.sleep(T_RAIL_JACK2)
+
+        # rail forward
+        await rail.G1(z=D_MAX, feed=FEED_RAIL_INTACT)
+
+        # change jacks to moving
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(T_RAIL_JACK1)
+        await rail.set_valves([0, 0])
+        await asyncio.sleep(T_RAIL_JACK1)
+
+        # rail park
+        await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
+
+    # await internal([0] * 4 + [1])
+    # await internal([0] * 4 + [1])
+    # await internal([0] * 3 + [1] * 2)
+    # await internal([0] * 3 + [1] * 2)
+    await internal([0] * 2 + [1] * 3)
+    await internal([0] * 2 + [1] * 3)
+    await internal([0] * 1 + [1] * 4)
+    await internal([0] * 1 + [1] * 4)
+    for i in range(5):
+        await internal([1] * 5)
+    await internal([1] * 2)

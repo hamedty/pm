@@ -17,7 +17,7 @@ MODELS_PATH = os.path.join(BASE_PATH, 'models')
 
 SRC_DATA = os.path.join(VISION_PATH, 'annotaion.json')
 DST_DATA = os.path.join(MODELS_PATH, 'annotaion.json')
-MAX_ITER = 10
+MAX_ITER = 100
 
 
 def train_generic(node, component, write_lock):

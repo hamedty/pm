@@ -1,61 +1,34 @@
 {
     "101": {
         "dosing": {
-            "5oi9cceg": {
-                "zero": 2
+            "43npoqwi": {
+                "zero": 212
             },
-            "a082aqdt": {
-                "zero": 389
+            "nfllil34": {
+                "zero": 192
             },
-            "bir1fx9r": {
-                "zero": 2
-            },
-            "lzaxirvg": {
-                "zero": 100
-            },
-            "r7v162uk": {
-                "zero": 127
-            },
-            "uudb8pve": {
-                "zero": 312
-            },
-            "viqh0t7a": {
-                "zero": 27
-            },
-            "xfqa3ri2": {
-                "zero": 61
+            "nfzqo9h3": {
+                "zero": 192
             }
         },
         "dosing_roi": {
             "dx": 230,
             "dy": 205,
-            "x0": 170,
+            "x0": 210,
             "y0": 50
         },
         "holder": {
-            "3zw2fzaa": {
-                "zero": 317
+            "0m1whc6p": {
+                "zero": 78
             },
-            "5aicayw5": {
-                "zero": 112
+            "briwizjt": {
+                "zero": 191
             },
-            "b11gp8nm": {
-                "zero": 38
+            "mnmbljv1": {
+                "zero": 255
             },
-            "ktcdjo18": {
-                "zero": 340
-            },
-            "llcm8dee": {
-                "zero": 37
-            },
-            "syrrjejq": {
-                "zero": 157
-            },
-            "v48rolap": {
-                "zero": 194
-            },
-            "xetsno89": {
-                "zero": 365
+            "nlpzrx9n": {
+                "zero": 173
             }
         },
         "holder_roi": {
@@ -67,14 +40,14 @@
     },
     "102": {
         "dosing": {
-            "c182ed0w": {
-                "zero": 28
+            "np6hcg2s": {
+                "zero": 194
             },
-            "gvrnltqc": {
-                "zero": 328
+            "tu2mmm4u": {
+                "zero": 215
             },
-            "ysx6bt4e": {
-                "zero": 300
+            "zxcfray9": {
+                "zero": 190
             }
         },
         "dosing_roi": {
@@ -84,20 +57,14 @@
             "y0": 140
         },
         "holder": {
-            "5jk58x0n": {
-                "zero": 205
+            "2j9gkez7": {
+                "zero": 226
             },
-            "dag1aqju": {
-                "zero": 366
+            "nl3qqf9b": {
+                "zero": 202
             },
-            "g8ldw78t": {
-                "zero": 399
-            },
-            "m2g0fvki": {
-                "zero": 207
-            },
-            "tk0cye9u": {
-                "zero": 58
+            "qfmrz8o2": {
+                "zero": 219
             }
         },
         "holder_roi": {
@@ -109,14 +76,14 @@
     },
     "103": {
         "dosing": {
-            "74uhk6mo": {
-                "zero": 285
+            "rd4fxz8l": {
+                "zero": 203
             },
-            "ncdig64k": {
-                "zero": 258
+            "wieb2112": {
+                "zero": 208
             },
-            "v37w56tp": {
-                "zero": 232
+            "xcev2371": {
+                "zero": 203
             }
         },
         "dosing_roi": {
@@ -126,20 +93,17 @@
             "y0": 138
         },
         "holder": {
-            "1y0t0lwu": {
-                "zero": 165
+            "410r222s": {
+                "zero": 198
             },
-            "ah0acau7": {
-                "zero": 3
+            "aa9uzj14": {
+                "zero": 197
             },
-            "pytp79qc": {
-                "zero": 367
+            "phx3mw8i": {
+                "zero": 160
             },
-            "r3jjgj2a": {
-                "zero": 44
-            },
-            "rz3yxfi7": {
-                "zero": 200
+            "sr0fmycd": {
+                "zero": 211
             }
         },
         "holder_roi": {
@@ -151,17 +115,14 @@
     },
     "104": {
         "dosing": {
-            "0g91zd5a": {
-                "zero": 2
+            "nxz03b8v": {
+                "zero": 190
             },
-            "d95x0lzj": {
-                "zero": 287
+            "os6skejp": {
+                "zero": 189
             },
-            "sfjgf2z6": {
-                "zero": 21
-            },
-            "zarai7v9": {
-                "zero": 363
+            "rwk6z8vk": {
+                "zero": 196
             }
         },
         "dosing_roi": {
@@ -171,17 +132,14 @@
             "y0": 120
         },
         "holder": {
-            "0v0btd84": {
-                "zero": 10
+            "862o9yus": {
+                "zero": 201
             },
-            "501hj44e": {
-                "zero": 329
+            "qtzjuegn": {
+                "zero": 190
             },
-            "owa2vxk1": {
-                "zero": 97
-            },
-            "srk2xdd7": {
-                "zero": 9
+            "sxluesx1": {
+                "zero": 199
             }
         },
         "holder_roi": {
@@ -193,17 +151,14 @@
     },
     "105": {
         "dosing": {
-            "75x6euad": {
-                "zero": 378
+            "78qmgnp5": {
+                "zero": 192
             },
-            "beloyl2q": {
-                "zero": 301
+            "irg6vikm": {
+                "zero": 191
             },
-            "c1aw5fol": {
-                "zero": 262
-            },
-            "epo0t33h": {
-                "zero": 11
+            "x36jmk5q": {
+                "zero": 187
             }
         },
         "dosing_roi": {
@@ -213,14 +168,14 @@
             "y0": 144
         },
         "holder": {
-            "576r9k2a": {
-                "zero": 195
+            "2od1uc7q": {
+                "zero": 196
             },
-            "y4iai7du": {
-                "zero": 247
+            "ag4qnmjo": {
+                "zero": 200
             },
-            "z5tcpbav": {
-                "zero": 61
+            "uf2j2pot": {
+                "zero": 204
             }
         },
         "holder_roi": {

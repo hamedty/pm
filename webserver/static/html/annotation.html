@@ -38,11 +38,11 @@
         <select ng-model="station" ng-options="item for item in stations"> </select>
       </div>
     </form>
-    <graph id="reference" ng-if="sets"></graph>
+    <graph id="reference" zero="{{reference_id}}" ng-if="sets"></graph>
 
     <div class="row">
 
-      <div class="col-md-3" ng-repeat="(set_name, zero) in sets">
+      <div class="col-md-4" ng-repeat="(set_name, zero) in sets">
 
         <form>
           <label>{{set_name}}:
