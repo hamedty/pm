@@ -168,7 +168,7 @@ async def raw(command, _):
 
 
 async def G1(command, _):
-    correction_eps = 0.1
+    correction_eps = 0.5
     arduino = ARDUINOS[command['arduino_index']]
     arduino._debug = True
     for a in ['x', 'y', 'z']:

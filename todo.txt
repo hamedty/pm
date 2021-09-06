@@ -1,5 +1,4 @@
 if vision response is "not exist", handle correctly
-ST4 encoder issue
 detect dosing existance before comming down, then if naioftad
 st6-10 vision
 multiprocessing generic function
