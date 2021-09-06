@@ -23,7 +23,7 @@ async def main(system, ALL_NODES):
     )
 
     await feeder_fill_line(system, feeder, rail)
-    return
+
     while True:
         '''PICK UP'''
         await get_input(system, 'pick up')
@@ -105,7 +105,7 @@ async def main(system, ALL_NODES):
         ''' FEEDER '''
         await get_input(system, 'feeder')
         await feeder.G1(z=16, feed=5000)
-        await feeder.send_command({'verb': 'feeder_process', 'N': N})
+        await feeder.send_command({'verb': 'feeder_process', 'mask': [1] * N})
 
         ''' RAIL '''
         # await get_input(system, 'rail')
@@ -142,9 +142,9 @@ async def main(system, ALL_NODES):
         async def align_holder(station):
             await station.set_valves([0, 1])
             z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
-            print(z1, z2)
+            print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
-                await aioconsole.ainput('aligining failed. align to continue')
+                await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
         await do_stations(stations, lambda s: align_holder(s), simultanously=True)
 
         ''' STATION::Align Dosing '''
@@ -157,9 +157,9 @@ async def main(system, ALL_NODES):
             await station.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
             await station.set_valves([1])
             z1, z2 = await station.send_command({'verb': 'align', 'component': 'dosing', 'speed': ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
-            print(z1, z2)
+            print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
-                await aioconsole.ainput('aligining failed. align to continue')
+                await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
         await do_stations(stations, lambda s: align_dosing(s), simultanously=True)
 
         ''' STATION::Rest '''
