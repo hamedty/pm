@@ -55,7 +55,6 @@ class System(object):
         message = [{
             'type': n.type,
             'name': n.name,
-            'actions': n.get_actions(),
         } for n in self.nodes]
         message = {
             'type': 'architecture',
