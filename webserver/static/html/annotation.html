@@ -38,7 +38,23 @@
         <select ng-model="station" ng-options="item for item in stations"> </select>
       </div>
     </form>
-    <graph id="reference" zero="{{reference_id}}" ng-if="sets"></graph>
+    <form>
+      <label>x0:
+        <input type="number" name="input" ng-model="roi.x0" min="0" max="640" ng-change="update()">
+      </label>
+      <label>y0:
+        <input type="number" name="input" ng-model="roi.y0" min="0" max="480" ng-change="update()">
+      </label>
+      <label>dx:
+        <input type="number" name="input" ng-model="roi.dx" min="0" max="640" ng-change="update()">
+      </label>
+      <label>dy:
+        <input type="number" name="input" ng-model="roi.dy" min="0" max="480" ng-change="update()">
+      </label>
+
+    </form>
+
+    <graph id="reference" zero="{{reference_id}}" roi="{{roi}}" ng-if="sets"></graph>
 
     <div class="row">
 
@@ -49,7 +65,7 @@
             <input type="number" name="input" ng-model="sets[set_name].zero" min="0" max="399" ng-change="update()">
           </label>
         </form>
-        <graph id="{{set_name}}" zero="{{sets[set_name].zero}}"></graph>
+        <graph id="{{set_name}}" zero="{{sets[set_name].zero}}" roi="{{roi}}"></graph>
       </div>
 
 

@@ -23,14 +23,17 @@ annotation_app.controller('annotation_controller', function($scope, $http) {
     });
   }
   $scope.update = function(e) {
-    post($scope.sets);
+    post({
+      sets:$scope.sets,
+      roi:$scope.roi,
+    });
   };
 
   function data_received(data) {
     // console.log(data);
     $scope.sets = data.sets;
     $scope.roi = data.roi;
-    $scope.reference_id = $scope.component+$scope.station+JSON.stringify($scope.roi);
+    $scope.reference_id = $scope.component+$scope.station;
   }
 });
 
@@ -60,7 +63,7 @@ annotation_app.directive('graph', function(){
             ctx.beginPath();
             if (scope.component.toLowerCase() == 'dosing'){
               ctx.moveTo(0, scope.roi.dy/2*scale);
-              ctx.lineTo(scope.roi.dx*scale, scope.roi.dy/2*scale);              
+              ctx.lineTo(scope.roi.dx*scale, scope.roi.dy/2*scale);
 
             }
             else {
@@ -79,12 +82,12 @@ annotation_app.directive('graph', function(){
       link: function(scope, elm, attrs, ctrl) {
        draw(scope, elm.children()[0], attrs.id, attrs.zero);
        scope.$watch(function() {
-         return elm.attr('zero');
+         return JSON.stringify(elm.attr('zero')) + JSON.stringify(elm.attr('roi'));
        }
          ,function(newValue,oldValue) {
            if(!newValue) return
            if (newValue != oldValue)
-           draw(scope, elm.children()[0], attrs.id, newValue);
+           draw(scope, elm.children()[0], attrs.id, attrs.zero);
         });
       }
 

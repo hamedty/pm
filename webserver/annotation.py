@@ -69,6 +69,7 @@ def get(component, station, list=True):
 def post(component, station, data_in):
     data_in = json.loads(data_in.decode("utf-8"))
     print(data_in)
-    data[station][component] = data_in
+    data[station][component] = data_in['sets']
+    data[station][component + '_roi'] = data_in['roi']
     save_data()
     return get(component, station, list=False)

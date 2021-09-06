@@ -1,6 +1,3 @@
-station 4,5 vision
-roi on HTML
-add amin's features
 detect dosing existance before comming down, then if naioftad
 st6-10 Z locations
 st6-10 vision
@@ -24,3 +21,4 @@ feeder encoder disable resistor / max flt?
 cartrdige feeding clear n is too much
 robots home switch
 if nodes downs, UI must react
+add amin's features
