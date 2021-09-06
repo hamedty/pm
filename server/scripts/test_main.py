@@ -16,14 +16,14 @@ async def main(system, ALL_NODES):
 
     await do_stations(stations, lambda s: s.set_valves([0, 0, 0, 1, 0]))
     await robot.set_valves([0] * 10)
-    # await feeder.set_motors(
-    #     (2, 4), (3, 3),  # Holder Downstream
-    #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-    #     (6, 32), (8, 200)  # Cartridge Conveyor + OralB
-    # )
-    #
-    # await feeder_fill_line(system, feeder, rail)
+    await feeder.set_motors(
+        (2, 4), (3, 3),  # Holder Downstream
+        (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+        (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+    )
 
+    await feeder_fill_line(system, feeder, rail)
+    return
     while True:
         '''PICK UP'''
         await get_input(system, 'pick up')
@@ -104,8 +104,8 @@ async def main(system, ALL_NODES):
 
         ''' FEEDER '''
         await get_input(system, 'feeder')
-        # await feeder.G1(z=16, feed=5000)
-        # await feeder.send_command({'verb': 'feeder_process', 'N': N})
+        await feeder.G1(z=16, feed=5000)
+        await feeder.send_command({'verb': 'feeder_process', 'N': N})
 
         ''' RAIL '''
         # await get_input(system, 'rail')
@@ -316,6 +316,7 @@ async def do_stations(stations, func, simultanously=True):
 async def feeder_fill_line(system, feeder, rail):
 
     async def internal(mask):
+        print(mask)
         await get_input(system, 'filling line')
         await feeder.G1(z=16, feed=5000)
         await feeder.send_command({'verb': 'feeder_process', 'mask': mask})
@@ -349,10 +350,10 @@ async def feeder_fill_line(system, feeder, rail):
         # rail park
         await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
-    # await internal([0] * 4 + [1])
-    # await internal([0] * 4 + [1])
-    # await internal([0] * 3 + [1] * 2)
-    # await internal([0] * 3 + [1] * 2)
+    await internal([0] * 4 + [1])
+    await internal([0] * 4 + [1])
+    await internal([0] * 3 + [1] * 2)
+    await internal([0] * 3 + [1] * 2)
     await internal([0] * 2 + [1] * 3)
     await internal([0] * 2 + [1] * 3)
     await internal([0] * 1 + [1] * 4)
