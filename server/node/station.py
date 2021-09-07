@@ -136,7 +136,7 @@ class Station(Node):
         y_margin = 40
         direction = self.hw_config['dosing_webcam_direction']
 
-        y0 = roi_dosing['y0'] - int(y_margin / 2)
+        y0 = int(roi_dosing['y0'] + (roi_dosing['dy'] / 2) - y_margin / 2)
         dy = y_margin
         dx = 450
         x0 = (640 - dx) if direction == 'liu' else 0

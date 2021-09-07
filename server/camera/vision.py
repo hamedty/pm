@@ -47,6 +47,14 @@ def object_present(frame, threshold):
     return bool(value > threshold)
 
 
+def dosing_sit_right(frame):
+    brightness_threshold = 25
+    black_pixel_count = (frame.mean(axis=2).mean(axis=0)
+                         < brightness_threshold).sum()
+    sit_wrong = 300 > black_pixel_count > 20
+    return {'result': not sit_wrong}
+
+
 def prepare_frame(frame, component):
     if component == 'dosing':
         x_downsample = 8
