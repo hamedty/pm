@@ -10,6 +10,7 @@ DEFAULT_PRE_FETCH = 4
 
 
 class CheapCam(CameraBase):
+    DEFAULT_PRE_FETCH = DEFAULT_PRE_FETCH
     FILE_FORMAT = '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.%s:1.0-video-index0'
     CONFIG_BASE = {
         CAP_PROP_FOURCC: VideoWriter_fourcc('M', 'J', 'P', 'G'),
@@ -18,11 +19,11 @@ class CheapCam(CameraBase):
     }
     LAST_FRAME = None
 
-    def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_index=None):
+    def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_name=None):
         if pre_fetch >= 0:
             self.frame = super().get_frame(pre_fetch)
-        if roi_index is not None:
-            roi = self.settings['roi'][roi_index]
+        if roi_name is not None:
+            roi = self.settings['roi'][roi_name]
             x0 = roi['x0']
             x1 = roi['x0'] + roi['dx']
             y0 = roi['y0']
@@ -32,8 +33,8 @@ class CheapCam(CameraBase):
             frame = self.frame
         return frame
 
-    def dump_frame(self, roi_index=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):
-        frame = self.get_frame(roi_index=roi_index, pre_fetch=pre_fetch)
+    def dump_frame(self, roi_name=None, filename=None, pre_fetch=DEFAULT_PRE_FETCH):
+        frame = self.get_frame(roi_name=roi_name, pre_fetch=pre_fetch)
         if filename is None:
             return
         print(filename, frame.shape)

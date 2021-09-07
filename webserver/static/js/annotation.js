@@ -53,6 +53,7 @@ annotation_app.directive('graph', function(){
       zero = String(zero).padStart(3, '0')
       url = '/dataset/'+scope.component.toLowerCase()+'_'+scope.station+'_' + id + '_192.168.44.'+scope.station+'/'+zero+'_00.png';
     }
+    url += '?t=' + Math.floor(new Date()) // to prevent cache
     image.src = url;
     image.onload = function(){
         ctx.drawImage(image,

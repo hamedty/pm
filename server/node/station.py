@@ -104,6 +104,7 @@ class Station(Node):
         'H_PRE_DANCE': 224,
         'dosing_offset': 0,
         'holder_webcam_direction': 'up',
+        'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
     }
 
     async def home_core(self):
@@ -130,10 +131,28 @@ class Station(Node):
         y0 = 0 if (direction == 'up') else 480 - y_margin
         roi_holder_presence = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
+        # ROI Dosing Sit Right
+        x_margin = 20
+        y_margin = 40
+        direction = self.hw_config['dosing_webcam_direction']
+
+        y0 = roi_dosing['y0'] - int(y_margin / 2)
+        dy = y_margin
+        dx = 450
+        x0 = (640 - dx) if direction == 'liu' else 0
+        roi_dosing_sit_right = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
+
         command = {
             'verb': 'create_camera',
-            'dosing_roi': (roi_dosing, roi_dosing_presence),
-            'holder_roi': (roi_holder, roi_holder_presence),
+            'dosing_roi': {
+                'alignment': roi_dosing,
+                'existance': roi_dosing_presence,
+                'sit_right': roi_dosing_sit_right,
+            },
+            'holder_roi': {
+                'alignment': roi_holder,
+                'existance': roi_holder_presence,
+            }
         }
         return await self.send_command(command)
 

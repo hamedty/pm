@@ -30,9 +30,9 @@ async def create_camera(command, _):
 
 async def dump_frame(command, _):
     CAMERAS['holder'].dump_frame(
-        filename=DATA_PATH + '/holder.png', roi_index=command.get('roi_index_holder'))
+        filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
     CAMERAS['dosing'].dump_frame(
-        filename=DATA_PATH + '/dosing.png', roi_index=command.get('roi_index_dosing'))
+        filename=DATA_PATH + '/dosing.png', roi_name=command.get('roi_index_dosing'))
     return {'success': True}
 
 
@@ -94,9 +94,9 @@ async def align(command, _):
     aligned = False
     exists = False
     for i in range(retries):
-        frame = camera.get_frame(roi_index=0)
+        frame = camera.get_frame(roi_name='alignment')
         if i == 0:  # check existance for the first time
-            frame2 = camera.get_frame(pre_fetch=-1, roi_index=1)
+            frame2 = camera.get_frame(pre_fetch=-1, roi_name='existance')
             if not vision.object_present(frame2, presence_threshold):
                 break
             exists = True
@@ -112,6 +112,29 @@ async def align(command, _):
 
     arduino.send_command(json.dumps({valve: 0}))
     return {'success': True, 'aligned': aligned, 'exists': exists, 'steps_history': steps_history}
+
+
+async def detect_vision(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+    object = command['object']
+
+    if object == 'dosing_sit_right':
+        camera = CAMERAS['dosing']
+        roi_name = 'sit_right'
+        pre_fetch = camera.DEFAULT_PRE_FETCH
+        detector = vision.dosing_sit_right
+    elif object == 'holder_existance':
+        camera = CAMERAS[0]
+        roi_name = None
+        pre_fetch = None
+        detector = None
+    else:
+        return {'success': False, 'message': 'Unknown object to detect'}
+
+    frame = camera.get_frame(pre_fetch=pre_fetch, roi_name=roi_name)
+    result = detector(frame)
+    result['success'] = True
+    return result
 
 
 async def create_arduino(command, _):
@@ -271,6 +294,7 @@ COMMAND_HANDLER = {
     'dump_training': dump_training,
 
     'align': align,
+    'detect_vision': detect_vision,
 
     # hardware
     'create_arduino': create_arduino,

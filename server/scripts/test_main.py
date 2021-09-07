@@ -72,7 +72,8 @@ async def main(system, ALL_NODES):
         await robot.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN)
         await asyncio.sleep(T_PRE_PRESS)
         await robot.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
-        await asyncio.sleep(T_POST_PRESS)
+        # await asyncio.sleep(T_POST_PRESS)
+        await verify_dosing_sit_right(stations)
 
         await do_stations(stations, lambda s: s.G1(z=Z_OUTPUT, feed=FEED_Z_DOWN / 4.0))
         await robot.G1(y=Y_OUTPUT, feed=FEED_Y_UP)
@@ -361,3 +362,13 @@ async def feeder_fill_line(system, feeder, rail):
     for i in range(5):
         await internal([1] * 5)
     await internal([1] * 2)
+
+
+async def verify_dosing_sit_right(stations):
+    res = await asyncio.gather(*[
+        station.send_command(
+            {'verb': 'detect_vision', 'object': 'dosing_sit_right'})
+        for station in stations])
+    res = [r['success'] for r in res]
+    if not all(res):
+        raise Exception('Station failed on verify_dosing_sit_right', res)

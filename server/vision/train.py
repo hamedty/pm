@@ -159,8 +159,8 @@ def main():
 
         for node in nodes:
             for component in componenets:
-                c1 = compare_dict(src_data[node][component],
-                                  dst_data[node][component])
+                c1 = compare_dict(src_data[node].get(component),
+                                  dst_data[node].get(component))
                 c2 = compare_dict(
                     src_data[node][component + '_roi'], dst_data[node][component + '_roi'])
                 if c1 and c2:

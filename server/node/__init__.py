@@ -14,11 +14,11 @@ ALL_NODES = [
     Station('Station 3', '192.168.44.103'),
     Station('Station 4', '192.168.44.104'),
     Station('Station 5', '192.168.44.105'),
-    # Station('Station 6', '192.168.44.106'),
-    # Station('Station 7', '192.168.44.107'),
-    # Station('Station 8', '192.168.44.108'),
-    # Station('Station 9', '192.168.44.109'),
-    # Station('Station 10', '192.168.44.110'),
+    Station('Station 6', '192.168.44.106'),
+    Station('Station 7', '192.168.44.107'),
+    Station('Station 8', '192.168.44.108'),
+    Station('Station 9', '192.168.44.109'),
+    Station('Station 10', '192.168.44.110'),
     Feeder('Feeder 1', '192.168.44.21'),
 
 ]
@@ -28,31 +28,31 @@ assert len(ALL_NODES_DICT) == len(ALL_NODES)
 
 if 'Station 1' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 1']
-    ALL_NODES_DICT['Station 1'].hw_config['H_ALIGNING'] = 230
-    ALL_NODES_DICT['Station 1'].hw_config['H_PUSH'] = 238
-    ALL_NODES_DICT['Station 1'].hw_config['H_PRE_DANCE'] = 244.5
-    # ALL_NODES_DICT['Station 1'].hw_config['dosing_offset'] = -2
+    station.hw_config['H_ALIGNING'] = 230
+    station.hw_config['H_PUSH'] = 238
+    station.hw_config['H_PRE_DANCE'] = 244.5
 
 if 'Station 2' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 2']
-    ALL_NODES_DICT['Station 2'].hw_config['H_ALIGNING'] = 225
-    ALL_NODES_DICT['Station 2'].hw_config['H_PUSH'] = 237
+    station.hw_config['H_ALIGNING'] = 225
+    station.hw_config['H_PUSH'] = 237
     station.hw_config['H_PRE_DANCE'] = 244
-    # station.hw_config['dosing_offset'] = 0
+    station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
+
 
 if 'Station 3' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 3']
     station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 237
     station.hw_config['H_PRE_DANCE'] = 244
+    station.hw_config['dosing_webcam_direction'] = 'riu'
 
 if 'Station 4' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 4']
     station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 238.5
     station.hw_config['H_PRE_DANCE'] = 245
-    # station.hw_config['dosing_offset'] = -2
     station.hw_config['holder_webcam_direction'] = 'down'
 
 if 'Station 5' in ALL_NODES_DICT:
@@ -66,6 +66,7 @@ if 'Station 6' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 227
     station.hw_config['H_PUSH'] = 240
     station.hw_config['H_PRE_DANCE'] = 248
+    station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
 
 
@@ -92,6 +93,7 @@ if 'Station 9' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 220
     station.hw_config['H_PUSH'] = 232.5
     station.hw_config['H_PRE_DANCE'] = 240
+    station.hw_config['dosing_webcam_direction'] = 'riu'
 
 
 if 'Station 10' in ALL_NODES_DICT:
@@ -99,6 +101,7 @@ if 'Station 10' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 223
     station.hw_config['H_PUSH'] = 234.5
     station.hw_config['H_PRE_DANCE'] = 242
+    station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
 
 for i in range(0, 10):

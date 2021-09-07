@@ -1,13 +1,18 @@
-detect dosing existance before comming down, then if naioftad
-led for holder input switch
-if vision response is "not exist", handle correctly
+verify_dosing_existance before comming down
+verify_no_holder_no_dosing "before pickup" & "after press"
+disable cahce (add ?t=) for angular image
+--------------------------------------------
 multiprocessing generic function
-verify gate
+if vision response is "not exist", handle correctly
+led for holder input switch
+verify gate - general read input function
+--------------------------------------------
 st6-10 vision
+adjust robots locations and mechanical align
+homing rail > smaller cap
 add 48V PSU's
 USB robot 1 is loose
-homing rail > smaller cap
-adjust robots locations and mechanical align
+--------------------------------------------
 control holder DC motor with PWM instead of timer
 log collection framework
 vision debug frame work
