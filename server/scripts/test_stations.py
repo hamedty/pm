@@ -6,14 +6,14 @@ from .recipe import *
 async def main(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     print('all nodes ready')
-    await verify_no_holder_no_dosing(stations)
+    # await verify_no_holder_no_dosing(stations)
     # await robots[1].restart_arduino()
+    await test_valve([robots[1]], .08, 30)
 
 
-async def test_valve(stations, valve, delay, count):
-    valves = [0] * 5
+async def test_valve(stations, delay, count):
     for i in range(count):
-        valves[valve] = 1 - (i % 2)
+        valves = [1 - (i % 2)] * 10
         await run_many(stations, lambda x: x.set_valves(valves))
         await asyncio.sleep(delay)
 

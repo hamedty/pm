@@ -1,7 +1,9 @@
-multiprocessing generic function
-verify gate - general read input function
-homing rail > smaller cap
+verify gate - general read metric function
+query if homed (r.home)
+multiprocessing and speed up process
 add 48V PSU's
+feeder wait for input
+homing rail > smaller cap
 USB robot 1 is loose
 --------------------------------------------
 control holder DC motor with PWM instead of timer

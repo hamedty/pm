@@ -146,8 +146,6 @@ async def main(system, ALL_NODES):
 
         ''' STATION::Align Dosing '''
         async def align_dosing(station):
-            if not station.full:
-                continue
             data = {}
             data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
             data['FEED_ALIGNING'] = FEED_Z_DOWN
