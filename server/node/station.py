@@ -123,7 +123,7 @@ class Station(Node):
 
         # ROI holder presence
         x_margin = 20
-        y_margin = 40
+        y_margin = 30
         x0 = roi_holder['x0'] + x_margin
         dx = roi_holder['dx'] - 2 * x_margin
         dy = y_margin
@@ -132,7 +132,6 @@ class Station(Node):
         roi_holder_presence = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
         # ROI Dosing Sit Right
-        x_margin = 20
         y_margin = 40
         direction = self.hw_config['dosing_webcam_direction']
 
@@ -154,6 +153,7 @@ class Station(Node):
                 'existance': roi_holder_presence,
             }
         }
+        # print('---------------', self.name, command)
         return await self.send_command(command)
 
     def set_status(self, **kwargs):

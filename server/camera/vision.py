@@ -7,6 +7,8 @@ try:
 except:
     pass  # robot and rail
 
+PRESENCE_THRESHOLD = {'holder': 90, 'dosing': 50}
+
 
 def detect_dosing(frame, offset):
     frame = prepare_frame(frame, 'dosing')
@@ -42,7 +44,6 @@ def detect_holder(frame, offset):
 
 
 def object_present(frame, threshold):
-    threshold = 70
     value = frame.mean()
     return bool(value > threshold)
 

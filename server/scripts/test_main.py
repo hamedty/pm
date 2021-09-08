@@ -63,6 +63,7 @@ async def main(system, ALL_NODES):
         T_OUTPUT_GRIPP = 0.1
         T_OUTPUT_RELEASE = 0.2
 
+        await verify_no_holder_no_dosing(stations)
         await do_nodes(robots, lambda r: r.G1(x=X_INPUT, feed=FEED_X), simultanously=False)
         await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
         await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
@@ -136,20 +137,17 @@ async def main(system, ALL_NODES):
         await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
         ''' STATION::Align Holder '''
-        await get_input(system, 'STATION::Align Holder')
-
         async def align_holder(station):
             await station.set_valves([0, 1])
             z1, z2 = await station.send_command({'verb': 'align', 'component': 'holder', 'speed': ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
             print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
-        await do_nodes(stations, lambda s: align_holder(s), simultanously=True)
 
         ''' STATION::Align Dosing '''
-        await get_input(system, 'STATION::Align Dosing')
-
         async def align_dosing(station):
+            if not station.full:
+                continue
             data = {}
             data['H_ALIGNING'] = station.hw_config['H_ALIGNING']
             data['FEED_ALIGNING'] = FEED_Z_DOWN
@@ -159,11 +157,8 @@ async def main(system, ALL_NODES):
             print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
-        await do_nodes(stations, lambda s: align_dosing(s), simultanously=False)
 
         ''' STATION::Rest '''
-        await get_input(system, 'STATION::Rest')
-
         async def station_rest(station):
             data = {}
             # go to aliging location
@@ -268,11 +263,22 @@ async def main(system, ALL_NODES):
 
             await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
             await station.set_valves([None, None, None, 1])
-        await do_nodes(stations, lambda s: station_rest(s), simultanously=False)
 
         async def release_result(station):
             await get_input(system, 'STATION::Release')
             await station.set_valves([0, 0, 0, 1])
+
+        async def station_combined(station):
+            if station.full:
+                await align_holder(station)
+                await align_dosing(station)
+                await station_rest(station)
+
+        await verify_holder_n_dosing(stations)
+        if station.full:
+            await get_input(system, 'STATION::Combined')
+            await do_nodes(stations, lambda s: station_combined(s), simultanously=True)
+        await verify_no_holder_no_dosing(stations)
         await do_nodes(stations, lambda s: release_result(s), simultanously=False)
 
 
@@ -371,3 +377,30 @@ async def verify_dosing_sit_right(stations):
     if not all(res):
         print(res)
         await aioconsole.ainput('dosing not sit right (above results).')
+
+
+async def verify_no_holder_no_dosing(stations):
+    res_raw = await asyncio.gather(*[
+        station.send_command(
+            {'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
+        for station in stations])
+    res = [r[1]['no_holder_no_dosing'] for r in res]
+    if not all(res):
+        print(res, res_raw)
+        await aioconsole.ainput('no holder no dosing failed. above results.')
+
+
+async def verify_holder_n_dosing(stations):
+    results = await asyncio.gather(*[
+        station.send_command(
+            {'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
+        for station in stations])
+    if i in range(len(results)):
+        result = results[i]
+        full = result['dosing_present'] and result['holder_present']
+        empty = result['no_holder_no_dosing']
+        station.full = full
+        if not (full or empty):
+            print(station.name, result)
+            message = 'not all elements are present at %s. remove all to continue' % station.name
+            await aioconsole.ainput(message)

@@ -85,7 +85,7 @@ async def align(command, _):
     valve = {'holder': 'out2', 'dosing': 'out1'}[component]
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
-    presence_threshold = {'holder': 70, 'dosing': 50}[component]
+    presence_threshold = vision.PRESENCE_THRESHOLD[component]
     retries = command['retries']
     offset = arduino._hw_config.get(component + '_offset', 0)
     feed = command['speed']
@@ -122,17 +122,29 @@ async def detect_vision(command, _):
         camera = CAMERAS['dosing']
         roi_name = 'sit_right'
         pre_fetch = camera.DEFAULT_PRE_FETCH
-        detector = vision.dosing_sit_right
-    elif object == 'holder_existance':
-        camera = CAMERAS[0]
-        roi_name = None
-        pre_fetch = None
-        detector = None
+        frame = camera.get_frame(pre_fetch=pre_fetch, roi_name=roi_name)
+        result = vision.dosing_sit_right(frame)
+    elif object == 'no_holder_no_dosing':
+        frames = await asyncio.gather(
+            CAMERAS['dosing'].async_get_frame(
+                pre_fetch=CAMERAS['dosing'].DEFAULT_PRE_FETCH, roi_name='existance'),
+            CAMERAS['holder'].async_get_frame(
+                pre_fetch=CAMERAS['holder'].DEFAULT_PRE_FETCH, roi_name='existance')
+        )
+        result = frames[0]
+        dosing_present = vision.object_present(
+            frames[0], vision.PRESENCE_THRESHOLD['dosing'])
+        holder_present = vision.object_present(
+            frames[1], vision.PRESENCE_THRESHOLD['holder'])
+        result = {
+            'dosing_present': dosing_present,
+            'holder_present': holder_present,
+            'no_dosing': not dosing_present,
+            'no_holder': not holder_present,
+            'no_holder_no_dosing': not (dosing_present or holder_present),
+        }
     else:
         return {'success': False, 'message': 'Unknown object to detect'}
-
-    frame = camera.get_frame(pre_fetch=pre_fetch, roi_name=roi_name)
-    result = detector(frame)
     result['success'] = True
     return result
 

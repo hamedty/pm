@@ -19,6 +19,9 @@ class CheapCam(CameraBase):
     }
     LAST_FRAME = None
 
+    async def async_get_frame(self, *args, **kwargs):
+        return self.get_frame(*args, **kwargs)
+
     def get_frame(self, pre_fetch=DEFAULT_PRE_FETCH, roi_name=None):
         if pre_fetch >= 0:
             self.frame = super().get_frame(pre_fetch)

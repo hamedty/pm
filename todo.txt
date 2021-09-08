@@ -1,12 +1,5 @@
-verify_no_holder_no_dosing "before pickup" & "after press"
-if vision response is "not exist", handle correctly
 multiprocessing generic function
---------------------------------------------
-led for holder input switch
 verify gate - general read input function
---------------------------------------------
-st6-10 vision
-adjust robots locations and mechanical align
 homing rail > smaller cap
 add 48V PSU's
 USB robot 1 is loose
@@ -18,6 +11,5 @@ feeder home every time
 motor oralB
 feeder stop motors if didn't feed for a while
 cartrdige feeding clear n is too much
-robots home switch
 if nodes downs, UI must react
 add amin's features

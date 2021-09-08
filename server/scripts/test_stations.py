@@ -6,8 +6,8 @@ from .recipe import *
 async def main(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     print('all nodes ready')
-    # await verify_dosing_sit_right(stations)
-    await stations[8].home()
+    await verify_no_holder_no_dosing(stations)
+    # await robots[1].restart_arduino()
 
 
 async def test_valve(stations, valve, delay, count):
@@ -26,13 +26,11 @@ async def move_rotary_motor(stations, axis, amount, feed, count, delay):
         await asyncio.sleep(delay)
 
 
-async def verify_dosing_sit_right(stations):
+async def verify_no_holder_no_dosing(stations):
     res = await asyncio.gather(*[
         station.send_command(
-            {'verb': 'detect_vision', 'object': 'dosing_sit_right'})
+            {'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
         for station in stations])
-    print(res)
-    res = [r[1]['sit_right'] for r in res]
-    print(res)
+    res = [r[1]['no_holder_no_dosing'] for r in res]
     if not all(res):
-        raise Exception('Station failed on verify_dosing_sit_right', res)
+        raise Exception('Station failed on verify_no_holder_no_dosing', res)
