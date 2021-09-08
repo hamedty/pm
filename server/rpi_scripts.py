@@ -11,21 +11,29 @@ async def feeder_process(arduino, G1, command):
     await asyncio.sleep(.3)
 
     holder_shift_register = 0
+    gate_status = 0
     for i in range(N + 1):
-        if not holder_mask[i]:
+        if holder_shift_register:
+            cartridge_feed_task = asyncio.create_task(
+                cartridge_feed(arduino, None))
+
+        if not holder_mask[i] and gate_status:
             arduino._send_command("{out7: 0}")
+            gate_status = 0
 
         z = 16 + 25 * i
-        await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
+        if z != 16:  # not in the first loop
+            await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
 
-        if holder_mask[i]:
+        if holder_mask[i] and not gate_status:
             arduino._send_command("{out7: 1}")
+            gate_status = 1
 
         if holder_shift_register:
-            await cartridge_feed(arduino, None)
+            await cartridge_feed_task
             await cartridge_handover(arduino, None)
-
-        await asyncio.sleep(.3)
+        else:
+            await asyncio.sleep(.3)
         holder_shift_register = await detect_holder(arduino)
 
     await G1({'arduino_index': None, 'z': 719, 'feed': 5000}, None)
@@ -57,13 +65,14 @@ async def cartridge_feed(arduino, cartridge_lock):
 async def cartridge_handover(arduino, cartridge_lock):
     command_id = arduino.get_command_id()
     command_raw = '''
-        G38.2 Y-100 F1000
+        G38.2 Y-100 F2000
         M100 ({clear:n})
         G10 L20 P1 Y0
         M100 ({out13: 0, out8: 0})
         N%d M0
         ''' % command_id
     arduino.send_command(command_raw)
+    await asyncio.sleep(.1)
     await arduino.wait_for_command_id(command_id)
 
 

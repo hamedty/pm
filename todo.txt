@@ -1,9 +1,7 @@
-verify_dosing_existance before comming down
 verify_no_holder_no_dosing "before pickup" & "after press"
-disable cahce (add ?t=) for angular image
---------------------------------------------
-multiprocessing generic function
 if vision response is "not exist", handle correctly
+multiprocessing generic function
+--------------------------------------------
 led for holder input switch
 verify gate - general read input function
 --------------------------------------------

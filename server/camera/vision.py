@@ -49,10 +49,14 @@ def object_present(frame, threshold):
 
 def dosing_sit_right(frame):
     brightness_threshold = 25
+    existance_count_threshold = 300
+    wrong_sitting_count_threshold = 20
     black_pixel_count = (frame.mean(axis=2).mean(axis=0)
                          < brightness_threshold).sum()
-    sit_wrong = 300 > black_pixel_count > 20
-    return {'result': not sit_wrong}
+    sit_wrong = existance_count_threshold > black_pixel_count > wrong_sitting_count_threshold
+    exist = existance_count_threshold > black_pixel_count
+    result = {'sit_right': not sit_wrong, 'exist': bool(exist)}
+    return result
 
 
 def prepare_frame(frame, component):
