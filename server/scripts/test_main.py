@@ -14,15 +14,17 @@ async def main(system, ALL_NODES):
         print('homing')
         await home_all_nodes(all_nodes, feeder, rail, robots, stations)
 
-    await do_stations(stations, lambda s: s.set_valves([0, 0, 0, 1, 0]))
-    await robot.set_valves([0] * 10)
+    await do_nodes(stations, lambda s: s.set_valves([0, 0, 0, 1, 0]))
+    await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
+
+    await get_input(system, 'start feeder motors')
     await feeder.set_motors(
-        (2, 4), (3, 3),  # Holder Downstream
+        (2, 4), (3, 4),  # Holder Downstream
         (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
         (6, 32), (8, 200)  # Cartridge Conveyor + OralB
     )
 
-    await feeder_fill_line(system, feeder, rail)
+    # await feeder_fill_line(system, feeder, rail)
 
     while True:
         '''PICK UP'''
@@ -32,12 +34,12 @@ async def main(system, ALL_NODES):
         Y_GRAB_IN_DOWN = 0
         Y_GRAB_IN_UP_2 = 65
         T_GRAB_IN = 0.5
-        await robot.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
-        await robot.G1(x=X_GRAB_IN, feed=FEED_X)
-        await robot.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
-        await robot.set_valves_grab_infeed()
+        await do_nodes(robots, lambda r: r.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(x=X_GRAB_IN, feed=FEED_X), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN), simultanously=False)
+        await do_nodes(robots, lambda r: r.set_valves_grab_infeed(), simultanously=False)
         await asyncio.sleep(T_GRAB_IN)
-        await robot.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
+        await do_nodes(robots, lambda r: r.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP), simultanously=False)
 
         '''EXCHANGE'''
         # await get_input(system, 'exchange')
@@ -61,47 +63,43 @@ async def main(system, ALL_NODES):
         T_OUTPUT_GRIPP = 0.1
         T_OUTPUT_RELEASE = 0.2
 
-        await robot.G1(x=X_INPUT, feed=FEED_X)
-        await robot.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN)
-        await robot.set_valves([0] * 10)
+        await do_nodes(robots, lambda r: r.G1(x=X_INPUT, feed=FEED_X), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
+        await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
         await asyncio.sleep(T_INPUT_RELEASE)
 
-        await robot.G1(y=Y_INPUT_UP, feed=FEED_Y_UP)
-        await robot.set_valves([0] * 5 + [1] * 5)
+        await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_UP, feed=FEED_Y_UP), simultanously=False)
+        await do_nodes(robots, lambda r: r.set_valves([0] * 5 + [1] * 5), simultanously=False)
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
-        await robot.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN)
+        await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_2, feed=FEED_Y_DOWN), simultanously=False)
         await asyncio.sleep(T_PRE_PRESS)
-        await robot.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
+        await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS), simultanously=False)
         # await asyncio.sleep(T_POST_PRESS)
         await verify_dosing_sit_right(stations)
 
-        await do_stations(stations, lambda s: s.G1(z=Z_OUTPUT, feed=FEED_Z_DOWN / 4.0))
-        await robot.G1(y=Y_OUTPUT, feed=FEED_Y_UP)
-        await robot.set_valves([1] * 5)
-        await do_stations(stations, lambda s: s.set_valves([0, 0, 0, 1]))
-
+        await do_nodes(stations, lambda s: s.G1(z=Z_OUTPUT, feed=FEED_Z_DOWN / 4.0))
+        await do_nodes(robots, lambda r: r.G1(y=Y_OUTPUT, feed=FEED_Y_UP), simultanously=False)
+        await do_nodes(robots, lambda r: r.set_valves([1] * 5), simultanously=False)
         await asyncio.sleep(T_OUTPUT_GRIPP)
-
-        # await do_stations(stations, lambda s: s.set_valves([0, 1]))
+        await do_nodes(stations, lambda s: s.set_valves([0, 0, 0, 1]))
         await asyncio.sleep(T_OUTPUT_RELEASE)
-        await do_stations(stations, lambda s: s.G1(z=Z_OUTPUT_SAFE, feed=FEED_Z_UP))
+        await do_nodes(stations, lambda s: s.G1(z=Z_OUTPUT_SAFE, feed=FEED_Z_UP))
 
-        await robot.G1(x=X_OUTPUT_SAFE, feed=FEED_X)
+        await do_nodes(robots, lambda r: r.G1(x=X_OUTPUT_SAFE, feed=FEED_X), simultanously=False)
 
         '''CAP'''
-        # await get_input(system, 'cap')
         await rail.set_valves([1, 0])
         await asyncio.sleep(T_RAIL_MOVING_JACK)
         await rail.set_valves([1, 1])
-        await robot.G1(x=X_CAPPING, feed=FEED_X)
-        await robot.G1(y=Y_CAPPING_DOWN_1, feed=FEED_Y_DOWN)
+        await do_nodes(robots, lambda r: r.G1(x=X_CAPPING, feed=FEED_X), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(y=Y_CAPPING_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
         await rail.set_valves([1, 0])
         await asyncio.sleep(T_RAIL_FIXED_JACK)
         await rail.set_valves([0, 0])
-        await robot.G1(y=Y_CAPPING_DOWN_2, feed=FEED_Y_CAPPING)
-        await robot.set_valves([0] * 10)
-        await robot.G1(x=X_PARK, feed=FEED_X)
-        await robot.G1(y=Y_PARK, feed=FEED_Y_UP)
+        await do_nodes(robots, lambda r: r.G1(y=Y_CAPPING_DOWN_2, feed=FEED_Y_CAPPING), simultanously=False)
+        await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(x=X_PARK, feed=FEED_X), simultanously=False)
+        await do_nodes(robots, lambda r: r.G1(y=Y_PARK, feed=FEED_Y_UP), simultanously=False)
 
         ''' FEEDER '''
         await get_input(system, 'feeder')
@@ -146,7 +144,7 @@ async def main(system, ALL_NODES):
             print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
-        await do_stations(stations, lambda s: align_holder(s), simultanously=True)
+        await do_nodes(stations, lambda s: align_holder(s), simultanously=True)
 
         ''' STATION::Align Dosing '''
         await get_input(system, 'STATION::Align Dosing')
@@ -161,7 +159,7 @@ async def main(system, ALL_NODES):
             print(station.name, z1, z2)
             if (not z1) or (not z2['aligned']):
                 await aioconsole.ainput('aligining failed at %s. align to continue' % station.name)
-        await do_stations(stations, lambda s: align_dosing(s), simultanously=True)
+        await do_nodes(stations, lambda s: align_dosing(s), simultanously=False)
 
         ''' STATION::Rest '''
         await get_input(system, 'STATION::Rest')
@@ -270,17 +268,17 @@ async def main(system, ALL_NODES):
 
             await station.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
             await station.set_valves([None, None, None, 1])
-        await do_stations(stations, lambda s: station_rest(s), simultanously=True)
+        await do_nodes(stations, lambda s: station_rest(s), simultanously=False)
 
-        # async def release_result(station):
-        #     await get_input(system, 'STATION::Release')
-        #     await station.set_valves([0, 0, 0, 1])
-        # await do_stations(stations, lambda s: release_result(s), simultanously=False)
+        async def release_result(station):
+            await get_input(system, 'STATION::Release')
+            await station.set_valves([0, 0, 0, 1])
+        await do_nodes(stations, lambda s: release_result(s), simultanously=False)
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
-    await do_stations(stations, lambda s: s.home())
-    await robots[0].home()
+    await do_nodes(stations, lambda s: s.home())
+    await do_nodes(robots, lambda r: r.home())
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
     await feeder.home()
@@ -297,7 +295,7 @@ async def get_input(system, text):
         raise
 
 
-async def do_stations(stations, func, simultanously=True):
+async def do_nodes(stations, func, simultanously=True):
     if simultanously:
         res = await asyncio.gather(*[func(station) for station in stations], return_exceptions=True)
         for i in range(len(stations)):
@@ -369,6 +367,7 @@ async def verify_dosing_sit_right(stations):
         station.send_command(
             {'verb': 'detect_vision', 'object': 'dosing_sit_right'})
         for station in stations])
-    res = [r['success'] for r in res]
+    res = [r[1]['sit_right'] for r in res]
     if not all(res):
-        raise Exception('Station failed on verify_dosing_sit_right', res)
+        print(res)
+        await aioconsole.ainput('dosing not sit right (above results).')
