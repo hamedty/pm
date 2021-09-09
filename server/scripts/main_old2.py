@@ -23,16 +23,10 @@ async def main(system, ALL_NODES):
         (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
         (6, 32), (8, 200)  # Cartridge Conveyor + OralB
     )
-    await asyncio.sleep(2)
-    # await feeder_fill_line(system, feeder, rail)
-    stations_task = None
-    while True:
-        ''' FEEDER '''
-        async def do_feed():
-            await feeder.G1(z=16, feed=5000)
-            await feeder.send_command({'verb': 'feeder_process', 'mask': [1] * N})
-        feeder_task = asyncio.create_task(do_feed())
 
+    # await feeder_fill_line(system, feeder, rail)
+
+    while True:
         '''PICK UP'''
         await get_input(system, 'pick up')
         Y_GRAB_IN_UP_1 = 75
@@ -69,8 +63,6 @@ async def main(system, ALL_NODES):
         T_OUTPUT_GRIPP = 0.1
         T_OUTPUT_RELEASE = 0.2
 
-        if stations_task:
-            await stations_task
         await verify_no_holder_no_dosing(stations)
         await do_nodes(robots, lambda r: r.G1(x=X_INPUT, feed=FEED_X), simultanously=False)
         await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
@@ -110,7 +102,13 @@ async def main(system, ALL_NODES):
         await do_nodes(robots, lambda r: r.G1(x=X_PARK, feed=FEED_X), simultanously=False)
         await do_nodes(robots, lambda r: r.G1(y=Y_PARK, feed=FEED_Y_UP), simultanously=False)
 
+        ''' FEEDER '''
+        await get_input(system, 'feeder')
+        await feeder.G1(z=16, feed=5000)
+        await feeder.send_command({'verb': 'feeder_process', 'mask': [1] * N})
+
         ''' RAIL '''
+        # await get_input(system, 'rail')
         D_MIN = D_STANDBY - 25 * N
         D_MAX = D_STANDBY
         T_RAIL_JACK1 = 1.5
@@ -118,7 +116,7 @@ async def main(system, ALL_NODES):
 
         # rail backward
         await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
-        await feeder_task
+
         # change jacks to moving
         await rail.set_valves([1, 0])
         await asyncio.sleep(T_RAIL_JACK1)
@@ -273,12 +271,13 @@ async def main(system, ALL_NODES):
                 await align_holder(station)
                 await align_dosing(station)
                 await station_rest(station)
-                # await release_result(station)
 
         await verify_holder_n_dosing(stations)
-        await get_input(system, 'STATION::Combined')
-        await do_nodes(stations, lambda s: station_combined(s), simultanously=True)
-        # await verify_no_holder_no_dosing(stations)
+        if station.full:
+            await get_input(system, 'STATION::Combined')
+            await do_nodes(stations, lambda s: station_combined(s), simultanously=True)
+        await verify_no_holder_no_dosing(stations)
+        await do_nodes(stations, lambda s: release_result(s), simultanously=False)
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
@@ -287,17 +286,6 @@ async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
     await feeder.home()
-
-
-async def get_input(system, text):
-    # await system.system_running.wait()
-    print(text)
-    try:
-        a = await aioconsole.ainput('? - Type anything to stop... - Just enter to continue')
-    except:
-        a = '-'
-    if a:
-        raise
 
 
 async def do_nodes(stations, func, simultanously=True):

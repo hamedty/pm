@@ -2,18 +2,15 @@ import asyncio
 import subprocess
 
 
-async def scp_to(path_src, path_dst):
-    command = 'rsync -az %s pi@%s:%s' % (path_src, '192.168.44.101', path_dst)
-    print(command)
-    proc = await asyncio.create_subprocess_shell(command, stdout=subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    print(stdout)
-    print(stderr)
-    assert proc.returncode == 0, proc.returncode
+async def f1():
+    pass
+    print(1)
 
 
 async def main():
-    await scp_to('./rpi_scripts.py', '~/server/')
+    t1 = asyncio.create_task(f1())
+    await t1
+    await t1
 
 
 asyncio.run(main())
