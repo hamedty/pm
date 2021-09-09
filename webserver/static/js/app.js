@@ -80,15 +80,13 @@ app.controller('app_controller', function($scope, ws) {
 
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
-    'home motor': COMMAND_TEMPLATE_HOME_AXIS,
+    'home': COMMAND_TEMPLATE_HOME,
     'G-Code': COMMAND_TEMPLATE_GCODE,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
     'dump training dosing': COMMAND_TEMPLATE_DUMP_TRAINING_DOSING,
     'align holder': COMMAND_TEMPLATE_ALIGN_HOLDER,
     'align dosing': COMMAND_TEMPLATE_ALIGN_DOSING,
-    'dance': COMMAND_TEMPLATE_DANCE,
-    'home': COMMAND_TEMPLATE_HOME,
   }
 
   $scope.select_template = function(name) {
@@ -154,13 +152,6 @@ COMMAND_TEMPLATE_SET_VALVE = "{\n\
     'valves': [0],\n\
 }";
 
-COMMAND_TEMPLATE_HOME_AXIS = "{\n\
-    'verb': 'home',\n\
-    'axis': 3,\n\
-}";
-
-
-
 COMMAND_TEMPLATE_GCODE = "{\n\
     'verb': 'raw',\n\
     'data': '{m1:100}',\n\
@@ -181,5 +172,4 @@ COMMAND_TEMPLATE_DUMP_TRAINING_DOSING = "{\n\
 }"
 COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder', 'retries': 10}"
 COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing', 'retries': 10}"
-COMMAND_TEMPLATE_DANCE = "{'verb': 'dance', 'value': 1}"
 COMMAND_TEMPLATE_HOME = "{'verb': 'home'}"

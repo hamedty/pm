@@ -107,6 +107,10 @@ class Station(Node):
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
     }
 
+    def __init__(self, *args, **kwargs):
+        super(Station, self).__init__(*args, **kwargs)
+        self.calc_rois()
+
     async def home_core(self):
         await self.send_command_raw('G28.2 Z0')
 
@@ -115,10 +119,10 @@ class Station(Node):
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
 
-    async def send_command_create_camera(self):
+    def calc_rois(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
-        roi_dosing = annotation_data['dosing_roi']
-        roi_dosing_presence = roi_dosing
+
+        # Holder
         roi_holder = annotation_data['holder_roi']
 
         # ROI holder presence
@@ -131,6 +135,15 @@ class Station(Node):
         y0 = 0 if (direction == 'up') else 480 - y_margin
         roi_holder_presence = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
+        holder_roi = {
+            'alignment': roi_holder,
+            'existance': roi_holder_presence,
+        }
+
+        # Dosing
+        roi_dosing = annotation_data['dosing_roi']
+        roi_dosing_presence = roi_dosing
+
         # ROI Dosing Sit Right
         y_margin = 40
         direction = self.hw_config['dosing_webcam_direction']
@@ -141,19 +154,21 @@ class Station(Node):
         x0 = (640 - dx) if direction == 'liu' else 0
         roi_dosing_sit_right = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
+        dosing_roi = {
+            'alignment': roi_dosing,
+            'existance': roi_dosing_presence,
+            'sit_right': roi_dosing_sit_right,
+        }
+
+        self.holder_roi = holder_roi
+        self.dosing_roi = dosing_roi
+
+    async def send_command_create_camera(self):
         command = {
             'verb': 'create_camera',
-            'dosing_roi': {
-                'alignment': roi_dosing,
-                'existance': roi_dosing_presence,
-                'sit_right': roi_dosing_sit_right,
-            },
-            'holder_roi': {
-                'alignment': roi_holder,
-                'existance': roi_holder_presence,
-            }
+            'dosing_roi': self.dosing_roi,
+            'holder_roi': self.holder_roi,
         }
-        # print('---------------', self.name, command)
         return await self.send_command(command)
 
     def set_status(self, **kwargs):
