@@ -179,3 +179,157 @@ class Station(Node):
 
     def draw_debug_dump(self):
         pass
+
+    def init_events(self):
+        self.station_is_full_event = asyncio.Event()  # setter: robot - waiter: station
+        self.station_is_full_event.clear()
+        self.station_is_safe = asyncio.Event()  # setter: robot - waiter: station
+        self.station_is_safe.clear()
+        self.station_is_done_event = asyncio.Event()  # setter: station - waiter: robot
+        self.station_is_done_event.set()
+
+    async def station_assembly_loop(self, recipe, system)
+        while True:
+            await self.station_is_full_event.wait()
+            self.station_is_full_event.clear()
+
+            check_fullness = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})[i][1]
+            full = check_fullness['dosing_present'] and check_fullness['holder_present']
+            empty = check_fullness['no_holder_no_dosing']
+
+            if full:
+                await self.align_holder(recipe)
+            await self.station_is_safe_event.wait()
+            self.station_is_safe_event.clear()
+            if full:
+                await self.align_dosing(recipe)
+                await self.assemble(recipe)
+
+            if not (full or empty):
+                print(self.name, result)
+                message = 'not all elements are present at %s. remove all to continue' % self.name
+                await aioconsole.ainput(message)
+            self.station_is_done_event.set()
+
+    async def align_holder(self, recipe):
+        await self.set_valves([0, 1])
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
+        print(self.name, z1, z2)
+        if (not z1) or (not z2['aligned']):
+            await aioconsole.ainput('aligining failed at %s. align to continue' % self.name)
+
+    async def align_dosing(self, recipe):
+        data = {}
+        data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
+        data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
+        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
+        await self.set_valves([1])
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
+        print(self.name, z1, z2)
+        if (not z1) or (not z2['aligned']):
+            await aioconsole.ainput('aligining failed at %s. align to continue' % self.name)
+
+    async def assemble(self, recipe):
+        data = {}
+        # go to aliging location
+        data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
+        data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
+
+        # Fall
+        data['PAUSE_FALL_DOSING'] = 0.05
+
+        # Ready to push
+        data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 8
+        data['FEED_READY_TO_PUSH'] = recipe.FEED_Z_UP
+        data['PAUSE_READY_TO_PUSH'] = 0.05
+
+        # Push
+        data['H_PUSH'] = self.hw_config['H_PUSH']
+        data['FEED_PUSH'] = recipe.FEED_Z_DOWN / 3.0
+        data['PAUSE_PUSH'] = 0.1
+        data['H_PUSH_BACK'] = data['H_PUSH'] - 5
+        data['FEED_PUSH_BACK'] = recipe.FEED_Z_UP
+
+        # Dance
+        data['PAUSE_JACK_PRE_DANCE_1'] = 0.05
+        data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
+        data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
+        data['H_PRE_DANCE'] = self.hw_config['H_PRE_DANCE']
+        data['FEED_PRE_DANCE'] = recipe.FEED_Z_UP
+
+        dance_rev = 1
+        charge_h = 0.1
+        data['H_DANCE'] = data['H_PRE_DANCE'] - \
+            ((11 + charge_h) * dance_rev)
+        data['Y_DANCE'] = 360 * dance_rev
+        data['FEED_DANCE'] = recipe.FEED_DANCE
+
+        # Press
+        data['PAUSE_PRESS0'] = 0.1
+        data['PAUSE_PRESS1'] = 0.4
+        data['PAUSE_PRESS2'] = 0.8
+
+        # Dance Back
+        data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
+        data['PAUSE_POST_DANCE_BACK'] = .3
+
+        data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
+        data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
+        data['Y_DANCE_BACK'] = 0
+        data['Y_DANCE_BACK2'] = -8
+        data['FEED_DANCE_BACK'] = data['FEED_DANCE']
+
+        # Deliver
+        data['H_DELIVER'] = .5
+        data['FEED_DELIVER'] = recipe.FEED_Z_UP
+
+        command = '''
+            ; release dosing
+            M100 ({out1: 0, out4: 0})
+            G4 P%(PAUSE_FALL_DOSING).2f
+
+            ; ready to push
+            G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
+            M100 ({out1: 1})
+            G4 P%(PAUSE_READY_TO_PUSH).2f
+
+            ; push and come back
+            G1 Z%(H_PUSH).2f F%(FEED_PUSH)d
+            G4 P%(PAUSE_PUSH).2f
+            G1 Z%(H_PUSH_BACK).2f F%(FEED_PUSH_BACK)d
+
+            ; prepare for dance
+            G10 L20 P1 Y0
+            M100 ({out1: 0, out4: 1})
+            G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
+            G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
+            G4 P%(PAUSE_JACK_PRE_DANCE_2).2f
+            M100 ({out1: 1})
+            G4 P%(PAUSE_JACK_PRE_DANCE_3).2f
+
+            ; dance
+            G1 Z%(H_DANCE).2f Y%(Y_DANCE).2f F%(FEED_DANCE)d
+
+            ; press
+            M100 ({out1: 0, out2: 0, out4: 0})
+            G4 P%(PAUSE_PRESS0).2f
+            M100 ({out5: 1})
+            G4 P%(PAUSE_PRESS1).2f
+            M100 ({out3: 1})
+            G4 P%(PAUSE_PRESS2).2f
+            M100 ({out3: 0})
+
+            ; dance back
+            M100 ({out1: 1, out4: 1, out5: 0})
+            G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
+
+            G1 Z%(H_DANCE_BACK).2f F5000
+            G1 Z%(H_DANCE_BACK2).2f Y%(Y_DANCE_BACK).2f F%(FEED_DANCE_BACK)d
+            G1 Y%(Y_DANCE_BACK2).2f F%(FEED_DANCE_BACK)d
+            M100 ({out4: 0})
+            G4 P%(PAUSE_POST_DANCE_BACK).2f
+        ''' % data
+        await self.send_command_raw(command)
+
+        await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
+        await self.set_valves([None, None, None, 1])
