@@ -11,22 +11,22 @@ class Rail(Robot):
         (1, {
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
-            'tr': 5,  # travel per rev = 5mm
+            'tr': 25,  # travel per rev = 5mm
             'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 10000,  # max speed
-            'fr': 10000,  # max feed rate
+            'vm': 50000,  # max speed
+            'fr': 50000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 496,  # max travel -- 496
-            'jm': 1500,  # max jerk
-            'jh': 4000,  # hominzg jerk
+            'jm': 2000,  # max jerk
+            'jh': 2000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
-            'lv': 200,  # latch speed
+            'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
@@ -56,7 +56,7 @@ class Rail(Robot):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 320.0, 1],  # encoder key, ratio, telorance
+            'posz': ['enc1', 64.0, 1],  # encoder key, ratio, telorance
         }
 
     }

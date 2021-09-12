@@ -3,12 +3,15 @@ import time
 
 
 async def feeder_process(arduino, G1, command):
+    FEEDER_OFFSET = 17
+    FEED = 7000
     holder_mask = command['mask']
     N = len(holder_mask)
     holder_mask.append(0)
 
-    initial_z = 16
-    await G1({'arduino_index': None, 'z': initial_z, 'feed': 6000}, None)
+    initial_z = FEEDER_OFFSET
+    arduino._send_command("{out2: 0}")
+    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED}, None)
 
     arduino._send_command("{out2: 1}")
     await asyncio.sleep(.3)
@@ -20,9 +23,9 @@ async def feeder_process(arduino, G1, command):
             arduino._send_command("{out7: 0}")
             gate_status = 0
 
-        z = 16 + 25 * i
-        if z != 16:  # not in the first loop
-            await G1({'arduino_index': None, 'z': z, 'feed': 6000}, None)
+        z = FEEDER_OFFSET + 25 * i
+        if z != FEEDER_OFFSET:  # not in the first loop
+            await G1({'arduino_index': None, 'z': z, 'feed': FEED}, None)
 
         if holder_mask[i] and not gate_status:
             arduino._send_command("{out7: 1}")
@@ -32,10 +35,16 @@ async def feeder_process(arduino, G1, command):
             await cartridge_feed(arduino, None)
             await cartridge_handover(arduino, None)
         else:
-            await asyncio.sleep(.3)
-        holder_shift_register = await detect_holder(arduino)
+            # await asyncio.sleep(.3)
+            pass
+        if int(i / 1) % 2:
+            arduino._send_command("{m2: 4, m3: 2}")
+        else:
+            arduino._send_command("{m2: 2, m3: 4}")
+        if holder_mask[i]:
+            holder_shift_register = await detect_holder_wraper(arduino)
 
-    await G1({'arduino_index': None, 'z': 719, 'feed': 5000}, None)
+    await G1({'arduino_index': None, 'z': 719, 'feed': FEED}, None)
 
 
 async def cartridge_feed(arduino, cartridge_lock):
@@ -71,8 +80,8 @@ async def cartridge_handover(arduino, cartridge_lock):
         N%d M0
         ''' % command_id
     arduino.send_command(command_raw)
-    await asyncio.sleep(.2)
     await arduino.wait_for_command_id(command_id)
+    await asyncio.sleep(.4)
 
 
 async def cartridge_repeat_home(arduino):
@@ -85,6 +94,13 @@ async def cartridge_repeat_home(arduino):
         ''' % command_id
     arduino.send_command(command_raw)
     await arduino.wait_for_command_id(command_id)
+
+
+async def detect_holder_wraper(arduino):
+    value = False
+    while not value:
+        value = await detect_holder(arduino)
+    return value
 
 
 async def detect_holder(arduino):

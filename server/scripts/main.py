@@ -6,7 +6,7 @@ from .recipe import *
 
 
 async def main(system, ALL_NODES):
-    null_awaitable = asyncio.create_task(null_func)
+    null_awaitable = asyncio.create_task(null_func())
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     ''' Homing '''
@@ -20,30 +20,34 @@ async def main(system, ALL_NODES):
     await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
 
     await get_input(system, 'Release all stations jack')
-    await do_nodes(stations, lambda s: s.set_valves([0, 0, 0, 1, 0]))
+    await do_nodes(stations, lambda s: s.set_valves([None, None, 0, 1, 0]))
 
-    await get_input(system, 'start feeder motors')
-    await feeder.set_motors(
-        (2, 4), (3, 4),  # Holder Downstream
-        (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-        (6, 32), (8, 200)  # Cartridge Conveyor + OralB
-    )
-    await asyncio.sleep(2)
+    # await get_input(system, 'start feeder motors')
+    # await feeder.set_motors(
+    #     (2, 4), (3, 4),  # Holder Downstream
+    #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+    #     (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+    # )
+    # await asyncio.sleep(2)
 
     ''' Fill Line '''
-    await feeder_fill_line(system, feeder, rail)
+    # await feeder_fill_line(system, feeder, rail)
 
     stations_task = null_awaitable
     feeder_task = null_awaitable
     while True:
         ''' FEEDER '''
-        async def do_feed():
-            await feeder.send_command({'verb': 'feeder_process', 'mask': [1] * N})
-
-        feeder_task = asyncio.create_task(do_feed())
-        await feeder_task
+        # await get_input(system, 'Feed')
+        #
+        # async def do_feed():
+        #     await feeder.send_command({'verb': 'feeder_process', 'mask': [1] * N})
+        #
+        # feeder_task = asyncio.create_task(do_feed())
+        # await feeder_task
 
         '''PICK UP'''
+        await get_input(system, 'Pick up')
+
         async def do_pickup(robot):
             Y_GRAB_IN_UP_1 = 75
             X_GRAB_IN = 284.5
@@ -86,8 +90,11 @@ async def main(system, ALL_NODES):
             await stations_task
             await verify_no_holder_no_dosing(stations)
             await do_nodes(robots, lambda r: r.G1(x=X_INPUT, feed=FEED_X), simultanously=False)
+            await get_input(system, 'go down1?')
+
             await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
             await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
+            await get_input(system, 'go down1?')
             await asyncio.sleep(T_INPUT_RELEASE)
 
             await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_UP, feed=FEED_Y_UP), simultanously=False)
@@ -98,6 +105,7 @@ async def main(system, ALL_NODES):
             await do_nodes(robots, lambda r: r.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS), simultanously=False)
             # await asyncio.sleep(T_POST_PRESS)
             await verify_dosing_sit_right(stations)
+            # await get_input(system, 'go down2?')
 
             await do_nodes(stations, lambda s: s.G1(z=Z_OUTPUT, feed=FEED_Z_DOWN / 4.0))
             await do_nodes(robots, lambda r: r.G1(y=Y_OUTPUT, feed=FEED_Y_UP), simultanously=False)
@@ -116,6 +124,8 @@ async def main(system, ALL_NODES):
             await asyncio.sleep(T_RAIL_MOVING_JACK)
             await rail.set_valves([1, 1])
             await do_nodes(robots, lambda r: r.G1(x=X_CAPPING, feed=FEED_X), simultanously=False)
+            await get_input(system, 'go down1?')
+
             await do_nodes(robots, lambda r: r.G1(y=Y_CAPPING_DOWN_1, feed=FEED_Y_DOWN), simultanously=False)
             await rail.set_valves([1, 0])
             await asyncio.sleep(T_RAIL_FIXED_JACK)
@@ -138,7 +148,7 @@ async def main(system, ALL_NODES):
         # change jacks to moving
         await rail.set_valves([1, 0])
         await asyncio.sleep(T_RAIL_JACK1 / 3)
-        # await feeder.set_valves([None, 0])
+        await feeder.set_valves([None, 0])
         await asyncio.sleep(T_RAIL_JACK1 * 2 / 3)
         await rail.set_valves([1, 1])
         await asyncio.sleep(T_RAIL_JACK2)
@@ -223,7 +233,7 @@ async def main(system, ALL_NODES):
             data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
             data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
             data['Y_DANCE_BACK'] = 0
-            data['Y_DANCE_BACK2'] = -15
+            data['Y_DANCE_BACK2'] = -8
             data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
             # Deliver
@@ -282,20 +292,22 @@ async def main(system, ALL_NODES):
             await station.set_valves([None, None, None, 1])
 
         async def release_result(station):
-            await get_input(system, 'STATION::Release')
             await station.set_valves([0, 0, 0, 1])
 
         async def station_combined(station):
             if station.full:
+                # await get_input(system, 'combined')
                 await align_holder(station)
                 await align_dosing(station)
                 await station_rest(station)
+                # await get_input(system, 'release %s' % station.name)
                 # await release_result(station)
 
         async def stations_main():
             await verify_holder_n_dosing(stations)
-            # await get_input(system, 'STATION::Combined')
             await do_nodes(stations, lambda s: station_combined(s), simultanously=True)
+
+        await get_input(system, 'STATION::Combined')
         stations_task = asyncio.create_task(stations_main())
         await stations_task
         # await verify_no_holder_no_dosing(stations)
@@ -363,13 +375,13 @@ async def feeder_fill_line(system, feeder, rail):
         # rail park
         await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
-    await internal([0] * 4 + [1])
-    await internal([0] * 4 + [1])
-    await internal([0] * 3 + [1] * 2)
-    await internal([0] * 3 + [1] * 2)
-    await internal([0] * 2 + [1] * 3)
-    await internal([0] * 2 + [1] * 3)
-    await internal([0] * 1 + [1] * 4)
+    # await internal([0] * 4 + [1])
+    # await internal([0] * 4 + [1])
+    # await internal([0] * 3 + [1] * 2)
+    # await internal([0] * 3 + [1] * 2)
+    # await internal([0] * 2 + [1] * 3)
+    # await internal([0] * 2 + [1] * 3)
+    # await internal([0] * 1 + [1] * 4)
     await internal([0] * 1 + [1] * 4)
     for i in range(5):
         await internal([1] * 5)
