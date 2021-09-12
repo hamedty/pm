@@ -20,7 +20,6 @@ ALL_NODES = [
     # Station('Station 9', '192.168.44.109'),
     # Station('Station 10', '192.168.44.110'),
     Feeder('Feeder 1', '192.168.44.21'),
-
 ]
 ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 

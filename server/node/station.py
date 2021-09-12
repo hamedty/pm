@@ -107,10 +107,6 @@ class Station(Node):
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
     }
 
-    def __init__(self, *args, **kwargs):
-        super(Station, self).__init__(*args, **kwargs)
-        self.calc_rois()
-
     async def home_core(self):
         await self.send_command_raw('G28.2 Z0')
 
@@ -164,6 +160,7 @@ class Station(Node):
         self.dosing_roi = dosing_roi
 
     async def send_command_create_camera(self):
+        self.calc_rois()
         command = {
             'verb': 'create_camera',
             'dosing_roi': self.dosing_roi,

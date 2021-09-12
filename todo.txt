@@ -1,5 +1,3 @@
-verification haie vision kharab hast, bood o nabood
-[True, False, True, False, True] [(True, {'dosing_present': False, 'holder_present': False, 'no_dosing': True, 'no_holder': True, 'no_holder_no_dosing': True, 'success': True}), (True, {'dosing_present': False, 'holder_present': True, 'no_dosing': True, 'no_holder': False, 'no_holder_no_dosing': False, 'success': True}), (True, {'dosing_present': False, 'holder_present': False, 'no_dosing': True, 'no_holder': True, 'no_holder_no_dosing': True, 'success': True}), (True, {'dosing_present': False, 'holder_present': True, 'no_dosing': True, 'no_holder': False, 'no_holder_no_dosing': False, 'success': True}), (True, {'dosing_present': False, 'holder_present': False, 'no_dosing': True, 'no_holder': True, 'no_holder_no_dosing': True, 'success': True})]
 
 -------------------------------------------
 verify gate - general read metric function
