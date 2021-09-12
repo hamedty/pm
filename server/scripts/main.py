@@ -314,11 +314,12 @@ async def main(system, ALL_NODES):
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
+    feeder_home = asyncio.create_task(feeder.home())
     await do_nodes(stations, lambda s: s.home())
     await do_nodes(robots, lambda r: r.home())
     await rail.home()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
-    await feeder.home()
+    await feeder_home
 
 
 async def do_nodes(stations, func, simultanously=True):
@@ -342,11 +343,10 @@ async def feeder_fill_line(system, feeder, rail):
     async def internal(mask):
         print(mask)
         await get_input(system, 'filling line')
-        await feeder.G1(z=16, feed=5000)
-        await feeder.send_command({'verb': 'feeder_process', 'mask': mask})
+        feeder_task = asyncio.create_task(feeder.send_command(
+            {'verb': 'feeder_process', 'mask': mask}))
 
         ''' RAIL '''
-        # await get_input(system, 'rail')
         D_MIN = D_STANDBY - 25 * len(mask)
         D_MAX = D_STANDBY
         T_RAIL_JACK1 = 1.5
@@ -354,6 +354,7 @@ async def feeder_fill_line(system, feeder, rail):
 
         # rail backward
         await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
+        await feeder_task
 
         # change jacks to moving
         await rail.set_valves([1, 0])
@@ -375,13 +376,13 @@ async def feeder_fill_line(system, feeder, rail):
         # rail park
         await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
 
-    # await internal([0] * 4 + [1])
-    # await internal([0] * 4 + [1])
-    # await internal([0] * 3 + [1] * 2)
-    # await internal([0] * 3 + [1] * 2)
-    # await internal([0] * 2 + [1] * 3)
-    # await internal([0] * 2 + [1] * 3)
-    # await internal([0] * 1 + [1] * 4)
+    await internal([0] * 4 + [1])
+    await internal([0] * 4 + [1])
+    await internal([0] * 3 + [1] * 2)
+    await internal([0] * 3 + [1] * 2)
+    await internal([0] * 2 + [1] * 3)
+    await internal([0] * 2 + [1] * 3)
+    await internal([0] * 1 + [1] * 4)
     await internal([0] * 1 + [1] * 4)
     for i in range(5):
         await internal([1] * 5)
