@@ -2,6 +2,7 @@ from .node import Node
 import os
 import json
 import asyncio
+import aioconsole
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(PATH)
@@ -183,17 +184,18 @@ class Station(Node):
     def init_events(self):
         self.station_is_full_event = asyncio.Event()  # setter: robot - waiter: station
         self.station_is_full_event.clear()
-        self.station_is_safe = asyncio.Event()  # setter: robot - waiter: station
-        self.station_is_safe.clear()
+        self.station_is_safe_event = asyncio.Event()  # setter: robot - waiter: station
+        self.station_is_safe_event.clear()
         self.station_is_done_event = asyncio.Event()  # setter: station - waiter: robot
         self.station_is_done_event.set()
 
-    async def station_assembly_loop(self, recipe, system)
+    async def station_assembly_loop(self, recipe, system):
         while True:
             await self.station_is_full_event.wait()
             self.station_is_full_event.clear()
 
-            check_fullness = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})[i][1]
+            check_fullness = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
+            check_fullness = check_fullness[1]
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
 
@@ -228,6 +230,18 @@ class Station(Node):
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             await aioconsole.ainput('aligining failed at %s. align to continue' % self.name)
+
+    async def verify_no_holder_no_dosing(self):
+        res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
+        if not res[1]['no_holder_no_dosing']:
+            print(res)
+            await aioconsole.ainput('no holder no dosing failed at %s' % self.name)
+
+    async def verify_dosing_sit_right(self):
+        res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
+        if not res[1]['sit_right']:
+            print(res)
+            await aioconsole.ainput('dosing not sit right at %s' % self.name)
 
     async def assemble(self, recipe):
         data = {}

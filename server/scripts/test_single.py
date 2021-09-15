@@ -8,37 +8,19 @@ import aioconsole
 
 async def main(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
-    # for i in range(5):
-    #     await rail.set_valves([1, 0])
-    #     await asyncio.sleep(.6)
-    #     await rail.set_valves([1, 1])
-    #     await asyncio.sleep(.6)
-    #     await rail.G1(z=400, feed=16000)
-    #
-    #     await rail.set_valves([1, 0])
-    #     await asyncio.sleep(.6)
-    #     await rail.set_valves([0, 0])
-    #     await asyncio.sleep(.6)
-    #     await rail.G1(z=100, feed=30000)
 
-    # async def do_pickup(robot):
-    #     Y_GRAB_IN_UP_1 = 75
-    #     X_GRAB_IN = 284.5
-    #     Y_GRAB_IN_DOWN = 0
-    #     Y_GRAB_IN_UP_2 = 65
-    #     T_GRAB_IN = 0.5
-    #     await robot.G1(y=Y_GRAB_IN_UP_1, feed=FEED_Y_UP)
-    #     await robot.G1(x=X_GRAB_IN, feed=FEED_X)
-    #     await robot.G1(y=Y_GRAB_IN_DOWN, feed=FEED_Y_DOWN)
-    #     await robot.set_valves_grab_infeed()
-    #     await asyncio.sleep(T_GRAB_IN)
-    #     await robot.G1(y=Y_GRAB_IN_UP_2, feed=FEED_Y_UP)
-    #
-    # await do_nodes(robots, lambda r: do_pickup(r), simultanously=False)
-    await verify_no_holder_no_dosing(stations)
-    for station in stations:
-        print(station.holder_roi)
-        print(station.hw_config['holder_webcam_direction'])
+    # stations = [stations[0]]
+    # robot = robots[0]
+    # robots = [robots[0]]
+    # feed = 5000
+    # await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=True)
+    # await do_nodes(robots, lambda r: r.G1(y=40, feed=1000), simultanously=True)
+    # for i in range(3):
+    #     await do_nodes(robots, lambda r: r.G1(x=10, feed=feed), simultanously=True)
+    #     await do_nodes(robots, lambda r: r.G1(x=300, feed=feed), simultanously=True)
+    await rail.G1(z=5, feed=10000)
+    # await rail.G1(z=250, feed=10000)
+    await rail.G1(z=495, feed=10000)
 
 
 async def test_valve(stations, delay, count):

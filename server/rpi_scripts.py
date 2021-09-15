@@ -28,7 +28,7 @@ async def feeder_process(arduino, G1, command):
             await G1({'arduino_index': None, 'z': z, 'feed': FEED}, None)
 
         if holder_mask[i] and not gate_status:
-            arduino._send_command("{out7: 1}")
+            # arduino._send_command("{out7: 1}")
             gate_status = 1
 
         if holder_shift_register:
@@ -37,12 +37,12 @@ async def feeder_process(arduino, G1, command):
         else:
             # await asyncio.sleep(.3)
             pass
-        if int(i / 1) % 2:
-            arduino._send_command("{m2: 4, m3: 2}")
-        else:
-            arduino._send_command("{m2: 2, m3: 4}")
+        # if int(i / 1) % 2:
+        #     arduino._send_command("{m2: 4, m3: 2}")
+        # else:
+        #     arduino._send_command("{m2: 2, m3: 4}")
         if holder_mask[i]:
-            holder_shift_register = await detect_holder_wraper(arduino)
+            holder_shift_register = True  # await detect_holder_wraper(arduino)
 
     await G1({'arduino_index': None, 'z': 719, 'feed': FEED}, None)
 
