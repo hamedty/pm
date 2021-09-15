@@ -156,6 +156,8 @@ class Feeder(Node):
         self.feeder_is_full_event.clear()
         self.feeder_is_empty_event = asyncio.Event()  # setter: rail - waiter: feeder
         self.feeder_is_empty_event.set()
+        self.feeder_rail_is_parked_event = asyncio.Event()  # setter: rail - waiter: feeder
+        self.feeder_rail_is_parked_event.set()
 
     async def feeding_loop(self, command_args, system):
         command = {'verb': 'feeder_process'}
@@ -164,4 +166,8 @@ class Feeder(Node):
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()
             await self.send_command(command)
+
+            await self.feeder_rail_is_parked_event.wait()
+            self.feeder_rail_is_parked_event.clear()
+            await self.G1(z=719, feed=7000)
             self.feeder_is_full_event.set()

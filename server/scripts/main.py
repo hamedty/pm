@@ -34,17 +34,34 @@ async def main(system, ALL_NODES):
     ''' Fill Line '''
     # await feeder_fill_line(system, feeder, rail)
 
-    stations_task = null_awaitable
+    ''' Initial Condition '''
+    # feeder
     feeder.init_events()
     asyncio.create_task(feeder.feeding_loop({'mask': [1] * N}, system))
+
+    # rail
+    rail.init_events()
+    asyncio.create_task(rail.rail_loop(feeder, recipe, system))
+
+    # stations
     for station in stations:
         station.init_events()
         asyncio.create_task(station.station_assembly_loop(recipe, system))
 
+    ''' Main Loop'''
     while True:
+        # wait for rail to be parked
+        await rail.rail_parked_event.wait()
+        rail.rail_parked_event.clear()
+
+        # do robots
         await do_nodes(robots, lambda r: r.do_robot(recipe, system), simultanously=True)
-        ''' RAIL '''
-        await do_rail(rail, feeder)
+
+        # command rail to do the next cycle
+        rail.rail_move_event.set()
+
+        # park robots
+        await do_nodes(robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
 
 
 async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
@@ -121,36 +138,3 @@ async def feeder_fill_line(system, feeder, rail):
     for i in range(5):
         await internal([1] * 5)
     await internal([1] * 2)
-
-
-async def do_rail(rail, feeder):
-    D_MIN = D_STANDBY - 25 * N
-    D_MAX = D_STANDBY
-    T_RAIL_JACK1 = 1.5
-    T_RAIL_JACK2 = 1.5
-
-    # rail backward
-    await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
-    await feeder.feeder_is_full_event.wait()
-    feeder.feeder_is_full_event.clear()
-
-    # change jacks to moving
-    await rail.set_valves([1, 0])
-    await asyncio.sleep(T_RAIL_JACK1 / 3)
-    await feeder.set_valves([None, 0])
-    await asyncio.sleep(T_RAIL_JACK1 * 2 / 3)
-    await rail.set_valves([1, 1])
-    await asyncio.sleep(T_RAIL_JACK2)
-
-    # rail forward
-    await rail.G1(z=D_MAX, feed=FEED_RAIL_INTACT)
-    feeder.feeder_is_empty_event.set()
-
-    # change jacks to moving
-    await rail.set_valves([1, 0])
-    await asyncio.sleep(T_RAIL_JACK1)
-    await rail.set_valves([0, 0])
-    await asyncio.sleep(T_RAIL_JACK1)
-
-    # rail park
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)

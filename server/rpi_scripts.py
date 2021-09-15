@@ -44,8 +44,6 @@ async def feeder_process(arduino, G1, command):
         if holder_mask[i]:
             holder_shift_register = True  # await detect_holder_wraper(arduino)
 
-    await G1({'arduino_index': None, 'z': 719, 'feed': FEED}, None)
-
 
 async def cartridge_feed(arduino, cartridge_lock):
     # rotate to upstream + Vacuum + bring jack down

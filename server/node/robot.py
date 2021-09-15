@@ -206,4 +206,6 @@ class Robot(Node):
         await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING)
         await self.set_valves([0] * 10)
         await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X)
-        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP)
+
+    async def do_robot_park(self, recipe, system):
+        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 5.0)
