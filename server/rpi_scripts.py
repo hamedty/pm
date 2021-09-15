@@ -11,32 +11,32 @@ async def feeder_process(arduino, G1, command):
 
     initial_z = FEEDER_OFFSET
     arduino._send_command("{out2: 0}")
-    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED}, None)
+    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED})
 
     arduino._send_command("{out2: 1}")
     await asyncio.sleep(.3)
 
     holder_shift_register = 0
     gate_status = 0
+
     for i in range(N + 1):
         if not holder_mask[i] and gate_status:
             arduino._send_command("{out7: 0}")
             gate_status = 0
 
         z = FEEDER_OFFSET + 25 * i
-        if z != FEEDER_OFFSET:  # not in the first loop
-            await G1({'arduino_index': None, 'z': z, 'feed': FEED}, None)
+        # if z != FEEDER_OFFSET:  # not in the first loop
+        #     await G1({'arduino_index': None, 'z': z, 'feed': FEED})
+        if i > 0:
+            await cartridge_feed_n_move_rail(arduino, z, FEED, G1)
 
         if holder_mask[i] and not gate_status:
             # arduino._send_command("{out7: 1}")
             gate_status = 1
 
         if holder_shift_register:
-            await cartridge_feed(arduino, None)
             await cartridge_handover(arduino, None)
-        else:
-            # await asyncio.sleep(.3)
-            pass
+
         # if int(i / 1) % 2:
         #     arduino._send_command("{m2: 4, m3: 2}")
         # else:
@@ -45,10 +45,13 @@ async def feeder_process(arduino, G1, command):
             holder_shift_register = True  # await detect_holder_wraper(arduino)
 
 
-async def cartridge_feed(arduino, cartridge_lock):
+async def cartridge_feed_n_move_rail(arduino, z, z_FEED, G1):
     # rotate to upstream + Vacuum + bring jack down
-    arduino._send_command("{out9: 1, out13: 1, out8: 1}")
-    arduino._send_command("G1 Y100 F60000")
+    arduino._send_command("{out9: 1}")
+    arduino._send_command('''
+        G1 Y100 F60000
+        M100.1 ({out13: 1})
+        ''')
     await asyncio.sleep(.24)
 
     # Cartridge Pusher
@@ -56,7 +59,7 @@ async def cartridge_feed(arduino, cartridge_lock):
     await asyncio.sleep(.02)
 
     # bring jack up
-    arduino._send_command("{out9: 0}")  # bring jack up
+    arduino._send_command("{out9: 0, out8:0}")  # bring jack up and open hug
     await asyncio.sleep(.1)
 
     # Cartridge Pusher back
@@ -64,22 +67,29 @@ async def cartridge_feed(arduino, cartridge_lock):
     await asyncio.sleep(.02)
 
     # rotate to rail
-    arduino._send_command("G1 Y10 F25000")
+    # arduino._send_command("G1 Y10 F25000")
+    command_id = arduino.get_command_id()
+    arduino._send_command('''
+        G1 Y10 Z%.2f F26000
+        N%d M0
+        ''' % (z, command_id))
+    await arduino.wait_for_command_id(command_id)
+    await G1({'arduino_index': None, 'z': z, 'feed': z_FEED, 'correct_initial': True})
     # await asyncio.sleep(.5)
 
 
 async def cartridge_handover(arduino, cartridge_lock):
     command_id = arduino.get_command_id()
     command_raw = '''
+        M100 ({out8: 1})
         G38.2 Y-100 F2000
         M100 ({clear:n})
+        M100 ({out13: 0})
         G10 L20 P1 Y0
-        M100 ({out13: 0, out8: 0})
         N%d M0
         ''' % command_id
     arduino.send_command(command_raw)
     await arduino.wait_for_command_id(command_id)
-    await asyncio.sleep(.4)
 
 
 async def cartridge_repeat_home(arduino):

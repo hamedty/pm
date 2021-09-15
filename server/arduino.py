@@ -132,7 +132,7 @@ class Arduino(object):
         del d['time']
         return d
 
-    def check_encoder(self, axis):  # axis = 'x'
+    def check_encoder(self, axis, desired_location):  # axis = 'x'
         # 'encoders': {
         #     'posz': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
         # }
@@ -142,9 +142,11 @@ class Arduino(object):
 
         g2core_location = self._status[axis_key]
         encoder_location = self._status[enc_key] / float(ratio)
-        diversion = abs(encoder_location - g2core_location)
-        result = (diversion < telorance)
-        return result, g2core_location, encoder_location
+        diversion_g2core = abs(encoder_location - g2core_location)
+        result = (diversion_g2core < telorance)
+        diversion_desired = abs(encoder_location - desired_location)
+        reached = (diversion_desired < telorance)
+        return result, reached, g2core_location, encoder_location
 
 
 def flatten(dictionary, parent_key=False, separator='.'):

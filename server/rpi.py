@@ -101,7 +101,7 @@ async def align(command, _):
                 break
             exists = True
         steps, aligned = detector(frame, offset)
-        print(steps, aligned)
+        # print(steps, aligned)
         steps_history.append(steps)
         if aligned:
             break
@@ -202,7 +202,7 @@ async def raw(command, _):
     return {'success': True, 'status': status}
 
 
-async def G1(command, _):
+async def G1(command, _=None):
     correction_eps = 0.5
     arduino = ARDUINOS[command['arduino_index']]
     arduino._debug = True
@@ -212,14 +212,19 @@ async def G1(command, _):
             req_location = command[a]
             break
     feed = command['feed']
+    correct_initial = command.get('correct_initial', False)
     wait_start = {1, 3, 4}
     retries = 10
     # check current position is correct
-    result, g2core_location, encoder_location = arduino.check_encoder(axes)
-    print(result, g2core_location, encoder_location)
-    if not result:
+    result, reached, g2core_location, encoder_location = arduino.check_encoder(
+        axes, req_location)
+    # print(result, g2core_location, encoder_location)
+    if correct_initial and (not result):
         arduino._debug = False
         return {'success': False, 'message': 'current position is incorrect g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
+    if reached:
+        arduino._debug = False
+        return {'success': True, 'status': arduino.get_status()}
 
     for r in range(retries):
         # command move
@@ -234,8 +239,9 @@ async def G1(command, _):
         await arduino.wait_for_command_id(command_id)
 
         # if encoder pos is correct return success
-        result, g2core_location, encoder_location = arduino.check_encoder(axes)
-        print(result, g2core_location, encoder_location)
+        result, reached, g2core_location, encoder_location = arduino.check_encoder(
+            axes, req_location)
+        # print(result, g2core_location, encoder_location)
 
         if result:
             arduino._debug = False
@@ -249,7 +255,8 @@ async def G1(command, _):
         await arduino.wait_for_command_id(command_id)
 
         # update position
-        result, g2core_location, encoder_location = arduino.check_encoder(axes)
+        result, reached, g2core_location, encoder_location = arduino.check_encoder(
+            axes, req_location)
         command_id = arduino.get_command_id()
         command_raw = 'G28.3 %s%.03f\nN%d M0' % (
             axes, encoder_location, command_id)

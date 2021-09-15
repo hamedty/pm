@@ -22,6 +22,8 @@ async def main(system, ALL_NODES):
 
     # await get_input(system, 'Release all stations jack')
     await do_nodes(stations, lambda s: s.set_valves([None, None, 0, 1, 0]))
+    await rail.set_valves([0, 0])
+    await feeder.set_valves([0] * 14)
 
     # await get_input(system, 'start feeder motors')
     # await feeder.set_motors(
