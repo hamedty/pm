@@ -112,6 +112,6 @@ class Rail(Robot):
             await self.set_valves([1, 0])
             await asyncio.sleep(recipe.T_RAIL_JACK1)
             await self.set_valves([0, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK1)
+            await asyncio.sleep(recipe.T_RAIL_JACK2)
 
             feeder.feeder_rail_is_parked_event.set()

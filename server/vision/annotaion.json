@@ -334,21 +334,21 @@
     },
     "110": {
         "dosing": {
-            "7gafmddw": {
-                "zero": 319
+            "033zcarh": {
+                "zero": 214
             },
-            "ibgrpzzw": {
-                "zero": 318
+            "4cw7s54x": {
+                "zero": 222
             },
-            "un6ozqk9": {
-                "zero": 285
+            "55y01g4v": {
+                "zero": 199
             }
         },
         "dosing_roi": {
-            "dx": 242,
-            "dy": 183,
-            "x0": 256,
-            "y0": 196
+            "dx": 235,
+            "dy": 177,
+            "x0": 145,
+            "y0": 151
         },
         "holder": {
             "49tcmvza": {

@@ -1,3 +1,4 @@
+station starting point can be faster (rail at safe distance)
 verify gate - general read metric function
 query if homed (r.home)
 multiprocessing and speed up process
