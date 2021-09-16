@@ -1,16 +1,12 @@
-start/stop + error / event page
+error / event page
 optimize robot station event (going to safe place station can start)
-station starting point can be faster (rail at safe distance)
+feeder stop motors if didn't feed for a while
 verify gate - general read metric function
 query if homed (r.home)
 homing rail > smaller cap
---------------------------------------------
 control holder DC motor with PWM instead of timer
+motor oralB
+emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 log collection framework
 vision debug frame work
-feeder home every time
-motor oralB
-feeder stop motors if didn't feed for a while
-cartrdige feeding clear n is too much
 if nodes downs, UI must react
-add amin's features

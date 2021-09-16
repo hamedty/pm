@@ -140,6 +140,7 @@ class Robot(Node):
         Y_GRAB_IN_UP_2 = 65
         T_GRAB_IN = 0.5
 
+        await system.system_running.wait()
         await self.G1(y=Y_GRAB_IN_UP_1, feed=recipe.FEED_Y_UP)
         await self.G1(x=X_GRAB_IN, feed=recipe.FEED_X)
         await self.G1(y=Y_GRAB_IN_DOWN, feed=recipe.FEED_Y_DOWN)
@@ -170,7 +171,7 @@ class Robot(Node):
 
         # ensure about stations
         await t1
-
+        await system.system_running.wait()
         await self.G1(x=X_INPUT, feed=recipe.FEED_X)
         await self.G1(y=Y_INPUT_DOWN_1, feed=recipe.FEED_Y_DOWN)
         await self.set_valves([0] * 10)
@@ -205,6 +206,7 @@ class Robot(Node):
             station.station_is_safe_event.set()
 
         '''CAP'''
+        await system.system_running.wait()
         await self.G1(x=recipe.X_CAPPING, feed=recipe.FEED_X)
         await self.G1(y=recipe.Y_CAPPING_DOWN_1, feed=recipe.FEED_Y_DOWN)
         await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING)
@@ -212,4 +214,5 @@ class Robot(Node):
         await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X)
 
     async def do_robot_park(self, recipe, system):
+        await system.system_running.wait()
         await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 5.0)

@@ -176,10 +176,12 @@ class Feeder(Node):
             if mask is None:
                 mask = [1] * recipe.N
             command = {'verb': 'feeder_process', 'mask': mask}
+            await system.system_running.wait()
             await self.send_command(command)
             self.feeder_finished_command_event.set()
 
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
+            await system.system_running.wait()
             await self.G1(z=719, feed=7000)
             self.feeder_is_full_event.set()

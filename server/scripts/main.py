@@ -14,18 +14,15 @@ async def main(system, ALL_NODES):
     a = await aioconsole.ainput('type anything to home. or enter to dismiss')
     if a:
         print('homing')
-        await home_all_nodes(all_nodes, feeder, rail, robots, stations)
+        await home_all_nodes(feeder, rail, robots, stations)
 
     ''' Initial Condition '''
-    # await get_input(system, 'Open all robots jacks')
-    await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
+    await system.system_running.wait()
 
-    # await get_input(system, 'Release all stations jack')
+    await do_nodes(robots, lambda r: r.set_valves([0] * 10), simultanously=False)
     await do_nodes(stations, lambda s: s.set_valves([None, None, 0, 1, 0]))
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
-
-    # await get_input(system, 'start feeder motors')
     # await feeder.set_motors(
     #     (2, 4), (3, 4),  # Holder Downstream
     #     (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
@@ -67,11 +64,19 @@ async def main(system, ALL_NODES):
         await do_nodes(robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
 
 
-async def home_all_nodes(all_nodes, feeder, rail, robots, stations):
+async def home_all_nodes(feeder, rail, robots, stations):
     feeder_home = asyncio.create_task(feeder.home())
+
+    await system.system_running.wait()
     await do_nodes(stations, lambda s: s.home())
+
+    await system.system_running.wait()
     await do_nodes(robots, lambda r: r.home())
+
+    await system.system_running.wait()
     await rail.home()
+
+    await system.system_running.wait()
     await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
     await feeder_home
 

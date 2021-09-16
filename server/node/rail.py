@@ -87,6 +87,7 @@ class Rail(Robot):
             self.rail_move_event.clear()
 
             # rail backward
+            await system.system_running.wait()
             await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
 
             # wait for feeder
@@ -94,6 +95,7 @@ class Rail(Robot):
             feeder.feeder_is_full_event.clear()
 
             # change jacks to moving
+            await system.system_running.wait()
             await self.set_valves([1, 0])
             await asyncio.sleep(recipe.T_RAIL_JACK1 * recipe.T_RAIL_FEEDER_JACK_PERCENTAGE)
             await feeder.set_valves([None, 0])
@@ -102,6 +104,7 @@ class Rail(Robot):
             await asyncio.sleep(recipe.T_RAIL_JACK2)
 
             # rail forward
+            await system.system_running.wait()
             await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
 
             # clear feeder

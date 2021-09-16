@@ -21,7 +21,7 @@ class System(object):
         self.nodes = nodes
         self._ws = []
         self.system_running = asyncio.Event()
-        # self.system_running.set()
+        self.system_running.clear()
 
     async def connect(self):
         for node in self.nodes:
@@ -59,7 +59,7 @@ class System(object):
         message = {
             'type': 'architecture',
             'payload': message,
-            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType)],
+            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType) and (i != 'main')],
         }
         ws.write_message(json.dumps(message))
 
@@ -111,13 +111,7 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    await SYSTEM.script_wrapper_always(
-        # scripts.main
-        # scripts.test_stations
-        # scripts.test_dosing_feeder
-        # scripts.test_single
-        # scripts.test_main
-    )
+    await SYSTEM.script_wrapper_always(scripts.main)
     await task1
 
 

@@ -199,12 +199,15 @@ class Station(Node):
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
 
+            await system.system_running.wait()
             if full:
                 await self.align_holder(recipe)
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
             if full:
+                await system.system_running.wait()
                 await self.align_dosing(recipe)
+                await system.system_running.wait()
                 await self.assemble(recipe)
 
             if not (full or empty):
