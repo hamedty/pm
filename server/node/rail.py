@@ -81,7 +81,7 @@ class Rail(Robot):
         self.rail_parked_event = asyncio.Event()  # setter: rail - waiter: robot
         self.rail_parked_event.set()
 
-    async def rail_loop(self, feeder, recipe, system):
+    async def rail_loop(self, system, recipe, feeder):
         while True:
             await self.rail_move_event.wait()
             self.rail_move_event.clear()

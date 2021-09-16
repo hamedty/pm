@@ -1,11 +1,9 @@
+start/stop + error / event page
+optimize robot station event (going to safe place station can start)
 station starting point can be faster (rail at safe distance)
 verify gate - general read metric function
 query if homed (r.home)
-multiprocessing and speed up process
-add 48V PSU's
-feeder wait for input
 homing rail > smaller cap
-USB robot 1 is loose
 --------------------------------------------
 control holder DC motor with PWM instead of timer
 log collection framework

@@ -33,22 +33,23 @@ async def main(system, ALL_NODES):
     # )
     # await asyncio.sleep(2)
 
-    ''' Fill Line '''
-    # await feeder_fill_line(system, feeder, rail)
-
     ''' Initial Condition '''
     # feeder
     feeder.init_events()
-    asyncio.create_task(feeder.feeding_loop({'mask': [1] * N}, system))
+    asyncio.create_task(feeder.feeding_loop(system, recipe))
 
     # rail
     rail.init_events()
-    asyncio.create_task(rail.rail_loop(feeder, recipe, system))
+    asyncio.create_task(rail.rail_loop(system, recipe, feeder))
 
     # stations
     for station in stations:
         station.init_events()
         asyncio.create_task(station.station_assembly_loop(recipe, system))
+
+    ''' Fill Line '''
+    # await feeder_fill_line(system, recipe, feeder, rail)
+    feeder.feeder_initial_start_event.set()
 
     ''' Main Loop'''
     while True:
@@ -92,51 +93,35 @@ async def do_nodes(stations, func, simultanously=True):
                 await aioconsole.ainput('enter to continue')
 
 
-async def feeder_fill_line(system, feeder, rail):
-    async def internal(mask):
-        print(mask)
-        await get_input(system, 'filling line')
-        feeder_task = asyncio.create_task(feeder.send_command(
-            {'verb': 'feeder_process', 'mask': mask}))
+async def feeder_fill_line(system, recipe, feeder, rail):
+    masks = [
+        [0] * 4 + [1],
+        [0] * 4 + [1],
+        [0] * 3 + [1] * 2,
+        [0] * 3 + [1] * 2,
+        [0] * 2 + [1] * 3,
+        [0] * 2 + [1] * 3,
+        [0] * 1 + [1] * 4,
+        [0] * 1 + [1] * 4,
+        [0] * 1 + [1] * 5,
+        [0] * 1 + [1] * 5,
+        [0] * 1 + [1] * 5,
+        [0] * 1 + [1] * 5,
+        [0] * 1 + [1] * 5,
+        [1] * 2,
+    ]
 
-        ''' RAIL '''
-        D_MIN = D_STANDBY - 25 * len(mask)
-        D_MAX = D_STANDBY
-        T_RAIL_JACK1 = 1.5
-        T_RAIL_JACK2 = 1.5
+    for mask in masks:
+        # setup feeder
+        feeder.mask = mask
+        feeder.feeder_initial_start_event.set()
 
-        # rail backward
-        await rail.G1(z=D_MIN, feed=FEED_RAIL_FREE)
-        await feeder_task
+        await rail.rail_parked_event.wait()
+        rail.rail_parked_event.clear()
+        rail.N = len(mask)
+        rail.rail_move_event.set()
 
-        # change jacks to moving
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(T_RAIL_JACK1 / 3)
-        await feeder.set_valves([None, 0])
-        await asyncio.sleep(T_RAIL_JACK1 * 2 / 3)
-        await rail.set_valves([1, 1])
-        await asyncio.sleep(T_RAIL_JACK2)
+        await feeder.feeder_finished_command_event.wait()
+        feeder.feeder_finished_command_event.clear()
 
-        # rail forward
-        await rail.G1(z=D_MAX, feed=FEED_RAIL_INTACT)
-
-        # change jacks to moving
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(T_RAIL_JACK1)
-        await rail.set_valves([0, 0])
-        await asyncio.sleep(T_RAIL_JACK1)
-
-        # rail park
-        await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE)
-
-    await internal([0] * 4 + [1])
-    await internal([0] * 4 + [1])
-    await internal([0] * 3 + [1] * 2)
-    await internal([0] * 3 + [1] * 2)
-    await internal([0] * 2 + [1] * 3)
-    await internal([0] * 2 + [1] * 3)
-    await internal([0] * 1 + [1] * 4)
-    await internal([0] * 1 + [1] * 4)
-    for i in range(5):
-        await internal([1] * 5)
-    await internal([1] * 2)
+    feeder.mask = None  # default

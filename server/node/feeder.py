@@ -7,6 +7,7 @@ class Feeder(Node):
 
     type = 'feeder'
     arduino_reset_pin = 21
+    mask = None
 
     g2core_config_base = [
         # X - Cartridge Motor 1
@@ -158,14 +159,25 @@ class Feeder(Node):
         self.feeder_is_empty_event.set()
         self.feeder_rail_is_parked_event = asyncio.Event()  # setter: rail - waiter: feeder
         self.feeder_rail_is_parked_event.set()
+        # setter: feeder - waiter: initial feed
+        self.feeder_finished_command_event = asyncio.Event()
+        self.feeder_finished_command_event.clear()
+        # setter: main - waiter: feeder
+        self.feeder_initial_start_event = asyncio.Event()
+        self.feeder_initial_start_event.clear()
 
-    async def feeding_loop(self, command_args, system):
-        command = {'verb': 'feeder_process'}
-        command.update(command_args)
+    async def feeding_loop(self, system, recipe, mask=None):
+        await self.feeder_initial_start_event.wait()
         while True:
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()
+
+            mask = self.mask
+            if mask is None:
+                mask = [1] * recipe.N
+            command = {'verb': 'feeder_process', 'mask': mask}
             await self.send_command(command)
+            self.feeder_finished_command_event.set()
 
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
