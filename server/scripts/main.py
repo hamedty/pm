@@ -14,7 +14,7 @@ async def main(system, ALL_NODES):
     a = await aioconsole.ainput('type anything to home. or enter to dismiss')
     if a:
         print('homing')
-        await home_all_nodes(feeder, rail, robots, stations)
+        await home_all_nodes(system, feeder, rail, robots, stations)
 
     ''' Initial Condition '''
     await system.system_running.wait()
@@ -62,9 +62,10 @@ async def main(system, ALL_NODES):
 
         # park robots
         await do_nodes(robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
+        system.system_running.clear()
 
 
-async def home_all_nodes(feeder, rail, robots, stations):
+async def home_all_nodes(system, feeder, rail, robots, stations):
     feeder_home = asyncio.create_task(feeder.home())
 
     await system.system_running.wait()

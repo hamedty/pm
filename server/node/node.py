@@ -32,6 +32,7 @@ class Node(object):
         self.set_status(message='node instance created')
         self.lock = None
         self.homed = False
+        self.events = {}
 
     async def ping(self):
         command = 'ping -c 1 -W 0.5'.split()
@@ -220,7 +221,8 @@ class Node(object):
             #data['age'] = time.time() - data['time']
             del data['time']
             del data['age']
-
+        for event in self.events:
+            data[event] = self.events[event].is_set()
         return data
 
     async def home(self):

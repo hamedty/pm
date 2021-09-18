@@ -1,12 +1,12 @@
-error / event page
-optimize robot station event (going to safe place station can start)
+error page
 feeder stop motors if didn't feed for a while
+optimize robot station event (going to safe place station can start)
 verify gate - general read metric function
 query if homed (r.home)
+emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 homing rail > smaller cap
 control holder DC motor with PWM instead of timer
 motor oralB
-emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 log collection framework
 vision debug frame work
 if nodes downs, UI must react

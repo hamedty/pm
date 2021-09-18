@@ -184,10 +184,15 @@ class Station(Node):
     def init_events(self):
         self.station_is_full_event = asyncio.Event()  # setter: robot - waiter: station
         self.station_is_full_event.clear()
+        self.events['station_is_full_event'] = self.station_is_full_event
+
         self.station_is_safe_event = asyncio.Event()  # setter: robot - waiter: station
         self.station_is_safe_event.clear()
+        self.events['station_is_safe_event'] = self.station_is_safe_event
+
         self.station_is_done_event = asyncio.Event()  # setter: station - waiter: robot
         self.station_is_done_event.set()
+        self.events['station_is_done_event'] = self.station_is_done_event
 
     async def station_assembly_loop(self, recipe, system):
         while True:

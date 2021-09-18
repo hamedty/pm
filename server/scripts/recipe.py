@@ -1,7 +1,7 @@
 import asyncio
 import aioconsole
 
-N = 10
+N = 5
 # Basics
 FEED_X = 5000  # 6500  # 8500
 FEED_Y_UP = 5000  # 8000

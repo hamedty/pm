@@ -233,7 +233,7 @@ async def G1(command, _=None):
             axes, req_location, feed, command_id)
 
         if abs(g2core_location - encoder_location) > correction_eps:
-            command_raw = 'G28.3 %s%.03f\n' % (
+            command_raw = ('G28.3 %s%.03f\n' + command_raw) % (
                 axes, encoder_location) + command_raw
         arduino.send_command(command_raw)
         await arduino.wait_for_command_id(command_id)

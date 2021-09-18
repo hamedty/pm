@@ -22,6 +22,8 @@ class System(object):
         self._ws = []
         self.system_running = asyncio.Event()
         self.system_running.clear()
+        self.errors = []
+        self.error_lock = asyncio.Lock()
 
     async def connect(self):
         for node in self.nodes:
@@ -34,6 +36,17 @@ class System(object):
             await node.send_command_config_arduino()
             await node.send_command_create_camera()
             node.boot = True
+
+    async def register_error(self, error):
+        async with self.error_lock():
+            self.system_running.clear()
+            self.errors.append(error)
+
+    async def clear_error(self, error):
+        async with self.error_lock():
+            self.errors.remove(error)
+            if not(self.errors):
+                self.system_running.set()
 
     def register_ws(self, ws):
         self.send_architecture(ws)
@@ -59,7 +72,7 @@ class System(object):
         message = {
             'type': 'architecture',
             'payload': message,
-            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType) and (i != 'main')],
+            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType)],
         }
         ws.write_message(json.dumps(message))
 
@@ -111,7 +124,7 @@ async def main():
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
 
     task1 = asyncio.create_task(SYSTEM.loop())
-    await SYSTEM.script_wrapper_always(scripts.main)
+    # await SYSTEM.script_wrapper_always(scripts.main)
     await task1
 
 

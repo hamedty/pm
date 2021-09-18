@@ -155,16 +155,25 @@ class Feeder(Node):
     def init_events(self):
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
+        self.events['feeder_is_full_event'] = self.feeder_is_full_event
+
         self.feeder_is_empty_event = asyncio.Event()  # setter: rail - waiter: feeder
         self.feeder_is_empty_event.set()
+        self.events['feeder_is_empty_event'] = self.feeder_is_empty_event
+
         self.feeder_rail_is_parked_event = asyncio.Event()  # setter: rail - waiter: feeder
         self.feeder_rail_is_parked_event.set()
+        self.events['feeder_rail_is_parked_event'] = self.feeder_rail_is_parked_event
+
         # setter: feeder - waiter: initial feed
         self.feeder_finished_command_event = asyncio.Event()
         self.feeder_finished_command_event.clear()
+        self.events['feeder_finished_command_event'] = self.feeder_finished_command_event
+
         # setter: main - waiter: feeder
         self.feeder_initial_start_event = asyncio.Event()
         self.feeder_initial_start_event.clear()
+        self.events['feeder_initial_start_event'] = self.feeder_initial_start_event
 
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
