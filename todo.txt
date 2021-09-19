@@ -1,4 +1,8 @@
-error page
+niaz be khali kardan feeder nabashad - better pause/stop/play
+better khali bazi on feeder
+status request sent for no reason!
+fix feeder G1 and optimize
+G1 optimization - optimize robot move
 feeder stop motors if didn't feed for a while
 optimize robot station event (going to safe place station can start)
 verify gate - general read metric function

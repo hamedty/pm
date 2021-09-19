@@ -92,14 +92,8 @@ async def align(command, _):
     steps_history = []
 
     aligned = False
-    exists = False
     for i in range(retries):
         frame = camera.get_frame(roi_name='alignment')
-        if i == 0:  # check existance for the first time
-            frame2 = camera.get_frame(pre_fetch=-1, roi_name='existance')
-            if not vision.object_present(frame2, presence_threshold):
-                break
-            exists = True
         steps, aligned = detector(frame, offset)
         # print(steps, aligned)
         steps_history.append(steps)
@@ -111,7 +105,7 @@ async def align(command, _):
         await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
 
     arduino.send_command(json.dumps({valve: 0}))
-    return {'success': True, 'aligned': aligned, 'exists': exists, 'steps_history': steps_history}
+    return {'success': True, 'aligned': aligned, 'steps_history': steps_history}
 
 
 async def detect_vision(command, _):
@@ -132,13 +126,15 @@ async def detect_vision(command, _):
                 pre_fetch=CAMERAS['holder'].DEFAULT_PRE_FETCH, roi_name='existance')
         )
         result = frames[0]
-        dosing_present = vision.object_present(
+        dosing_present, dosing_value = vision.object_present(
             frames[0], vision.PRESENCE_THRESHOLD['dosing'])
-        holder_present = vision.object_present(
+        holder_present, holder_value = vision.object_present(
             frames[1], vision.PRESENCE_THRESHOLD['holder'])
         result = {
             'dosing_present': dosing_present,
+            'dosing_value': dosing_value,
             'holder_present': holder_present,
+            'holder_value': holder_value,
             'no_dosing': not dosing_present,
             'no_holder': not holder_present,
             'no_holder_no_dosing': not (dosing_present or holder_present),
@@ -219,7 +215,7 @@ async def G1(command, _=None):
     result, reached, g2core_location, encoder_location = arduino.check_encoder(
         axes, req_location)
     # print(result, g2core_location, encoder_location)
-    if correct_initial and (not result):
+    if (not correct_initial) and (not result):
         arduino._debug = False
         return {'success': False, 'message': 'current position is incorrect g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
     if reached:

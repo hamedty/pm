@@ -1,6 +1,7 @@
-import time
+import datetime
 import os
 import sys
+import uuid
 import json
 import traceback
 import types
@@ -22,7 +23,8 @@ class System(object):
         self._ws = []
         self.system_running = asyncio.Event()
         self.system_running.clear()
-        self.errors = []
+        self.errors = {}
+        self.errors_events = {}
         self.error_lock = asyncio.Lock()
 
     async def connect(self):
@@ -38,15 +40,25 @@ class System(object):
             node.boot = True
 
     async def register_error(self, error):
-        async with self.error_lock():
+        error_id = str(uuid.uuid1())
+        error_event = asyncio.Event()
+        error_event.clear()
+        error['time'] = datetime.datetime.now().isoformat()
+        error['error_id'] = error_id
+        async with self.error_lock:
             self.system_running.clear()
-            self.errors.append(error)
+            self.errors[error_id] = error
+            self.errors_events[error_id] = error_event
+        return error_event
 
-    async def clear_error(self, error):
-        async with self.error_lock():
-            self.errors.remove(error)
-            if not(self.errors):
-                self.system_running.set()
+    async def clear_error(self, error_id):
+        async with self.error_lock:
+            del self.errors[error_id]
+            self.errors_events[error_id].set()
+            del self.errors_events[error_id]
+
+            # if not(self.errors):
+            #     self.system_running.set()
 
     def register_ws(self, ws):
         self.send_architecture(ws)
@@ -82,7 +94,8 @@ class System(object):
             message = {
                 'type': 'status_update',
                 'nodes': message,
-                'system': self._get_status()
+                'system': self._get_status(),
+                'errors': self.errors,
             }
             message = json.dumps(message)
             for ws in self._ws:
@@ -112,6 +125,8 @@ class System(object):
                 self.system_running.set()
             else:
                 self.system_running.clear()
+        if 'clear_error' in form:
+            asyncio.create_task(self.clear_error(form['clear_error']))
         if 'script' in form:
             script = getattr(scripts, form['script'])
             asyncio.create_task(self.script_wrapper_always(script))

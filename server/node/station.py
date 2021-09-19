@@ -206,29 +206,43 @@ class Station(Node):
 
             await system.system_running.wait()
             if full:
-                await self.align_holder(recipe)
+                await self.align_holder(recipe, system)
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
             if full:
                 await system.system_running.wait()
-                await self.align_dosing(recipe)
+                await self.align_dosing(recipe, system)
                 await system.system_running.wait()
-                await self.assemble(recipe)
+                await self.assemble(recipe, system)
 
             if not (full or empty):
-                print(self.name, result)
-                message = 'not all elements are present at %s. remove all to continue' % self.name
-                await aioconsole.ainput(message)
+                error = {
+                    'message': 'Not all elements are present in the station. Remove all to continue.',
+                    'location_name': self.name,
+                    'details': check_fullness,
+                }
+                print(error)
+                # await aioconsole.ainput(str(error))
+                error_clear_event = await system.register_error(error)
+                await error_clear_event.wait()
             self.station_is_done_event.set()
 
-    async def align_holder(self, recipe):
+    async def align_holder(self, recipe, system):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await aioconsole.ainput('aligining failed at %s. align to continue' % self.name)
+            error = {
+                'message': 'Aligining failed for holder. Align to continue',
+                'location_name': self.name,
+                'details': (z1, z2),
+            }
+            print(error)
+            # await aioconsole.ainput(str(error))
+            error_clear_event = await system.register_error(error)
+            await error_clear_event.wait()
 
-    async def align_dosing(self, recipe):
+    async def align_dosing(self, recipe, system):
         data = {}
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
@@ -237,21 +251,44 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await aioconsole.ainput('aligining failed at %s. align to continue' % self.name)
+            error = {
+                'message': 'Aligining failed for dosing. Align to continue',
+                'location_name': self.name,
+                'details': (z1, z2),
+            }
+            print(error)
+            # await aioconsole.ainput(str(error))
+            error_clear_event = await system.register_error(error)
+            await error_clear_event.wait()
 
-    async def verify_no_holder_no_dosing(self):
+    async def verify_no_holder_no_dosing(self, system):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
         if not res[1]['no_holder_no_dosing']:
-            print(res)
-            await aioconsole.ainput('no holder no dosing failed at %s' % self.name)
+            error = {
+                'message': 'no-holder-no-dosing failed',
+                'location_name': self.name,
+                'details': res,
+            }
+            print(error)
+            # await aioconsole.ainput(str(error))
+            error_clear_event = await system.register_error(error)
+            await error_clear_event.wait()
 
-    async def verify_dosing_sit_right(self):
+    async def verify_dosing_sit_right(self, recipe, system):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
+        print(res)
         if not res[1]['sit_right']:
-            print(res)
-            await aioconsole.ainput('dosing not sit right at %s' % self.name)
+            error = {
+                'message': 'verify_dosing_sit_right failed',
+                'location_name': self.name,
+                'details': res,
+            }
+            print(error)
+            # await aioconsole.ainput(str(error))
+            error_clear_event = await system.register_error(error)
+            await error_clear_event.wait()
 
-    async def assemble(self, recipe):
+    async def assemble(self, recipe, system):
         data = {}
         # go to aliging location
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']

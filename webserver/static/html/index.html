@@ -40,6 +40,24 @@
     <hr />
 
     <table>
+      <tr ng-repeat="error in errors track by $index" style="margin:20px">
+
+        <!-- <td style="padding:10px">
+          <button class="btn node-button" ng-class="{'btn-success': node.type == 'robot', 'btn-warning': node.type == 'station'}" ng-click="select_node(node)">
+            <input type="checkbox" class="node-button-check" ng-checked="node.selected">{{node.name}}
+          </button>
+        </td> -->
+        <td>
+          {{error}}
+          <button class="btn btn-danger btn-sm" ng-click="clear_error(error)">Clear</button>
+
+        </td>
+
+      </tr>
+    </table>
+
+
+    <table>
       <tr ng-repeat="node in nodes track by $index" style="margin:20px">
 
         <td style="padding:10px">

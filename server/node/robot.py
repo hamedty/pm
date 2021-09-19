@@ -127,11 +127,12 @@ class Robot(Node):
 
     async def do_robot(self, recipe, system):
         # ensure about stations
-        async def a(station):
+        async def a(station, system):
             await station.station_is_done_event.wait()
             station.station_is_done_event.clear()
-            await station.verify_no_holder_no_dosing()
-        t1 = asyncio.gather(*[a(station) for station in self._stations])
+            await station.verify_no_holder_no_dosing(system)
+        stations_task1 = asyncio.gather(*[a(station, system)
+                                          for station in self._stations])
 
         '''PICK UP'''
         Y_GRAB_IN_UP_1 = 75
@@ -162,7 +163,7 @@ class Robot(Node):
         Z_OUTPUT = 70
         Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
-        T_INPUT_RELEASE = 0.5
+        T_INPUT_RELEASE = 1.0
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1
@@ -170,14 +171,14 @@ class Robot(Node):
         T_OUTPUT_RELEASE = 0.2
 
         # ensure about stations
-        await t1
+        await stations_task1
         await system.system_running.wait()
         await self.G1(x=X_INPUT, feed=recipe.FEED_X)
         await self.G1(y=Y_INPUT_DOWN_1, feed=recipe.FEED_Y_DOWN)
         await self.set_valves([0] * 10)
-        # await asyncio.sleep(T_INPUT_RELEASE)
-        await asyncio.gather(*[station.verify_dosing_sit_right() for station in self._stations])
-        t1 = asyncio.gather(
+        await asyncio.sleep(T_INPUT_RELEASE)
+        await asyncio.gather(*[station.verify_dosing_sit_right(recipe, system) for station in self._stations])
+        stations_task2 = asyncio.gather(
             *[station.G1(z=Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 4.0) for station in self._stations])
 
         await self.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP)
@@ -188,7 +189,7 @@ class Robot(Node):
         await self.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
         await asyncio.sleep(T_POST_PRESS)
         await self.set_valves([0] * 10)
-        await t1
+        await stations_task2
         await self.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP)
         await self.set_valves([1] * 5)
         await asyncio.sleep(T_OUTPUT_GRIPP)

@@ -1,5 +1,5 @@
 import asyncio
-import aioconsole
+
 
 N = 5
 # Basics
@@ -56,26 +56,3 @@ async def gather_all_nodes(system, ALL_NODES):
             await asyncio.sleep(.01)
 
     return all_nodes, feeder, rail, robots, stations
-
-
-def run_many(nodes, func):
-    tasks = []
-    for node in nodes:
-        tasks.append(func(node))
-
-    return asyncio.gather(*tasks)
-
-
-async def get_input(system, text):
-    # await system.system_running.wait()
-    print(text)
-    try:
-        a = await aioconsole.ainput('? - Type anything to stop... - Just enter to continue')
-    except:
-        a = '-'
-    if a:
-        raise
-
-
-async def null_func():
-    pass

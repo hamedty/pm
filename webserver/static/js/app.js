@@ -41,6 +41,7 @@ app.controller('app_controller', function($scope, ws) {
       case 'status_update':
         $scope.update_node_status(message.nodes);
         $scope.update_system_status(message.system);
+        $scope.errors = message.errors;
         break;
       case 'response':
         console.log(message);
@@ -132,6 +133,14 @@ app.controller('app_controller', function($scope, ws) {
    $scope.run_script = function(script_name) {
      data = {
        form: {'script': script_name,},
+       selected_nodes: [],
+     }
+     ws.get(data);
+   }
+   $scope.clear_error = function(error) {
+     console.log('clearing error', error);
+     data = {
+       form: {'clear_error': error.error_id,},
        selected_nodes: [],
      }
      ws.get(data);

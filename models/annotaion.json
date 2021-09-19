@@ -19,7 +19,10 @@
         },
         "holder": {
             "0m1whc6p": {
-                "zero": 78
+                "zero": 77
+            },
+            "1e1x0pvn": {
+                "zero": 292
             },
             "briwizjt": {
                 "zero": 191
@@ -40,21 +43,24 @@
     },
     "102": {
         "dosing": {
+            "jsrlbwpe": {
+                "zero": 208
+            },
             "np6hcg2s": {
-                "zero": 194
+                "zero": 193
             },
             "tu2mmm4u": {
-                "zero": 215
+                "zero": 216
             },
             "zxcfray9": {
-                "zero": 190
+                "zero": 191
             }
         },
         "dosing_roi": {
             "dx": 240,
-            "dy": 200,
+            "dy": 192,
             "x0": 300,
-            "y0": 140
+            "y0": 142
         },
         "holder": {
             "2j9gkez7": {

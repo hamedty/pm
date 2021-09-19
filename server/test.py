@@ -2,15 +2,22 @@ import asyncio
 import subprocess
 
 
-async def f1():
-    pass
-    print(1)
+async def f1(q):
+    while True:
+        q.put_nowait('a')
+        await asyncio.sleep(.1)
 
 
 async def main():
-    t1 = asyncio.create_task(f1())
-    await t1
-    await t1
+    q = asyncio.Queue()
+    t1 = asyncio.create_task(f1(q))
+
+    while True:
+        try:
+            a = await asyncio.wait_for(q.get(), timeout=.5)
+            print(1, a)
+        except asyncio.TimeoutError:
+            print(2)
 
 
 asyncio.run(main())

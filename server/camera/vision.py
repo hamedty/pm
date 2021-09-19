@@ -45,18 +45,19 @@ def detect_holder(frame, offset):
 
 def object_present(frame, threshold):
     value = frame.mean()
-    return bool(value > threshold)
+    return bool(value > threshold), float(value)
 
 
 def dosing_sit_right(frame):
     brightness_threshold = 25
-    existance_count_threshold = 300
+    existance_count_threshold = 250
     wrong_sitting_count_threshold = 20
     black_pixel_count = (frame.mean(axis=2).mean(axis=0)
                          < brightness_threshold).sum()
     sit_wrong = existance_count_threshold > black_pixel_count > wrong_sitting_count_threshold
     exist = existance_count_threshold > black_pixel_count
-    result = {'sit_right': not sit_wrong, 'exist': bool(exist)}
+    result = {'sit_right': not sit_wrong, 'exist': bool(
+        exist), 'black_pixel_count': int(black_pixel_count)}
     return result
 
 

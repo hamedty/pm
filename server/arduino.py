@@ -30,7 +30,6 @@ class Arduino(object):
         self._hw_config = {}
         self.usb_index = usb_index
         self.lock = Lock()
-        self._last_command_id = 0
         self.stat_code = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
@@ -39,6 +38,7 @@ class Arduino(object):
         self.set_status(message='object created')
         self._open_port()
         self.set_status(message='usb port opened')
+        self.init_command_id()
 
     def _open_port(self):
         print('opening ardiono port', self.usb_index)
@@ -52,8 +52,8 @@ class Arduino(object):
         time.sleep(1)
         self._open_port()
         self.stat_code = 0
-        self._last_command_id = 0
         self.lock.release()
+        self.init_command_id()
 
     def _close_port(self):
         self.ser.close()
@@ -90,6 +90,11 @@ class Arduino(object):
         if self._debug:
             print('command', data)
         self.lock.release()
+
+    def init_command_id(self):
+        self._last_command_id = 1
+        self._send_command('N1 M0')
+        time.sleep(.1)
 
     def get_command_id(self):
         self._last_command_id += 1
