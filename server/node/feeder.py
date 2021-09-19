@@ -68,18 +68,18 @@ class Feeder(Node):
         (3, {
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
-            'tr': 5,  # travel per rev = 5mm
-            'mi': 4,  # microstep = 4
+            'tr': 20,  # travel per rev = 5mm
+            'mi': 2,  # microstep = 4
             'po': 1,  # direction
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 20000,  # max speed
-            'fr': 20000,  # max feed rate
+            'vm': 100000,  # max speed
+            'fr': 100000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 719,  # max travel
-            'jm': 20000,  # max jerk
-            'jh': 8000,  # hominzg jerk
+            'jm': 2500,  # max jerk
+            'jh': 5000,  # hominzg jerk
             'hi': 3,  # home switch
             # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
@@ -125,7 +125,7 @@ class Feeder(Node):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 480.0, 2.0],  # encoder key, ratio, telorance
+            'posz': ['enc1', 120.0, 2.0],  # encoder key, ratio, telorance
             # Feed 10,000 @ 480 encoder = 80khz
         }
 

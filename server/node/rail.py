@@ -22,7 +22,7 @@ class Rail(Robot):
             'tn': 0,  # min travel
             'tm': 496,  # max travel -- 496
             'jm': 2000,  # max jerk
-            'jh': 2000,  # hominzg jerk
+            'jh': 10000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed

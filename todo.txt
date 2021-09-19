@@ -1,4 +1,5 @@
 niaz be khali kardan feeder nabashad - better pause/stop/play
+parameters: work without holder feeder - cartridge feeder 
 better khali bazi on feeder
 status request sent for no reason!
 fix feeder G1 and optimize

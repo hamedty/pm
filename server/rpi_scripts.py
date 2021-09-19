@@ -3,8 +3,12 @@ import time
 
 
 async def feeder_process(arduino, G1, command):
-    FEEDER_OFFSET = 17
-    FEED = 7000
+    FEEDER_OFFSET = 16
+    FEED = 100000
+    JERK_COMEBACK = 1300
+    JERK_FEED = 10000
+    JERK_IDLE = 2500
+
     holder_mask = command['mask']
     N = len(holder_mask)
     holder_mask.append(0)
@@ -12,8 +16,10 @@ async def feeder_process(arduino, G1, command):
     initial_z = FEEDER_OFFSET
     arduino._send_command("{m2: 2, m3: 4}")
     arduino._send_command("{out2: 0}")
+    arduino._send_command('{z:{jm:%d}}' % JERK_COMEBACK)
     await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED})
     arduino._send_command("{out2: 1}")
+    arduino._send_command('{z:{jm:%d}}' % JERK_FEED)
 
     holder_shift_register = 0
     gate_status = 0
@@ -45,6 +51,7 @@ async def feeder_process(arduino, G1, command):
             arduino._send_command("{m2: 4, m3: 2}")
         else:
             arduino._send_command("{m2: 2, m3: 4}")
+    arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
 
 
 async def cartridge_grab(arduino):

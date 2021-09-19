@@ -11,14 +11,14 @@ class Robot(Node):
         (1, {
             'ma': 0,  # map to X
             'sa': 1.8,  # step angle 1.8
-            'tr': 5,  # travel per rev = 5mm
-            'mi': 4,  # microstep = 2
+            'tr': 20,  # travel per rev = 5mm
+            'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
         ('x', {
             'am': 1,  # standard axis mode
-            'vm': 11000,  # max speed
-            'fr': 10000,  # max feed rate
+            'vm': 60000,  # max speed
+            'fr': 60000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 400,  # max travel
             'jm': 1000,  # max jerk
@@ -93,7 +93,7 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'posx': ['enc2', 480.0, 1.0],  # encoder key, ratio, telorance
+            'posx': ['enc2', 120.0, 1.0],  # encoder key, ratio, telorance
             'posy': ['enc1', 480.0, 1.0],
         }
 
