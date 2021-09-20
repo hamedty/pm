@@ -3,11 +3,12 @@ import time
 
 
 async def feeder_process(arduino, G1, command):
-    FEEDER_OFFSET = 16
-    FEED = 100000
-    JERK_COMEBACK = 1300
-    JERK_FEED = 10000
-    JERK_IDLE = 2500
+    FEEDER_OFFSET = command['z_offset']
+    FEED_FEED = command['feed_feed']
+    JERK_FEED = command['jerk_feed']
+    FEED_COMEBACK = command['feed_comeback']
+    JERK_COMEBACK = command['jerk_comeback']
+    JERK_IDLE = command['jerk_idle']
 
     holder_mask = command['mask']
     N = len(holder_mask)
@@ -17,7 +18,7 @@ async def feeder_process(arduino, G1, command):
     arduino._send_command("{m2: 2, m3: 4}")
     arduino._send_command("{out2: 0}")
     arduino._send_command('{z:{jm:%d}}' % JERK_COMEBACK)
-    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED})
+    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED_COMEBACK})
     arduino._send_command("{out2: 1}")
     arduino._send_command('{z:{jm:%d}}' % JERK_FEED)
 
@@ -34,7 +35,7 @@ async def feeder_process(arduino, G1, command):
         if any(holder_mask[i:]):
             await cartridge_grab(arduino)
 
-        # Wait for holder
+        Wait for holder
         if holder_mask[i]:
             await detect_holder_wraper(arduino)
 
@@ -45,7 +46,7 @@ async def feeder_process(arduino, G1, command):
 
         # Move and Handover
         z = FEEDER_OFFSET + 25 * (i + 1)
-        await move_rail_n_cartridge_handover(arduino, z, FEED, G1)
+        await move_rail_n_cartridge_handover(arduino, z, FEED_FEED, G1)
 
         if int(i / 1) % 2:
             arduino._send_command("{m2: 4, m3: 2}")
@@ -76,7 +77,7 @@ async def cartridge_grab(arduino):
     await asyncio.sleep(.02)
 
 
-async def move_rail_n_cartridge_handover(arduino, z, z_FEED, G1):
+async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     # rotate to rail
     # arduino._send_command("G1 Y10 F25000")
     command_id = arduino.get_command_id()
@@ -87,7 +88,7 @@ async def move_rail_n_cartridge_handover(arduino, z, z_FEED, G1):
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
     await asyncio.sleep(.6)
-    await G1({'arduino_index': None, 'z': z, 'feed': z_FEED, 'correct_initial': True})
+    await G1({'arduino_index': None, 'z': z, 'feed': feed, 'correct_initial': True})
 
     command_id = arduino.get_command_id()
     command_raw = '''

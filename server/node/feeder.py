@@ -164,7 +164,7 @@ class Feeder(Node):
         return abs(posz - enc_location) < telorance
 
     def init_events(self):
-        assert not is_at_z(0)  # must be already homed
+        assert not self.is_at_z(0)  # must be already homed
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
         self.events['feeder_is_full_event'] = self.feeder_is_full_event
@@ -189,7 +189,7 @@ class Feeder(Node):
 
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
-        while not self.system_stop.is_set():
+        while not system.system_stop.is_set():
             if not self.is_at_z(recipe.FEEDER_Z_IDLE):  # first time I am lost!
                 await self.feeder_rail_is_parked_event.wait()
                 self.feeder_rail_is_parked_event.clear()
@@ -199,13 +199,22 @@ class Feeder(Node):
                 await self.feeder_is_empty_event.wait()
                 self.feeder_is_empty_event.clear()
 
-            if self.system_stop.is_set():
+            if system.system_stop.is_set():
                 return
 
             mask = self.mask
             if mask is None:
                 mask = [1] * recipe.N
-            command = {'verb': 'feeder_process', 'mask': mask}
+            command = {
+                'verb': 'feeder_process',
+                'mask': mask,
+                'z_offset': recipe.FEEDER_Z_IDLE,
+                'feed_feed': recipe.FEED_FEEDER_FEED,
+                'jerk_feed': recipe.JERK_FEEDER_FEED,
+                'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
+                'jerk_comeback': recipe.JERK_FEEDER_COMEBACK,
+                'jerk_idle': recipe.JERK_FEEDER_IDLE,
+            }
             await system.system_running.wait()
             await self.send_command(command)
             self.feeder_finished_command_event.set()

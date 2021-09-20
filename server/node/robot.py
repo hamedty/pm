@@ -154,8 +154,6 @@ class Robot(Node):
         Y_OUTPUT = 80
         X_OUTPUT_SAFE = recipe.X_CAPPING
 
-        FEED_Y_PRESS = 3000
-
         Z_OUTPUT = 70
         Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
@@ -182,7 +180,7 @@ class Robot(Node):
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
         await self.G1(y=Y_INPUT_DOWN_2, feed=recipe.FEED_Y_DOWN)
         await asyncio.sleep(T_PRE_PRESS)
-        await self.G1(y=Y_INPUT_DOWN_3, feed=FEED_Y_PRESS)
+        await self.G1(y=Y_INPUT_DOWN_3, feed=recipe.FEED_Y_PRESS)
         await asyncio.sleep(T_POST_PRESS)
         await self.set_valves([0] * 10)
         await stations_task2

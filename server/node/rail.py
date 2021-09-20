@@ -22,7 +22,7 @@ class Rail(Robot):
             'tn': 0,  # min travel
             'tm': 496,  # max travel -- 496
             'jm': 2000,  # max jerk
-            'jh': 10000,  # hominzg jerk
+            'jh': 1000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
@@ -89,7 +89,7 @@ class Rail(Robot):
         self.rail_parked_event.set()
         feeder.feeder_rail_is_parked_event.set()
 
-        while not self.system_stop.is_set():
+        while not system.system_stop.is_set():
             await self.rail_move_event.wait()
             self.rail_move_event.clear()
 
