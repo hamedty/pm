@@ -39,16 +39,19 @@ async def main(system, ALL_NODES):
     asyncio.create_task(rail.rail_loop(system, recipe, feeder))
 
     # stations
+    stations_loop = []
     for station in stations:
         station.init_events()
-        asyncio.create_task(station.station_assembly_loop(recipe, system))
+        task = asyncio.create_task(
+            station.station_assembly_loop(recipe, system))
+        stations_loop.append(task)
 
     ''' Fill Line '''
     # await feeder_fill_line(system, recipe, feeder, rail)
     feeder.feeder_initial_start_event.set()
 
     ''' Main Loop'''
-    while True:
+    while not self.system_stop.is_set():
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
         rail.rail_parked_event.clear()
@@ -57,11 +60,17 @@ async def main(system, ALL_NODES):
         await do_nodes(system, robots, lambda r: r.do_robot(recipe, system), simultanously=True)
 
         # command rail to do the next cycle
-        rail.rail_move_event.set()
+        if not self.system_stop.is_set():
+            rail.rail_move_event.set()
 
         # park robots
         await do_nodes(system, robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
         system.system_running.clear()
+
+    ''' Clean Up '''
+    await asyncio.gather(*[station.clearance(system) for station in stations])
+    for task in stations_loop:
+        task.cancel()
 
 
 async def home_all_nodes(system, feeder, rail, robots, stations):

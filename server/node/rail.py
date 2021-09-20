@@ -81,11 +81,15 @@ class Rail(Robot):
 
         assert abs(self._status['r.posz'] - 250) < 1, 'Rail must be parked'
         self.rail_parked_event = asyncio.Event()  # setter: rail - waiter: robot
-        self.rail_parked_event.set()
+        self.rail_parked_event.clear()
         self.events['rail_parked_event'] = self.rail_parked_event
 
     async def rail_loop(self, system, recipe, feeder):
-        while True:
+        assert abs(self._status['r.posz'] - 250) < 1, 'Rail must be parked'
+        self.rail_parked_event.set()
+        feeder.feeder_rail_is_parked_event.set()
+
+        while not self.system_stop.is_set():
             await self.rail_move_event.wait()
             self.rail_move_event.clear()
 

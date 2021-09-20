@@ -152,17 +152,29 @@ class Feeder(Node):
         command = '{%s}' % command
         await self.send_command_raw(command)
 
+    def get_z(self):
+        enc_name, enc_ratio, telorance = self.hw_config['encoders']['posz']
+        enc_location = self._status[enc_name] / float(enc_ratio)
+        g2_location = self._status['r.posz']
+        assert abs(g2_location - enc_location) < telorance
+        return g2_location, enc_location, telorance
+
+    def is_at_z(self, posz):
+        g2_location, enc_location, telorance = self.get_z()
+        return abs(posz - enc_location) < telorance
+
     def init_events(self):
+        assert not is_at_z(0)  # must be already homed
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
         self.events['feeder_is_full_event'] = self.feeder_is_full_event
 
         self.feeder_is_empty_event = asyncio.Event()  # setter: rail - waiter: feeder
-        self.feeder_is_empty_event.set()
+        self.feeder_is_empty_event.clear()
         self.events['feeder_is_empty_event'] = self.feeder_is_empty_event
 
         self.feeder_rail_is_parked_event = asyncio.Event()  # setter: rail - waiter: feeder
-        self.feeder_rail_is_parked_event.set()
+        self.feeder_rail_is_parked_event.clear()
         self.events['feeder_rail_is_parked_event'] = self.feeder_rail_is_parked_event
 
         # setter: feeder - waiter: initial feed
@@ -177,9 +189,18 @@ class Feeder(Node):
 
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
-        while True:
-            await self.feeder_is_empty_event.wait()
-            self.feeder_is_empty_event.clear()
+        while not self.system_stop.is_set():
+            if not self.is_at_z(recipe.FEEDER_Z_IDLE):  # first time I am lost!
+                await self.feeder_rail_is_parked_event.wait()
+                self.feeder_rail_is_parked_event.clear()
+                await system.system_running.wait()
+                await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
+                self.feeder_is_full_event.set()
+                await self.feeder_is_empty_event.wait()
+                self.feeder_is_empty_event.clear()
+
+            if self.system_stop.is_set():
+                return
 
             mask = self.mask
             if mask is None:
@@ -188,9 +209,3 @@ class Feeder(Node):
             await system.system_running.wait()
             await self.send_command(command)
             self.feeder_finished_command_event.set()
-
-            await self.feeder_rail_is_parked_event.wait()
-            self.feeder_rail_is_parked_event.clear()
-            await system.system_running.wait()
-            await self.G1(z=719, feed=7000)
-            self.feeder_is_full_event.set()

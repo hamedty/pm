@@ -41,6 +41,11 @@ T_RAIL_JACK1 = 1.1
 T_RAIL_JACK2 = 1.1
 T_RAIL_FEEDER_JACK_PERCENTAGE = .3
 
+# Feeder
+FEED_FEEDER_DELIVER = 70000
+FEEDER_Z_IDLE = 16
+FEEDER_Z_DELIVER = 719
+
 
 async def gather_all_nodes(system, ALL_NODES):
     stations = [node for node in ALL_NODES if node.name.startswith('Station ')]

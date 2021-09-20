@@ -23,6 +23,8 @@ class System(object):
         self._ws = []
         self.system_running = asyncio.Event()
         self.system_running.clear()
+        self.system_stop = asyncio.Event()
+        self.system_stop.clear()
         self.errors = {}
         self.errors_events = {}
         self.error_lock = asyncio.Lock()
@@ -123,8 +125,11 @@ class System(object):
         if 'system_running' in form:
             if form['system_running']:
                 self.system_running.set()
+                self.system_stop.clear()
             else:
                 self.system_running.clear()
+        if 'system_stop' in form:
+            self.system_stop.set()
         if 'clear_error' in form:
             asyncio.create_task(self.clear_error(form['clear_error']))
         if 'script' in form:

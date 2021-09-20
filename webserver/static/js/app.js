@@ -129,6 +129,13 @@ app.controller('app_controller', function($scope, ws) {
      }
      ws.get(data);
    }
+   $scope.send_system_status_stop = function() {
+     data = {
+       form: {'system_stop': 1,},
+       selected_nodes: [],
+     }
+     ws.get(data);
+   }
 
    $scope.run_script = function(script_name) {
      data = {

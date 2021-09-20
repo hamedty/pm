@@ -227,6 +227,11 @@ class Station(Node):
                 await error_clear_event.wait()
             self.station_is_done_event.set()
 
+    async def clearance(self, system):
+        await self.station_is_done_event.wait()
+        self.station_is_done_event.clear()
+        await self.verify_no_holder_no_dosing(system)
+
     async def align_holder(self, recipe, system):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)

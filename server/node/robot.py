@@ -127,12 +127,8 @@ class Robot(Node):
 
     async def do_robot(self, recipe, system):
         # ensure about stations
-        async def a(station, system):
-            await station.station_is_done_event.wait()
-            station.station_is_done_event.clear()
-            await station.verify_no_holder_no_dosing(system)
-        stations_task1 = asyncio.gather(*[a(station, system)
-                                          for station in self._stations])
+        stations_task1 = asyncio.gather(
+            *[station.clearance(system) for station in self._stations])
 
         '''PICK UP'''
         Y_GRAB_IN_UP_1 = 75

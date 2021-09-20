@@ -32,8 +32,9 @@
     <h1>
       PAM2060
       <div class='pull-right'>
-        <button class="btn btn-success btn-lg" ng-disabled="system_status.running" ng-click="send_system_status_running(1)">Start</button>
-        <button class="btn btn-danger btn-lg" ng-disabled="!system_status.running" ng-click="send_system_status_running(0)">Stop</button>
+        <button class="btn btn-success btn-lg" ng-disabled="system_status.running" ng-click="send_system_status_running(1)"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+        <button class="btn btn-danger btn-lg" ng-disabled="!system_status.running" ng-click="send_system_status_running(0)"><span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button>
+        <button class="btn btn-warning btn-lg" ng-disabled="!system_status.running" ng-click="send_system_status_stop()"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button>
       </div>
     </h1>
 
