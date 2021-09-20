@@ -35,7 +35,7 @@ async def feeder_process(arduino, G1, command):
         if any(holder_mask[i:]):
             await cartridge_grab(arduino)
 
-        Wait for holder
+        # Wait for holder
         if holder_mask[i]:
             await detect_holder_wraper(arduino)
 

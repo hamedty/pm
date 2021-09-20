@@ -51,22 +51,25 @@ async def main(system, ALL_NODES):
     feeder.feeder_initial_start_event.set()
 
     ''' Main Loop'''
+    t0 = time.time()
     while not system.system_stop.is_set():
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
         rail.rail_parked_event.clear()
+        print(time.time() - t0)
+        t0 = time.time()
 
         # do robots
         await do_nodes(system, robots, lambda r: r.do_robot(recipe, system), simultanously=True)
 
         # command rail to do the next cycle
-        if not system.system_stop.is_set():
-            rail.rail_move_event.set()
+        rail.rail_move_event.set()
 
         # park robots
         await do_nodes(system, robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
 
     ''' Clean Up '''
+    rail.system_stop_event.set()
     await asyncio.gather(*[station.clearance(system) for station in stations])
     for task in stations_loop:
         task.cancel()

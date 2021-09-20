@@ -21,7 +21,7 @@ class Robot(Node):
             'fr': 60000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 400,  # max travel
-            'jm': 1000,  # max jerk
+            'jm': 900,  # max jerk
             'jh': 1000,  # hominzg jerk
             'hi': 1,  # home switch
             'hd': 0,  # homing direction

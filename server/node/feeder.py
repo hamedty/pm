@@ -189,7 +189,7 @@ class Feeder(Node):
 
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
-        while not system.system_stop.is_set():
+        while True:
             if not self.is_at_z(recipe.FEEDER_Z_IDLE):  # first time I am lost!
                 await self.feeder_rail_is_parked_event.wait()
                 self.feeder_rail_is_parked_event.clear()

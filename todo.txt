@@ -1,5 +1,4 @@
 check everyone are homed in the beginning of main loop
-niaz be khali kardan feeder nabashad - better pause/stop/play
 parameters: work without holder feeder - cartridge feeder
 better khali bazi on feeder
 -----------------------------------------

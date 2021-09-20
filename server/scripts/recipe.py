@@ -2,7 +2,7 @@ import asyncio
 
 
 N = 5
-SPEED = .8  # between 0-1
+SPEED = 1  # between 0-1
 ''' Station '''
 FEED_Z_UP = 10000 * SPEED
 FEED_Z_DOWN = 15000 * SPEED
@@ -36,8 +36,8 @@ FEED_RAIL_INTACT = 16000 * SPEED
 D_STANDBY = 250
 D_MIN = D_STANDBY - 25 * N
 assert D_MIN >= 0
-T_RAIL_JACK1 = 1.1
-T_RAIL_JACK2 = 1.1
+T_RAIL_JACK1 = 1.8
+T_RAIL_JACK2 = 1.8
 T_RAIL_FEEDER_JACK_PERCENTAGE = .3
 
 ''' Feeder '''

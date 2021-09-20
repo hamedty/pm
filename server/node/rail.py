@@ -84,12 +84,15 @@ class Rail(Robot):
         self.rail_parked_event.clear()
         self.events['rail_parked_event'] = self.rail_parked_event
 
+        self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
+        self.system_stop_event.clear()
+
     async def rail_loop(self, system, recipe, feeder):
         assert abs(self._status['r.posz'] - 250) < 1, 'Rail must be parked'
         self.rail_parked_event.set()
-        feeder.feeder_rail_is_parked_event.set()
 
-        while not system.system_stop.is_set():
+        while not self.system_stop_event.is_set():
+            feeder.feeder_rail_is_parked_event.set()
             await self.rail_move_event.wait()
             self.rail_move_event.clear()
 
@@ -123,5 +126,3 @@ class Rail(Robot):
             await asyncio.sleep(recipe.T_RAIL_JACK1)
             await self.set_valves([0, 0])
             await asyncio.sleep(recipe.T_RAIL_JACK2)
-
-            feeder.feeder_rail_is_parked_event.set()
