@@ -9,6 +9,7 @@ async def feeder_process(arduino, G1, command):
     FEED_COMEBACK = command['feed_comeback']
     JERK_COMEBACK = command['jerk_comeback']
     JERK_IDLE = command['jerk_idle']
+    CARTRIDGE_FEED = command['cartridge_feed']
 
     holder_mask = command['mask']
     N = len(holder_mask)
@@ -32,7 +33,7 @@ async def feeder_process(arduino, G1, command):
             gate_status = 1
 
         # Grab
-        if any(holder_mask[i:]):
+        if CARTRIDGE_FEED and any(holder_mask[i:]):
             await cartridge_grab(arduino)
 
         # Wait for holder
@@ -46,7 +47,10 @@ async def feeder_process(arduino, G1, command):
 
         # Move and Handover
         z = FEEDER_OFFSET + 25 * (i + 1)
-        await move_rail_n_cartridge_handover(arduino, z, FEED_FEED, G1)
+        if if CARTRIDGE_FEED:
+            await move_rail_n_cartridge_handover(arduino, z, FEED_FEED, G1)
+        else:
+            await G1({'arduino_index': None, 'z': z, 'feed': FEED_FEED})
 
         if int(i / 1) % 2:
             arduino._send_command("{m2: 4, m3: 2}")

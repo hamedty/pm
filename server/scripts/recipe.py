@@ -3,6 +3,8 @@ import asyncio
 
 N = 5
 SPEED = 1  # between 0-1
+SERVICE_FUNC_NO_FEEDER = 0
+SERVICE_FUNC_NO_CARTRIDGE = 0
 ''' Station '''
 FEED_Z_UP = 10000 * SPEED
 FEED_Z_DOWN = 15000 * SPEED
@@ -65,3 +67,22 @@ async def gather_all_nodes(system, ALL_NODES):
             await asyncio.sleep(.01)
 
     return all_nodes, feeder, rail, robots, stations
+
+
+def check_home_all_nodes(system, feeder, rail, robots, stations):
+    assert feeder.is_at_loc(
+        z=FEEDER_Z_IDLE) or feeder.is_at_loc(z=FEEDER_Z_DELIVER)
+    assert rail.is_at_loc(z=D_STANDBY)
+
+    # robots
+    for robot in robots:
+        condition = robot.is_at_loc(
+            x=0, y=0) or robot.is_at_loc(x=X_PARK, y=Y_PARK)
+        message = '%s is not at proper location' % robot.name
+        assert condition, message
+
+    # stations
+    for station in stations:
+        condition = station.is_at_loc(z=0.5) or station.is_at_loc(z=50)
+        message = '%s is not at proper location' % station.name
+        assert condition, message

@@ -14,7 +14,7 @@ async def main(system, ALL_NODES):
     if a:
         print('homing')
         await home_all_nodes(system, feeder, rail, robots, stations)
-
+    check_home_all_nodes(system, feeder, rail, robots, stations)
     ''' Initial Condition '''
     await system.system_running.wait()
 
@@ -74,8 +74,7 @@ async def main(system, ALL_NODES):
     for task in stations_loop:
         task.cancel()
 
-    for i in range(1, 10):
-        await feeder.set_motors((i, 0))
+    await feeder.set_motors()  # set all feeder motors to 0
 
 
 async def home_all_nodes(system, feeder, rail, robots, stations):

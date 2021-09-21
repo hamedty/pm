@@ -152,19 +152,7 @@ class Feeder(Node):
         command = '{%s}' % command
         await self.send_command_raw(command)
 
-    def get_z(self):
-        enc_name, enc_ratio, telorance = self.hw_config['encoders']['posz']
-        enc_location = self._status[enc_name] / float(enc_ratio)
-        g2_location = self._status['r.posz']
-        assert abs(g2_location - enc_location) < telorance
-        return g2_location, enc_location, telorance
-
-    def is_at_z(self, posz):
-        g2_location, enc_location, telorance = self.get_z()
-        return abs(posz - enc_location) < telorance
-
     def init_events(self):
-        assert not self.is_at_z(0)  # must be already homed
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
         self.events['feeder_is_full_event'] = self.feeder_is_full_event
@@ -191,22 +179,24 @@ class Feeder(Node):
         await self.feeder_initial_start_event.wait()
         while system.system_stop.is_set():
             ''' Fill '''
-            mask = self.mask
-            if mask is None:
-                mask = [1] * recipe.N
-            command = {
-                'verb': 'feeder_process',
-                'mask': mask,
-                'z_offset': recipe.FEEDER_Z_IDLE,
-                'feed_feed': recipe.FEED_FEEDER_FEED,
-                'jerk_feed': recipe.JERK_FEEDER_FEED,
-                'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
-                'jerk_comeback': recipe.JERK_FEEDER_COMEBACK,
-                'jerk_idle': recipe.JERK_FEEDER_IDLE,
-            }
-            await system.system_running.wait()
-            await self.send_command(command)
-            self.feeder_finished_command_event.set()
+            if not recipe.SERVICE_FUNC_NO_FEEDER:
+                mask = self.mask
+                if mask is None:
+                    mask = [1] * recipe.N
+                command = {
+                    'verb': 'feeder_process',
+                    'mask': mask,
+                    'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
+                    'z_offset': recipe.FEEDER_Z_IDLE,
+                    'feed_feed': recipe.FEED_FEEDER_FEED,
+                    'jerk_feed': recipe.JERK_FEEDER_FEED,
+                    'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
+                    'jerk_comeback': recipe.JERK_FEEDER_COMEBACK,
+                    'jerk_idle': recipe.JERK_FEEDER_IDLE,
+                }
+                await system.system_running.wait()
+                await self.send_command(command)
+                self.feeder_finished_command_event.set()
 
             ''' Deliver '''
             await self.feeder_rail_is_parked_event.wait()

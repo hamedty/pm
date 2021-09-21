@@ -238,3 +238,20 @@ class Node(object):
             except:
                 print('repeating home - homming failed')
         raise Exception('Homing Failed')
+
+    def get_loc(self, axis):
+        # axis in {'x', 'y', 'z'}
+        enc_name, enc_ratio, telorance = self.hw_config['encoders']['pos' + axis]
+        enc_location = self._status[enc_name] / float(enc_ratio)
+        g2_location = self._status['r.pos' + axis]
+        assert abs(g2_location - enc_location) < telorance
+        return g2_location, enc_location, telorance
+
+    def is_at_loc(self, **kwargs):
+        # x=10, y=20, z=30
+        for axis in kwargs:
+            desired_location = kwargs[axis]
+            g2_location, enc_location, telorance = self.get_lox(axis)
+            if abs(desired_location - enc_location) > telorance:
+                return False
+        return True

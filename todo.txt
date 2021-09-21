@@ -1,17 +1,22 @@
-check everyone are homed in the beginning of main loop
-fix feeder G1 and optimize
-parameters: work without holder feeder - cartridge feeder
-G1 optimization - optimize robot move
-feeder stop motors if didn't feed for a while
------------------------------------------
-optimize robot station event (going to safe place station can start)
 status request sent for no reason!
-verify gate - general read metric function
-query if homed (r.home)
-emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
+fix feeder G1 and optimize
+query if homed (r.home) - general read metric function
+optimize robot station event (going to safe place station can start)
+-----------------------------------------
 homing rail > smaller cap
-control holder DC motor with PWM instead of timer
+feeder stop motors if didn't feed for a while
 motor oralB
+wait for holder in gcode? (M101)
+G1 optimization - optimize robot move
+verify gate (or wait for gate in gcode)
+ST4,5 better z locations
+emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
+control feeder motors with RPI
+control holder DC motor with PWM instead of timer
 log collection framework
 vision debug frame work
 if nodes downs, UI must react
+----------------------------------------
+Production
+Fill Cartridge Conveyor
+Running Empty
