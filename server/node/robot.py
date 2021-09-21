@@ -168,7 +168,9 @@ class Robot(Node):
         await stations_task1
         await system.system_running.wait()
         await self.G1(x=X_INPUT, feed=recipe.FEED_X)
-        await self.G1(y=Y_INPUT_DOWN_1, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_1 + 5, feed=recipe.FEED_Y_DOWN)
+        await self.set_valves([None] * 5 + [0] * 5)
+        await self.G1(y=Y_INPUT_DOWN_1 - 3, feed=recipe.FEED_Y_DOWN)
         await self.set_valves([0] * 10)
         await asyncio.sleep(T_INPUT_RELEASE)
         await asyncio.gather(*[station.verify_dosing_sit_right(recipe, system) for station in self._stations])

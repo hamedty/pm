@@ -1,13 +1,11 @@
 check everyone are homed in the beginning of main loop
-parameters: work without holder feeder - cartridge feeder
-better khali bazi on feeder
------------------------------------------
-status request sent for no reason!
 fix feeder G1 and optimize
+parameters: work without holder feeder - cartridge feeder
 G1 optimization - optimize robot move
 feeder stop motors if didn't feed for a while
-optimize robot station event (going to safe place station can start)
 -----------------------------------------
+optimize robot station event (going to safe place station can start)
+status request sent for no reason!
 verify gate - general read metric function
 query if homed (r.home)
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)

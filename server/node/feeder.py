@@ -189,19 +189,8 @@ class Feeder(Node):
 
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
-        while True:
-            if not self.is_at_z(recipe.FEEDER_Z_IDLE):  # first time I am lost!
-                await self.feeder_rail_is_parked_event.wait()
-                self.feeder_rail_is_parked_event.clear()
-                await system.system_running.wait()
-                await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
-                self.feeder_is_full_event.set()
-                await self.feeder_is_empty_event.wait()
-                self.feeder_is_empty_event.clear()
-
-            if system.system_stop.is_set():
-                return
-
+        while system.system_stop.is_set():
+            ''' Fill '''
             mask = self.mask
             if mask is None:
                 mask = [1] * recipe.N
@@ -218,3 +207,12 @@ class Feeder(Node):
             await system.system_running.wait()
             await self.send_command(command)
             self.feeder_finished_command_event.set()
+
+            ''' Deliver '''
+            await self.feeder_rail_is_parked_event.wait()
+            self.feeder_rail_is_parked_event.clear()
+            await system.system_running.wait()
+            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
+            self.feeder_is_full_event.set()
+            await self.feeder_is_empty_event.wait()
+            self.feeder_is_empty_event.clear()
