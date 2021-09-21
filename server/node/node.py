@@ -251,7 +251,7 @@ class Node(object):
         # x=10, y=20, z=30
         for axis in kwargs:
             desired_location = kwargs[axis]
-            g2_location, enc_location, telorance = self.get_lox(axis)
+            g2_location, enc_location, telorance = self.get_loc(axis)
             if abs(desired_location - enc_location) > telorance:
                 return False
         return True

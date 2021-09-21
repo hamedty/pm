@@ -175,9 +175,12 @@ class Feeder(Node):
         self.feeder_initial_start_event.clear()
         self.events['feeder_initial_start_event'] = self.feeder_initial_start_event
 
+        self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
+        self.system_stop_event.clear()
+
     async def feeding_loop(self, system, recipe, mask=None):
         await self.feeder_initial_start_event.wait()
-        while system.system_stop.is_set():
+        while not self.system_stop_event.is_set():
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 mask = self.mask

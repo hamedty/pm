@@ -29,7 +29,7 @@ if 'Station 1' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 1']
     station.hw_config['H_ALIGNING'] = 230
     station.hw_config['H_PUSH'] = 238
-    station.hw_config['H_PRE_DANCE'] = 244.5
+    station.hw_config['H_PRE_DANCE'] = 244.5 + 1
 
 if 'Station 2' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 2']
@@ -51,14 +51,14 @@ if 'Station 4' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 4']
     station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 238.5
-    station.hw_config['H_PRE_DANCE'] = 245
+    station.hw_config['H_PRE_DANCE'] = 245 + 1
     station.hw_config['holder_webcam_direction'] = 'down'
 
 if 'Station 5' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 5']
     station.hw_config['H_ALIGNING'] = 224
     station.hw_config['H_PUSH'] = 242
-    station.hw_config['H_PRE_DANCE'] = 244
+    station.hw_config['H_PRE_DANCE'] = 244 + 2
 
 if 'Station 6' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 6']

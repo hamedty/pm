@@ -9,7 +9,6 @@ motor oralB
 wait for holder in gcode? (M101)
 G1 optimization - optimize robot move
 verify gate (or wait for gate in gcode)
-ST4,5 better z locations
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
 control holder DC motor with PWM instead of timer

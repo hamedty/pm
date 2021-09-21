@@ -47,7 +47,7 @@ FEED_FEEDER_DELIVER = 50000 * SPEED
 FEED_FEEDER_FEED = 100000 * SPEED
 FEED_FEEDER_COMEBACK = 70000 * SPEED
 FEEDER_Z_IDLE = 16
-FEEDER_Z_DELIVER = 719
+FEEDER_Z_DELIVER = 717
 JERK_FEEDER_COMEBACK = 1300
 JERK_FEEDER_FEED = 10000
 JERK_FEEDER_IDLE = 2500
@@ -83,6 +83,7 @@ def check_home_all_nodes(system, feeder, rail, robots, stations):
 
     # stations
     for station in stations:
-        condition = station.is_at_loc(z=0.5) or station.is_at_loc(z=50)
+        condition = station.is_at_loc(z=0.5) or station.is_at_loc(
+            z=50) or station.is_at_loc(z=0)
         message = '%s is not at proper location' % station.name
         assert condition, message
