@@ -1,4 +1,3 @@
-vaccum gahi oghat vel nemikonad
 fix G1 Hard limit error + status request sent for no reason + fix feeder G1 and optimize
 ST4 hanuz iekhorde gir mikonad
 dosing 5 dar avalin gir data jam shavad

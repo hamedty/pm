@@ -47,6 +47,7 @@ async def feeder_process(arduino, G1, command):
         z = FEEDER_OFFSET + 25 * (i + 1)
         if CARTRIDGE_FEED:
             await move_rail_n_cartridge_handover(arduino, z, FEED_FEED, G1)
+            await asyncio.sleep(.1)  # vaccum release
         else:
             await G1({'arduino_index': None, 'z': z, 'feed': FEED_FEED})
 
