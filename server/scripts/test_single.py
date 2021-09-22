@@ -75,3 +75,10 @@ async def main(system, ALL_NODES):
     #     M101 ({in5:t})
     #     G1Z50F1000
     # ''')
+    # v = 0
+    # while True:
+    #     v = 1 - v
+    #     # for station in stations:
+    #     #     await station.set_valves([0, 0, v])
+    #     await asyncio.gather(*[station.set_valves([0, 0, v]) for station in stations])
+    #     await asyncio.sleep(2)
