@@ -147,10 +147,11 @@ class Robot(Node):
 
         '''EXCHANGE'''
         X_INPUT = 373
-        Y_INPUT_DOWN_1 = 35
+        Y_INPUT_DOWN_RELEASE_HOLDER = 36
+        Y_INPUT_DOWN_RELEASE_DOSING = 32
         Y_INPUT_UP = 55
-        Y_INPUT_DOWN_3 = 6
-        Y_INPUT_DOWN_2 = Y_INPUT_DOWN_3 + 10
+        Y_INPUT_DOWN_PRESS_HOLDER = 6
+        Y_INPUT_DOWN_PRE_PRESS_HOLDER = Y_INPUT_DOWN_PRESS_HOLDER + 10
         Y_OUTPUT = 80
         X_OUTPUT_SAFE = recipe.X_CAPPING
 
@@ -168,9 +169,9 @@ class Robot(Node):
         await stations_task1
         await system.system_running.wait()
         await self.G1(x=X_INPUT, feed=recipe.FEED_X)
-        await self.G1(y=Y_INPUT_DOWN_1 + 5, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN)
         await self.set_valves([None] * 5 + [0] * 5)
-        await self.G1(y=Y_INPUT_DOWN_1 - 3, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN)
         await self.set_valves([0] * 10)
         await asyncio.sleep(T_INPUT_RELEASE)
         await asyncio.gather(*[station.verify_dosing_sit_right(recipe, system) for station in self._stations])
@@ -180,9 +181,9 @@ class Robot(Node):
         await self.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP)
         await self.set_valves([0] * 5 + [1] * 5)
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
-        await self.G1(y=Y_INPUT_DOWN_2, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN)
         await asyncio.sleep(T_PRE_PRESS)
-        await self.G1(y=Y_INPUT_DOWN_3, feed=recipe.FEED_Y_PRESS)
+        await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS)
         await asyncio.sleep(T_POST_PRESS)
         await self.set_valves([0] * 10)
         await stations_task2

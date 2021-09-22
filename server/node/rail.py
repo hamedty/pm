@@ -107,9 +107,9 @@ class Rail(Robot):
             # change jacks to moving
             await system.system_running.wait()
             await self.set_valves([1, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK1 * recipe.T_RAIL_FEEDER_JACK_PERCENTAGE)
+            await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
             await feeder.set_valves([None, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK1 * (1 - recipe.T_RAIL_FEEDER_JACK_PERCENTAGE))
+            await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
             await self.set_valves([1, 1])
             await asyncio.sleep(recipe.T_RAIL_JACK2)
 

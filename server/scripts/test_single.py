@@ -45,28 +45,28 @@ async def main(system, ALL_NODES):
     # T_OUTPUT_RELEASE = 0.2
     # await robot.G1(x=X_INPUT, feed=recipe.FEED_X)
 
-    # while True:
-    #     await rail.set_valves([0] * 2)
-    #     await system.system_running.wait()
-    #     await rail.G1(z=25, feed=recipe.FEED_RAIL_FREE)
-    #     await rail.set_valves([1, 0])
-    #     await asyncio.sleep(recipe.T_RAIL_JACK1 * recipe.T_RAIL_FEEDER_JACK_PERCENTAGE)
-    #     await asyncio.sleep(recipe.T_RAIL_JACK1 * (1 - recipe.T_RAIL_FEEDER_JACK_PERCENTAGE))
-    #     await rail.set_valves([1, 1])
-    #     await asyncio.sleep(recipe.T_RAIL_JACK2)
-    #
-    #     # rail forward
-    #     await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
-    #
-    #     # change jacks to moving
-    #     await rail.set_valves([1, 0])
-    #     await asyncio.sleep(recipe.T_RAIL_JACK1)
-    #     await rail.set_valves([0, 0])
-    #     await asyncio.sleep(recipe.T_RAIL_JACK2)
+    while True:
+        await rail.set_valves([0] * 2)
+        await system.system_running.wait()
+        await rail.G1(z=25, feed=recipe.FEED_RAIL_FREE)
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(recipe.T_RAIL_JACK1 * recipe.T_RAIL_FEEDER_JACK_PERCENTAGE)
+        await asyncio.sleep(recipe.T_RAIL_JACK1 * (1 - recipe.T_RAIL_FEEDER_JACK_PERCENTAGE))
+        await rail.set_valves([1, 1])
+        await asyncio.sleep(recipe.T_RAIL_JACK2)
 
-    for station in stations:
-        await station.G1(z=station.hw_config['H_PRE_DANCE'], feed=5000)
-        # await station.G1(z=100, feed=10000)
-    # station.hw_config['H_ALIGNING'] = 230
-    # station.hw_config['H_PUSH'] = 238
-    # station.hw_config['H_PRE_DANCE'] = 244.5
+        # rail forward
+        await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+
+        # change jacks to moving
+        await rail.set_valves([1, 0])
+        await asyncio.sleep(recipe.T_RAIL_JACK1)
+        await rail.set_valves([0, 0])
+        await asyncio.sleep(recipe.T_RAIL_JACK2)
+    #
+    # for station in stations:
+    #     await station.G1(z=station.hw_config['H_PRE_DANCE'], feed=5000)
+    #     # await station.G1(z=100, feed=10000)
+    # # station.hw_config['H_ALIGNING'] = 230
+    # # station.hw_config['H_PUSH'] = 238
+    # # station.hw_config['H_PRE_DANCE'] = 244.5
