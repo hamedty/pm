@@ -331,9 +331,7 @@ class Station(Node):
         data['FEED_DANCE'] = recipe.FEED_DANCE
 
         # Press
-        data['PAUSE_PRESS0'] = 0.1
-        data['PAUSE_PRESS1'] = 0.4
-        data['PAUSE_PRESS2'] = 0.8
+        data['PAUSE_PRESS'] = 1.5
 
         # Dance Back
         data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
@@ -378,11 +376,9 @@ class Station(Node):
 
             ; press
             M100 ({out1: 0, out2: 0, out4: 0})
-            G4 P%(PAUSE_PRESS0).2f
-            M100 ({out5: 1})
-            G4 P%(PAUSE_PRESS1).2f
             M100 ({out3: 1})
-            G4 P%(PAUSE_PRESS2).2f
+            M100 ({out5: 1})
+            G4 P%(PAUSE_PRESS).2f
             M100 ({out3: 0})
 
             ; dance back

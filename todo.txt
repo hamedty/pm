@@ -1,3 +1,4 @@
+vaccum gahi oghat vel nemikonad
 fix G1 Hard limit error + status request sent for no reason + fix feeder G1 and optimize
 ST4 hanuz iekhorde gir mikonad
 dosing 5 dar avalin gir data jam shavad
@@ -20,3 +21,9 @@ if nodes downs, UI must react
 Production
 Fill Cartridge Conveyor
 Running Empty
+
+
+31/6/1400
+shoro kaar: 173 + 344 = 517 (az daftarche double check shavad)
+be iakhchal: 18*24 + 10 = 442
+tahvili: 75 pen

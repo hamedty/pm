@@ -26,7 +26,7 @@ async def main(system, ALL_NODES):
         await feeder.set_motors(
             (2, 4), (3, 4),  # Holder Downstream
             (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-            (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+            (6, 32)  # , (8, 200)  # Cartridge Conveyor + OralB
         )
         await asyncio.sleep(2)
 
