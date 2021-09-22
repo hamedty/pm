@@ -98,7 +98,8 @@ class Station(Node):
             'gate': 2,  # gate verification
         },
         'encoders': {
-            'posz': ['enc1', 300.0, .4],  # encoder key, ratio, telorance
+            # encoder key, ratio, telorance_soft, telorance_hard
+            'posz': ['enc1', 300.0, .4, 5.0],
         },
         'H_ALIGNING': 210,
         'H_PUSH': 219,
@@ -251,7 +252,7 @@ class Station(Node):
         data = {}
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
-        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
+        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], system=system)
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
@@ -396,5 +397,5 @@ class Station(Node):
         ''' % data
         await self.send_command_raw(command)
 
-        await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
+        await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'], system=system)
         await self.set_valves([None, None, None, 1])

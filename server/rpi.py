@@ -213,7 +213,7 @@ async def G1(command, _=None):
     retries = 10
     # check current position is correct
     result, reached, g2core_location, encoder_location = arduino.check_encoder(
-        axes, req_location)
+        axes, req_location, check_telorance_hard=(not correct_initial))
     # print(result, g2core_location, encoder_location)
     if (not correct_initial) and (not result):
         arduino._debug = False

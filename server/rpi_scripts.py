@@ -1,13 +1,12 @@
 import asyncio
 import time
+import random
 
 
 async def feeder_process(arduino, G1, command):
     FEEDER_OFFSET = command['z_offset']
     FEED_FEED = command['feed_feed']
     JERK_FEED = command['jerk_feed']
-    FEED_COMEBACK = command['feed_comeback']
-    JERK_COMEBACK = command['jerk_comeback']
     JERK_IDLE = command['jerk_idle']
     CARTRIDGE_FEED = command['cartridge_feed']
 
@@ -16,12 +15,11 @@ async def feeder_process(arduino, G1, command):
     holder_mask.append(0)
 
     initial_z = FEEDER_OFFSET
-    arduino._send_command("{m2: 2, m3: 4}")
-    arduino._send_command("{out2: 0}")
-    arduino._send_command('{z:{jm:%d}}' % JERK_COMEBACK)
-    await G1({'arduino_index': None, 'z': initial_z, 'feed': FEED_COMEBACK})
-    arduino._send_command("{out2: 1}")
-    arduino._send_command('{z:{jm:%d}}' % JERK_FEED)
+    arduino._send_command('''
+        {out2: 1}
+        {z:{jm:%d}}
+        ''' % JERK_FEED)
+    oscillate_motors_task = asyncio.create_task(oscillate_motors(arduino))
 
     holder_shift_register = 0
     gate_status = 0
@@ -52,11 +50,24 @@ async def feeder_process(arduino, G1, command):
         else:
             await G1({'arduino_index': None, 'z': z, 'feed': FEED_FEED})
 
-        if int(i / 1) % 2:
-            arduino._send_command("{m2: 4, m3: 2}")
-        else:
-            arduino._send_command("{m2: 2, m3: 4}")
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
+    oscillate_motors_task.cancel()
+
+
+async def oscillate_motors(arduino):
+    async def send_command_to_be_shielded(arduino, command):
+        arduino._send_command(command)
+    m2 = 4
+    m3 = 2
+    dir = 1
+    while True:
+        command = "{m2: %d, m3: %d}" % (m2, m3)
+        await asyncio.shield(send_command_to_be_shielded(arduino, command))
+        await asyncio.sleep(.3 + 0.3 * random.random())
+        if m2 == 4 or m3 == 4:
+            dir = -dir
+        m2 += dir
+        m3 -= dir
 
 
 async def cartridge_grab(arduino):
@@ -120,5 +131,5 @@ async def detect_holder(arduino):
         del arduino._status['r.in5']
     arduino._send_command('{in5:n}')
     while 'r.in5' not in arduino._status:
-        await asyncio.sleep(0.001)
+        await asyncio.sleep(0.002)
     return arduino._status['r.in5']

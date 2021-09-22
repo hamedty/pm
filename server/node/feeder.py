@@ -125,8 +125,8 @@ class Feeder(Node):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 120.0, 2.0],  # encoder key, ratio, telorance
-            # Feed 10,000 @ 480 encoder = 80khz
+            # encoder key, ratio, telorance_soft, telorance_hard
+            'posz': ['enc1', 120.0, 2.0, 5.0],
         }
 
     }
@@ -183,6 +183,8 @@ class Feeder(Node):
         while not self.system_stop_event.is_set():
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
+                await self.set_valves([None, 0])
+                await self.G1(z=recipe.FEEDER_Z_IDLE, feed=recipe.FEED_FEEDER_COMEBACK, system=system)
                 mask = self.mask
                 if mask is None:
                     mask = [1] * recipe.N
@@ -193,8 +195,6 @@ class Feeder(Node):
                     'z_offset': recipe.FEEDER_Z_IDLE,
                     'feed_feed': recipe.FEED_FEEDER_FEED,
                     'jerk_feed': recipe.JERK_FEEDER_FEED,
-                    'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
-                    'jerk_comeback': recipe.JERK_FEEDER_COMEBACK,
                     'jerk_idle': recipe.JERK_FEEDER_IDLE,
                 }
                 await system.system_running.wait()
@@ -205,7 +205,7 @@ class Feeder(Node):
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
             await system.system_running.wait()
-            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
+            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER, system=system)
             self.feeder_is_full_event.set()
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()

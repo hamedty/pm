@@ -198,13 +198,28 @@ class Node(object):
     async def send_command_create_camera(self):
         return
 
-    async def G1(self, **kwargs):
+    async def G1(self, system=None, **kwargs):
         # if not self.homed:
         #     raise
         # kwargs: x, y, z, feed
         command = {'verb': 'G1'}
         command.update(kwargs)
-        return await self.send_command(command)
+
+        while True:
+            success, line = await self.send_command(command, assert_success=False)
+            if success:
+                return success, line
+            if system is None:
+                raise (line, self.ip, self.arduino_id)
+            error = {
+                'message': 'G1 Failed',
+                'location_name': self.name,
+                'details': line,
+            }
+            print(error)
+            error_clear_event = await system.register_error(error)
+            await error_clear_event.wait()
+            command['correct_initial'] = True
 
     def ready_for_command(self):
         return 'enc1' in self._status
@@ -241,11 +256,12 @@ class Node(object):
 
     def get_loc(self, axis):
         # axis in {'x', 'y', 'z'}
-        enc_name, enc_ratio, telorance = self.hw_config['encoders']['pos' + axis]
+        enc_name, enc_ratio, telorance_soft, telorance_hard = self.hw_config[
+            'encoders']['pos' + axis]
         enc_location = self._status[enc_name] / float(enc_ratio)
         g2_location = self._status['r.pos' + axis]
-        assert abs(g2_location - enc_location) < telorance
-        return g2_location, enc_location, telorance
+        assert abs(g2_location - enc_location) < telorance_soft
+        return g2_location, enc_location, telorance_soft
 
     def is_at_loc(self, **kwargs):
         # x=10, y=20, z=30

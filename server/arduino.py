@@ -137,20 +137,23 @@ class Arduino(object):
         del d['time']
         return d
 
-    def check_encoder(self, axis, desired_location):  # axis = 'x'
+    def check_encoder(self, axis, desired_location, check_telorance_hard=True):  # axis = 'x'
         # 'encoders': {
-        #     'posz': ['enc1', 320.0, .1],  # encoder key, ratio, telorance
+        #     'posz': ['enc1', 320.0, .1, 10],  # encoder key, ratio, telorance_soft, telorance_hard
         # }
 
-        enc_key, ratio, telorance = self._hw_config['encoders']['pos' + axis]
+        enc_key, ratio, telorance_soft, telorance_hard = self._hw_config['encoders']['pos' + axis]
         axis_key = 'r.pos' + axis
 
         g2core_location = self._status[axis_key]
         encoder_location = self._status[enc_key] / float(ratio)
         diversion_g2core = abs(encoder_location - g2core_location)
-        result = (diversion_g2core < telorance)
+        result = (diversion_g2core < telorance_soft)
+        if check_telorance_hard:
+            if diversion_g2core >= telorance_hard:
+                raise Exception('error exceed hard telorance')
         diversion_desired = abs(encoder_location - desired_location)
-        reached = (diversion_desired < telorance)
+        reached = (diversion_desired < telorance_soft)
         return result, reached, g2core_location, encoder_location
 
 

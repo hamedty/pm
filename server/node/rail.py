@@ -56,7 +56,8 @@ class Rail(Robot):
             'z-': 1,
         },
         'encoders': {
-            'posz': ['enc1', 64.0, 1],  # encoder key, ratio, telorance
+            # encoder key, ratio, telorance_soft, telorance_hard
+            'posz': ['enc1', 64.0, 1.0, 5.0],
         }
 
     }
@@ -98,7 +99,7 @@ class Rail(Robot):
 
             # rail backward
             await system.system_running.wait()
-            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
 
             # wait for feeder
             await feeder.feeder_is_full_event.wait()
@@ -115,7 +116,7 @@ class Rail(Robot):
 
             # rail forward
             await system.system_running.wait()
-            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT, system=system)
 
             # clear feeder
             feeder.feeder_is_empty_event.set()

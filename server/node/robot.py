@@ -93,8 +93,9 @@ class Robot(Node):
             'y-': 4,
         },
         'encoders': {
-            'posx': ['enc2', 120.0, 1.0],  # encoder key, ratio, telorance
-            'posy': ['enc1', 480.0, 1.0],
+            # encoder key, ratio, telorance_soft, telorance_hard
+            'posx': ['enc2', 120.0, 1.0, 5.0],
+            'posy': ['enc1', 480.0, 1.0, 5.0],
         }
 
     }
@@ -138,12 +139,12 @@ class Robot(Node):
         T_GRAB_IN = 0.5
 
         await system.system_running.wait()
-        await self.G1(y=Y_GRAB_IN_UP_1, feed=recipe.FEED_Y_UP)
-        await self.G1(x=X_GRAB_IN, feed=recipe.FEED_X)
-        await self.G1(y=Y_GRAB_IN_DOWN, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_GRAB_IN_UP_1, feed=recipe.FEED_Y_UP, system=system)
+        await self.G1(x=X_GRAB_IN, feed=recipe.FEED_X, system=system)
+        await self.G1(y=Y_GRAB_IN_DOWN, feed=recipe.FEED_Y_DOWN, system=system)
         await self.set_valves_grab_infeed()
         await asyncio.sleep(T_GRAB_IN)
-        await self.G1(y=Y_GRAB_IN_UP_2, feed=recipe.FEED_Y_UP)
+        await self.G1(y=Y_GRAB_IN_UP_2, feed=recipe.FEED_Y_UP, system=system)
 
         '''EXCHANGE'''
         X_INPUT = 373
@@ -168,49 +169,49 @@ class Robot(Node):
         # ensure about stations
         await stations_task1
         await system.system_running.wait()
-        await self.G1(x=X_INPUT, feed=recipe.FEED_X)
-        await self.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN)
+        await self.G1(x=X_INPUT, feed=recipe.FEED_X, system=system)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
         await self.set_valves([None] * 5 + [0] * 5)
-        await self.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN, system=system)
         await self.set_valves([0] * 10)
         await asyncio.sleep(T_INPUT_RELEASE)
         await asyncio.gather(*[station.verify_dosing_sit_right(recipe, system) for station in self._stations])
         stations_task2 = asyncio.gather(
-            *[station.G1(z=Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 4.0) for station in self._stations])
+            *[station.G1(z=Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 4.0, system=system) for station in self._stations])
 
-        await self.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP)
+        await self.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP, system=system)
         await self.set_valves([0] * 5 + [1] * 5)
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
-        await self.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN)
+        await self.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
         await asyncio.sleep(T_PRE_PRESS)
-        await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS)
+        await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS, system=system)
         await asyncio.sleep(T_POST_PRESS)
         await self.set_valves([0] * 10)
         await stations_task2
-        await self.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP)
+        await self.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
         await self.set_valves([1] * 5)
         await asyncio.sleep(T_OUTPUT_GRIPP)
         await asyncio.gather(*[station.set_valves([0, 0, 0, 1]) for station in self._stations])
 
         await asyncio.sleep(T_OUTPUT_RELEASE)
-        await asyncio.gather(*[station.G1(z=Z_OUTPUT_SAFE, feed=recipe.FEED_Z_UP) for station in self._stations])
+        await asyncio.gather(*[station.G1(z=Z_OUTPUT_SAFE, feed=recipe.FEED_Z_UP, system=system) for station in self._stations])
 
         for station in self._stations:
             station.station_is_full_event.set()
 
         # TODO: This can be faster
-        await self.G1(x=X_OUTPUT_SAFE, feed=recipe.FEED_X)
+        await self.G1(x=X_OUTPUT_SAFE, feed=recipe.FEED_X, system=system)
         for station in self._stations:
             station.station_is_safe_event.set()
 
         '''CAP'''
         await system.system_running.wait()
-        await self.G1(x=recipe.X_CAPPING, feed=recipe.FEED_X)
-        await self.G1(y=recipe.Y_CAPPING_DOWN_1, feed=recipe.FEED_Y_DOWN)
-        await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING)
+        await self.G1(x=recipe.X_CAPPING, feed=recipe.FEED_X, system=system)
+        await self.G1(y=recipe.Y_CAPPING_DOWN_1, feed=recipe.FEED_Y_DOWN, system=system)
+        await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING, system=system)
         await self.set_valves([0] * 10)
-        await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X)
+        await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X, system=system)
 
     async def do_robot_park(self, recipe, system):
         await system.system_running.wait()
-        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 5.0)
+        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 5.0, system=system)

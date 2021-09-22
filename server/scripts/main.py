@@ -22,12 +22,13 @@ async def main(system, ALL_NODES):
     await do_nodes(system, stations, lambda s: s.set_valves([None, None, 0, 1, 0]))
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
-    await feeder.set_motors(
-        (2, 4), (3, 4),  # Holder Downstream
-        (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-        (6, 32), (8, 200)  # Cartridge Conveyor + OralB
-    )
-    await asyncio.sleep(2)
+    if not recipe.SERVICE_FUNC_NO_FEEDER:
+        await feeder.set_motors(
+            (2, 4), (3, 4),  # Holder Downstream
+            (1, 26), (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+            (6, 32), (8, 200)  # Cartridge Conveyor + OralB
+        )
+        await asyncio.sleep(2)
 
     ''' Initial Condition '''
     # feeder
@@ -93,7 +94,7 @@ async def home_all_nodes(system, feeder, rail, robots, stations):
     await rail.home()
 
     await system.system_running.wait()
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6, system=system)
     await feeder_home
 
 
