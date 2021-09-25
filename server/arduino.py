@@ -122,6 +122,9 @@ class Arduino(object):
             new_status['traceback'] = traceback
 
         new_status['time'] = time.time()
+        if ('r.line' in new_status) and new_status.get('r.stat') not in {1, 3, 4}:
+            del new_status['r.line']
+
         self._status.update(new_status)
         if self._status_out_queue is not None:
             try:

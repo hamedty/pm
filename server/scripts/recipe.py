@@ -1,7 +1,7 @@
 import asyncio
 
 
-N = 5
+N = 10
 SPEED = 1  # between 0-1
 SERVICE_FUNC_NO_FEEDER = 1
 SERVICE_FUNC_NO_CARTRIDGE = 0
