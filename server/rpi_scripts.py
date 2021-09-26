@@ -103,7 +103,6 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
         N%d M0
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
-    await asyncio.sleep(.6)
     await G1({'arduino_index': None, 'z': z, 'feed': feed, 'correct_initial': True})
 
     command_id = arduino.get_command_id()

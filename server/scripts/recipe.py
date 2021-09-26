@@ -54,7 +54,7 @@ JERK_FEEDER_FEED = 10000
 JERK_FEEDER_IDLE = 2500
 
 
-async def gather_all_nodes(system, ALL_NODES):
+async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
     stations = [node for node in ALL_NODES if node.name.startswith('Station ')]
     robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
     rail = [node for node in ALL_NODES if node.name.startswith('Rail')][0]
@@ -63,9 +63,10 @@ async def gather_all_nodes(system, ALL_NODES):
     all_nodes = stations + robots + [rail, feeder]
 
     # All Nodes Ready?
-    for node in all_nodes:
-        while not node.ready_for_command():
-            await asyncio.sleep(.01)
+    if wait_for_readiness:
+        for node in all_nodes:
+            while not node.ready_for_command():
+                await asyncio.sleep(.01)
 
     return all_nodes, feeder, rail, robots, stations
 

@@ -1,6 +1,4 @@
-fix G1 Hard limit error + status request sent for no reason + fix feeder G1 and optimize
 ST4 hanuz iekhorde gir mikonad
-dosing 5 dar avalin gir data jam shavad
 query if homed (r.home) - general read metric function
 optimize robot station event (going to safe place station can start)
 -----------------------------------------
@@ -9,6 +7,7 @@ feeder stop motors if didn't feed for a while
 motor oralB
 wait for holder in gcode? (M101)
 G1 optimization - optimize robot move
+status request sent for no reason
 verify gate (or wait for gate in gcode)
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
