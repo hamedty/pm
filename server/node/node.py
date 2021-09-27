@@ -209,6 +209,12 @@ class Node(object):
         assert abs(g2_location - enc_location) < telorance_soft
         return g2_location, enc_location, telorance_soft
 
+    def get_enc_loc(self, axis):
+        # axis in {'x', 'y', 'z'}
+        enc_name, enc_ratio, _, _ = self.hw_config['encoders']['pos' + axis]
+        enc_location = self._status[enc_name] / float(enc_ratio)
+        return enc_location
+
     def is_at_loc(self, **kwargs):
         # x=10, y=20, z=30
         for axis in kwargs:

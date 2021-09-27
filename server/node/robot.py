@@ -198,10 +198,18 @@ class Robot(Node):
         for station in self._stations:
             station.station_is_full_event.set()
 
-        # TODO: This can be faster
-        await self.G1(x=X_OUTPUT_SAFE, feed=recipe.FEED_X, system=system)
+        ''' Move out '''
+        STATION_SAFE_LIMIT = 310
+        assert self.get_enc_loc(
+            'x') > STATION_SAFE_LIMIT, '%s is not unsafe intially' % self.name
+        t1 = asyncio.create_task(
+            self.G1(x=X_OUTPUT_SAFE, feed=recipe.FEED_X, system=system))
+        while self.get_enc_loc('x') > STATION_SAFE_LIMIT:
+            await asyncio.sleep(0.002)
+
         for station in self._stations:
             station.station_is_safe_event.set()
+        await t1
 
         '''CAP'''
         await system.system_running.wait()
