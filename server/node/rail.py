@@ -23,12 +23,12 @@ class Rail(Robot):
             'tn': 0,  # min travel
             'tm': 496,  # max travel -- 496
             'jm': 2000,  # max jerk
-            'jh': 1000,  # hominzg jerk
+            'jh': 5000,  # hominzg jerk
             'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 1000,  # home search speed
-            'lv': 500,  # latch speed
-            'lb': 10,  # latch backoff; if home switch is active at start
+            'sv': 1200,  # home search speed
+            'lv': 100,  # latch speed
+            'lb': 5,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
         ('di2mo', 1),  # Homing Switch - Mode = Active High - NC
@@ -74,6 +74,7 @@ class Rail(Robot):
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
         await asyncio.sleep(1)
+        await self.G1(z=250, feed=5000)
 
     def init_events(self):
         self.rail_move_event = asyncio.Event()  # setter: robot - waiter: rail

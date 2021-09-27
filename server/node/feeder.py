@@ -84,8 +84,8 @@ class Feeder(Node):
             'hi': 3,  # home switch
             # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
-            'sv': 2000,  # home search speed
-            'lv': 200,  # latch speed
+            'sv': 1500,  # home search speed
+            'lv': 100,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),

@@ -1,4 +1,3 @@
-homing rail, feeder > smaller cap? jerk? speed?
 G1 optimization - optimize robot move
 -----------------------------------------
 feeder stop motors if didn't feed for a while
