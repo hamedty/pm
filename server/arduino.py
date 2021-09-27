@@ -112,6 +112,20 @@ class Arduino(object):
         if self.stat_code:
             raise HW_PANIC_EXCEPTION(self.stat_code)
 
+    async def read_metric(self, query, response):
+        # e.g. query = in5, response = r.in5
+        if response in self._status:
+            del self._status[response]
+        self._send_command('{%s:n}' % query)
+        for i in range(500):
+            if response in self._status:
+                break
+            await asyncio.sleep(0.002)
+        if response in self._status:
+            return True, self._status[response]
+        else:
+            return False, None
+
     def set_status(self, message='', traceback='', data={}):
         flatten_data = flatten(data)
         new_status = clean_dictionary(flatten_data)
@@ -207,6 +221,9 @@ def clean_key(key):
     if '.pos.' in key:
         return key.replace('.pos.', '.pos')
     if key.startswith('r.pos'):
+        return key
+
+    if key.startswith('r.hom'):
         return key
 
     if key in GOOD_KEYS:

@@ -5,6 +5,7 @@ import asyncio
 class Robot(Node):
     type = 'robot'
     arduino_reset_pin = 2
+    HOMMED_AXES = ['x', 'y']
 
     g2core_config_base = [
         # X - Holder Motor
@@ -96,8 +97,7 @@ class Robot(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posx': ['enc2', 120.0, 1.0, 5.0],
             'posy': ['enc1', 480.0, 1.0, 5.0],
-        }
-
+        },
     }
 
     def __init__(self, *args, **kwargs):

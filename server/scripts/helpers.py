@@ -3,6 +3,7 @@ import asyncio
 from .main import *
 from .recipe import *
 from scripts import recipe
+import aioconsole
 
 
 async def fill_cartridge_conveyor(system, ALL_NODES):
@@ -14,7 +15,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 
 async def run_rail_empty(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
-    check_home_all_nodes(system, feeder, rail, robots, stations)
+    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
 
@@ -39,7 +40,7 @@ async def run_rail_empty(system, ALL_NODES):
 
 async def pickup_rail(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
-    check_home_all_nodes(system, feeder, rail, robots, stations)
+    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
 
     robot = robots[1]
     Y_GRAB_IN_UP_1 = 75
@@ -74,7 +75,11 @@ async def pickup_rail(system, ALL_NODES):
     T_OUTPUT_GRIPP = 0.1
     T_OUTPUT_RELEASE = 0.2
 
-    await robot.G1(x=X_INPUT, feed=recipe.FEED_X, system=system)
+    await robot.G1(x=X_INPUT - .5, feed=recipe.FEED_X, system=system)
+
+    # await robot.G1(y=50, feed=recipe.FEED_Y_DOWN, system=system)
+    # await aioconsole.ainput('continue?')
+
     await robot.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
     await robot.set_valves([None] * 5 + [0] * 5)
     await robot.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN, system=system)

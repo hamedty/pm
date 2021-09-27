@@ -6,6 +6,7 @@ class Rail(Robot):
     type = 'rail'
     arduino_reset_pin = 2
     HOMMING_RETRIES = 10
+    HOMMED_AXES = ['z']
 
     g2core_config_base = [
         (1, {
@@ -58,8 +59,7 @@ class Rail(Robot):
         'encoders': {
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 64.0, 1.0, 5.0],
-        }
-
+        },
     }
 
     async def set_valves(self, values):

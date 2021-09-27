@@ -18,16 +18,6 @@ CAMERAS = {}
 DATA_PATH = '/home/pi/data'
 
 
-async def create_camera(command, _):
-    if 'holder' not in CAMERAS:
-        CAMERAS['holder'] = cheap_cam.create_camera(
-            'holder', command['holder_roi'])
-    if 'dosing' not in CAMERAS:
-        CAMERAS['dosing'] = cheap_cam.create_camera(
-            'dosing', command['dosing_roi'])
-    return {'success': True}
-
-
 async def dump_frame(command, _):
     CAMERAS['holder'].dump_frame(
         filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
@@ -146,29 +136,34 @@ async def detect_vision(command, _):
     return result
 
 
-async def create_arduino(command, _):
-    arduino_index = command['arduino_index']
-    if ARDUINOS.get(arduino_index) is None:
-        arduino = Arduino(arduino_index)
-        arduino.receive_thread = threading.Thread(
-            target=arduino._receive)
-        arduino.receive_thread.start()
-        ARDUINOS[arduino_index] = arduino
-    return {'success': True}
-
-
 async def restart_arduino(command, _):
     arduino = ARDUINOS[command['arduino_index']]
     arduino.restart()
     return {'success': True}
 
 
-async def config_arduino(command, _):
+async def create_arduino(command, _):
+    arduino_index = command['arduino_index']
+    # create arduino
+    if ARDUINOS.get(arduino_index) is None:
+        arduino = Arduino(arduino_index)
+        arduino.receive_thread = threading.Thread(
+            target=arduino._receive)
+        arduino.receive_thread.start()
+        ARDUINOS[arduino_index] = arduino
     arduino = ARDUINOS[command['arduino_index']]
+
+    # config arduino & G2
     arduino._hw_config = command['hw_config']
     for key, value in command['g2core_config']:
         command_id = arduino.send_command(json.dumps({key: value}))
-    importlib.reload(rpi_scripts)
+
+    # create cameras
+    for cam_id in arduino._hw_config.get('cameras', {}):  # holder, dosing, etc
+        if cam_id not in CAMERAS:
+            rois = arduino._hw_config['cameras'][cam_id]['rois']
+            CAMERAS[cam_id] = cheap_cam.create_camera(cam_id, rois)
+
     return {'success': True}
 
 
@@ -267,6 +262,14 @@ async def feeder_process(command, _):
     return {'success': True}
 
 
+async def read_metric(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+    query = command['query']
+    response = command['response']
+    success, result = await arduino.read_metric(query, response)
+    return {'success': success, 'result': result}
+
+
 async def status_hook(command, writer):
     arduino_index = command['arduino_index']
 
@@ -296,7 +299,6 @@ async def status_hook(command, writer):
 
 COMMAND_HANDLER = {
     # vision
-    'create_camera': create_camera,
     'dump_frame': dump_frame,
     'dump_training': dump_training,
 
@@ -304,12 +306,12 @@ COMMAND_HANDLER = {
     'detect_vision': detect_vision,
 
     # hardware
+    'restart_arduino': restart_arduino,
     'create_arduino': create_arduino,
-    'config_arduino': config_arduino,
     'raw': raw,
     'G1': G1,
     'feeder_process': feeder_process,
-    'restart_arduino': restart_arduino,
+    'read_metric': read_metric,
 
     # second channel - status
     'status_hook': status_hook,

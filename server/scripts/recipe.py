@@ -71,7 +71,11 @@ async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
     return all_nodes, feeder, rail, robots, stations
 
 
-def check_home_all_nodes(system, feeder, rail, robots, stations):
+async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations):
+    for node in all_nodes:
+        # only checks if home squence has beed ran. location must be checked separately
+        is_homed = await node.is_homed()
+        assert is_homed, '%s is not homed!' % node.name
     assert feeder.is_at_loc(
         z=FEEDER_Z_IDLE) or feeder.is_at_loc(z=FEEDER_Z_DELIVER)
     assert rail.is_at_loc(z=D_STANDBY)

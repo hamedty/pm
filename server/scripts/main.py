@@ -14,7 +14,7 @@ async def main(system, ALL_NODES):
     if a:
         print('homing')
         await home_all_nodes(system, feeder, rail, robots, stations)
-    check_home_all_nodes(system, feeder, rail, robots, stations)
+    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     ''' Initial Condition '''
     await system.system_running.wait()
 

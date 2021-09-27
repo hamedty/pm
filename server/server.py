@@ -36,10 +36,7 @@ class System(object):
     async def setup_node(self, node):
         res = await node.connect()
         asyncio.create_task(node.loop())
-        if res:
-            await node.send_command_config_arduino()
-            await node.send_command_create_camera()
-            node.boot = True
+        node.boot = True
 
     async def register_error(self, error):
         error_id = str(uuid.uuid1())

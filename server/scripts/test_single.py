@@ -37,8 +37,13 @@ async def main(system, ALL_NODES):
     # await feeder.send_command_raw(command)
     #
     # print(time.time() - t0)
-    station = stations[8]
 
-    for i in range(100):
-        await asyncio.gather(*[s.set_valves([None] * 4 + [i % 2]) for s in stations[5:]])
-        await asyncio.sleep(.3)
+    # for i in range(100):
+    #     await asyncio.gather(*[s.set_valves([None] * 4 + [i % 2]) for s in stations[5:]])
+    #     await asyncio.sleep(.2)
+    #
+    is_homed = await feeder.is_homed()
+    print(is_homed)
+    # print(await feeder.read_metric('homy'))
+    # print(await feeder.read_metric('homz'))
+    # print(await feeder.read_metric('j'))

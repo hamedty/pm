@@ -4,6 +4,7 @@ import asyncio
 
 class Feeder(Node):
     HOMMING_RETRIES = 4
+    HOMMED_AXES = ['y', 'z']
 
     type = 'feeder'
     arduino_reset_pin = 21
@@ -127,8 +128,7 @@ class Feeder(Node):
         'encoders': {
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 120.0, 2.0, 5.0],
-        }
-
+        },
     }
 
     async def home_core(self):

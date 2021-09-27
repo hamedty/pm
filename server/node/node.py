@@ -18,6 +18,7 @@ def generate_random_string():
 
 class Node(object):
     HOMMING_RETRIES = 2
+    HOMMED_AXES = ['a']
 
     def __init__(self, name, ip, arduino_id=None):
         self.set_status(message='node instance creating')
@@ -33,13 +34,6 @@ class Node(object):
         self.lock = None
         self.homed = False
         self.events = {}
-
-    async def ping(self):
-        command = 'ping -c 1 -W 0.5'.split()
-        command.append(self.ip)
-        while subprocess.call(command, stdout=subprocess.PIPE) != 0:
-            await asyncio.sleep(.5)
-        return True
 
     async def scp_from(self, path_src, path_dst):
         path_dst, file_extension = os.path.splitext(path_dst)
@@ -71,7 +65,7 @@ class Node(object):
 
             self.set_status(message='socket connected')
 
-        await self.send_command({'verb': 'create_arduino'})
+        await self.create_arduino()
         return True
 
     async def send_command_raw(self, data, wait_start=[1, 3, 4], wait_completion=True):
@@ -87,59 +81,6 @@ class Node(object):
             return self.get_status()
         else:
             return res
-
-    async def send_command_scenario(self, command):
-        if command['verb'] == 'dump_frame':
-            await self.send_command(command)
-            await self.scp_from('~/data/dosing.png', './dump/dosing.png')
-            await self.scp_from('~/data/holder.png', './dump/holder.png')
-            self.draw_debug_dump()
-        elif command['verb'] == 'dump_training_holder':
-            await self.set_valves([0, 1])
-            await asyncio.sleep(1)
-
-            random_string = generate_random_string()
-            command['verb'] = 'dump_training'
-            command['component'] = 'holder'
-            command['speed'] = 10000
-            command['folder_name'] = random_string
-
-            await self.send_command(command, assert_success=True)
-
-            folder_name_src = '~/data/%s' % random_string
-            folder_name_dst = '../dataset/holder_%02d_%s' % (
-                self.ip_short, random_string)
-
-            await self.set_valves([0, 0])
-            await self.scp_from(folder_name_src, folder_name_dst)
-
-        elif command['verb'] == 'dump_training_dosing':
-            if command.get('prepare'):
-                await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
-            await self.set_valves([1])
-            await asyncio.sleep(1)
-
-            random_string = generate_random_string()
-            command['verb'] = 'dump_training'
-            command['component'] = 'dosing'
-            command['speed'] = 10000
-            command['folder_name'] = random_string
-
-            await self.send_command(command, assert_success=True)
-
-            folder_name_src = '~/data/%s' % random_string
-            folder_name_dst = '../dataset/dosing_%02d_%s' % (
-                self.ip_short, random_string)
-
-            await self.set_valves([0])
-            if command.get('prepare'):
-                await self.G1(z=1, feed=10000)
-            await self.scp_from(folder_name_src, folder_name_dst)
-
-        elif command['verb'] == 'home':
-            await self.home()
-        else:
-            return await self.send_command(command)
 
     async def send_command(self, command, assert_success=True):
         command['arduino_index'] = self.arduino_id
@@ -171,21 +112,28 @@ class Node(object):
             line = json.loads(line)
             self.set_status(**line)
 
-    async def send_command_config_arduino(self):
-        await self.scp_to('./rpi_scripts.py', '~/server/')
-        command = {
-            'verb': 'config_arduino',
-            'g2core_config': self.g2core_config,
-            'hw_config': self.hw_config,
-        }
-        await self.send_command(command)
-
     async def restart_arduino(self):
         command = {
             'verb': 'restart_arduino',
         }
         await self.send_command(command)
-        await self.send_command_config_arduino()
+        await self.create_arduino()
+
+    async def create_arduino(self):
+        # update rpi-scripts file
+        await self.scp_to('./rpi_scripts.py', '~/server/')
+
+        # calc rois
+        if self.hw_config.get('cameras'):
+            self.calc_rois()
+
+        # send command
+        command = {
+            'verb': 'create_arduino',
+            'g2core_config': self.g2core_config,
+            'hw_config': self.hw_config,
+        }
+        await self.send_command(command)
 
     async def set_valves(self, values):
         N = min(len(self.hw_config['valves']), len(values))
@@ -194,9 +142,6 @@ class Node(object):
             data[i] = values[i - 1]
         data = {'out': data}
         return await self.send_command_raw(json.dumps(data), wait_start=[], wait_completion=False)
-
-    async def send_command_create_camera(self):
-        return
 
     async def G1(self, system=None, **kwargs):
         # if not self.homed:
@@ -259,6 +204,7 @@ class Node(object):
         enc_name, enc_ratio, telorance_soft, telorance_hard = self.hw_config[
             'encoders']['pos' + axis]
         enc_location = self._status[enc_name] / float(enc_ratio)
+        # g2_location = await self.read_metric('pos' + axis)
         g2_location = self._status['r.pos' + axis]
         assert abs(g2_location - enc_location) < telorance_soft
         return g2_location, enc_location, telorance_soft
@@ -271,3 +217,71 @@ class Node(object):
             if abs(desired_location - enc_location) > telorance:
                 return False
         return True
+
+    async def is_homed(self):
+        res = [await self.read_metric('hom' + axis) == 1 for axis in self.HOMMED_AXES]
+        return all(res)
+
+    async def read_metric(self, query, response=None):
+        if response is None:
+            response = 'r.' + query
+        command = {
+            'verb': 'read_metric',
+            'query': query,
+            'response': response,
+        }
+        success, line = await self.send_command(command)
+        return line['result']
+
+    async def send_command_scenario(self, command):
+        if command['verb'] == 'dump_frame':
+            await self.send_command(command)
+            await self.scp_from('~/data/dosing.png', './dump/dosing.png')
+            await self.scp_from('~/data/holder.png', './dump/holder.png')
+            self.draw_debug_dump()
+        elif command['verb'] == 'dump_training_holder':
+            await self.set_valves([0, 1])
+            await asyncio.sleep(1)
+
+            random_string = generate_random_string()
+            command['verb'] = 'dump_training'
+            command['component'] = 'holder'
+            command['speed'] = 10000
+            command['folder_name'] = random_string
+
+            await self.send_command(command, assert_success=True)
+
+            folder_name_src = '~/data/%s' % random_string
+            folder_name_dst = '../dataset/holder_%02d_%s' % (
+                self.ip_short, random_string)
+
+            await self.set_valves([0, 0])
+            await self.scp_from(folder_name_src, folder_name_dst)
+
+        elif command['verb'] == 'dump_training_dosing':
+            if command.get('prepare'):
+                await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
+            await self.set_valves([1])
+            await asyncio.sleep(1)
+
+            random_string = generate_random_string()
+            command['verb'] = 'dump_training'
+            command['component'] = 'dosing'
+            command['speed'] = 10000
+            command['folder_name'] = random_string
+
+            await self.send_command(command, assert_success=True)
+
+            folder_name_src = '~/data/%s' % random_string
+            folder_name_dst = '../dataset/dosing_%02d_%s' % (
+                self.ip_short, random_string)
+
+            await self.set_valves([0])
+            if command.get('prepare'):
+                await self.G1(z=1, feed=10000)
+            await self.scp_from(folder_name_src, folder_name_dst)
+
+        elif command['verb'] == 'home':
+            await self.home()
+        else:
+            return await self.send_command(command)

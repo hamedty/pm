@@ -1,13 +1,11 @@
-ST4 hanuz iekhorde gir mikonad
-general read metric function - query if homed (r.home)
 optimize robot station event (going to safe place station can start)
------------------------------------------
+G1 optimization - optimize robot move
 homing rail > smaller cap
+-----------------------------------------
 feeder stop motors if didn't feed for a while
 motor oralB
-wait for holder in gcode? (M101)
-G1 optimization - optimize robot move
 status request sent for no reason
+wait for holder in gcode? (M101)
 verify gate (or wait for gate in gcode)
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
@@ -15,13 +13,3 @@ control holder DC motor with PWM instead of timer
 log collection framework
 vision debug frame work
 if nodes downs, UI must react
-----------------------------------------
-Production
-Fill Cartridge Conveyor
-Running Empty
-
-
-31/6/1400
-shoro kaar: 173 + 344 = 517 (az daftarche double check shavad)
-be iakhchal: 18*24 + 10 = 442
-tahvili: 75 pen

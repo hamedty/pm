@@ -16,6 +16,7 @@ with open(VISION_ANNOTATION_FILE) as f:
 class Station(Node):
     type = 'station'
     arduino_reset_pin = 21
+    HOMMED_AXES = ['z']
 
     g2core_config_base = [
         # X - Holder Motor
@@ -108,6 +109,7 @@ class Station(Node):
         'holder_webcam_direction': 'up',
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
         'presence_threshold': {'holder': 80, 'dosing': 50},
+        'cameras': {'holder': {'rois': {}}, 'dosing': {'rois': {}}},
     }
 
     async def home_core(self):
@@ -138,7 +140,7 @@ class Station(Node):
             'alignment': roi_holder,
             'existance': roi_holder_presence,
         }
-
+        self.hw_config['cameras']['holder']['rois'] = holder_roi
         # Dosing
         roi_dosing = annotation_data['dosing_roi']
         roi_dosing_presence = roi_dosing
@@ -158,24 +160,7 @@ class Station(Node):
             'existance': roi_dosing_presence,
             'sit_right': roi_dosing_sit_right,
         }
-
-        self.holder_roi = holder_roi
-        self.dosing_roi = dosing_roi
-
-    async def send_command_create_camera(self):
-        self.calc_rois()
-        command = {
-            'verb': 'create_camera',
-            'dosing_roi': self.dosing_roi,
-            'holder_roi': self.holder_roi,
-        }
-        return await self.send_command(command)
-
-    def set_status(self, **kwargs):
-        # if 'data' in kwargs:
-        #     data = kwargs['data']
-        #     kwargs['data'] = data
-        super(Station, self).set_status(**kwargs)
+        self.hw_config['cameras']['dosing']['rois'] = dosing_roi
 
     def set_robot(self, robot):
         self._robot = robot
