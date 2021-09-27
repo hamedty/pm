@@ -13,7 +13,7 @@ async def main(system, ALL_NODES):
     # stations = stations[4:]
     # H_ALIGNING H_PUSH H_PRE_DANCE
     # for station in stations:
-    #     await station.G1(z=station.hw_config['H_PUSH'], feed=500)
+    #     await station.G1(z=station.hw_config['H_ALIGNING'], feed=5000)
     #     await asyncio.sleep(1)
 
     # v = 0
@@ -22,18 +22,23 @@ async def main(system, ALL_NODES):
     #     await asyncio.gather(*[station.set_valves([0, 0, v]) for station in stations])
     #     await asyncio.sleep(2)
 
-    # await feeder.home()
-    t0 = time.time()
-    z = 16
-    feed = 50000
+    # # await feeder.home()
+    # t0 = time.time()
+    # z = 16
+    # feed = 50000
+    # # for i in range(10):
+    # #     z += 25
+    # #     await feeder.G1(z=z, feed=feed)
+    # command = ''
     # for i in range(10):
     #     z += 25
-    #     await feeder.G1(z=z, feed=feed)
-    command = ''
-    for i in range(10):
-        z += 25
-        command += 'G1Z%dF%d\n' % (z, feed)
+    #     command += 'G1Z%dF%d\n' % (z, feed)
+    #
+    # await feeder.send_command_raw(command)
+    #
+    # print(time.time() - t0)
+    station = stations[8]
 
-    await feeder.send_command_raw(command)
-
-    print(time.time() - t0)
+    for i in range(100):
+        await asyncio.gather(*[s.set_valves([None] * 4 + [i % 2]) for s in stations[5:]])
+        await asyncio.sleep(.3)

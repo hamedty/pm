@@ -54,6 +54,8 @@ async def main(system, ALL_NODES):
     ''' Main Loop'''
     t0 = time.time()
     while not system.system_stop.is_set():
+        await aioconsole.ainput('enter to continue')
+
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
         rail.rail_parked_event.clear()

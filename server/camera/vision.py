@@ -7,8 +7,6 @@ try:
 except:
     pass  # robot and rail
 
-PRESENCE_THRESHOLD = {'holder': 90, 'dosing': 50}
-
 
 def detect_dosing(frame, offset):
     frame = prepare_frame(frame, 'dosing')
@@ -25,8 +23,8 @@ def detect_dosing(frame, offset):
     else:
         cls = 25
 
-    steps = -cls * p
-    aligned = bool(abs(cls) < 2)  # np.bool_ to bool
+    steps = -cls * p * .95
+    aligned = bool(abs(cls) < 1)  # np.bool_ to bool
     return steps, aligned
 
 

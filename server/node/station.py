@@ -107,6 +107,7 @@ class Station(Node):
         'dosing_offset': 0,
         'holder_webcam_direction': 'up',
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
+        'presence_threshold': {'holder': 80, 'dosing': 50},
     }
 
     async def home_core(self):
@@ -331,7 +332,7 @@ class Station(Node):
         data['FEED_DANCE'] = recipe.FEED_DANCE
 
         # Press
-        data['PAUSE_PRESS'] = 1.5
+        data['PAUSE_PRESS'] = 2.0  # 1.5
 
         # Dance Back
         data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
@@ -340,7 +341,7 @@ class Station(Node):
         data['H_DANCE_BACK'] = data['H_DANCE'] + (charge_h * dance_rev)
         data['H_DANCE_BACK2'] = data['H_PRE_DANCE']
         data['Y_DANCE_BACK'] = 0
-        data['Y_DANCE_BACK2'] = -8
+        data['Y_DANCE_BACK2'] = -4
         data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
         # Deliver

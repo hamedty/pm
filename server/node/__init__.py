@@ -93,11 +93,12 @@ if 'Station 9' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 238
     station.hw_config['H_PRE_DANCE'] = 246
     station.hw_config['dosing_webcam_direction'] = 'riu'
+    station.hw_config['dosing_offset'] = 2
 
 
 if 'Station 10' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 10']
-    station.hw_config['H_ALIGNING'] = 223
+    station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 234
     station.hw_config['H_PRE_DANCE'] = 242
     station.hw_config['dosing_webcam_direction'] = 'riu'

@@ -1,5 +1,5 @@
 ST4 hanuz iekhorde gir mikonad
-query if homed (r.home) - general read metric function
+general read metric function - query if homed (r.home)
 optimize robot station event (going to safe place station can start)
 -----------------------------------------
 homing rail > smaller cap

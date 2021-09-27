@@ -3,8 +3,8 @@ var annotation_app = angular.module('annotation_app', []);
 annotation_app.controller('annotation_controller', function($scope, $http) {
   $scope.components = ["Holder", "Dosing"];
   $scope.stations = Array.from(Array(10).keys()).map(function(x){return x+101});
-  $scope.component = "Holder"
-  $scope.station = 103
+  $scope.component = "Dosing"
+  $scope.station = 110
   $scope.$watch('component', function() {fetch();});
   $scope.$watch('station', function() {fetch();});
   // http://localhost:8080/annotation/api?component=dosing&node=101

@@ -85,7 +85,8 @@ async def align(command, _):
     valve = {'holder': 'out2', 'dosing': 'out1'}[component]
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
-    presence_threshold = vision.PRESENCE_THRESHOLD[component]
+
+    presence_threshold = arduino._hw_config['presence_threshold'][component]
     retries = command['retries']
     offset = arduino._hw_config.get(component + '_offset', 0)
     feed = command['speed']
@@ -127,9 +128,9 @@ async def detect_vision(command, _):
         )
         result = frames[0]
         dosing_present, dosing_value = vision.object_present(
-            frames[0], vision.PRESENCE_THRESHOLD['dosing'])
+            frames[0], arduino._hw_config['presence_threshold']['dosing'])
         holder_present, holder_value = vision.object_present(
-            frames[1], vision.PRESENCE_THRESHOLD['holder'])
+            frames[1], arduino._hw_config['presence_threshold']['holder'])
         result = {
             'dosing_present': dosing_present,
             'dosing_value': dosing_value,

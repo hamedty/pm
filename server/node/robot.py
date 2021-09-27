@@ -159,7 +159,7 @@ class Robot(Node):
         Z_OUTPUT = 70
         Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
-        T_INPUT_RELEASE = 1.0
+        T_INPUT_RELEASE = 1.1
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1
@@ -186,10 +186,9 @@ class Robot(Node):
         await asyncio.sleep(T_PRE_PRESS)
         await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS, system=system)
         await asyncio.sleep(T_POST_PRESS)
-        await self.set_valves([0] * 10)
         await stations_task2
         await self.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
-        await self.set_valves([1] * 5)
+        await self.set_valves([1] * 5 + [0] * 5)
         await asyncio.sleep(T_OUTPUT_GRIPP)
         await asyncio.gather(*[station.set_valves([0, 0, 0, 1]) for station in self._stations])
 
