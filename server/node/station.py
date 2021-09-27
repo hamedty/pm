@@ -152,7 +152,7 @@ class Station(Node):
         y0 = int(roi_dosing['y0'] + (roi_dosing['dy'] / 2) - y_margin / 2)
         dy = y_margin
         dx = 450
-        x0 = (640 - dx) if direction == 'liu' else 0
+        x0 = (640 - dx - 40) if direction == 'liu' else 40
         roi_dosing_sit_right = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
         dosing_roi = {

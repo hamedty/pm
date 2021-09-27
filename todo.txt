@@ -1,6 +1,6 @@
 optimize robot station event (going to safe place station can start)
+homing rail, feeder > smaller cap? jerk? speed?
 G1 optimization - optimize robot move
-homing rail > smaller cap
 -----------------------------------------
 feeder stop motors if didn't feed for a while
 motor oralB

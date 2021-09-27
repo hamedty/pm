@@ -47,6 +47,7 @@ def object_present(frame, threshold):
 
 
 def dosing_sit_right(frame):
+    # cv2.imwrite('/home/pi/data/sitright.png', frame)
     brightness_threshold = 25
     existance_count_threshold = 250
     wrong_sitting_count_threshold = 20

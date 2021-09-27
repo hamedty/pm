@@ -159,7 +159,7 @@ class Robot(Node):
         Z_OUTPUT = 70
         Z_OUTPUT_SAFE = Z_OUTPUT - 20
 
-        T_INPUT_RELEASE = 1.1
+        T_INPUT_RELEASE = 1.0
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1

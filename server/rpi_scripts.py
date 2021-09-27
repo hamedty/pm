@@ -36,7 +36,7 @@ async def feeder_process(arduino, G1, command):
 
         # Wait for holder
         if holder_mask[i]:
-            await detect_holder_wraper(arduino)
+            await wait_for_holder(arduino)
 
         # Close Gate
         if not holder_mask[i + 1] and gate_status:
@@ -119,17 +119,7 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     await arduino.wait_for_command_id(command_id)
 
 
-async def detect_holder_wraper(arduino):
+async def wait_for_holder(arduino):
     value = False
     while not value:
-        value = await detect_holder(arduino)
-    return value
-
-
-async def detect_holder(arduino):
-    if 'r.in5' in arduino._status:
-        del arduino._status['r.in5']
-    arduino._send_command('{in5:n}')
-    while 'r.in5' not in arduino._status:
-        await asyncio.sleep(0.002)
-    return arduino._status['r.in5']
+        value = await arduino.read_metric('in5', 'r.in5')

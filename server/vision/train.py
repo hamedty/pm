@@ -164,7 +164,7 @@ def main():
                 c2 = compare_dict(
                     src_data[node][component + '_roi'], dst_data[node][component + '_roi'])
                 if c1 and c2:
-                    print(node, component, 'mode is up to-date')
+                    # print(node, component, 'mode is up to-date')
                     continue
                 print(node, component, 'training model')
                 res.append(pool.apply_async(
