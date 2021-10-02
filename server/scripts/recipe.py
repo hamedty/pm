@@ -2,7 +2,7 @@ import asyncio
 
 
 N = 10
-SPEED = .5  # between 0-1
+SPEED = .9  # between 0-1
 SERVICE_FUNC_NO_FEEDER = 1
 SERVICE_FUNC_NO_CARTRIDGE = 0
 ''' Station '''

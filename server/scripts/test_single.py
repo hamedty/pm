@@ -38,6 +38,7 @@ async def main(system, ALL_NODES):
     #
     # print(time.time() - t0)
 
-    for i in range(100):
-        await asyncio.gather(*[s.set_valves([None] * 4 + [i % 2]) for s in stations[3:4]])
-        await asyncio.sleep(.8)
+    for i in range(50):
+        await asyncio.gather(*[s.set_valves([0] * 4 + [i % 2]) for s in stations[2:3]])
+
+        await asyncio.sleep(0.8)

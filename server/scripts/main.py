@@ -19,7 +19,7 @@ async def main(system, ALL_NODES):
     await system.system_running.wait()
 
     await do_nodes(system, robots, lambda r: r.set_valves([0] * 10), simultanously=False)
-    await do_nodes(system, stations, lambda s: s.set_valves([None, None, 0, 1, 0]))
+    await do_nodes(system, stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
     if not recipe.SERVICE_FUNC_NO_FEEDER:

@@ -45,7 +45,7 @@ class System(object):
         error['time'] = datetime.datetime.now().isoformat()
         error['error_id'] = error_id
         async with self.error_lock:
-            self.system_running.clear()
+            # self.system_running.clear()
             self.errors[error_id] = error
             self.errors_events[error_id] = error_event
         return error_event

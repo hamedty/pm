@@ -317,7 +317,7 @@ class Station(Node):
         data['FEED_DANCE'] = recipe.FEED_DANCE
 
         # Press
-        data['PAUSE_PRESS'] = 2.0  # 1.5
+        # data['PAUSE_PRESS'] = 1.5
 
         # Dance Back
         data['PAUSE_JACK_PRE_DANCE_BACK'] = .2
@@ -330,7 +330,7 @@ class Station(Node):
         data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
         # Deliver
-        data['H_DELIVER'] = .5
+        data['H_DELIVER'] = .1
         data['FEED_DELIVER'] = recipe.FEED_Z_UP
 
         command = '''
@@ -362,13 +362,16 @@ class Station(Node):
 
             ; press
             M100 ({out1: 0, out2: 0, out4: 0})
-            M100 ({out3: 1})
             M100 ({out5: 1})
-            G4 P%(PAUSE_PRESS).2f
+            G4 P0.1
+            M100 ({out3: 1})
+            G4 P1.5
             M100 ({out3: 0})
+            G4 P0.5
 
             ; dance back
             M100 ({out1: 1, out4: 1, out5: 0})
+            G4 P0.2
             G4 P%(PAUSE_JACK_PRE_DANCE_BACK).2f
 
             G1 Z%(H_DANCE_BACK).2f F5000

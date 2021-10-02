@@ -5,15 +5,15 @@ from .feeder import Feeder
 
 
 ALL_NODES = [
-    # Robot('Robot 1', '192.168.44.100', arduino_id=0),
+    Robot('Robot 1', '192.168.44.100', arduino_id=0),
     Robot('Robot 2', '192.168.44.100', arduino_id=1),
     Rail('Rail', '192.168.44.100', arduino_id=2),
 
-    # Station('Station 1', '192.168.44.101'),
-    # Station('Station 2', '192.168.44.102'),
-    # Station('Station 3', '192.168.44.103'),
-    # Station('Station 4', '192.168.44.104'),
-    # Station('Station 5', '192.168.44.105'),
+    Station('Station 1', '192.168.44.101'),
+    Station('Station 2', '192.168.44.102'),
+    Station('Station 3', '192.168.44.103'),
+    Station('Station 4', '192.168.44.104'),
+    Station('Station 5', '192.168.44.105'),
     Station('Station 6', '192.168.44.106'),
     Station('Station 7', '192.168.44.107'),
     Station('Station 8', '192.168.44.108'),
@@ -67,6 +67,7 @@ if 'Station 6' in ALL_NODES_DICT:
     station.hw_config['H_PRE_DANCE'] = 248
     station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
+    station.hw_config['presence_threshold']['holder'] = 63
     # station.hw_config['cameras']['dosing']['rois']['sit_right']['x0'] = 50
 
 
@@ -100,10 +101,16 @@ if 'Station 9' in ALL_NODES_DICT:
 if 'Station 10' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 10']
     station.hw_config['H_ALIGNING'] = 226
-    station.hw_config['H_PUSH'] = 234
-    station.hw_config['H_PRE_DANCE'] = 242
+    station.hw_config['H_PUSH'] = 235.5
+    station.hw_config['H_PRE_DANCE'] = 243
     station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
+    # station.hw_config['dosing_offset'] = 2
+
+if 'Robot 2' in ALL_NODES_DICT:
+    robot = ALL_NODES_DICT['Robot 2']
+    station.hw_config['Y_GRAB_IN_UP_2'] = 62
+
 
 for i in range(0, 10):
     station_id = 'Station %d' % (i + 1)

@@ -42,7 +42,7 @@ async def pickup_rail(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
 
-    robot = robots[1]
+    robot = robots[0]
     Y_GRAB_IN_UP_1 = 75
     X_GRAB_IN = 284.5
     Y_GRAB_IN_DOWN = 0
@@ -77,8 +77,8 @@ async def pickup_rail(system, ALL_NODES):
 
     await robot.G1(x=X_INPUT - .5, feed=recipe.FEED_X, system=system)
 
-    # await robot.G1(y=50, feed=recipe.FEED_Y_DOWN, system=system)
-    # await aioconsole.ainput('continue?')
+    await robot.G1(y=50, feed=recipe.FEED_Y_DOWN, system=system)
+    await aioconsole.ainput('continue?')
 
     await robot.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
     await robot.set_valves([None] * 5 + [0] * 5)

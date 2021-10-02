@@ -98,6 +98,7 @@ class Robot(Node):
             'posx': ['enc2', 120.0, 1.0, 5.0],
             'posy': ['enc1', 480.0, 1.0, 5.0],
         },
+        'Y_GRAB_IN_UP_2': 64,
     }
 
     def __init__(self, *args, **kwargs):
@@ -135,7 +136,7 @@ class Robot(Node):
         Y_GRAB_IN_UP_1 = 75
         X_GRAB_IN = 284.5
         Y_GRAB_IN_DOWN = 0
-        Y_GRAB_IN_UP_2 = 65
+        Y_GRAB_IN_UP_2 = self.hw_config['Y_GRAB_IN_UP_2']
         T_GRAB_IN = 0.5
 
         await system.system_running.wait()

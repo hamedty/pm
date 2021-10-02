@@ -113,6 +113,9 @@
             },
             "sr0fmycd": {
                 "zero": 211
+            },
+            "sxgqpfzh": {
+                "zero": 217
             }
         },
         "holder_roi": {
@@ -310,24 +313,18 @@
     },
     "109": {
         "dosing": {
-            "3moo1u5z": {
-                "zero": 203
+            "0kodcd9n": {
+                "zero": 351
             },
-            "8t3iublm": {
-                "zero": 210
-            },
-            "c7vxae4i": {
-                "zero": 205
-            },
-            "zxlrdbt7": {
-                "zero": 189
+            "sn1n1l58": {
+                "zero": 236
             }
         },
         "dosing_roi": {
-            "dx": 206,
+            "dx": 211,
             "dy": 204,
-            "x0": 265,
-            "y0": 225
+            "x0": 254,
+            "y0": 229
         },
         "holder": {
             "3z15m18e": {
@@ -350,13 +347,19 @@
     "110": {
         "dosing": {
             "6q1ywako": {
-                "zero": 225
+                "zero": 224
+            },
+            "c6mdnm1x": {
+                "zero": 205
             },
             "eddw3sxz": {
-                "zero": 225
+                "zero": 223
             },
             "n8ip9g1o": {
-                "zero": 246
+                "zero": 245
+            },
+            "p63e6t2o": {
+                "zero": 214
             }
         },
         "dosing_roi": {
