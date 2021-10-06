@@ -1,10 +1,11 @@
 import time
-import asyncio
 from .main import *
+import asyncio
 import traceback
 import aioconsole
 from .recipe import *
 from scripts import recipe
+from node import ALL_NODES_DICT
 
 
 async def main(system, ALL_NODES):
@@ -36,9 +37,25 @@ async def main(system, ALL_NODES):
     #
     # await feeder.send_command_raw(command)
     #
-    # print(time.time() - t0)
-
+    node = ALL_NODES_DICT['Dosing Feeder 1']
     for i in range(50):
-        await asyncio.gather(*[s.set_valves([0] * 4 + [i % 2]) for s in stations[2:3]])
-
+        await node.set_valves([i % 2])
         await asyncio.sleep(0.8)
+
+    # dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
+    # holder_feeder = ALL_NODES_DICT['Feeder 1']
+    #
+    # # start dosing conveyor motor
+    # await holder_feeder.set_motors((9, 10))
+    #
+    # while True:
+    #     # set channel selector 1= channel 1 open
+    #     await dosing_feeder.set_valves([0])
+    #     # wait for optic sensor input=1
+    #     while not await dosing_feeder.read_metric('in1'):
+    #         await asyncio.sleep(0.001)
+    #
+    #     await asyncio.sleep(.05)
+    #     proximity_input = await dosing_feeder.read_metric('in2')
+    #     await dosing_feeder.set_valves([1, proximity_input])
+    #     await asyncio.sleep(1)

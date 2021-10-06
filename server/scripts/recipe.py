@@ -2,8 +2,8 @@ import asyncio
 
 
 N = 10
-SPEED = .9  # between 0-1
-SERVICE_FUNC_NO_FEEDER = 1
+SPEED = .6  # between 0-1
+SERVICE_FUNC_NO_FEEDER = 0
 SERVICE_FUNC_NO_CARTRIDGE = 0
 ''' Station '''
 FEED_Z_UP = 10000 * SPEED
