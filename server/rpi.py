@@ -10,6 +10,8 @@ import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
 import rpi_scripts
+
+
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
 ARDUINOS = {}
@@ -152,6 +154,9 @@ async def create_arduino(command, _):
         arduino.receive_thread.start()
         ARDUINOS[arduino_index] = arduino
     arduino = ARDUINOS[command['arduino_index']]
+
+    # reload scripts
+    importlib.reload(rpi_scripts)
 
     # config arduino & G2
     arduino._hw_config = command['hw_config']

@@ -94,3 +94,41 @@ async def pickup_rail(system, ALL_NODES):
     await asyncio.sleep(T_POST_PRESS)
     await robot.set_valves([0] * 10)
     await robot.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
+
+
+async def holder_feeder(system, ALL_NODES):
+    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    print('salam')
+
+    # rail, feeder homed and parked
+    assert await rail.is_homed(), 'Rail is not homed!'
+    assert await feeder.is_homed(), 'Feeder is not homed!'
+    assert rail.is_at_loc(z=D_STANDBY), 'rail is in bad location'
+
+    # jack's to normal
+    await rail.set_valves([0, 0])
+    await feeder.set_valves([0] * 14)
+
+    # G1 Z16
+    await feeder.G1(z=FEEDER_Z_IDLE, feed=FEED_FEEDER_COMEBACK)
+
+    # Motors on
+    await feeder.set_motors(
+        (2, 4), (3, 4),  # Holder Downstream
+        (1, 26), (4, 8), (7, 46)  # Holder Upstream - Lift and long conveyor
+    )
+    await asyncio.sleep(1.5)
+    # script feed run - with cartridge off
+    command = {
+        'verb': 'feeder_process',
+        'mask': [1] * recipe.N,
+        'cartridge_feed': False,
+        'z_offset': recipe.FEEDER_Z_IDLE,
+        'feed_feed': recipe.FEED_FEEDER_FEED,
+        'jerk_feed': recipe.JERK_FEEDER_FEED,
+        'jerk_idle': recipe.JERK_FEEDER_IDLE,
+    }
+    await feeder.send_command(command)
+
+    # G1 Z717
+    await feeder.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)

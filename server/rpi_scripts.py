@@ -2,6 +2,8 @@ import asyncio
 import time
 import random
 
+HOLDER_ARDUINO_INDEX = 2
+
 
 async def feeder_process(arduino, G1, command):
     FEEDER_OFFSET = command['z_offset']
@@ -49,7 +51,7 @@ async def feeder_process(arduino, G1, command):
             await move_rail_n_cartridge_handover(arduino, z, FEED_FEED, G1)
             await asyncio.sleep(.1)  # vaccum release
         else:
-            await G1({'arduino_index': None, 'z': z, 'feed': FEED_FEED})
+            await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED})
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
     oscillate_motors_task.cancel()
@@ -103,7 +105,7 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
         N%d M0
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
-    await G1({'arduino_index': None, 'z': z, 'feed': feed, 'correct_initial': True})
+    await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': feed, 'correct_initial': True})
 
     command_id = arduino.get_command_id()
     command_raw = '''
