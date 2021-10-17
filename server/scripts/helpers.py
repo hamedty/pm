@@ -132,3 +132,29 @@ async def holder_feeder(system, ALL_NODES):
 
     # G1 Z717
     await feeder.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
+
+
+async def feeder_handover_to_rail(system, ALL_NODES):
+    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+
+    # rail, feeder homed and parked
+    assert await rail.is_homed(), 'Rail is not homed!'
+    assert await feeder.is_homed(), 'Feeder is not homed!'
+    assert rail.is_at_loc(z=D_STANDBY), 'rail is in bad location'
+    assert feeder.is_at_loc(z=FEEDER_Z_DELIVER), 'feeder is in bad location'
+
+    # jack's to normal
+    await rail.set_valves([0, 0])
+
+    await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
+    await feeder.set_valves([None, 0])
+    await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
+    await rail.set_valves([1, 1])
+    await asyncio.sleep(recipe.T_RAIL_JACK2)
+    await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT, system=system)
+    await rail.set_valves([1, 0])
+    await asyncio.sleep(recipe.T_RAIL_JACK1)
+    await rail.set_valves([0, 0])
+    await asyncio.sleep(recipe.T_RAIL_JACK2)

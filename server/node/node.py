@@ -239,6 +239,10 @@ class Node(object):
         success, line = await self.send_command(command)
         return line['result']
 
+    async def wait_metric(self, metric, expected=1):
+        while await self.read_metric(metric) != expected:
+            await asyncio.sleep(0.001)
+
     async def send_command_scenario(self, command):
         if command['verb'] == 'dump_frame':
             await self.send_command(command)

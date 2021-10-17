@@ -37,25 +37,47 @@ async def main(system, ALL_NODES):
     #
     # await feeder.send_command_raw(command)
     #
-    node = ALL_NODES_DICT['Dosing Feeder 1']
-    for i in range(50):
-        await node.set_valves([i % 2])
-        await asyncio.sleep(0.8)
+    # node = ALL_NODES_DICT['Dosing Feeder 1']
+    # for i in range(50):
+    #     await node.set_valves([i % 2])
+    #     await asyncio.sleep(0.8)
 
-    # dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
-    # holder_feeder = ALL_NODES_DICT['Feeder 1']
-    #
-    # # start dosing conveyor motor
-    # await holder_feeder.set_motors((9, 10))
-    #
-    # while True:
-    #     # set channel selector 1= channel 1 open
-    #     await dosing_feeder.set_valves([0])
-    #     # wait for optic sensor input=1
-    #     while not await dosing_feeder.read_metric('in1'):
-    #         await asyncio.sleep(0.001)
-    #
-    #     await asyncio.sleep(.05)
-    #     proximity_input = await dosing_feeder.read_metric('in2')
-    #     await dosing_feeder.set_valves([1, proximity_input])
-    #     await asyncio.sleep(1)
+    dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
+    holder_feeder = ALL_NODES_DICT['Feeder 1']
+
+    # start dosing conveyor motor
+    await holder_feeder.set_motors((5, 25), (9, 5))
+    # await holder_feeder.set_valves([None] * 10 + [1])
+    try:
+        # for i in range(100):
+        while True:
+
+            # set channel selector 1= channel 1 open
+            # await dosing_feeder.set_valves([0, None, 1])
+
+            # wait for optic sensor input=1
+            await dosing_feeder.wait_metric('in1')
+
+            # wait for buffer to be free
+            await dosing_feeder.wait_metric('in3', 0)
+
+            # close gate
+            await dosing_feeder.set_valves([None, None, 0])
+
+            # wait for proximity_input value established
+            await asyncio.sleep(.2)
+            proximity_input = await dosing_feeder.read_metric('in2')
+            await dosing_feeder.set_valves([None, proximity_input])
+
+            # wait for jacks to be stable
+            await asyncio.sleep(.2)
+            await dosing_feeder.set_valves([1])
+            await asyncio.sleep(.5)
+            await dosing_feeder.set_valves([0])
+            await asyncio.sleep(.05)
+    except:
+        trace = traceback.format_exc()
+        print(trace)
+
+    await dosing_feeder.set_valves([0, None, 0])
+    await holder_feeder.set_motors((5, 0), (9, 0))

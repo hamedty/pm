@@ -29,7 +29,7 @@ async def feeder_process(arduino, G1, command):
     for i in range(N):
         # Gate Open
         if holder_mask[i] and not gate_status:
-            arduino._send_command("{out7: 1}")
+            arduino._send_command("{out7: 1, out11: 1}")
             gate_status = 1
 
         # Grab
@@ -42,7 +42,7 @@ async def feeder_process(arduino, G1, command):
 
         # Close Gate
         if not holder_mask[i + 1] and gate_status:
-            arduino._send_command("{out7: 0}")
+            arduino._send_command("{out7: 0, out11: 0}")
             gate_status = 0
 
         # Move and Handover
@@ -52,6 +52,7 @@ async def feeder_process(arduino, G1, command):
             await asyncio.sleep(.1)  # vaccum release
         else:
             await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED})
+        await asyncio.sleep(1)  # extra wait
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
     oscillate_motors_task.cancel()
