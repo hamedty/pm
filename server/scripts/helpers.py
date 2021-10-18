@@ -98,7 +98,6 @@ async def pickup_rail(system, ALL_NODES):
 
 async def holder_feeder(system, ALL_NODES):
     all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
-    print('salam')
 
     # rail, feeder homed and parked
     assert await rail.is_homed(), 'Rail is not homed!'
