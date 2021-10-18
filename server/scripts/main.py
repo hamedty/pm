@@ -4,6 +4,7 @@ import asyncio
 import aioconsole
 from .recipe import *
 from scripts import recipe
+from node import ALL_NODES_DICT
 
 
 async def main(system, ALL_NODES):
@@ -34,6 +35,9 @@ async def main(system, ALL_NODES):
     # feeder
     feeder.init_events()
     asyncio.create_task(feeder.feeding_loop(system, recipe))
+
+    dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
+    asyncio.create_task(dosing_feeder.feeding_loop(feeder, system, recipe))
 
     # rail
     rail.init_events()

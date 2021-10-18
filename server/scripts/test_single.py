@@ -14,31 +14,17 @@ async def main(system, ALL_NODES):
     dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
     holder_feeder = ALL_NODES_DICT['Feeder 1']
 
-    # start dosing conveyor motor
-    await holder_feeder.set_motors((5, 25), (9, 5))
-    # await holder_feeder.set_valves([None] * 10 + [1])
+    await holder_feeder.send_command_raw('{out11:1}')
+
+    t1 = asyncio.create_task(
+        dosing_feeder.feeding_loop(holder_feeder, system, recipe))
     try:
-        while True:
-            # wait for optic sensor input=1
-            await dosing_feeder.wait_metric('in1')
-
-            # wait for buffer to be free
-            await dosing_feeder.wait_metric('in3', 0)
-
-            # wait for proximity_input value established
-            await asyncio.sleep(.2)
-            proximity_input = await dosing_feeder.read_metric('in2')
-            await dosing_feeder.set_valves([None, proximity_input])
-
-            # wait for jacks to be stable
-            await asyncio.sleep(.2)
-            await dosing_feeder.set_valves([1])
-            await asyncio.sleep(.5)
-            await dosing_feeder.set_valves([0])
-            await asyncio.sleep(.05)
+        await asyncio.sleep(100000)
     except:
-        trace = traceback.format_exc()
-        print(trace)
+        pass
 
-    await dosing_feeder.set_valves([0, None, 0])
-    await holder_feeder.set_motors((5, 0), (9, 0))
+    system.system_stop.set()
+    await asyncio.sleep(1)
+    t1.cancel()
+    await self.set_valves([0, None, 0])
+    await feeder.set_motors((5, 0), (9, 0))

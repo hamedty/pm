@@ -52,7 +52,7 @@ async def feeder_process(arduino, G1, command):
             await asyncio.sleep(.1)  # vaccum release
         else:
             await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED})
-        await asyncio.sleep(1)  # extra wait
+        await asyncio.sleep(.1)  # extra wait
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
     oscillate_motors_task.cancel()

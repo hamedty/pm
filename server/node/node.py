@@ -140,6 +140,8 @@ class Node(object):
         data = {}
         for i in range(1, N + 1):
             data[i] = values[i - 1]
+            if data[i] is not None:
+                data[i] = int(data[i])
         data = {'out': data}
         return await self.send_command_raw(json.dumps(data), wait_start=[], wait_completion=False)
 
