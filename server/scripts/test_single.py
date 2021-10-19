@@ -9,7 +9,7 @@ from node import ALL_NODES_DICT
 
 
 async def main(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
 
     dosing_feeder = ALL_NODES_DICT['Dosing F. 1']
     holder_feeder = ALL_NODES_DICT['Feeder 1']

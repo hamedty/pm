@@ -8,7 +8,7 @@ from node import ALL_NODES_DICT
 
 
 async def main(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     ''' Homing '''
     a = await aioconsole.ainput('type anything to home. or enter to dismiss')
@@ -36,7 +36,7 @@ async def main(system, ALL_NODES):
     feeder.init_events()
     asyncio.create_task(feeder.feeding_loop(system, recipe))
 
-    dosing_feeder = ALL_NODES_DICT['Dosing F. 1']
+    # dosing feeder
     asyncio.create_task(dosing_feeder.feeding_loop(feeder, system, recipe))
 
     # rail

@@ -60,6 +60,8 @@ async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
     robots = [node for node in ALL_NODES if node.name.startswith('Robot ')]
     rail = [node for node in ALL_NODES if node.name.startswith('Rail')][0]
     feeder = [node for node in ALL_NODES if node.name.startswith('Feeder ')][0]
+    dosing_feeder = [
+        node for node in ALL_NODES if node.name.startswith('Dosing ')][0]
 
     all_nodes = stations + robots + [rail, feeder]
 
@@ -69,7 +71,7 @@ async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
             while not node.ready_for_command():
                 await asyncio.sleep(.01)
 
-    return all_nodes, feeder, rail, robots, stations
+    return all_nodes, feeder, dosing_feeder, rail, robots, stations
 
 
 async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations):

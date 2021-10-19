@@ -7,14 +7,14 @@ import aioconsole
 
 
 async def fill_cartridge_conveyor(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await feeder.set_motors(
         (6, 300),  # Cartridge Conveyor
     )
 
 
 async def run_rail_empty(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
@@ -39,7 +39,7 @@ async def run_rail_empty(system, ALL_NODES):
 
 
 async def pickup_rail(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
 
     robot = robots[0]
@@ -97,7 +97,7 @@ async def pickup_rail(system, ALL_NODES):
 
 
 async def holder_feeder(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     # rail, feeder homed and parked
     assert await rail.is_homed(), 'Rail is not homed!'
@@ -134,7 +134,7 @@ async def holder_feeder(system, ALL_NODES):
 
 
 async def feeder_handover_to_rail(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     # rail, feeder homed and parked
     assert await rail.is_homed(), 'Rail is not homed!'
@@ -160,5 +160,5 @@ async def feeder_handover_to_rail(system, ALL_NODES):
 
 
 async def motors_off(system, ALL_NODES):
-    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await feeder.set_motors()
