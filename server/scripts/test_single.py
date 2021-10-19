@@ -11,13 +11,10 @@ from node import ALL_NODES_DICT
 async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
 
-    dosing_feeder = ALL_NODES_DICT['Dosing F. 1']
-    holder_feeder = ALL_NODES_DICT['Feeder 1']
-
-    # await holder_feeder.send_command_raw('{out11:1}')
+    # await feeder.send_command_raw('{out11:1}')
 
     t1 = asyncio.create_task(
-        dosing_feeder.feeding_loop(holder_feeder, system, recipe))
+        dosing_feeder.feeding_loop(feeder, system, recipe))
 
     try:
         await asyncio.sleep(100000)
