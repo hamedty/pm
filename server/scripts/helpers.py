@@ -157,3 +157,8 @@ async def feeder_handover_to_rail(system, ALL_NODES):
     await asyncio.sleep(recipe.T_RAIL_JACK1)
     await rail.set_valves([0, 0])
     await asyncio.sleep(recipe.T_RAIL_JACK2)
+
+
+async def motors_off(system, ALL_NODES):
+    all_nodes, feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    await feeder.set_motors()

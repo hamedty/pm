@@ -233,6 +233,14 @@ class Station(Node):
             # await aioconsole.ainput(str(error))
             error_clear_event = await system.register_error(error)
             await error_clear_event.wait()
+        if 'steps_history' in z2:
+            data = {
+                'station': self.ip_short,
+                'component': 'holder',
+                'steps': z2['steps_history'],
+            }
+            table = 'vision_retries'
+            system.mongo.write(table, data)
 
     async def align_dosing(self, recipe, system):
         data = {}
@@ -253,6 +261,14 @@ class Station(Node):
             # await aioconsole.ainput(str(error))
             error_clear_event = await system.register_error(error)
             await error_clear_event.wait()
+        if 'steps_history' in z2:
+            data = {
+                'station': self.ip_short,
+                'component': 'dosing',
+                'steps': z2['steps_history'],
+            }
+            table = 'vision_retries'
+            system.mongo.write(table, data)
 
     async def verify_no_holder_no_dosing(self, system):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})

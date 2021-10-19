@@ -56,6 +56,7 @@ async def feeder_process(arduino, G1, command):
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
     oscillate_motors_task.cancel()
+    arduino._send_command("{m2: 5, m3: 5}")
 
 
 async def oscillate_motors(arduino):

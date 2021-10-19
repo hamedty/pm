@@ -1,3 +1,4 @@
+turn off motors if feeder system was unoperating for while
 G1 optimization - optimize robot move
 -----------------------------------------
 feeder stop motors if didn't feed for a while
@@ -9,5 +10,6 @@ emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
 control holder DC motor with PWM instead of timer
 log collection framework
+need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react

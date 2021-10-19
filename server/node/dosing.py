@@ -79,10 +79,10 @@ class Dosing(Node):
 
     async def read_proximity(self):
         read_out = []
-        for i in range(20):
+        for i in range(25):
             proximity_input = await self.read_metric('in2')
             read_out.append(proximity_input)
-            await asyncio.sleep(.003)
+            await asyncio.sleep(.005)
         # print(read_out)
         mean = sum(read_out) / float(len(read_out))
         value = int(mean > 0.5)

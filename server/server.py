@@ -7,6 +7,7 @@ import traceback
 import types
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
+import mongo
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PARENT_PATH = os.path.dirname(PATH)
@@ -28,6 +29,10 @@ class System(object):
         self.errors = {}
         self.errors_events = {}
         self.error_lock = asyncio.Lock()
+
+        # mongo db access point
+        self.mongo = mongo.Mongo()
+        self.mongo.start()
 
     async def connect(self):
         for node in self.nodes:
