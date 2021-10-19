@@ -22,7 +22,7 @@ ALL_NODES = [
     Station('Station 10', '192.168.44.110'),
 
     Feeder('Feeder 1', '192.168.44.21', arduino_id=2),
-    Dosing('Dosing Feeder 1', '192.168.44.21', arduino_id=1),
+    Dosing('Dosing F. 1', '192.168.44.21', arduino_id=1),
 ]
 ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 

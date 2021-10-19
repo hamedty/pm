@@ -126,3 +126,7 @@ async def wait_for_holder(arduino):
     value = False
     while not value:
         _, value = await arduino.read_metric('in5', 'r.in5')
+
+    value = False
+    while not value:
+        _, value = await arduino.read_metric('in6', 'r.in6')

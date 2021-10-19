@@ -36,7 +36,7 @@ async def main(system, ALL_NODES):
     feeder.init_events()
     asyncio.create_task(feeder.feeding_loop(system, recipe))
 
-    dosing_feeder = ALL_NODES_DICT['Dosing Feeder 1']
+    dosing_feeder = ALL_NODES_DICT['Dosing F. 1']
     asyncio.create_task(dosing_feeder.feeding_loop(feeder, system, recipe))
 
     # rail

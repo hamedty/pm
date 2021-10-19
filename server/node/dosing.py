@@ -43,7 +43,7 @@ class Dosing(Node):
         pass
 
     async def feeding_loop(self, feeder, system, recipe):
-        if recipe.SERVICE_FUNC_NO_FEEDER:
+        if recipe.SERVICE_FUNC_NO_FEEDER or recipe.SERVICE_FUNC_NO_DOSING:
             return
 
         # start dosing conveyor motor
@@ -60,7 +60,6 @@ class Dosing(Node):
             confidence = 0
             while True:
                 confidence, proximity_input = await self.read_proximity()
-                print(I, 'confidence:', confidence, 'value:', proximity_input)
                 if confidence > .98:
                     break
                 await asyncio.sleep(.15)
