@@ -42,7 +42,7 @@ async def pickup_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
 
-    robot = robots[0]
+    robot = robots[1]
     Y_GRAB_IN_UP_1 = 75
     X_GRAB_IN = 284.5
     Y_GRAB_IN_DOWN = 0

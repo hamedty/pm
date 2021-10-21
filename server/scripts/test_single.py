@@ -11,18 +11,11 @@ from node import ALL_NODES_DICT
 async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
 
-    # await feeder.send_command_raw('{out11:1}')
-
-    t1 = asyncio.create_task(
-        dosing_feeder.feeding_loop(feeder, system, recipe))
+    await dosing_feeder.create_feeding_loop(feeder, system, recipe)
 
     try:
         await asyncio.sleep(100000)
     except:
         pass
 
-    system.system_stop.set()
-    await asyncio.sleep(1)
-    t1.cancel()
-    await self.set_valves([0, None, 0])
-    await feeder.set_motors((5, 0), (9, 0))
+    await dosing_feeder.terminate_feeding_loop()

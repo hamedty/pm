@@ -12,38 +12,53 @@ async def feeder_process(arduino, G1, command):
     JERK_IDLE = command['jerk_idle']
     CARTRIDGE_FEED = command['cartridge_feed']
 
-    holder_mask = command['mask']
+    # prepare masks
+    holder_mask = command['holder_mask']
+    dosing_mask = command['dosing_mask']
+    assert len(holder_mask) == len(dosing_mask)
     N = len(holder_mask)
     holder_mask.append(0)
+    dosing_mask.append(0)
 
+    # initial condition
     initial_z = FEEDER_OFFSET
     arduino._send_command('''
         {out2: 1}
         {z:{jm:%d}}
         ''' % JERK_FEED)
+
+    # Motors
+    if any(dosing_mask):
+        arduino._send_command("{m5: 25, m9: 5}")
     oscillate_motors_task = asyncio.create_task(oscillate_motors(arduino))
 
     holder_shift_register = 0
-    gate_status = 0
+    holder_gate_status = 0
+    dosing_gate_status = 0
 
     for i in range(N):
         # Gate Open
-        if holder_mask[i] and not gate_status:
-            arduino._send_command("{out7: 1, out11: 1}")
-            gate_status = 1
+        if holder_mask[i] and not holder_gate_status:
+            arduino._send_command("{out7: 1}")
+            holder_gate_status = 1
+        if dosing_mask[i] and not dosing_gate_status:
+            arduino._send_command("{out11: 1}")
+            dosing_gate_status = 1
 
         # Grab
         if CARTRIDGE_FEED and any(holder_mask[i:]):
             await cartridge_grab(arduino)
 
         # Wait for holder
-        if holder_mask[i]:
-            await wait_for_holder(arduino)
+        await wait_for_inputs(arduino, holder_mask[i], dosing_mask[i])
 
         # Close Gate
-        if not holder_mask[i + 1] and gate_status:
-            arduino._send_command("{out7: 0, out11: 0}")
-            gate_status = 0
+        if not holder_mask[i + 1] and holder_gate_status:
+            arduino._send_command("{out7: 0}")
+            holder_gate_status = 0
+        if not dosing_mask[i + 1] and dosing_gate_status:
+            arduino._send_command("{out11: 0}")
+            dosing_gate_status = 0
 
         # Move and Handover
         z = FEEDER_OFFSET + 25 * (i + 1)
@@ -123,11 +138,13 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     await arduino.wait_for_command_id(command_id)
 
 
-async def wait_for_holder(arduino):
-    value = False
-    while not value:
-        _, value = await arduino.read_metric('in5', 'r.in5')
+async def wait_for_inputs(arduino, holder, dosing):
+    if holder:
+        value = False
+        while not value:
+            _, value = await arduino.read_metric('in5', 'r.in5')
 
-    value = False
-    while not value:
-        _, value = await arduino.read_metric('in6', 'r.in6')
+    if dosing:
+        value = False
+        while not value:
+            _, value = await arduino.read_metric('in6', 'r.in6')

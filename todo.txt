@@ -1,8 +1,9 @@
-turn off motors if feeder system was unoperating for while
+vision dosing 101 - train
+feeder stop motors if didn't feed for a while
+feeder gradual motor on
+motor oralB
 G1 optimization - optimize robot move
 -----------------------------------------
-feeder stop motors if didn't feed for a while
-motor oralB
 status request sent for no reason
 wait for holder in gcode? (M101)
 verify gate (or wait for gate in gcode)

@@ -152,6 +152,13 @@ class Feeder(Node):
         command = '{%s}' % command
         await self.send_command_raw(command)
 
+    async def set_motors2(self, *args):
+        if not args:  # set all zero
+            await self.set_motors(self, *args)
+            return
+        # for motor, speed in args:
+        #     await
+
     def init_events(self):
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
@@ -178,7 +185,7 @@ class Feeder(Node):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
-    async def feeding_loop(self, system, recipe, mask=None):
+    async def feeding_loop(self, system, recipe):
         await self.feeder_initial_start_event.wait()
 
         if self.is_at_loc(z=recipe.FEEDER_Z_DELIVER):
@@ -191,12 +198,15 @@ class Feeder(Node):
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 await self.set_valves([None, 0])
                 await self.G1(z=recipe.FEEDER_Z_IDLE, feed=recipe.FEED_FEEDER_COMEBACK, system=system)
-                mask = self.mask
-                if mask is None:
-                    mask = [1] * recipe.N
+
+                holder_mask = [1] * recipe.N
+                dosing_mask = [
+                    int(not recipe.SERVICE_FUNC_NO_DOSING)] * recipe.N
+
                 command = {
                     'verb': 'feeder_process',
-                    'mask': mask,
+                    'holder_mask': holder_mask,
+                    'dosing_mask': dosing_mask,
                     'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
                     'z_offset': recipe.FEEDER_Z_IDLE,
                     'feed_feed': recipe.FEED_FEEDER_FEED,

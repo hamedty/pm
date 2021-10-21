@@ -37,7 +37,7 @@ async def main(system, ALL_NODES):
     asyncio.create_task(feeder.feeding_loop(system, recipe))
 
     # dosing feeder
-    asyncio.create_task(dosing_feeder.feeding_loop(feeder, system, recipe))
+    await dosing_feeder.create_feeding_loop(feeder, system, recipe)
 
     # rail
     rail.init_events()
@@ -78,6 +78,7 @@ async def main(system, ALL_NODES):
     ''' Clean Up '''
     rail.system_stop_event.set()
     feeder.system_stop_event.set()
+    await dosing_feeder.terminate_feeding_loop()
 
     await asyncio.gather(*[station.clearance(system) for station in stations])
     for task in stations_loop:
