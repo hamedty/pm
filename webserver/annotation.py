@@ -29,7 +29,7 @@ def save_data():
 
 
 def list_all():
-    l = glob.glob(DATASET_PATH + '/*_*')
+    l = glob.glob(DATASET_PATH + '/*192*')
     l = [tuple(i.split('/')[-1].split('_')[:-1]) for i in l]
     for component, node, dataset_name in l:
         if node not in data:

@@ -1,4 +1,4 @@
-vision dosing 101 - train
+log history for dosing direction
 feeder stop motors if didn't feed for a while
 feeder gradual motor on
 motor oralB
@@ -14,3 +14,5 @@ log collection framework
 need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react
+----------------------------------------
+546 - shoro

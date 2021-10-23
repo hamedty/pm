@@ -22,7 +22,7 @@ async def main(system, ALL_NODES):
     await do_nodes(system, robots, lambda r: r.set_valves([0] * 10), simultanously=False)
     await do_nodes(system, stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))
     await rail.set_valves([0, 0])
-    await feeder.set_valves([0, None] + [0] * 12)
+    await feeder.set_valves([0] * 14)
     if not recipe.SERVICE_FUNC_NO_FEEDER:
         await feeder.set_motors(
             (2, 4), (3, 4),  # Holder Downstream
@@ -58,7 +58,7 @@ async def main(system, ALL_NODES):
     ''' Main Loop'''
     t0 = time.time()
     while not system.system_stop.is_set():
-        await aioconsole.ainput('enter to continue')
+        # await aioconsole.ainput('enter to continue')
 
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
@@ -78,7 +78,7 @@ async def main(system, ALL_NODES):
     ''' Clean Up '''
     rail.system_stop_event.set()
     feeder.system_stop_event.set()
-    await dosing_feeder.terminate_feeding_loop()
+    await dosing_feeder.terminate_feeding_loop(feeder)
 
     await asyncio.gather(*[station.clearance(system) for station in stations])
     for task in stations_loop:

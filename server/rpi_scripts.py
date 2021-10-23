@@ -139,12 +139,15 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
 
 async def wait_for_inputs(arduino, holder, dosing):
+    print('waiting for holder')
     if holder:
         value = False
         while not value:
             _, value = await arduino.read_metric('in5', 'r.in5')
-
+    print('holder done')
+    print('waiting for dosing')
     if dosing:
         value = False
         while not value:
             _, value = await arduino.read_metric('in6', 'r.in6')
+    print('dosing done')

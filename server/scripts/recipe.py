@@ -4,8 +4,8 @@ import asyncio
 N = 10
 SPEED = .6  # between 0-1
 SERVICE_FUNC_NO_FEEDER = 0
-SERVICE_FUNC_NO_CARTRIDGE = 1
-SERVICE_FUNC_NO_DOSING = 1
+SERVICE_FUNC_NO_CARTRIDGE = 0
+SERVICE_FUNC_NO_DOSING = 0
 ''' Station '''
 FEED_Z_UP = 10000 * SPEED
 FEED_Z_DOWN = 15000 * SPEED
@@ -75,12 +75,18 @@ async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
 
 
 async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations):
+    # G2Core Flag
     for node in all_nodes:
         # only checks if home squence has beed ran. location must be checked separately
         is_homed = await node.is_homed()
         assert is_homed, '%s is not homed!' % node.name
+
+    # Feeder
     assert feeder.is_at_loc(
         z=FEEDER_Z_IDLE) or feeder.is_at_loc(z=FEEDER_Z_DELIVER)
+    assert await feeder.read_metric('out2') == 0, "Feeder Jack is out - transfer first"
+
+    # Rail
     assert rail.is_at_loc(z=D_STANDBY)
 
     # robots

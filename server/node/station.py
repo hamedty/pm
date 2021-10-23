@@ -105,6 +105,7 @@ class Station(Node):
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
+        'holder_offset': 0,
         'dosing_offset': 0,
         'holder_webcam_direction': 'up',
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up

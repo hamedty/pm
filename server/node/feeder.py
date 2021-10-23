@@ -188,10 +188,10 @@ class Feeder(Node):
     async def feeding_loop(self, system, recipe):
         await self.feeder_initial_start_event.wait()
 
-        if self.is_at_loc(z=recipe.FEEDER_Z_DELIVER):
-            self.feeder_is_full_event.set()
-            await self.feeder_is_empty_event.wait()
-            self.feeder_is_empty_event.clear()
+        # if self.is_at_loc(z=recipe.FEEDER_Z_DELIVER):
+        #     self.feeder_is_full_event.set()
+        #     await self.feeder_is_empty_event.wait()
+        #     self.feeder_is_empty_event.clear()
 
         while not self.system_stop_event.is_set():
             ''' Fill '''

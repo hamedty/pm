@@ -41,6 +41,7 @@ if 'Station 2' in ALL_NODES_DICT:
     station.hw_config['H_PRE_DANCE'] = 244
     station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
+    station.hw_config['holder_offset'] = 2
 
 
 if 'Station 3' in ALL_NODES_DICT:

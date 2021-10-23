@@ -75,7 +75,7 @@ class Dosing(Node):
         self.motor_control_task = asyncio.create_task(
             self.motor_control_loop(feeder, system, recipe))
 
-    async def terminate_feeding_loop(self):
+    async def terminate_feeding_loop(self, feeder):
         if self.feeding_task is None:
             return
 
@@ -151,7 +151,7 @@ class Dosing(Node):
         for i in range(30):
             proximity_input = await self.read_metric('in2')
             read_out.append(proximity_input)
-            await asyncio.sleep(.005)
+            await asyncio.sleep(.006)
         # print(read_out)
         mean = sum(read_out) / float(len(read_out))
         value = int(mean > 0.5)
