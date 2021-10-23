@@ -78,13 +78,13 @@ async def main(system, ALL_NODES):
     ''' Clean Up '''
     rail.system_stop_event.set()
     feeder.system_stop_event.set()
-    await dosing_feeder.terminate_feeding_loop(feeder)
 
     await asyncio.gather(*[station.clearance(system) for station in stations])
     for task in stations_loop:
         task.cancel()
 
     await feeder.set_motors()  # set all feeder motors to 0
+    await dosing_feeder.terminate_feeding_loop(feeder)
 
 
 async def home_all_nodes(system, feeder, rail, robots, stations):

@@ -109,7 +109,7 @@ class Arduino(object):
             if self._status.get('r.stat', -1) in {13}:
                 raise HW_PANIC_EXCEPTION()
             await asyncio.sleep(0.001)
-        if self.stat_code:
+        if self.stat_code not in {0, 100}:
             raise HW_PANIC_EXCEPTION(self.stat_code)
 
     async def read_metric(self, query, response):
