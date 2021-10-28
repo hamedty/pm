@@ -120,8 +120,9 @@ async def holder_feeder(system, ALL_NODES):
     # script feed run - with cartridge off
     command = {
         'verb': 'feeder_process',
-        'mask': [1] * recipe.N,
-        'cartridge_feed': False,
+        'holder_mask': [1] * recipe.N,
+        'dosing_mask': [1] * recipe.N,
+        'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
         'z_offset': recipe.FEEDER_Z_IDLE,
         'feed_feed': recipe.FEED_FEEDER_FEED,
         'jerk_feed': recipe.JERK_FEEDER_FEED,
