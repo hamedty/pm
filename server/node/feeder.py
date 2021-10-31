@@ -194,6 +194,14 @@ class Feeder(Node):
         #     self.feeder_is_empty_event.clear()
 
         while not self.system_stop_event.is_set():
+            ''' Turn on Motors '''
+            if not recipe.SERVICE_FUNC_NO_FEEDER:
+                await self.set_motors(
+                    (2, 4), (3, 4),  # Holder Downstream
+                    # Holder Upstream - Lift and long conveyor
+                    (1, 26), (4, 8), (7, 46),
+                    (6, 32)  # , (8, 200)  # Cartridge Conveyor + OralB
+                )
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 await self.set_valves([None, 0])

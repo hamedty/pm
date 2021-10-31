@@ -1,9 +1,3 @@
-error ha jadval khoshgel
-baiad feeder stop kone on pause
-motor ha aram roshan shavand
-if elements exist before feed, on while
-motor haie feeder baiad hardafe set shan
-log history for dosing direction
 feeder stop motors if didn't feed for a while
 feeder gradual motor on
 motor oralB
@@ -20,3 +14,5 @@ need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react
 ----------------------------------------
+
+440 + 285

@@ -272,15 +272,16 @@ class Station(Node):
             system.mongo.write(table, data)
 
     async def verify_no_holder_no_dosing(self, system):
-        res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
-        if not res[1]['no_holder_no_dosing']:
+        while True:
+            res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
+            if res[1]['no_holder_no_dosing']:
+                return
             error = {
                 'message': 'no-holder-no-dosing failed',
                 'location_name': self.name,
                 'details': res,
             }
             print(error)
-            # await aioconsole.ainput(str(error))
             error_clear_event = await system.register_error(error)
             await error_clear_event.wait()
 

@@ -70,7 +70,6 @@ if 'Station 6' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 240
     station.hw_config['H_PRE_DANCE'] = 248
     station.hw_config['dosing_webcam_direction'] = 'riu'
-    station.hw_config['holder_webcam_direction'] = 'down'
     station.hw_config['presence_threshold']['holder'] = 63
     # station.hw_config['cameras']['dosing']['rois']['sit_right']['x0'] = 50
 
@@ -107,7 +106,6 @@ if 'Station 10' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 226
     station.hw_config['H_PUSH'] = 235.5
     station.hw_config['H_PRE_DANCE'] = 243
-    station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
     station.hw_config['holder_offset'] = 1
 
