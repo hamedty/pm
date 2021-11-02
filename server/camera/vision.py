@@ -46,11 +46,12 @@ def object_present(frame, threshold):
     return bool(value > threshold), float(value)
 
 
-def dosing_sit_right(frame):
+def dosing_sit_right(frame, hw_config_dosing_sit_right):
     # cv2.imwrite('/home/pi/data/sitright.png', frame)
-    brightness_threshold = 25
-    existance_count_threshold = 250
-    wrong_sitting_count_threshold = 20
+    brightness_threshold = hw_config_dosing_sit_right['brightness_threshold']
+    existance_count_threshold = hw_config_dosing_sit_right['existance_count_threshold']
+    wrong_sitting_count_threshold = hw_config_dosing_sit_right['wrong_sitting_count_threshold']
+
     black_pixel_count = (frame.mean(axis=2).mean(axis=0)
                          < brightness_threshold).sum()
     sit_wrong = existance_count_threshold > black_pixel_count > wrong_sitting_count_threshold
@@ -78,3 +79,7 @@ def prepare_frame(frame, component):
 
     frame = frame.flatten()
     return frame
+
+
+def dump(frame, filename):
+    cv2.imwrite(filename, frame)
