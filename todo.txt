@@ -1,9 +1,9 @@
-disable station dump for now
-vaghti holder ro align kard vaisa check kon ie bar dige
-dosing feeder keep going till last second before stop
+1- kaji jozi holder o dosing ba ham jam mishe
+2- kaji omde dosing
+3- dosing ro mikeshe bala
+4- moghe soghoot azad micharkhe
+----------------------------------------
 fault G1 rooie feeder -> logging now
-station1 dahanesh baaz nemishe - jack dosing
-
 --------------------------------
 feeder stop motors if didn't feed for a while
 feeder gradual motor on
@@ -21,6 +21,3 @@ need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react
 ----------------------------------------
-453
-18*24 + 10
-iedoone mohamad goft shekaste benevis too 10 shekast

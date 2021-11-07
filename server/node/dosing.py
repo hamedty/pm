@@ -91,7 +91,7 @@ class Dosing(Node):
         self.feeding_task = None
 
     async def feeding_loop(self, feeder, system, recipe):
-        while not system.system_stop.is_set():
+        while True:
             await self.set_valves([0])
 
             # wait for optic sensor input=1

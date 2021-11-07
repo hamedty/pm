@@ -7,7 +7,7 @@ import aioconsole
 
 
 async def fill_cartridge_conveyor(system, ALL_NODES):
-    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors(
         (6, 300),  # Cartridge Conveyor
     )
@@ -19,10 +19,12 @@ async def run_rail_empty(system, ALL_NODES):
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
 
+    await system.system_running.wait()
+
     while system.system_running.is_set():
         await rail.set_valves([0] * 2)
         await system.system_running.wait()
-        await rail.G1(z=25, feed=recipe.FEED_RAIL_FREE, system=system)
+        await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
         await rail.set_valves([1, 0])
         await asyncio.sleep(recipe.T_RAIL_JACK1)
         await rail.set_valves([1, 1])
@@ -114,7 +116,8 @@ async def holder_feeder(system, ALL_NODES):
     # Motors on
     await feeder.set_motors(
         (2, 4), (3, 4),  # Holder Downstream
-        (1, 26), (4, 8), (7, 46)  # Holder Upstream - Lift and long conveyor
+        (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
+        (1, 7500), (10, 60000),  # holder gate on/off
     )
     await asyncio.sleep(1.5)
     # script feed run - with cartridge off
@@ -161,5 +164,5 @@ async def feeder_handover_to_rail(system, ALL_NODES):
 
 
 async def motors_off(system, ALL_NODES):
-    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors()

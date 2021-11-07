@@ -38,7 +38,7 @@ async def feeder_process(arduino, G1, command):
 
     for i in range(N):
         # Gate Open
-        if holder_mask[i] and not holder_gate_status:
+        if holder_mask[i]:  # and not holder_gate_status:
             arduino._send_command("{out7: 1}")
             holder_gate_status = 1
         if dosing_mask[i] and not dosing_gate_status:
@@ -126,7 +126,10 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
     command_id = arduino.get_command_id()
     command_raw = '''
+        G4 P.15
         M100 ({out8: 1})
+        G4 P.3
+
         G38.2 Y-100 F2000
         M100 ({clear:n})
         M100 ({out13: 0})
@@ -145,6 +148,10 @@ async def wait_for_inputs(arduino, holder, dosing):
         while not value:
             _, value = await arduino.read_metric('in5', 'r.in5')
     print('holder done')
+
+    await asyncio.sleep(.2)
+    arduino._send_command('{out7: 0}')
+
     print('waiting for dosing')
     if dosing:
         value = False

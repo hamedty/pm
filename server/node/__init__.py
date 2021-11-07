@@ -99,7 +99,6 @@ if 'Station 9' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 238
     station.hw_config['H_PRE_DANCE'] = 246
     station.hw_config['dosing_webcam_direction'] = 'riu'
-    station.hw_config['dosing_offset'] = 2
 
 
 if 'Station 10' in ALL_NODES_DICT:
@@ -108,7 +107,7 @@ if 'Station 10' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 235.5
     station.hw_config['H_PRE_DANCE'] = 243
     station.hw_config['holder_webcam_direction'] = 'down'
-    station.hw_config['holder_offset'] = 1
+    # station.hw_config['holder_offset'] = 1
 
 
 if 'Robot 2' in ALL_NODES_DICT:

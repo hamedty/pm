@@ -82,6 +82,7 @@ app.controller('app_controller', function($scope, ws) {
   $scope.COMMAND_TEMPLATES = {
     'set valve': COMMAND_TEMPLATE_SET_VALVE,
     'home': COMMAND_TEMPLATE_HOME,
+    'open dosing valve': COMMAND_TEMPLATE_OPEN_DOSING_VALVE,
     'G-Code': COMMAND_TEMPLATE_GCODE,
     'dump frame': COMMAND_TEMPLATE_DUMP_FRAME,
     'dump training holder': COMMAND_TEMPLATE_DUMP_TRAINING_HOLDER,
@@ -167,6 +168,13 @@ COMMAND_TEMPLATE_SET_VALVE = "{\n\
     'verb': 'set_valves',\n\
     'valves': [0],\n\
 }";
+
+COMMAND_TEMPLATE_OPEN_DOSING_VALVE = "{\n\
+    'verb': 'raw',\n\
+    'data': '{out4:0}',\n\
+    'wait_start': [1,3,4],\n\
+    'wait_completion': true,\n\
+}"
 
 COMMAND_TEMPLATE_GCODE = "{\n\
     'verb': 'raw',\n\

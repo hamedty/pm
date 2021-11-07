@@ -76,8 +76,8 @@ async def main(system, ALL_NODES):
     for task in stations_loop:
         task.cancel()
 
-    await feeder.set_motors()  # set all feeder motors to 0
     await dosing_feeder.terminate_feeding_loop(feeder)
+    await feeder.set_motors()  # set all feeder motors to 0
 
 
 async def home_all_nodes(system, feeder, rail, robots, stations):

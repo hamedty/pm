@@ -14,6 +14,8 @@ import rpi_scripts
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
+global PEN_ID
+PEN_ID = 0
 ARDUINOS = {}
 CAMERAS = {}
 
@@ -21,11 +23,15 @@ DATA_PATH = '/home/pi/data'
 
 
 async def dump_frame(command, _):
+    arduino.send_command('{out6:1}')
+
     CAMERAS['holder'].dump_frame(
         filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
     CAMERAS['dosing'].dump_frame(
         filename=DATA_PATH + '/dosing.png', roi_name=command.get('roi_index_dosing'))
     return {'success': True}
+
+    arduino.send_command('{out6:0}')
 
 
 async def dump_training(command, _):
@@ -45,6 +51,8 @@ async def dump_training(command, _):
         steps = -steps
 
     webcam_buffer_length = 4
+    arduino.send_command('{out6:1}')
+
     for frame_no in range(-webcam_buffer_length, no_frames):
         if frame_no < 0:
             filename = None  # capture frame but ignore buffer
@@ -66,10 +74,12 @@ async def dump_training(command, _):
             delay = .25
             await asyncio.sleep(delay)  # needed for system to settle
 
+    arduino.send_command('{out6:0}')
     return {'success': True}
 
 
 async def align(command, _):
+
     arduino = ARDUINOS[command['arduino_index']]
     component = command['component']  # holder / dosing
     camera = CAMERAS[component]
@@ -78,6 +88,12 @@ async def align(command, _):
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
 
+    arduino.send_command('{out6:1}')
+
+    global PEN_ID
+    if PEN_ID > 10:
+        os.system('rm /home/pi/data/%04d_*' % PEN_ID)
+
     presence_threshold = arduino._hw_config['presence_threshold'][component]
     retries = command['retries']
     offset = arduino._hw_config.get(component + '_offset', 0)
@@ -85,19 +101,41 @@ async def align(command, _):
     steps_history = []
 
     aligned = False
-    for i in range(retries):
-        frame = camera.get_frame(roi_name='alignment')
-        steps, aligned = detector(frame, offset)
-        # print(steps, aligned)
-        steps_history.append(steps)
-        if aligned:
+    for j in range(3):
+        arduino.send_command('{%s:1}' % valve)
+        await asyncio.sleep(.05)
+
+        for i in range(retries):
+            frame = camera.get_frame(roi_name='alignment')
+
+            # filename = '/home/pi/data/%04d_%s_%d.png' % (PEN_ID, component, i)
+            # vision.dump(frame, filename)
+
+            steps, aligned = detector(frame, offset)
+            # print(steps, aligned)
+            steps_history.append(steps)
+            if aligned:
+                break
+
+            arduino.send_command('G10 L20 P1 %s0' % axis)
+            arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
+            await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
+
+        arduino.send_command('{%s:0}' % valve)
+
+        if component == 'holder' and aligned:
+            await asyncio.sleep(.25)
+            frame = camera.get_frame(roi_name='alignment')
+            _, aligned_check = detector(frame, offset)
+            if aligned_check:
+                break
+        else:
             break
 
-        arduino.send_command('G10 L20 P1 %s0' % axis)
-        arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
-        await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
+    if component == 'dosing':
+        PEN_ID += 1
 
-    arduino.send_command(json.dumps({valve: 0}))
+    arduino.send_command('{out6:0}')
     return {'success': True, 'aligned': aligned, 'steps_history': steps_history}
 
 
@@ -105,12 +143,15 @@ async def detect_vision(command, _):
     arduino = ARDUINOS[command['arduino_index']]
     object = command['object']
 
+    arduino.send_command('{out6:1}')
+
     if object == 'dosing_sit_right':
         camera = CAMERAS['dosing']
         roi_name = 'sit_right'
         pre_fetch = camera.DEFAULT_PRE_FETCH
         frame = camera.get_frame(pre_fetch=pre_fetch, roi_name=roi_name)
-        result = vision.dosing_sit_right(frame)
+        result = vision.dosing_sit_right(
+            frame, arduino._hw_config['dosing_sit_right'])
     elif object == 'no_holder_no_dosing':
         frames = await asyncio.gather(
             CAMERAS['dosing'].async_get_frame(
@@ -133,7 +174,10 @@ async def detect_vision(command, _):
             'no_holder_no_dosing': not (dosing_present or holder_present),
         }
     else:
+        arduino.send_command('{out6:0}')
         return {'success': False, 'message': 'Unknown object to detect'}
+
+    arduino.send_command('{out6:0}')
     result['success'] = True
     return result
 
@@ -217,7 +261,8 @@ async def G1(command, _=None):
     # check current position is correct
     result, reached, g2core_location, encoder_location = arduino.check_encoder(
         axes, req_location, check_telorance_hard=(not correct_initial))
-
+    print('check_encoder1:', result, reached,
+          g2core_location, encoder_location)
     if (not correct_initial) and (not result):
         return {'success': False, 'message': 'current position is incorrect g2core %.2f encoder %.2f' % (g2core_location, encoder_location)}
     if reached:
@@ -235,10 +280,12 @@ async def G1(command, _=None):
 
         arduino.send_command(command_raw)
         await arduino.wait_for_command_id(command_id)
-
+        print('send_command1:', command_raw)
         # if encoder pos is correct return success
         result, reached, g2core_location, encoder_location = arduino.check_encoder(
             axes, req_location)
+        print('check_encoder2:', result, reached,
+              g2core_location, encoder_location)
         if result:
             return {'success': True, 'status': arduino.get_status()}
 
@@ -247,6 +294,7 @@ async def G1(command, _=None):
         command_id = arduino.get_command_id()
         command_raw = '{pos%s:n}\nN%d M0' % (axes, command_id)
         arduino.send_command(command_raw)
+        print('send_command2:', command_raw)
         await arduino.wait_for_command_id(command_id)
 
         # update position

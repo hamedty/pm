@@ -100,7 +100,7 @@ class Station(Node):
         },
         'encoders': {
             # encoder key, ratio, telorance_soft, telorance_hard
-            'posz': ['enc1', 300.0, .4, 5.0],
+            'posz': ['enc1', 300.0, .7, 5.0],
         },
         'H_ALIGNING': 210,
         'H_PUSH': 219,
@@ -110,6 +110,11 @@ class Station(Node):
         'holder_webcam_direction': 'up',
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
         'presence_threshold': {'holder': 80, 'dosing': 50},
+        'dosing_sit_right': {
+            'brightness_threshold': 25,
+            'existance_count_threshold': 250,
+            'wrong_sitting_count_threshold': 20,
+        },
         'cameras': {'holder': {'rois': {}}, 'dosing': {'rois': {}}},
     }
 
@@ -200,6 +205,16 @@ class Station(Node):
             if full:
                 await system.system_running.wait()
                 await self.align_dosing(recipe, system)
+
+                # check vision correctness
+                if self.ip_short in {109, 110}:
+                    error = {
+                        'message': 'Ready. continue?',
+                        'location_name': self.name,
+                    }
+                    error_clear_event = await system.register_error(error)
+                    await error_clear_event.wait()
+
                 await system.system_running.wait()
                 await self.assemble(recipe, system)
 
@@ -252,7 +267,7 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([None, None, None, 0])
+            # await self.set_valves([None, None, None, 0])
             error = {
                 'message': 'Aligining failed for dosing. Align to continue',
                 'location_name': self.name,
@@ -325,7 +340,7 @@ class Station(Node):
         data['PAUSE_JACK_PRE_DANCE_2'] = 0.05
         data['PAUSE_JACK_PRE_DANCE_3'] = 0.05
         data['H_PRE_DANCE'] = self.hw_config['H_PRE_DANCE']
-        data['FEED_PRE_DANCE'] = recipe.FEED_Z_UP
+        data['FEED_PRE_DANCE'] = recipe.FEED_Z_UP * .7
 
         dance_rev = 1
         charge_h = 0.1
@@ -368,6 +383,11 @@ class Station(Node):
 
             ; prepare for dance
             G10 L20 P1 Y0
+
+
+            M100 ({zjm:5000})
+
+
             M100 ({out1: 0, out4: 1})
             G4 P%(PAUSE_JACK_PRE_DANCE_1).2f
             G1 Z%(H_PRE_DANCE).2f F%(FEED_PRE_DANCE)d
@@ -397,6 +417,11 @@ class Station(Node):
             G1 Y%(Y_DANCE_BACK2).2f F%(FEED_DANCE_BACK)d
             M100 ({out4: 0})
             G4 P%(PAUSE_POST_DANCE_BACK).2f
+
+
+            M100 ({zjm:15000})
+
+
         ''' % data
         await self.send_command_raw(command)
 
