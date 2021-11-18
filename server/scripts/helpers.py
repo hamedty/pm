@@ -98,6 +98,13 @@ async def pickup_rail(system, ALL_NODES):
     await robot.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
 
 
+async def holder_feeder_forever(system, ALL_NODES):
+    await system.system_running.wait()
+    while system.system_running.is_set():
+        await holder_feeder(system, ALL_NODES)
+        await feeder_handover_to_rail(system, ALL_NODES)
+
+
 async def holder_feeder(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 

@@ -1,18 +1,16 @@
-1- kaji jozi holder o dosing ba ham jam mishe
-2- kaji omde dosing
-3- dosing ro mikeshe bala
-4- moghe soghoot azad micharkhe
-----------------------------------------
-fault G1 rooie feeder -> logging now
---------------------------------
-feeder stop motors if didn't feed for a while
+jack haie station ra baz bad moghe mizanam o motmaen mishavam
+verify correct press
+higher station in exchange to avoid station 1 accident
+verify gate (or wait for gate in gcode)
+-----------------------------------------
 feeder gradual motor on
 motor oralB
+feeder stop motors if didn't feed for a while
 G1 optimization - optimize robot move
+sometimes webcam doest load on boot - reset usb?
 -----------------------------------------
 status request sent for no reason
 wait for holder in gcode? (M101)
-verify gate (or wait for gate in gcode)
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
 control holder DC motor with PWM instead of timer
@@ -21,3 +19,4 @@ need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react
 ----------------------------------------
+6 holder

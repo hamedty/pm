@@ -1,18 +1,18 @@
 {
     "101": {
         "dosing": {
-            "2ueaa0wj": {
-                "zero": 323
+            "ofk6d7br": {
+                "zero": 186
             },
-            "nx3jppbs": {
-                "zero": 215
+            "x62dbzow": {
+                "zero": 206
             }
         },
         "dosing_roi": {
             "dx": 230,
             "dy": 205,
             "x0": 222,
-            "y0": 50
+            "y0": 22
         },
         "holder": {
             "0m1whc6p": {
@@ -222,9 +222,6 @@
             "35798e0r": {
                 "zero": 202
             },
-            "qcpiw9jk": {
-                "zero": 217
-            },
             "z982k55u": {
                 "zero": 217
             }
@@ -295,16 +292,16 @@
         },
         "holder": {
             "4dj7dbbx": {
-                "zero": 235
+                "zero": 234
             },
             "5voo52ia": {
-                "zero": 198
+                "zero": 197
             },
             "7b1ga82x": {
-                "zero": 202
+                "zero": 200
             },
             "o5lc4zjm": {
-                "zero": 176
+                "zero": 175
             }
         },
         "holder_roi": {

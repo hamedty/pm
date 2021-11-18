@@ -57,7 +57,7 @@ def create_camera(index, roi):
         'backlight_compensation': 0,
         'white_balance_temperature_auto': 0,
         'white_balance_temperature': 5250,
-        'exposure_auto': 0,
+        'exposure_auto': 1,
         'exposure_absolute': 18,
     }
     v4l2_config = {

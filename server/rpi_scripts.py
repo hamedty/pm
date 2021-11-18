@@ -30,7 +30,9 @@ async def feeder_process(arduino, G1, command):
     # Motors
     if any(dosing_mask):
         arduino._send_command("{m5: 25, m9: 5}")
-    oscillate_motors_task = asyncio.create_task(oscillate_motors(arduino))
+
+    arduino._send_command("{m2: 4, m3: 4}")
+    # oscillate_motors_task = asyncio.create_task(oscillate_motors(arduino))
 
     holder_shift_register = 0
     holder_gate_status = 0
@@ -70,7 +72,7 @@ async def feeder_process(arduino, G1, command):
         await asyncio.sleep(.1)  # extra wait
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
-    oscillate_motors_task.cancel()
+    # oscillate_motors_task.cancel()
     arduino._send_command("{m2: 5, m3: 5}")
 
 
@@ -151,10 +153,11 @@ async def wait_for_inputs(arduino, holder, dosing):
 
     await asyncio.sleep(.2)
     arduino._send_command('{out7: 0}')
+    await asyncio.sleep(.8)
 
-    print('waiting for dosing')
-    if dosing:
-        value = False
-        while not value:
-            _, value = await arduino.read_metric('in6', 'r.in6')
-    print('dosing done')
+    # print('waiting for dosing')
+    # if dosing:
+    #     value = False
+    #     while not value:
+    #         _, value = await arduino.read_metric('in6', 'r.in6')
+    # print('dosing done')

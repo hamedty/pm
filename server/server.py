@@ -23,7 +23,7 @@ class System(object):
         self.nodes = nodes
         self._ws = []
         self.system_running = asyncio.Event()
-        self.system_running.clear()
+        self.system_running.set()
         self.system_stop = asyncio.Event()
         self.system_stop.clear()
         self.errors = {}

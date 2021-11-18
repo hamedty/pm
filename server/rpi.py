@@ -23,15 +23,18 @@ DATA_PATH = '/home/pi/data'
 
 
 async def dump_frame(command, _):
+    arduino = ARDUINOS[command['arduino_index']]
+
     arduino.send_command('{out6:1}')
 
     CAMERAS['holder'].dump_frame(
         filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
     CAMERAS['dosing'].dump_frame(
         filename=DATA_PATH + '/dosing.png', roi_name=command.get('roi_index_dosing'))
-    return {'success': True}
 
     arduino.send_command('{out6:0}')
+
+    return {'success': True}
 
 
 async def dump_training(command, _):
@@ -121,7 +124,8 @@ async def align(command, _):
             arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
             await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
 
-        arduino.send_command('{%s:0}' % valve)
+        if component == 'holder':
+            arduino.send_command('{%s:0}' % valve)
 
         if component == 'holder' and aligned:
             await asyncio.sleep(.25)

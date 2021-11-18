@@ -189,6 +189,7 @@ class Station(Node):
 
     async def station_assembly_loop(self, recipe, system):
         while True:
+            await self.set_valves([None, 0, 0, 1])
             await self.station_is_full_event.wait()
             self.station_is_full_event.clear()
 
@@ -206,14 +207,15 @@ class Station(Node):
                 await system.system_running.wait()
                 await self.align_dosing(recipe, system)
 
-                # check vision correctness
-                if self.ip_short in {109, 110}:
-                    error = {
-                        'message': 'Ready. continue?',
-                        'location_name': self.name,
-                    }
-                    error_clear_event = await system.register_error(error)
-                    await error_clear_event.wait()
+                # # check vision correctness
+                # if self.ip_short in {109}:
+                #     error = {
+                #         'message': 'Ready. continue?',
+                #         'location_name': self.name,
+                #     }
+                #     error_clear_event = await system.register_error(error)
+                #     await error_clear_event.wait()
+                # # must be done in rpi, temporarily here for debugging
 
                 await system.system_running.wait()
                 await self.assemble(recipe, system)
@@ -321,10 +323,12 @@ class Station(Node):
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
 
         # Fall
-        data['PAUSE_FALL_DOSING'] = 0.05
+        # data['H_FALL'] = data['H_ALIGNING'] + 10
+        data['H_FALL'] = self.hw_config['H_PRE_DANCE'] - 1
+        data['PAUSE_FALL_DOSING'] = 2  # 0.05
 
         # Ready to push
-        data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 8
+        data['H_READY_TO_PUSH'] = data['H_ALIGNING'] - 18
         data['FEED_READY_TO_PUSH'] = recipe.FEED_Z_UP
         data['PAUSE_READY_TO_PUSH'] = 0.05
 
@@ -368,8 +372,18 @@ class Station(Node):
 
         command = '''
             ; release dosing
-            M100 ({out1: 0, out4: 0})
-            G4 P%(PAUSE_FALL_DOSING).2f
+            M100 ({out4: 0})
+            ; G4 P%(PAUSE_FALL_DOSING).2f
+            G4 P.1
+
+            G1 Z%(H_FALL).2f F5000
+            G4 P.07
+            M100 ({out4: 1})
+            G4 P.1
+            M100 ({out1: 0})
+            G4 P.05
+            M100 ({out4: 0})
+            G4 P.05
 
             ; ready to push
             G1 Z%(H_READY_TO_PUSH).2f F%(FEED_READY_TO_PUSH)d
@@ -384,9 +398,7 @@ class Station(Node):
             ; prepare for dance
             G10 L20 P1 Y0
 
-
             M100 ({zjm:5000})
-
 
             M100 ({out1: 0, out4: 1})
             G4 P%(PAUSE_JACK_PRE_DANCE_1).2f

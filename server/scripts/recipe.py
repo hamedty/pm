@@ -3,9 +3,9 @@ import asyncio
 
 N = 10
 SPEED = .6  # between 0-1
-SERVICE_FUNC_NO_FEEDER = 1
-SERVICE_FUNC_NO_CARTRIDGE = 1
-SERVICE_FUNC_NO_DOSING = 1
+SERVICE_FUNC_NO_FEEDER = 0
+SERVICE_FUNC_NO_CARTRIDGE = 0
+SERVICE_FUNC_NO_DOSING = 0
 ''' Station '''
 FEED_Z_UP = 10000 * SPEED
 FEED_Z_DOWN = 15000 * SPEED
@@ -99,6 +99,6 @@ async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations
     # stations
     for station in stations:
         condition = station.is_at_loc(z=0.5) or station.is_at_loc(
-            z=50) or station.is_at_loc(z=0)
+            z=40) or station.is_at_loc(z=0)
         message = '%s is not at proper location' % station.name
         assert condition, message

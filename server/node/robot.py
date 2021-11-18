@@ -151,21 +151,21 @@ class Robot(Node):
         X_INPUT = 373
         Y_INPUT_DOWN_RELEASE_HOLDER = 36
         Y_INPUT_DOWN_RELEASE_DOSING = 32
-        Y_INPUT_UP = 55
+        Y_INPUT_UP = 55 + 10
         Y_INPUT_DOWN_PRESS_HOLDER = 6
         Y_INPUT_DOWN_PRE_PRESS_HOLDER = Y_INPUT_DOWN_PRESS_HOLDER + 10
         Y_OUTPUT = 80
         X_OUTPUT_SAFE = recipe.X_CAPPING
 
         Z_OUTPUT = 70
-        Z_OUTPUT_SAFE = Z_OUTPUT - 20
+        Z_OUTPUT_SAFE = Z_OUTPUT - 30
 
         T_INPUT_RELEASE = 1.0
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1
         T_OUTPUT_GRIPP = 0.1
-        T_OUTPUT_RELEASE = 0.2
+        T_OUTPUT_RELEASE = 0.4
 
         # ensure about stations
         await stations_task1

@@ -32,7 +32,7 @@ if 'Station 1' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 1']
     station.hw_config['H_ALIGNING'] = 230
     station.hw_config['H_PUSH'] = 238
-    station.hw_config['H_PRE_DANCE'] = 244.5 + 1
+    station.hw_config['H_PRE_DANCE'] = 245.5
 
 if 'Station 2' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 2']
