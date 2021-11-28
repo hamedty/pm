@@ -1,14 +1,15 @@
-jack haie station ra baz bad moghe mizanam o motmaen mishavam
 verify correct press
-higher station in exchange to avoid station 1 accident
-verify gate (or wait for gate in gcode)
 -----------------------------------------
+jack haie station ra baz bad moghe mizanam o motmaen mishavam
+avoid tasadof complete pen in exchange - station 1
+avoid tasadof complete pen with new dosing - station 8 va ?
+verify gate (or wait for gate in gcode)
+verify dosing orientation
 feeder gradual motor on
 motor oralB
 feeder stop motors if didn't feed for a while
 G1 optimization - optimize robot move
 sometimes webcam doest load on boot - reset usb?
------------------------------------------
 status request sent for no reason
 wait for holder in gcode? (M101)
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
@@ -18,5 +19,13 @@ log collection framework
 need to feed 16 dosing in begining
 vision debug frame work
 if nodes downs, UI must react
-----------------------------------------
-6 holder
+*************************************************************************
+*************************************************************************
+*************************************************************************
+iradat riz
+stableize kari
+feature riz
+khoshgel kari
+-------------------------
+optimize movement
+restructure software to be able to hold

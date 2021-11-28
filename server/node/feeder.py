@@ -23,13 +23,13 @@ class Feeder(Node):
             'am': 1,  # standard axis mode
             'vm': 200 * 1000,  # max speed
             'fr': 200 * 1000,  # max feed rate
-            'tn': 0,  # min travel
-            'tm': 100,  # max travel
+            'tn': -1,  # min travel
+            'tm': 99,  # max travel
             'jm': 50000,  # max jerk
             'jh': 50000,  # hominzg jerk
-            'hi': 1,  # home switch
+            'hi': 2,  # home switch
             'hd': 0,  # homing direction
-            'sv': 3000,  # home search speed
+            'sv': 1000,  # home search speed
             'lv': 500,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
@@ -152,13 +152,6 @@ class Feeder(Node):
         command = '{%s}' % command
         await self.send_command_raw(command)
 
-    async def set_motors2(self, *args):
-        if not args:  # set all zero
-            await self.set_motors(self, *args)
-            return
-        # for motor, speed in args:
-        #     await
-
     def init_events(self):
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
         self.feeder_is_full_event.clear()
@@ -203,6 +196,8 @@ class Feeder(Node):
                     (1, 7500), (10, 60000),  # holder gate on/off
                     (6, 32)  # , (8, 200)  # Cartridge Conveyor + OralB
                 )
+                # turn on air tunnel
+                await self.set_valves([None] * 9 + [1])
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 await self.set_valves([None, 0])

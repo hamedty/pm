@@ -78,6 +78,7 @@ async def main(system, ALL_NODES):
 
     await dosing_feeder.terminate_feeding_loop(feeder)
     await feeder.set_motors()  # set all feeder motors to 0
+    await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
 
 async def home_all_nodes(system, feeder, rail, robots, stations):

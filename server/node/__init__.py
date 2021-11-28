@@ -18,7 +18,7 @@ ALL_NODES = [
     Station('Station 6', '192.168.44.106'),
     Station('Station 7', '192.168.44.107'),
     Station('Station 8', '192.168.44.108'),
-    Station('Station 9', '192.168.44.109'),
+    # Station('Station 9', '192.168.44.109'),
     Station('Station 10', '192.168.44.110'),
 
     Feeder('Feeder 1', '192.168.44.21', arduino_id=2),

@@ -1,3 +1,4 @@
+import time
 from .node import Node
 import os
 import json
@@ -437,5 +438,17 @@ class Station(Node):
         ''' % data
         await self.send_command_raw(command)
 
+        # Verification
+        H_VERIFICATION = self.hw_config['H_PRE_DANCE'] - 80
+        await self.G1(z=H_VERIFICATION, feed=data['FEED_DELIVER'], system=system)
+        # take picture and scp to dump folder
+        await self.send_command({
+            'verb': 'dump_frame',
+            'components': ['dosing'],
+        })
+        asyncio.create_task(self.scp_from(
+            '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
+
+        # deliver
         await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'], system=system)
         await self.set_valves([None, None, None, 1])

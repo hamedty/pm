@@ -248,6 +248,7 @@ class Node(object):
 
     async def send_command_scenario(self, command):
         if command['verb'] == 'dump_frame':
+            command['components'] = ['holder', 'dosing']
             await self.send_command(command)
             await self.scp_from('~/data/dosing.png', './dump/dosing.png')
             await self.scp_from('~/data/holder.png', './dump/holder.png')

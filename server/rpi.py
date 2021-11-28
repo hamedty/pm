@@ -24,13 +24,16 @@ DATA_PATH = '/home/pi/data'
 
 async def dump_frame(command, _):
     arduino = ARDUINOS[command['arduino_index']]
+    components = command['components']
 
     arduino.send_command('{out6:1}')
 
-    CAMERAS['holder'].dump_frame(
-        filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
-    CAMERAS['dosing'].dump_frame(
-        filename=DATA_PATH + '/dosing.png', roi_name=command.get('roi_index_dosing'))
+    if 'holder' in components:
+        CAMERAS['holder'].dump_frame(
+            filename=DATA_PATH + '/holder.png', roi_name=command.get('roi_index_holder'))
+    if 'dosing' in components:
+        CAMERAS['dosing'].dump_frame(
+            filename=DATA_PATH + '/dosing.png', roi_name=command.get('roi_index_dosing'))
 
     arduino.send_command('{out6:0}')
 
