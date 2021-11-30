@@ -123,20 +123,21 @@ async def holder_feeder(system, ALL_NODES):
     # Motors on
     await feeder.set_motors(
         (2, 4), (3, 4),  # Holder Downstream
-        # (4, 8), (7, 46),  # Holder Upstream - Lift and long conveyor
-        (4, 4), (7, 46),  # Holder Upstream - Lift and long conveyor
+        # (4, 8), (7, 11),  # Holder Upstream - Lift and long conveyor
+        (4, 4), (7, 11),  # Holder Upstream - Lift and long conveyor
         # (1, 7500), (10, 60000),  # holder gate on/off
         (1, 3750), (10, 45000),  # holder gate on/off
     )
     await feeder.set_valves([None] * 9 + [1])
 
-    await asyncio.sleep(1.5)
-    # script feed run - with cartridge off
+    holder_mask = [1] * recipe.N
+    dosing_mask = [int(not recipe.SERVICE_FUNC_NO_DOSING)] * recipe.N
+    cartridge_feed = 0 if recipe.SERVICE_FUNC_NO_CARTRIDGE else 1
     command = {
         'verb': 'feeder_process',
-        'holder_mask': [1] * recipe.N,
-        'dosing_mask': [1] * recipe.N,
-        'cartridge_feed': 0,  # not recipe.SERVICE_FUNC_NO_CARTRIDGE,
+        'holder_mask': holder_mask,
+        'dosing_mask': dosing_mask,
+        'cartridge_feed': cartridge_feed,
         'z_offset': recipe.FEEDER_Z_IDLE,
         'feed_feed': recipe.FEED_FEEDER_FEED,
         'jerk_feed': recipe.JERK_FEEDER_FEED,
@@ -177,4 +178,4 @@ async def feeder_handover_to_rail(system, ALL_NODES):
 async def motors_off(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors()
-    # await self.set_valves([None] * 9 + [0])
+    await feeder.set_valves([None] * 9 + [0])

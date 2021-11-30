@@ -5,6 +5,30 @@ import random
 HOLDER_ARDUINO_INDEX = 2
 
 
+'''
+    m1 (10): holder sequencer - on and off (jack)
+    m2, m3: holder pusher motors
+    m4, m7: holder elevator and conveyor
+    m5, m9: dosing feeder motors
+    m6, m8: reserve
+
+    out1: holder microswitch lock
+    out2: comb
+    out3: reserve (used as M1 - not connected electrically)
+    out4: push cartridge to vaccum
+    out5: reserve
+    out6: hug
+    out7: holder gate
+    out8: reserve
+    out9: cartridge lift
+    out10: air pusher
+    out11: dosing gate
+    out12: reserve (broken solonoid)
+    out13: cartridge vaccum
+    out14: reserve
+'''
+
+
 async def feeder_process(arduino, G1, command):
     FEEDER_OFFSET = command['z_offset']
     FEED_FEED = command['feed_feed']
@@ -33,17 +57,13 @@ async def feeder_process(arduino, G1, command):
 
     arduino._send_command("{m2: 4, m3: 4, out10: 1}")
 
-    # oscillate_motors_task = asyncio.create_task(oscillate_motors(arduino))
-
     holder_shift_register = 0
-    holder_gate_status = 0
     dosing_gate_status = 0
 
     for i in range(N):
         # Gate Open
-        if holder_mask[i]:  # and not holder_gate_status:
-            arduino._send_command("{out7: 1}")
-            holder_gate_status = 1
+        if holder_mask[i]:
+            arduino._send_command("{out7: 1, m2: 4, m3: 4}")
         if dosing_mask[i] and not dosing_gate_status:
             arduino._send_command("{out11: 1}")
             dosing_gate_status = 1
@@ -57,9 +77,6 @@ async def feeder_process(arduino, G1, command):
         await wait_for_inputs(arduino, holder_mask[i], dosing_mask[i], current_z)
 
         # Close Gate
-        if not holder_mask[i + 1] and holder_gate_status:
-            arduino._send_command("{out7: 0}")
-            holder_gate_status = 0
         if not dosing_mask[i + 1] and dosing_gate_status:
             arduino._send_command("{out11: 0}")
             dosing_gate_status = 0
@@ -71,27 +88,11 @@ async def feeder_process(arduino, G1, command):
             await asyncio.sleep(.1)  # vaccum release
         else:
             await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED, 'correct_initial': True})
+
+        arduino.send_command('{out1: 0}')
         await asyncio.sleep(.1)  # extra wait
 
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
-    # oscillate_motors_task.cancel()
-    # arduino._send_command("{m2: 5, m3: 5}")
-
-
-async def oscillate_motors(arduino):
-    async def send_command_to_be_shielded(arduino, command):
-        arduino._send_command(command)
-    m2 = 4
-    m3 = 2
-    dir = 1
-    while True:
-        command = "{m2: %d, m3: %d}" % (m2, m3)
-        await asyncio.shield(send_command_to_be_shielded(arduino, command))
-        await asyncio.sleep(.3 + 0.3 * random.random())
-        if m2 == 4 or m3 == 4:
-            dir = -dir
-        m2 += dir
-        m3 -= dir
 
 
 async def cartridge_grab(arduino):
@@ -131,14 +132,14 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     command_id = arduino.get_command_id()
     command_raw = '''
         G4 P.15
-        M100 ({out8: 1})
+        M100 ({out6: 1})
         G4 P.3
 
         G38.2 Y-100 F2000
         M100 ({clear:n})
         M100 ({out13: 0})
         G10 L20 P1 Y0
-        M100 ({out8: 0})
+        M100 ({out6: 0})
         N%d M0
         ''' % command_id
     arduino.send_command(command_raw)
@@ -153,22 +154,13 @@ async def wait_for_inputs(arduino, holder, dosing, current_z):
             _, value = await arduino.read_metric('in5', 'r.in5')
     print('holder done')
 
-    command_id = arduino.get_command_id()
-    arduino.send_command('''
-        G1 Z%.2f
-        G4 P.05
-        G1 Z%.2f
-        M100 ({out7: 0})
-        N%d M0
-    ''' % (current_z - 2, current_z + 3, command_id))
-    await arduino.wait_for_command_id(command_id)
+    arduino._send_command('{out7: 0, m2: 15, m3: 15}')
+    # await asyncio.sleep(.1)
+    arduino._send_command('{out1: 1}')
 
-    # arduino._send_command('{out7: 0}')
-    await asyncio.sleep(.4)
-
-    # print('waiting for dosing')
-    # if dosing:
-    #     value = False
-    #     while not value:
-    #         _, value = await arduino.read_metric('in6', 'r.in6')
-    # print('dosing done')f
+    print('waiting for dosing')
+    if dosing:
+        value = False
+        while not value:
+            _, value = await arduino.read_metric('in6', 'r.in6')
+    print('dosing done')

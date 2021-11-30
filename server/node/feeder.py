@@ -144,13 +144,34 @@ class Feeder(Node):
         await self.send_command_raw('G1 Z16 F5000')
 
     async def set_motors(self, *args):
-        # args = (1,30), (2,15) , ....
         if not args:  # set all zero
             args = list(zip(range(1, 10), [0] * 9))
+
+        slow_motors = {7, 5, 9}  # 7 - holder elevator, 5,9 dosing
+        args_fast = [(i, j)
+                     for i, j in args if (i not in slow_motors) or (j == 0)]
+        args_slow = [(i, j)
+                     for i, j in args if (i in slow_motors) and (j != 0)]
+
+        await self.set_motors_fast(*args_fast)
+        await self.set_motors_slow(*args_slow)
+
+    async def set_motors_fast(self, *args):
+        if len(args) == 0:
+            return
         command = ','.join(
             ['m%d:%d' % (i, j) for i, j in args])
         command = '{%s}' % command
         await self.send_command_raw(command)
+
+    async def set_motors_slow(self, *args):
+        if len(args) == 0:
+            return
+        fast_args = [(i, int(j * 2.5)) for i, j in args]
+        await self.set_motors_fast(*args)
+        await asyncio.sleep(.5)
+        fast_args = [(i, j) for i, j in args]
+        await self.set_motors_fast(*args)
 
     def init_events(self):
         self.feeder_is_full_event = asyncio.Event()  # setter: feeder - waiter: rail
@@ -192,7 +213,7 @@ class Feeder(Node):
                 await self.set_motors(
                     (2, 4), (3, 4),  # Holder Downstream
                     # Holder Upstream - Lift and long conveyor
-                    (4, 8), (7, 46),
+                    (4, 8), (7, 11),
                     (1, 7500), (10, 60000),  # holder gate on/off
                     (6, 32)  # , (8, 200)  # Cartridge Conveyor + OralB
                 )
