@@ -126,6 +126,7 @@ class Station(Node):
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
+        await self.send_command_raw('{out4:1}')
 
     def calc_rois(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
@@ -270,7 +271,7 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            # await self.set_valves([None, None, None, 0])
+            await self.set_valves([0, None, None, 0])
             error = {
                 'message': 'Aligining failed for dosing. Align to continue',
                 'location_name': self.name,
@@ -439,15 +440,15 @@ class Station(Node):
         await self.send_command_raw(command)
 
         # Verification
-        H_VERIFICATION = self.hw_config['H_PRE_DANCE'] - 80
-        await self.G1(z=H_VERIFICATION, feed=data['FEED_DELIVER'], system=system)
-        # take picture and scp to dump folder
-        await self.send_command({
-            'verb': 'dump_frame',
-            'components': ['dosing'],
-        })
-        asyncio.create_task(self.scp_from(
-            '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
+        # H_VERIFICATION = self.hw_config['H_PRE_DANCE'] - 80
+        # await self.G1(z=H_VERIFICATION, feed=data['FEED_DELIVER'], system=system)
+        # # take picture and scp to dump folder
+        # await self.send_command({
+        #     'verb': 'dump_frame',
+        #     'components': ['dosing'],
+        # })
+        # asyncio.create_task(self.scp_from(
+        #     '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
 
         # deliver
         await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'], system=system)

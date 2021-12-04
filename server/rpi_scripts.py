@@ -68,10 +68,6 @@ async def feeder_process(arduino, G1, command):
             arduino._send_command("{out11: 1}")
             dosing_gate_status = 1
 
-        # Grab
-        if CARTRIDGE_FEED and any(holder_mask[i:]):
-            await cartridge_grab(arduino)
-
         # Wait for holder
         current_z = FEEDER_OFFSET + 25 * i
         await wait_for_inputs(arduino, holder_mask[i], dosing_mask[i], current_z)
@@ -81,6 +77,10 @@ async def feeder_process(arduino, G1, command):
             arduino._send_command("{out11: 0}")
             dosing_gate_status = 0
 
+        # Grab
+        if CARTRIDGE_FEED and any(holder_mask[i:]):
+            await cartridge_grab(arduino)
+
         # Move and Handover
         z = FEEDER_OFFSET + 25 * (i + 1)
         if CARTRIDGE_FEED:
@@ -88,10 +88,10 @@ async def feeder_process(arduino, G1, command):
             await asyncio.sleep(.1)  # vaccum release
         else:
             await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED, 'correct_initial': True})
+            arduino.send_command('{out1: 0}')
+            await asyncio.sleep(.1)  # wait to release microswitch holder
 
-        arduino.send_command('{out1: 0}')
-        await asyncio.sleep(.1)  # extra wait
-
+    arduino._send_command('G1 Y10 F60000')
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
 
 
@@ -131,14 +131,20 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
     command_id = arduino.get_command_id()
     command_raw = '''
-        G4 P.15
-        M100 ({out6: 1})
-        G4 P.3
+        ; release microswitch holder
+        M100 ({out1: 0})
 
+        ; hug
+        M100 ({out6: 1})
+
+        ; put in cartridge
         G38.2 Y-100 F2000
         M100 ({clear:n})
+        ; vaccum release
         M100 ({out13: 0})
         G10 L20 P1 Y0
+
+        ; un-hug
         M100 ({out6: 0})
         N%d M0
         ''' % command_id
@@ -154,8 +160,8 @@ async def wait_for_inputs(arduino, holder, dosing, current_z):
             _, value = await arduino.read_metric('in5', 'r.in5')
     print('holder done')
 
-    arduino._send_command('{out7: 0, m2: 15, m3: 15}')
-    # await asyncio.sleep(.1)
+    arduino._send_command('{out7: 0, m2: 30, m3: 30}')
+    await asyncio.sleep(.2)
     arduino._send_command('{out1: 1}')
 
     print('waiting for dosing')

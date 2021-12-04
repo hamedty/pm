@@ -18,7 +18,7 @@ ALL_NODES = [
     Station('Station 6', '192.168.44.106'),
     Station('Station 7', '192.168.44.107'),
     Station('Station 8', '192.168.44.108'),
-    # Station('Station 9', '192.168.44.109'),
+    Station('Station 9', '192.168.44.109'),
     Station('Station 10', '192.168.44.110'),
 
     Feeder('Feeder 1', '192.168.44.21', arduino_id=2),
@@ -107,7 +107,7 @@ if 'Station 10' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 235.5
     station.hw_config['H_PRE_DANCE'] = 243
     station.hw_config['holder_webcam_direction'] = 'down'
-    # station.hw_config['holder_offset'] = 1
+    station.hw_config['dosing_offset'] = 1
 
 
 if 'Robot 2' in ALL_NODES_DICT:

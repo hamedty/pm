@@ -13,6 +13,13 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
     )
 
 
+async def fill_dosing_rail(system, ALL_NODES):
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
+    await dosing_feeder.create_feeding_loop(feeder, system, recipe)
+    await asyncio.sleep(20)
+    await dosing_feeder.terminate_feeding_loop(feeder)
+
+
 async def run_rail_empty(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
@@ -115,7 +122,9 @@ async def holder_feeder(system, ALL_NODES):
 
     # jack's to normal
     await rail.set_valves([0, 0])
-    await feeder.set_valves([0] * 14)
+    valves = [0] * 14
+    valves[9] = 1
+    await feeder.set_valves(valves)
 
     # G1 Z16
     await feeder.G1(z=FEEDER_Z_IDLE, feed=FEED_FEEDER_COMEBACK)

@@ -51,7 +51,7 @@ async def main(system, ALL_NODES):
     ''' Main Loop'''
     t0 = time.time()
     while not system.system_stop.is_set():
-        await(await system.register_error({'message': 'Ready. continue?', 'location_name': 'System'})).wait()
+        # await(await system.register_error({'message': 'Ready. continue?', 'location_name': 'System'})).wait()
 
         # wait for rail to be parked
         await rail.rail_parked_event.wait()

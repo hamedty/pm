@@ -198,7 +198,7 @@ class Node(object):
                 print('%s Homed!' % self.name)
                 return
             except:
-                print('repeating home - homming failed')
+                print('repeating home - homming failed', self.name)
         raise Exception('Homing Failed')
 
     def get_loc(self, axis):
