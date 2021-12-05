@@ -11,10 +11,10 @@ async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     ''' Homing '''
-    a = await aioconsole.ainput('type anything to home. or enter to dismiss')
-    if a:
-        print('homing')
-        await home_all_nodes(system, feeder, rail, robots, stations)
+    # a = await aioconsole.ainput('type anything to home. or enter to dismiss')
+    # if a:
+    #     print('homing')
+    #     await home_all_nodes(system, feeder, rail, robots, stations)
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     ''' Initial Condition '''
     await system.system_running.wait()

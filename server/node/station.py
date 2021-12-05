@@ -111,6 +111,7 @@ class Station(Node):
         'holder_webcam_direction': 'up',
         'dosing_webcam_direction': 'liu',  # liu: Left Is Up - riu: Right Is Up
         'presence_threshold': {'holder': 80, 'dosing': 50},
+        'holder_existance_y_margin': 30,
         'dosing_sit_right': {
             'brightness_threshold': 25,
             'existance_count_threshold': 250,
@@ -136,7 +137,7 @@ class Station(Node):
 
         # ROI holder presence
         x_margin = 20
-        y_margin = 30
+        y_margin = self.hw_config['holder_existance_y_margin']
         x0 = roi_holder['x0'] + x_margin
         dx = roi_holder['dx'] - 2 * x_margin
         dy = y_margin
@@ -271,7 +272,7 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, 0])
+            await self.set_valves([0, None, None, 1])
             error = {
                 'message': 'Aligining failed for dosing. Align to continue',
                 'location_name': self.name,
@@ -294,7 +295,9 @@ class Station(Node):
         while True:
             res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
             if res[1]['no_holder_no_dosing']:
-                return
+                break
+
+            await self.set_valves([None] * 3 + [0])
             error = {
                 'message': 'no-holder-no-dosing failed',
                 'location_name': self.name,
@@ -303,6 +306,7 @@ class Station(Node):
             print(error)
             error_clear_event = await system.register_error(error)
             await error_clear_event.wait()
+        await self.set_valves([None] * 3 + [1])
 
     async def verify_dosing_sit_right(self, recipe, system):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})

@@ -99,6 +99,7 @@ class Robot(Node):
             'posy': ['enc1', 480.0, 1.0, 5.0],
         },
         'Y_GRAB_IN_UP_2': 64,
+        'X_CAPPING': 60,
     }
 
     def __init__(self, *args, **kwargs):
@@ -148,6 +149,8 @@ class Robot(Node):
         await self.G1(y=Y_GRAB_IN_UP_2, feed=recipe.FEED_Y_UP, system=system)
 
         '''EXCHANGE'''
+        X_CAPPING = self.hw_config['X_CAPPING']
+
         X_INPUT = 373
         Y_INPUT_DOWN_RELEASE_HOLDER = 36
         Y_INPUT_DOWN_RELEASE_DOSING = 32
@@ -155,7 +158,7 @@ class Robot(Node):
         Y_INPUT_DOWN_PRESS_HOLDER = 6
         Y_INPUT_DOWN_PRE_PRESS_HOLDER = Y_INPUT_DOWN_PRESS_HOLDER + 10
         Y_OUTPUT = 80
-        X_OUTPUT_SAFE = recipe.X_CAPPING
+        X_OUTPUT_SAFE = X_CAPPING
 
         Z_OUTPUT = 70
         Z_OUTPUT_SAFE = Z_OUTPUT - 30
@@ -164,7 +167,7 @@ class Robot(Node):
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1
-        T_OUTPUT_GRIPP = 0.1
+        T_OUTPUT_GRIPP = 0.2
         T_OUTPUT_RELEASE = 0.4
 
         # ensure about stations
@@ -214,7 +217,7 @@ class Robot(Node):
 
         '''CAP'''
         await system.system_running.wait()
-        await self.G1(x=recipe.X_CAPPING, feed=recipe.FEED_X, system=system)
+        await self.G1(x=X_CAPPING, feed=recipe.FEED_X, system=system)
         await self.G1(y=recipe.Y_CAPPING_DOWN_1, feed=recipe.FEED_Y_DOWN, system=system)
         await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING, system=system)
         await self.set_valves([0] * 10)

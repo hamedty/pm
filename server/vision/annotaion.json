@@ -46,6 +46,9 @@
             "r0qy5wrk": {
                 "zero": 37
             },
+            "rlu1mtly": {
+                "zero": 93
+            },
             "wrkkh673": {
                 "zero": 204
             }
@@ -102,6 +105,9 @@
             "aa9uzj14": {
                 "zero": 197
             },
+            "eqaouequ": {
+                "zero": 201
+            },
             "lrdxxyyl": {
                 "zero": 241
             },
@@ -128,7 +134,10 @@
                 "zero": 192
             },
             "xxoo534e": {
-                "zero": 333
+                "zero": 334
+            },
+            "zyjrmosq": {
+                "zero": 43
             }
         },
         "dosing_roi": {
@@ -235,6 +244,9 @@
     },
     "107": {
         "dosing": {
+            "1vzn0sx2": {
+                "zero": 40
+            },
             "7rrjp9a4": {
                 "zero": 203
             },
@@ -246,7 +258,7 @@
             }
         },
         "dosing_roi": {
-            "dx": 223,
+            "dx": 235,
             "dy": 198,
             "x0": 159,
             "y0": 123
@@ -336,8 +348,14 @@
             "38lszk78": {
                 "zero": 196
             },
+            "b8gqzv23": {
+                "zero": 201
+            },
             "ckwaiki0": {
                 "zero": 197
+            },
+            "ryi8sj70": {
+                "zero": 324
             },
             "zjqyk4f8": {
                 "zero": 209
@@ -352,24 +370,15 @@
     },
     "110": {
         "dosing": {
-            "lkb1fx0j": {
-                "zero": 183
-            },
-            "rl6kdhyc": {
-                "zero": 215
-            },
-            "xy3fveyd": {
-                "zero": 240
-            },
-            "yub9kbw6": {
-                "zero": 199
+            "rj9q6cds": {
+                "zero": 85
             }
         },
         "dosing_roi": {
             "dx": 235,
-            "dy": 206,
+            "dy": 207,
             "x0": 184,
-            "y0": 142
+            "y0": 150
         },
         "holder": {
             "54o8r2dq": {

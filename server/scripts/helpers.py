@@ -72,7 +72,7 @@ async def pickup_rail(system, ALL_NODES):
     Y_INPUT_DOWN_PRESS_HOLDER = 6
     Y_INPUT_DOWN_PRE_PRESS_HOLDER = Y_INPUT_DOWN_PRESS_HOLDER + 10
     Y_OUTPUT = 80
-    X_OUTPUT_SAFE = recipe.X_CAPPING
+    X_OUTPUT_SAFE = self.hw_config['X_CAPPING']
 
     Z_OUTPUT = 70
     Z_OUTPUT_SAFE = Z_OUTPUT - 20
@@ -150,7 +150,7 @@ async def holder_feeder(system, ALL_NODES):
         'z_offset': recipe.FEEDER_Z_IDLE,
         'feed_feed': recipe.FEED_FEEDER_FEED,
         'jerk_feed': recipe.JERK_FEEDER_FEED,
-        'jerk_idle': recipe.JERK_FEEDER_IDLE,
+        'jerk_idle': recipe.JERK_FEEDER_DELIVER,
     }
     await feeder.send_command(command)
 

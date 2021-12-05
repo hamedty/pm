@@ -26,6 +26,13 @@ HOLDER_ARDUINO_INDEX = 2
     out12: reserve (broken solonoid)
     out13: cartridge vaccum
     out14: reserve
+
+    in1:
+    in2:
+    in3:
+    in4:
+    in5: holder microswitch
+    in6:
 '''
 
 
@@ -68,6 +75,10 @@ async def feeder_process(arduino, G1, command):
             arduino._send_command("{out11: 1}")
             dosing_gate_status = 1
 
+        # Grab
+        if CARTRIDGE_FEED and any(holder_mask[i:]):
+            await cartridge_grab(arduino)
+
         # Wait for holder
         current_z = FEEDER_OFFSET + 25 * i
         await wait_for_inputs(arduino, holder_mask[i], dosing_mask[i], current_z)
@@ -76,10 +87,6 @@ async def feeder_process(arduino, G1, command):
         if not dosing_mask[i + 1] and dosing_gate_status:
             arduino._send_command("{out11: 0}")
             dosing_gate_status = 0
-
-        # Grab
-        if CARTRIDGE_FEED and any(holder_mask[i:]):
-            await cartridge_grab(arduino)
 
         # Move and Handover
         z = FEEDER_OFFSET + 25 * (i + 1)
@@ -119,7 +126,6 @@ async def cartridge_grab(arduino):
 
 async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     # rotate to rail
-    # arduino._send_command("G1 Y10 F25000")
     command_id = arduino.get_command_id()
     arduino._send_command('''
         G1 Y10 Z%.2f F26000
@@ -131,11 +137,8 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
     command_id = arduino.get_command_id()
     command_raw = '''
-        ; release microswitch holder
-        M100 ({out1: 0})
-
-        ; hug
-        M100 ({out6: 1})
+        ; release microswitch holder (out1) / hug (out6)
+        M100 ({out1: 0, out6: 1})
 
         ; put in cartridge
         G38.2 Y-100 F2000
@@ -153,20 +156,15 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
 
 async def wait_for_inputs(arduino, holder, dosing, current_z):
-    print('waiting for holder')
+    # print('waiting for holder')
     if holder:
         value = False
         while not value:
             _, value = await arduino.read_metric('in5', 'r.in5')
-    print('holder done')
 
-    arduino._send_command('{out7: 0, m2: 30, m3: 30}')
-    await asyncio.sleep(.2)
-    arduino._send_command('{out1: 1}')
-
-    print('waiting for dosing')
+    # print('waiting for dosing')
     if dosing:
         value = False
         while not value:
             _, value = await arduino.read_metric('in6', 'r.in6')
-    print('dosing done')
+    # print('dosing done')

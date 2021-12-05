@@ -1,5 +1,6 @@
 from .node import Node
 import asyncio
+import time
 
 
 class Feeder(Node):
@@ -143,6 +144,24 @@ class Feeder(Node):
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z16 F5000')
 
+    async def set_motors_working_condition(self, recipe, fast=False):
+        if recipe.SERVICE_FUNC_NO_FEEDER:
+            return
+        if fast:
+            method = self.set_motors_fast
+        else:
+            method = self.set_motors
+
+        await method(
+            (2, 4), (3, 4),  # Holder Downstream
+            # Holder Upstream - Lift and long conveyor
+            (4, 4), (7, 11),
+            (1, 3750), (10, 45000),  # holder gate on/off
+            (6, 20)  # , (8, 200)  # Cartridge Conveyor + OralB
+        )
+        # turn on air tunnel
+        await self.set_valves([None] * 9 + [1])
+
     async def set_motors(self, *args):
         if not args:  # set all zero
             args = list(zip(range(1, 10), [0] * 9))
@@ -207,18 +226,14 @@ class Feeder(Node):
         #     await self.feeder_is_empty_event.wait()
         #     self.feeder_is_empty_event.clear()
 
+        await self.set_motors_working_condition(recipe)
+
         while not self.system_stop_event.is_set():
+            t0 = time.time()
+
             ''' Turn on Motors '''
-            if not recipe.SERVICE_FUNC_NO_FEEDER:
-                await self.set_motors(
-                    (2, 4), (3, 4),  # Holder Downstream
-                    # Holder Upstream - Lift and long conveyor
-                    (4, 4), (7, 11),
-                    (1, 3750), (10, 45000),  # holder gate on/off
-                    (6, 32)  # , (8, 200)  # Cartridge Conveyor + OralB
-                )
-                # turn on air tunnel
-                await self.set_valves([None] * 9 + [1])
+            await self.set_motors_working_condition(recipe, fast=True)
+
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 await self.set_valves([None, 0])
@@ -236,7 +251,7 @@ class Feeder(Node):
                     'z_offset': recipe.FEEDER_Z_IDLE,
                     'feed_feed': recipe.FEED_FEEDER_FEED,
                     'jerk_feed': recipe.JERK_FEEDER_FEED,
-                    'jerk_idle': recipe.JERK_FEEDER_IDLE,
+                    'jerk_idle': recipe.JERK_FEEDER_DELIVER,
                 }
                 await system.system_running.wait()
                 await self.send_command(command)

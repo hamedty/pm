@@ -16,7 +16,7 @@ ALL_NODES = [
     Station('Station 4', '192.168.44.104'),
     Station('Station 5', '192.168.44.105'),
     Station('Station 6', '192.168.44.106'),
-    Station('Station 7', '192.168.44.107'),
+    # Station('Station 7', '192.168.44.107'),
     Station('Station 8', '192.168.44.108'),
     Station('Station 9', '192.168.44.109'),
     Station('Station 10', '192.168.44.110'),
@@ -99,7 +99,7 @@ if 'Station 9' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 238
     station.hw_config['H_PRE_DANCE'] = 246
     station.hw_config['dosing_webcam_direction'] = 'riu'
-
+    station.hw_config['holder_existance_y_margin'] = 17
 
 if 'Station 10' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 10']
@@ -107,12 +107,13 @@ if 'Station 10' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 235.5
     station.hw_config['H_PRE_DANCE'] = 243
     station.hw_config['holder_webcam_direction'] = 'down'
-    station.hw_config['dosing_offset'] = 1
+    # station.hw_config['dosing_offset'] = 1
 
 
 if 'Robot 2' in ALL_NODES_DICT:
     robot = ALL_NODES_DICT['Robot 2']
-    station.hw_config['Y_GRAB_IN_UP_2'] = 62
+    robot.hw_config['Y_GRAB_IN_UP_2'] = 62
+    robot.hw_config['X_CAPPING'] = 57
 
 
 for i in range(0, 10):
