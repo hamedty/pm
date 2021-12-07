@@ -156,7 +156,7 @@ class Feeder(Node):
             (2, 4), (3, 4),  # Holder Downstream
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
-            (1, 3750), (10, 45000),  # holder gate on/off
+            (1, 3750), (10, 35000),  # holder gate on/off
             (6, 20)  # , (8, 200)  # Cartridge Conveyor + OralB
         )
         # turn on air tunnel

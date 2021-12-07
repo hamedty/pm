@@ -1,7 +1,9 @@
-from .node import Node
+from .node import Node, WAIT_METRIC_TIMEOUT_EXCEPTION
 import asyncio
 import time
 import aioconsole
+
+CONVEYOR_SPEED = 5
 
 
 class Dosing(Node):
@@ -35,6 +37,7 @@ class Dosing(Node):
             'sub-gate 2': 4,
             'sub-gate 1': 5,
             'pusher': 6,
+            'conveyor_direction': 7,
         },
 
     }
@@ -84,8 +87,8 @@ class Dosing(Node):
             self.motor_control_task.cancel()
 
             # system to normal conditions
-            await self.set_valves([0])
-            await self.set_motors(feeder, 'off')
+            await self.set_valves([0] + [None] * 5 + [0])
+            await self.set_motors_highlevel(feeder, 'off')
 
         self.motor_control_task = None
         self.feeding_task = None
@@ -95,7 +98,16 @@ class Dosing(Node):
             await self.set_valves([0])
 
             # wait for optic sensor input=1
-            await self.wait_metric('in1')
+            timeout = 2
+            while True:
+                try:
+                    await self.wait_metric('in1', timeout=timeout)
+                    break
+                except WAIT_METRIC_TIMEOUT_EXCEPTION as e:
+                    # run motor in reverse
+                    await self.run_motor_in_reverse(reverse_time=2)
+                    timeout = 6
+
             # wait for proximity_input value established
             await asyncio.sleep(.030)
             confidence = 0
@@ -124,7 +136,7 @@ class Dosing(Node):
 
     async def motor_control_loop(self, feeder, system, recipe):
         motors_on = True
-        await self.set_motors(feeder, 'on')
+        await self.set_motors_highlevel(feeder, 'on')
         while True:
             if motors_on:
                 await asyncio.sleep(1)
@@ -134,17 +146,49 @@ class Dosing(Node):
                 buffer_full_time = time.time() - buffer_full_time
                 if (buffer_full_time > 2):
                     motors_on = False
-                    await self.set_motors(feeder, 'off')
+                    await self.set_motors_highlevel(feeder, 'off')
             else:  # motors off
                 await self.buffer_empty_event.wait()
-                await self.set_motors(feeder, 'on')
+                await self.set_motors_highlevel(feeder, 'on')
                 motors_on = True
 
-    async def set_motors(self, feeder, status):
+    async def set_motors_highlevel(self, feeder, status):
         if status == 'on':
-            await asyncio.shield(feeder.set_motors((5, 25), (9, 5)))
+            await asyncio.shield(self.set_motors(feeder, (5, 25), (9, CONVEYOR_SPEED)))
         else:
-            await asyncio.shield(feeder.set_motors((5, 0), (9, 0)))
+            await asyncio.shield(self.set_motors(feeder, (5, 0), (9, 0)))
+
+    async def set_motors(self, feeder, *args):
+        direct_motors = {9}
+        args_direct = [(i, j) for i, j in args if i in direct_motors]
+        args_proxy = [(i, j) for i, j in args if i not in direct_motors]
+
+        await self.set_motors_direct(*args_direct)
+        if args_proxy:  # needed because we may pass feeder as None
+            await feeder.set_motors(*args_proxy)
+
+    async def set_motors_direct(self, *args):
+        if len(args) == 0:
+            return
+        # command = ','.join(
+        #     ['m%d:%d' % (i, j) for i, j in args])
+        # command = '{%s}' % command
+        command = '{m1:%d}' % args[0][1]  # only M1 enabled
+        await self.send_command_raw(command)
+
+    async def run_motor_in_reverse(self, reverse_time):
+        await self.set_motors(None, (9, 0))
+        await self.set_valves([None] * 6 + [1])
+        await asyncio.sleep(.3)
+        # feeder not available
+        await self.set_motors(None, (9, CONVEYOR_SPEED))
+
+        await asyncio.sleep(reverse_time)
+
+        await self.set_motors(None, (9, 0))
+        await self.set_valves([None] * 6 + [0])
+        await asyncio.sleep(.3)
+        await self.set_motors(None, (9, CONVEYOR_SPEED))
 
     async def read_proximity(self):
         read_out = []

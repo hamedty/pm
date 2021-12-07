@@ -218,8 +218,7 @@ class Robot(Node):
         '''CAP'''
         await system.system_running.wait()
         await self.G1(x=X_CAPPING, feed=recipe.FEED_X, system=system)
-        await self.G1(y=recipe.Y_CAPPING_DOWN_1, feed=recipe.FEED_Y_DOWN, system=system)
-        await self.G1(y=recipe.Y_CAPPING_DOWN_2, feed=recipe.FEED_Y_CAPPING, system=system)
+        await self.G1(y=recipe.Y_CAPPING_DOWN, feed=recipe.FEED_Y_DOWN, system=system)
         await self.set_valves([0] * 10)
         await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X, system=system)
 

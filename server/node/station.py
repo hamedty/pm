@@ -10,6 +10,7 @@ SERVER_PATH = os.path.dirname(PATH)
 BASE_PATH = os.path.dirname(SERVER_PATH)
 VISION_ANNOTATION_FILE = os.path.join(BASE_PATH, 'models/annotaion.json')
 
+
 with open(VISION_ANNOTATION_FILE) as f:
     VISION_ANNOTATION = json.loads(f.read())
 
@@ -242,7 +243,7 @@ class Station(Node):
 
     async def align_holder(self, recipe, system):
         await self.set_valves([0, 1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': 10}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             error = {
@@ -269,10 +270,10 @@ class Station(Node):
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], system=system)
         await self.set_valves([1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': 10}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, 1])
+            await self.set_valves([0, None, None, 0])
             error = {
                 'message': 'Aligining failed for dosing. Align to continue',
                 'location_name': self.name,
@@ -373,7 +374,7 @@ class Station(Node):
         data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
         # Deliver
-        data['H_DELIVER'] = .1
+        data['H_DELIVER'] = -1
         data['FEED_DELIVER'] = recipe.FEED_Z_UP
 
         command = '''

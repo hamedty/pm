@@ -14,8 +14,8 @@ import rpi_scripts
 
 global ARDUINOS, CAMERAS
 MAX_ARDUINO_COUNT = 5
-global PEN_ID
-PEN_ID = 0
+# global PEN_ID
+# PEN_ID = 0
 ARDUINOS = {}
 CAMERAS = {}
 
@@ -96,9 +96,9 @@ async def align(command, _):
 
     arduino.send_command('{out6:1}')
 
-    global PEN_ID
-    if PEN_ID > 10:
-        os.system('rm /home/pi/data/%04d_*' % PEN_ID)
+    # global PEN_ID
+    # if PEN_ID > 10:
+    #     os.system('rm /home/pi/data/%04d_*' % PEN_ID)
 
     presence_threshold = arduino._hw_config['presence_threshold'][component]
     retries = command['retries']
@@ -111,21 +111,28 @@ async def align(command, _):
         arduino.send_command('{%s:1}' % valve)
         await asyncio.sleep(.05)
 
-        for i in range(retries):
-            frame = camera.get_frame(roi_name='alignment')
+        for i in range(len(retries)):
+            for retry in range(retries[i]):
+                frame = camera.get_frame(roi_name='alignment')
 
-            # filename = '/home/pi/data/%04d_%s_%d.png' % (PEN_ID, component, i)
-            # vision.dump(frame, filename)
+                # filename = '/home/pi/data/%04d_%s_%d.png' % (PEN_ID, component, i)
+                # vision.dump(frame, filename)
 
-            steps, aligned = detector(frame, offset)
-            # print(steps, aligned)
-            steps_history.append(steps)
+                steps, aligned = detector(frame, offset)
+                # print(steps, aligned)
+                steps_history.append(steps)
+                if aligned:
+                    break
+
+                arduino.send_command('G10 L20 P1 %s0' % axis)
+                arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
+                await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
             if aligned:
                 break
-
-            arduino.send_command('G10 L20 P1 %s0' % axis)
-            arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
-            await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
+            arduino.send_command('{%s:0}' % valve)
+            await asyncio.sleep(.3)
+            arduino.send_command('{%s:1}' % valve)
+            await asyncio.sleep(.2)
 
         if component == 'holder':
             arduino.send_command('{%s:0}' % valve)
@@ -139,8 +146,8 @@ async def align(command, _):
         else:
             break
 
-    if component == 'dosing':
-        PEN_ID += 1
+    # if component == 'dosing':
+    #     PEN_ID += 1
 
     arduino.send_command('{out6:0}')
     return {'success': True, 'aligned': aligned, 'steps_history': steps_history}

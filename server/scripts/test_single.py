@@ -22,7 +22,9 @@ async def main(system, ALL_NODES):
     # for i in range(40 + 1):
     #     await feeder.set_valves([0] * 6 + [i % 2])
     #     await asyncio.sleep(.3)
+    # stations = stations[:3]
+    # for i in range(10):
+    #     await asyncio.gather(*[s.G1(z=200, feed=15000) for s in stations])
+    #     await asyncio.gather(*[s.G1(z=10, feed=10000) for s in stations])
 
-    for i in range(20):
-        await stations[9].set_valves([0] * 4 + [i % 2])
-        await asyncio.sleep(2)
+    await dosing_feeder.set_motors(feeder, (9, 5))

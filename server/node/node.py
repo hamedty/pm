@@ -16,6 +16,10 @@ def generate_random_string():
     return ''.join(random.choices(alphabet, k=8))
 
 
+class WAIT_METRIC_TIMEOUT_EXCEPTION(Exception):
+    pass
+
+
 class Node(object):
     HOMMING_RETRIES = 2
     HOMMED_AXES = ['a']
@@ -242,9 +246,15 @@ class Node(object):
         success, line = await self.send_command(command)
         return line['result']
 
-    async def wait_metric(self, metric, expected=1):
+    async def wait_metric(self, metric, expected=1, timeout=None):
+        start_time = time.time()
         while await self.read_metric(metric) != expected:
             await asyncio.sleep(0.001)
+
+            if timeout is None:
+                continue
+            if time.time() > (start_time + timeout):
+                raise WAIT_METRIC_TIMEOUT_EXCEPTION()
 
     async def send_command_scenario(self, command):
         if command['verb'] == 'dump_frame':
@@ -273,6 +283,7 @@ class Node(object):
             await self.scp_from(folder_name_src, folder_name_dst)
 
         elif command['verb'] == 'dump_training_dosing':
+            await self.set_valves([0])
             if command.get('prepare'):
                 await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
             await self.set_valves([1])
