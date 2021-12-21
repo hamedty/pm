@@ -157,7 +157,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 35000),  # holder gate on/off
-            (6, 20)  # , (8, 200)  # Cartridge Conveyor + OralB
+            (6, 15),  (8, 10)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])
@@ -188,7 +188,7 @@ class Feeder(Node):
             return
         fast_args = [(i, int(j * 2.5)) for i, j in args]
         await self.set_motors_fast(*args)
-        await asyncio.sleep(.5)
+        await asyncio.sleep(1)
         fast_args = [(i, j) for i, j in args]
         await self.set_motors_fast(*args)
 
@@ -262,6 +262,9 @@ class Feeder(Node):
             self.feeder_rail_is_parked_event.clear()
             await system.system_running.wait()
             await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER, system=system)
+
+            await self.set_motors((6, 100))
+
             self.feeder_is_full_event.set()
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()

@@ -12,7 +12,7 @@ class Robot(Node):
         (1, {
             'ma': 0,  # map to X
             'sa': 1.8,  # step angle 1.8
-            'tr': 20,  # travel per rev = 5mm
+            'tr': 20,  # travel per rev = 20mm
             'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
@@ -42,7 +42,7 @@ class Robot(Node):
         (2, {
             'ma': 1,  # map to Y
             'sa': 1.8,  # step angle 1.8
-            'tr': 5,  # travel per rev = 5mm
+            'tr': 20,  # travel per rev = 20mm
             'mi': 4,  # microstep = 2
             'po': 1,  # direction
         }),
@@ -96,7 +96,7 @@ class Robot(Node):
         'encoders': {
             # encoder key, ratio, telorance_soft, telorance_hard
             'posx': ['enc2', 120.0, 1.0, 5.0],
-            'posy': ['enc1', 480.0, 1.0, 5.0],
+            'posy': ['enc1', 120.0, 1.0, 5.0],
         },
         'Y_GRAB_IN_UP_2': 64,
         'X_CAPPING': 60,

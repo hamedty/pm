@@ -273,7 +273,7 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, 0])
+            await self.set_valves([0, None, None, None])
             error = {
                 'message': 'Aligining failed for dosing. Align to continue',
                 'location_name': self.name,

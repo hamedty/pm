@@ -113,10 +113,9 @@ class Dosing(Node):
             confidence = 0
             while True:
                 confidence, proximity_input = await self.read_proximity()
-                if confidence > .98:
+                if (confidence > .6):
                     break
                 await asyncio.sleep(.15)
-
             await self.set_valves([None, proximity_input])
 
             # wait for buffer to be free
@@ -146,17 +145,21 @@ class Dosing(Node):
                 buffer_full_time = time.time() - buffer_full_time
                 if (buffer_full_time > 2):
                     motors_on = False
-                    await self.set_motors_highlevel(feeder, 'off')
+                    await self.set_motors_highlevel(feeder, 'standby')
             else:  # motors off
                 await self.buffer_empty_event.wait()
-                await self.set_motors_highlevel(feeder, 'on')
+                await self.set_motors_highlevel(feeder, 'resume')
                 motors_on = True
 
     async def set_motors_highlevel(self, feeder, status):
         if status == 'on':
-            await asyncio.shield(self.set_motors(feeder, (5, 25), (9, CONVEYOR_SPEED)))
-        else:
+            await asyncio.shield(self.set_motors(feeder, (5, 80), (9, CONVEYOR_SPEED)))
+        elif status == 'off':
             await asyncio.shield(self.set_motors(feeder, (5, 0), (9, 0)))
+        elif status == 'standby':
+            await asyncio.shield(self.set_motors(feeder, (9, 0)))
+        elif status == 'resume':
+            await asyncio.shield(self.set_motors(feeder, (9, CONVEYOR_SPEED)))
 
     async def set_motors(self, feeder, *args):
         direct_motors = {9}
@@ -198,6 +201,7 @@ class Dosing(Node):
             await asyncio.sleep(.006)
         # print(read_out)
         mean = sum(read_out) / float(len(read_out))
-        value = int(mean > 0.5)
-        confidence = abs(mean - 0.5) * 2
+        threshold = 0.25
+        value = int(mean > threshold)
+        confidence = (mean - threshold) / (value - threshold)
         return confidence, value

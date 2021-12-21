@@ -59,8 +59,10 @@ async def feeder_process(arduino, G1, command):
         ''' % JERK_FEED)
 
     # Motors
-    if any(dosing_mask):
-        arduino._send_command("{m5: 25, m9: 5}")
+    # if any(dosing_mask):
+    #     arduino._send_command("{m5: 75}")
+    if any(holder_mask):
+        arduino._send_command("{m6: 15}")  # cartridge conveyor
 
     arduino._send_command("{m2: 4, m3: 4, out10: 1}")
 
@@ -100,6 +102,10 @@ async def feeder_process(arduino, G1, command):
 
     arduino._send_command('G1 Y10 F60000')
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
+
+    # # Motors
+    # if any(holder_mask):
+    #     arduino._send_command("{m6: 100}")  # cartridge conveyor
 
 
 async def cartridge_grab(arduino):

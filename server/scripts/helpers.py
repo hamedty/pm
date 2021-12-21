@@ -16,7 +16,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 async def fill_dosing_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await dosing_feeder.create_feeding_loop(feeder, system, recipe)
-    await asyncio.sleep(20)
+    await asyncio.sleep(30)
     await dosing_feeder.terminate_feeding_loop(feeder)
 
 
@@ -132,10 +132,9 @@ async def holder_feeder(system, ALL_NODES):
     # Motors on
     await feeder.set_motors(
         (2, 4), (3, 4),  # Holder Downstream
-        # (4, 8), (7, 11),  # Holder Upstream - Lift and long conveyor
-        (4, 4), (7, 11),  # Holder Upstream - Lift and long conveyor
-        # (1, 7500), (10, 60000),  # holder gate on/off
-        (1, 3750), (10, 45000),  # holder gate on/off
+        # (4, 4), (7, 11),  # Holder Upstream - Lift and long conveyor
+        (1, 3750), (10, 35000),  # holder gate on/off
+        (6, 20),  (8, 10)  # Cartridge Conveyor + Randomizer
     )
     await feeder.set_valves([None] * 9 + [1])
 
@@ -164,12 +163,15 @@ async def feeder_handover_to_rail(system, ALL_NODES):
     # rail, feeder homed and parked
     assert await rail.is_homed(), 'Rail is not homed!'
     assert await feeder.is_homed(), 'Feeder is not homed!'
-    assert rail.is_at_loc(z=D_STANDBY), 'rail is in bad location'
-    assert feeder.is_at_loc(z=FEEDER_Z_DELIVER), 'feeder is in bad location'
+    assert rail.is_at_loc(z=D_STANDBY) or rail.is_at_loc(
+        z=D_MIN), 'rail is in bad location'
+    assert feeder.is_at_loc(z=FEEDER_Z_DELIVER) or feeder.is_at_loc(
+        z=FEEDER_Z_IDLE), 'feeder is in bad location'
 
     # jack's to normal
     await rail.set_valves([0, 0])
 
+    await feeder.G1(z=FEEDER_Z_DELIVER, feed=5000), 'feeder is in bad location'
     await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
     await rail.set_valves([1, 0])
     await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)

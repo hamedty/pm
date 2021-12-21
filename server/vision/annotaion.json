@@ -40,24 +40,15 @@
     },
     "102": {
         "dosing": {
-            "33xwwxwt": {
-                "zero": 243
-            },
-            "r0qy5wrk": {
-                "zero": 37
-            },
-            "rlu1mtly": {
-                "zero": 93
-            },
-            "wrkkh673": {
-                "zero": 204
+            "esrla8ym": {
+                "zero": 171
             }
         },
         "dosing_roi": {
             "dx": 240,
-            "dy": 204,
-            "x0": 324,
-            "y0": 134
+            "dy": 207,
+            "x0": 341,
+            "y0": 137
         },
         "holder": {
             "2j9gkez7": {
