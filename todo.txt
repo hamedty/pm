@@ -1,4 +1,3 @@
-home feeder (sare khar ro nadan bala)
 dosing feeder investigate
 main x 2 doesnt work
 extract dosing feeder params to recepie

@@ -28,7 +28,7 @@ class Feeder(Node):
             'tm': 99,  # max travel
             'jm': 50000,  # max jerk
             'jh': 50000,  # hominzg jerk
-            'hi': 2,  # home switch
+            'hi': 1,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 500,  # latch speed
@@ -86,7 +86,7 @@ class Feeder(Node):
             # 'sn': 3,  # minimum switch mode = limit-and-homing
             'hd': 0,  # homing direction
             'sv': 1500,  # home search speed
-            'lv': 100,  # latch speed
+            'lv': 200,  # latch speed
             'lb': 10,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
@@ -136,16 +136,14 @@ class Feeder(Node):
         # cartridge pickers
         await self.send_command_raw('G28.2 Y0')
         await self.send_command_raw('G1 Y10 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
-        # to avoid latch bug if homming has to be repeated
         # await self.send_command_raw('G1 Y10 F60000')
-        # await asyncio.sleep(.3)
+        await asyncio.sleep(.1)  # unknown! needed to avoid g2core panic
 
         # rail
         await self.send_command_raw('G28.2 Z0')
-
-        # reset encoder
-        await self.send_command_raw('G28.5')
-        await self.send_command_raw('G1 Z16 F5000')
+        await self.send_command_raw('G28.5')  # reset encoder
+        await asyncio.sleep(.1)  # unknown! needed to avoid g2core panic
+        await self.send_command_raw('G1 Z16 F5000')  # idle position
 
     async def set_motors_working_condition(self, recipe, fast=False):
         if recipe.SERVICE_FUNC_NO_FEEDER:
