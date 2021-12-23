@@ -174,9 +174,9 @@ class Robot(Node):
         await stations_task1
         await system.system_running.wait()
         await self.G1(x=X_INPUT, feed=recipe.FEED_X, system=system)
-        await self.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN_PRESS, system=system)
         await self.set_valves([None] * 5 + [0] * 5)
-        await self.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN, system=system)
+        await self.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN_PRESS, system=system)
         await self.set_valves([0] * 10)
         await asyncio.sleep(T_INPUT_RELEASE)
         await asyncio.gather(*[station.verify_dosing_sit_right(recipe, system) for station in self._stations])
@@ -188,7 +188,7 @@ class Robot(Node):
         await asyncio.sleep(T_HOLDER_JACK_CLOSE)
         await self.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
         await asyncio.sleep(T_PRE_PRESS)
-        await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS, system=system)
+        await self.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN_PRESS, system=system)
         await asyncio.sleep(T_POST_PRESS)
         await stations_task2
         await self.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
@@ -218,7 +218,7 @@ class Robot(Node):
         '''CAP'''
         await system.system_running.wait()
         await self.G1(x=X_CAPPING, feed=recipe.FEED_X, system=system)
-        await self.G1(y=recipe.Y_CAPPING_DOWN, feed=recipe.FEED_Y_DOWN, system=system)
+        await self.G1(y=recipe.Y_CAPPING_DOWN, feed=recipe.FEED_Y_DOWN_CAP, system=system)
         await self.set_valves([0] * 10)
         await self.G1(x=recipe.X_PARK, feed=recipe.FEED_X, system=system)
 

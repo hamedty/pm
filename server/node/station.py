@@ -422,7 +422,7 @@ class Station(Node):
             M100 ({out5: 1})
             G4 P0.1
             M100 ({out3: 1})
-            G4 P1.5
+            G4 P2
             M100 ({out3: 0})
             G4 P0.5
 

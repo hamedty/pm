@@ -16,7 +16,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 async def fill_dosing_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await dosing_feeder.create_feeding_loop(feeder, system, recipe)
-    await asyncio.sleep(30)
+    await asyncio.sleep(20)
     await dosing_feeder.terminate_feeding_loop(feeder)
 
 
@@ -99,7 +99,7 @@ async def pickup_rail(system, ALL_NODES):
     await asyncio.sleep(T_HOLDER_JACK_CLOSE)
     await robot.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
     await asyncio.sleep(T_PRE_PRESS)
-    await robot.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_PRESS, system=system)
+    await robot.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN_PRESS, system=system)
     await asyncio.sleep(T_POST_PRESS)
     await robot.set_valves([0] * 10)
     await robot.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)

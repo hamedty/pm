@@ -135,7 +135,10 @@ class Feeder(Node):
     async def home_core(self):
         # cartridge pickers
         await self.send_command_raw('G28.2 Y0')
-        await self.send_command_raw('G1 Y20 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
+        await self.send_command_raw('G1 Y10 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
+        # to avoid latch bug if homming has to be repeated
+        # await self.send_command_raw('G1 Y10 F60000')
+        # await asyncio.sleep(.3)
 
         # rail
         await self.send_command_raw('G28.2 Z0')
@@ -157,7 +160,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 35000),  # holder gate on/off
-            (6, 15),  (8, 10)  # Cartridge Conveyor + Randomizer
+            (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])

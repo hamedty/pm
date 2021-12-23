@@ -1,31 +1,41 @@
-verify correct press
------------------------------------------
-jack haie station ra baz bad moghe mizanam o motmaen mishavam
-avoid tasadof complete pen in exchange - station 1
-avoid tasadof complete pen with new dosing - station 8 va ?
-verify gate (or wait for gate in gcode)
-verify dosing orientation
-feeder gradual motor on
-motor oralB
-feeder stop motors if didn't feed for a while
+home feeder (sare khar ro nadan bala)
+dosing feeder investigate
+main x 2 doesnt work
+extract dosing feeder params to recepie
+feeder hang (G1 bug)
+shlvar ro bekesh bala
+optimize feeder gcodes
 G1 optimization - optimize robot move
+robot / rail / station gcode optimization
+dosing active ROI
+verify correct press
+feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
 status request sent for no reason
-wait for holder in gcode? (M101)
+if nodes downs, UI must react
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
 control holder DC motor with PWM instead of timer
 log collection framework
 need to feed 16 dosing in begining
 vision debug frame work
-if nodes downs, UI must react
+HMI Khoshgel
 *************************************************************************
-*************************************************************************
-*************************************************************************
-iradat riz
-stableize kari
-feature riz
-khoshgel kari
--------------------------
-optimize movement
-restructure software to be able to hold
+
+{
+  "connected": true,
+  "message": "usb port opened",
+  "f.2": 0,
+  "enc1": -97,
+  "r.posz": 16,
+  "r.stat": 3,
+  "er.st": 203,
+  "r.in5": 1,
+  "r.in6": 0,
+  "stat_code": 0,
+  "feeder_is_full_event": false,
+  "feeder_is_empty_event": false,
+  "feeder_rail_is_parked_event": true,
+  "feeder_finished_command_event": true,
+  "feeder_initial_start_event": true
+}
