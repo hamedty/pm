@@ -1,12 +1,11 @@
-dosing feeder investigate
+dosing active ROI
+feeder hang (G1 bug)
 main x 2 doesnt work
 extract dosing feeder params to recepie
-feeder hang (G1 bug)
 shlvar ro bekesh bala
 optimize feeder gcodes
 G1 optimization - optimize robot move
 robot / rail / station gcode optimization
-dosing active ROI
 verify correct press
 feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
@@ -18,6 +17,7 @@ control holder DC motor with PWM instead of timer
 log collection framework
 need to feed 16 dosing in begining
 vision debug frame work
+dosing feeder investigate
 HMI Khoshgel
 *************************************************************************
 

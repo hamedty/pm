@@ -133,17 +133,17 @@ class Feeder(Node):
     }
 
     async def home_core(self):
+        # rail
+        await self.send_command_raw('G28.2 Z0')
+        await self.send_command_raw('G28.5')  # reset encoder
+        await asyncio.sleep(.5)  # unknown! needed to avoid g2core panic
+        await self.send_command_raw('G1 Z16 F5000')  # idle position
+
         # cartridge pickers
         await self.send_command_raw('G28.2 Y0')
         await self.send_command_raw('G1 Y10 F60000\nG38.3 Y-100 F1000\nG10 L20 P1 Y0')
         # await self.send_command_raw('G1 Y10 F60000')
-        await asyncio.sleep(.1)  # unknown! needed to avoid g2core panic
-
-        # rail
-        await self.send_command_raw('G28.2 Z0')
-        await self.send_command_raw('G28.5')  # reset encoder
-        await asyncio.sleep(.1)  # unknown! needed to avoid g2core panic
-        await self.send_command_raw('G1 Z16 F5000')  # idle position
+        await asyncio.sleep(.5)  # unknown! needed to avoid g2core panic
 
     async def set_motors_working_condition(self, recipe, fast=False):
         if recipe.SERVICE_FUNC_NO_FEEDER:
@@ -158,7 +158,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 35000),  # holder gate on/off
-            (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
+            (6, 25),  (8, 8)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])

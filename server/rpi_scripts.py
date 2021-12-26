@@ -32,7 +32,7 @@ HOLDER_ARDUINO_INDEX = 2
     in3:
     in4:
     in5: holder microswitch
-    in6:
+    in6: dosing existance sensor
 '''
 
 
