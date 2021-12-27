@@ -182,7 +182,7 @@ class Feeder(Node):
         command = ','.join(
             ['m%d:%d' % (i, j) for i, j in args])
         command = '{%s}' % command
-        await self.send_command_raw(command)
+        await self.send_command_raw(command, wait_start=[])
 
     async def set_motors_slow(self, *args):
         if len(args) == 0:

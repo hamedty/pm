@@ -30,6 +30,7 @@ class Arduino(object):
         self._hw_config = {}
         self.usb_index = usb_index
         self.lock = Lock()
+        self.command_id_lock = Lock()
         self.stat_code = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
@@ -91,13 +92,18 @@ class Arduino(object):
         self.lock.release()
 
     def init_command_id(self):
+        self.command_id_lock.acquire()
         self._last_command_id = 1
         self._send_command('{uda0:"0x%x"}' % 1)
+        self.command_id_lock.release()
         time.sleep(.1)
 
     def get_command_id(self):
+        self.command_id_lock.acquire()
         self._last_command_id += 1
-        return self._last_command_id
+        res = self._last_command_id
+        self.command_id_lock.release()
+        return res
 
     async def wait_for_status(self, wait_list):
         while self._status.get('r.stat', -1) not in wait_list:

@@ -1,6 +1,6 @@
 # read -n 1 -s -r -p "Press any key to continue"
 copy_files () {
-  rsync --delete -azv --exclude 'dump/' /home/it/Desktop/PAM2060/server/ pi@192.168.44.$1:~/server/
+  rsync -azv --exclude 'dump/' /home/it/Desktop/PAM2060/server/ pi@192.168.44.$1:~/server/
 }
 
 
