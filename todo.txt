@@ -1,5 +1,5 @@
-dosing active ROI
 feeder hang (G1 bug)
+dosing active ROI
 main x 2 doesnt work
 extract dosing feeder params to recepie
 shlvar ro bekesh bala

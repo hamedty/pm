@@ -33,7 +33,6 @@ class Arduino(object):
         self.stat_code = 0
         self._hw_config = {'motors': {}}
         self.receive_thread = None
-        self._status_out_queue = None
         self._debug = False
         self.set_status(message='object created')
         self._open_port()
@@ -93,7 +92,7 @@ class Arduino(object):
 
     def init_command_id(self):
         self._last_command_id = 1
-        self._send_command('N1 M0')
+        self._send_command('{uda0:"0x%x"}' % 1)
         time.sleep(.1)
 
     def get_command_id(self):
@@ -105,7 +104,7 @@ class Arduino(object):
             await asyncio.sleep(0.001)
 
     async def wait_for_command_id(self, command_id):
-        while (self._status.get('r.line', -1) < command_id):
+        while (self._status.get('r.uda0', -1) < command_id):
             if self._status.get('r.stat', -1) in {13}:
                 raise HW_PANIC_EXCEPTION()
             await asyncio.sleep(0.001)
@@ -136,15 +135,8 @@ class Arduino(object):
             new_status['traceback'] = traceback
 
         new_status['time'] = time.time()
-        if ('r.line' in new_status) and new_status.get('r.stat') not in {1, 3, 4}:
-            del new_status['r.line']
 
         self._status.update(new_status)
-        if self._status_out_queue is not None:
-            try:
-                self._status_out_queue.put_nowait(self.get_status())
-            except asyncio.QueueFull:
-                pass
 
     def get_status(self):
         d = dict(self._status)
@@ -195,10 +187,12 @@ def clean_dictionary(dictionary):
         key = clean_key(key)
         if key:
             new_dict[key] = value
+    if 'r.uda0' in new_dict:
+        new_dict['r.uda0'] = int(new_dict['r.uda0'], 16)
     return new_dict
 
 
-GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.line', 'er.st'}
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.uda0', 'er.st'}
 
 
 def clean_key(key):

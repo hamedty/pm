@@ -36,7 +36,7 @@ class Rail(Robot):
         ('di2fn', 0),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'posz': True, 'stat': True}),
+        ('sr', {'uda0': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]
 

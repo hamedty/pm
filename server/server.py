@@ -73,7 +73,7 @@ class System(object):
 
     async def message_from_ws(self, ws, message_in):
         if message_in['selected_nodes']:
-            response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_scenario(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
+            response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_from_hmi(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
         else:
             response = self.system_command_scenario(message_in['form'])
         message_out = {'type': 'response', 'payload': response}

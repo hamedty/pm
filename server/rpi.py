@@ -22,7 +22,7 @@ CAMERAS = {}
 DATA_PATH = '/home/pi/data'
 
 
-async def dump_frame(command, _):
+async def dump_frame(command):
     arduino = ARDUINOS[command['arduino_index']]
     components = command['components']
 
@@ -40,7 +40,7 @@ async def dump_frame(command, _):
     return {'success': True}
 
 
-async def dump_training(command, _):
+async def dump_training(command):
     arduino = ARDUINOS[command['arduino_index']]
     component = command['component']  # holder / dosing
     feed = command['speed']
@@ -74,7 +74,7 @@ async def dump_training(command, _):
             arduino.send_command('G10 L20 P1 %s0' % axis)
             arduino.send_command('G1 %s%.02f F%d' % (axis, steps, feed))
             command_id = arduino.get_command_id()
-            arduino.send_command('N%d M0' % (command_id))
+            arduino.send_command('M100 ({uda0:"0x%x"})' % (command_id))
             await arduino.wait_for_command_id(command_id)
 
             delay = .25
@@ -84,7 +84,7 @@ async def dump_training(command, _):
     return {'success': True}
 
 
-async def align(command, _):
+async def align(command):
 
     arduino = ARDUINOS[command['arduino_index']]
     component = command['component']  # holder / dosing
@@ -153,7 +153,7 @@ async def align(command, _):
     return {'success': True, 'aligned': aligned, 'steps_history': steps_history}
 
 
-async def detect_vision(command, _):
+async def detect_vision(command):
     arduino = ARDUINOS[command['arduino_index']]
     object = command['object']
 
@@ -196,13 +196,13 @@ async def detect_vision(command, _):
     return result
 
 
-async def restart_arduino(command, _):
+async def restart_arduino(command):
     arduino = ARDUINOS[command['arduino_index']]
     arduino.restart()
     return {'success': True}
 
 
-async def create_arduino(command, _):
+async def create_arduino(command):
     arduino_index = command['arduino_index']
     # create arduino
     if ARDUINOS.get(arduino_index) is None:
@@ -230,7 +230,7 @@ async def create_arduino(command, _):
     return {'success': True}
 
 
-async def raw(command, _):
+async def raw(command):
     arduino = ARDUINOS[command['arduino_index']]
 
     wait_start = command['wait_start']
@@ -242,7 +242,7 @@ async def raw(command, _):
 
     if wait_completion:
         command_id = arduino.get_command_id()
-        command_raw = command_raw + '\nN%d M0' % command_id
+        command_raw = command_raw + '\nM100 ({uda0:"0x%x"})' % command_id
 
     arduino.send_command(command_raw)
 
@@ -257,7 +257,7 @@ async def raw(command, _):
     return {'success': True, 'status': status}
 
 
-async def G1(command, _=None):
+async def G1(command):
     correction_eps = 0.5
     arduino = ARDUINOS[command['arduino_index']]
     for a in ['x', 'y', 'z']:
@@ -290,7 +290,7 @@ async def G1(command, _=None):
 
         command_raw += 'G1 %s%.2f F%d\n' % (axes, req_location, feed)
         command_id = arduino.get_command_id()
-        command_raw += 'N%d M0' % command_id
+        command_raw += 'M100 ({uda0:"0x%x"})' % command_id
 
         arduino.send_command(command_raw)
         await arduino.wait_for_command_id(command_id)
@@ -306,7 +306,7 @@ async def G1(command, _=None):
         # get latest position
         # await asyncio.sleep(.2)
         command_id = arduino.get_command_id()
-        command_raw = '{pos%s:n}\nN%d M0' % (axes, command_id)
+        command_raw = '{pos%s:n}\nM100 ({uda0:"0x%x"})' % (axes, command_id)
         arduino.send_command(command_raw)
         print('send_command2:', command_raw)
         await arduino.wait_for_command_id(command_id)
@@ -323,13 +323,13 @@ async def G1_w_assert(*args, **kwargs):
     assert res['success'], res
 
 
-async def feeder_process(command, _):
+async def feeder_process(command):
     arduino = ARDUINOS[command['arduino_index']]
     await rpi_scripts.feeder_process(arduino, G1_w_assert, command)
     return {'success': True}
 
 
-async def read_metric(command, _):
+async def read_metric(command):
     arduino = ARDUINOS[command['arduino_index']]
     query = command['query']
     response = command['response']
@@ -337,31 +337,17 @@ async def read_metric(command, _):
     return {'success': success, 'result': result}
 
 
-async def status_hook(command, writer):
+async def get_status(command):
     arduino_index = command['arduino_index']
 
     while ARDUINOS.get(arduino_index) is None:
-        await asyncio.sleep(0.25)
-        status = {'message': 'arduino not created'}
-        response = json.dumps(status) + '\n'
-        writer.write(response.encode())
-        if writer.is_closing():
-            return {}
-    arduino = ARDUINOS[arduino_index]
-    status_queue = asyncio.Queue()
-    arduino._status_out_queue = status_queue
+        return {'success': True, 'status': {'message': 'arduino not created'}}
 
-    while True:
-        try:
-            status = await asyncio.wait_for(status_queue.get(), timeout=.5)
-        except asyncio.TimeoutError:
-            arduino.send_command('{stat:n}')
-            continue
-        status_queue.task_done()
-        response = json.dumps(status) + '\n'
-        writer.write(response.encode())
-        if writer.is_closing():
-            return {}
+    arduino = ARDUINOS[arduino_index]
+    status = arduino.get_status()
+    if status['age'] > 0.3:
+        arduino.send_command('{stat:n}')
+    return {'success': True, 'status': status}
 
 
 COMMAND_HANDLER = {
@@ -381,7 +367,7 @@ COMMAND_HANDLER = {
     'read_metric': read_metric,
 
     # second channel - status
-    'status_hook': status_hook,
+    'get_status': get_status,
 }
 
 
@@ -392,12 +378,12 @@ async def server_handler(reader, writer):
             return
         data = await reader.readline()
         if not data:
-            continue
+            break
 
         try:
             data = json.loads(data.decode())
             # print('command:', data)
-            response = await COMMAND_HANDLER[data['verb']](data, writer)
+            response = await COMMAND_HANDLER[data['verb']](data)
         except:
             trace = traceback.format_exc()
             print(trace)

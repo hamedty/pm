@@ -20,6 +20,36 @@ class WAIT_METRIC_TIMEOUT_EXCEPTION(Exception):
     pass
 
 
+class ConnectionPool(object):
+    def __init__(self, ip, port, count=5):
+        self.ip = ip
+        self.port = port
+        self.count = count
+        self.pool = []
+        self.occupied = set()
+        self.lock = asyncio.Lock()
+
+    async def connect(self):
+        for i in range(self.count):
+            reader, writer = await asyncio.open_connection(self.ip, self.port)
+            self.pool.append((reader, writer))
+
+    def ready(self):
+        return len(self.pool) > len(self.occupied)
+
+    async def get_socket(self):
+        async with self.lock:
+            for i in range(len(self.pool)):
+                if i not in self.occupied:
+                    self.occupied.add(i)
+                    return self.pool[i], i
+            raise Exception("running out of connection in pool")
+
+    async def release_socket(self, i):
+        async with self.lock:
+            self.occupied.remove(i)
+
+
 class Node(object):
     HOMMING_RETRIES = 2
     HOMMED_AXES = ['a']
@@ -32,10 +62,9 @@ class Node(object):
         self.arduino_id = arduino_id
         self.hw_config = copy.deepcopy(self.hw_config_base)
         self.g2core_config = copy.deepcopy(self.g2core_config_base)
+        self.connection_pool = ConnectionPool(self.ip, 2000, 5)
 
-        self._socket_reader = None
         self.set_status(message='node instance created')
-        self.lock = None
         self.homed = False
         self.events = {}
 
@@ -54,18 +83,15 @@ class Node(object):
         assert proc.returncode == 0, proc.returncode
 
     async def connect(self):
-        while not self._socket_reader:
+        self.set_status(message='Trying to connect to RPI')
+        while not self.connection_pool.ready():
             try:
-                reader, writer = await asyncio.open_connection(self.ip, 2000)
-                reader2, writer2 = await asyncio.open_connection(self.ip, 2000)
+                await self.connection_pool.connect()
             except:
+                print(traceback.format_exc())
+                print('retrying to connect to', self.name)
                 await asyncio.sleep(.5)
-                # print('retrying to connect to', self.ip)
                 continue
-            self._socket_reader = reader
-            self._socket_writer = writer
-            self._socket2_reader = reader2
-            self._socket2_writer = writer2
 
             self.set_status(message='socket connected')
 
@@ -90,11 +116,12 @@ class Node(object):
         command['arduino_index'] = self.arduino_id
         command_str = json.dumps(command) + '\n'
         command_str = command_str.encode()
-        if self.lock is None:
-            self.lock = asyncio.Lock()
-        async with self.lock:
-            self._socket_writer.write(command_str)
-            line = await self._socket_reader.readline()
+
+        socket, index = await self.connection_pool.get_socket()
+        reader, writer = socket
+        writer.write(command_str)
+        line = await reader.readline()
+        await self.connection_pool.release_socket(index)
 
         line = json.loads(line)
         if 'status' in line:
@@ -106,15 +133,10 @@ class Node(object):
         return line['success'], line
 
     async def loop(self):
-        command = {'verb': 'status_hook'}
-        command['arduino_index'] = self.arduino_id
-        command = json.dumps(command) + '\n'
-        command = command.encode()
-        self._socket2_writer.write(command)
         while True:
-            line = await self._socket2_reader.readline()
-            line = json.loads(line)
-            self.set_status(**line)
+            if (time.time() - self._status['time']) > 0.25:
+                await self.send_command({'verb': 'get_status'})
+                await asyncio.sleep(0.25)
 
     async def restart_arduino(self):
         command = {
@@ -180,7 +202,7 @@ class Node(object):
         self._status['time'] = time.time()
 
     def get_status(self):
-        data = {'connected': bool(self._socket_reader), 'age': 0}
+        data = {'connected': self.connection_pool.ready(), 'age': 0}
 
         if data['connected']:
             data.update(self._status)
@@ -256,7 +278,7 @@ class Node(object):
             if time.time() > (start_time + timeout):
                 raise WAIT_METRIC_TIMEOUT_EXCEPTION()
 
-    async def send_command_scenario(self, command):
+    async def send_command_from_hmi(self, command):
         if command['verb'] == 'dump_frame':
             command['components'] = ['holder', 'dosing']
             await self.send_command(command)

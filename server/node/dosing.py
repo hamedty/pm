@@ -25,7 +25,7 @@ class Dosing(Node):
 
 
         ('sv', 2),  # Status report enabled
-        ('sr', {'line': True, 'stat': True}),
+        ('sr', {'uda0': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]
 

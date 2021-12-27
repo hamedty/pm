@@ -136,7 +136,7 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     arduino._send_command('''
         G1 Y10 Z%.2f F26000
         M100 ({posz:n})
-        N%d M0
+        M100 ({uda0:"0x%x"})
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
     await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': feed, 'correct_initial': True})
@@ -155,7 +155,7 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
 
         ; un-hug
         M100 ({out6: 0})
-        N%d M0
+        M100 ({uda0:"0x%x"})
         ''' % command_id
     arduino.send_command(command_raw)
     await arduino.wait_for_command_id(command_id)
