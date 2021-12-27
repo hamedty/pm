@@ -15,7 +15,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 
 async def fill_dosing_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
-    await dosing_feeder.create_feeding_loop(feeder, system, recipe)
+    await dosing_feeder.create_feeding_loop(feeder, recipe)
     await asyncio.sleep(20)
     await dosing_feeder.terminate_feeding_loop(feeder)
 
@@ -31,14 +31,14 @@ async def run_rail_empty(system, ALL_NODES):
     while system.system_running.is_set():
         await rail.set_valves([0] * 2)
         await system.system_running.wait()
-        await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
+        await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
         await rail.set_valves([1, 0])
         await asyncio.sleep(recipe.T_RAIL_JACK1)
         await rail.set_valves([1, 1])
         await asyncio.sleep(recipe.T_RAIL_JACK2)
 
         # rail forward
-        await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT, system=system)
+        await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
 
         # change jacks to moving
         await rail.set_valves([1, 0])
@@ -84,32 +84,32 @@ async def pickup_rail(system, ALL_NODES):
     T_OUTPUT_GRIPP = 0.1
     T_OUTPUT_RELEASE = 0.2
 
-    await robot.G1(x=X_INPUT - .5, feed=recipe.FEED_X, system=system)
+    await robot.G1(x=X_INPUT - .5, feed=recipe.FEED_X)
 
-    await robot.G1(y=50, feed=recipe.FEED_Y_DOWN, system=system)
+    await robot.G1(y=50, feed=recipe.FEED_Y_DOWN)
     await aioconsole.ainput('continue?')
 
-    await robot.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
+    await robot.G1(y=Y_INPUT_DOWN_RELEASE_HOLDER, feed=recipe.FEED_Y_DOWN)
     await robot.set_valves([None] * 5 + [0] * 5)
-    await robot.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN, system=system)
+    await robot.G1(y=Y_INPUT_DOWN_RELEASE_DOSING, feed=recipe.FEED_Y_DOWN)
     await robot.set_valves([0] * 10)
     await asyncio.sleep(T_INPUT_RELEASE)
-    await robot.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP, system=system)
+    await robot.G1(y=Y_INPUT_UP, feed=recipe.FEED_Y_UP)
     await robot.set_valves([0] * 5 + [1] * 5)
     await asyncio.sleep(T_HOLDER_JACK_CLOSE)
-    await robot.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN, system=system)
+    await robot.G1(y=Y_INPUT_DOWN_PRE_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN)
     await asyncio.sleep(T_PRE_PRESS)
-    await robot.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN_PRESS, system=system)
+    await robot.G1(y=Y_INPUT_DOWN_PRESS_HOLDER, feed=recipe.FEED_Y_DOWN_PRESS)
     await asyncio.sleep(T_POST_PRESS)
     await robot.set_valves([0] * 10)
-    await robot.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP, system=system)
+    await robot.G1(y=Y_OUTPUT, feed=recipe.FEED_Y_UP)
 
 
 async def holder_feeder_forever(system, ALL_NODES):
     await system.system_running.wait()
     while system.system_running.is_set():
-        await holder_feeder(system, ALL_NODES)
-        await feeder_handover_to_rail(system, ALL_NODES)
+        await holder_feeder(ALL_NODES)
+        await feeder_handover_to_rail(ALL_NODES)
 
 
 async def holder_feeder(system, ALL_NODES):
@@ -172,14 +172,14 @@ async def feeder_handover_to_rail(system, ALL_NODES):
     await rail.set_valves([0, 0])
 
     await feeder.G1(z=FEEDER_Z_DELIVER, feed=5000), 'feeder is in bad location'
-    await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
+    await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
     await rail.set_valves([1, 0])
     await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
     await feeder.set_valves([None, 0])
     await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
     await rail.set_valves([1, 1])
     await asyncio.sleep(recipe.T_RAIL_JACK2)
-    await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT, system=system)
+    await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
     await rail.set_valves([1, 0])
     await asyncio.sleep(recipe.T_RAIL_JACK1)
     await rail.set_valves([0, 0])

@@ -55,7 +55,7 @@ class Node(object):
     HOMMED_AXES = ['a']
 
     def __init__(self, name, ip, arduino_id=None):
-        self.set_status(message='node instance creating')
+        # self.set_status(message='node instance creating')
         self.name = name
         self.ip = ip
         self.ip_short = int(self.ip.split('.')[-1])
@@ -64,9 +64,13 @@ class Node(object):
         self.g2core_config = copy.deepcopy(self.g2core_config_base)
         self.connection_pool = ConnectionPool(self.ip, 2000, 5)
 
-        self.set_status(message='node instance created')
+        # self.set_status(message='node instance created')
         self.homed = False
         self.events = {}
+        self.errors = {}
+
+    def set_system(self, system):
+        self.system = system
 
     async def scp_from(self, path_src, path_dst):
         path_dst, file_extension = os.path.splitext(path_dst)
@@ -83,7 +87,7 @@ class Node(object):
         assert proc.returncode == 0, proc.returncode
 
     async def connect(self):
-        self.set_status(message='Trying to connect to RPI')
+        await self.set_status(message='Trying to connect to RPI')
         while not self.connection_pool.ready():
             try:
                 await self.connection_pool.connect()
@@ -93,7 +97,7 @@ class Node(object):
                 await asyncio.sleep(.5)
                 continue
 
-            self.set_status(message='socket connected')
+            await self.set_status(message='socket connected')
 
         await self.create_arduino()
         return True
@@ -125,7 +129,7 @@ class Node(object):
 
         line = json.loads(line)
         if 'status' in line:
-            self.set_status(**line['status'])
+            await self.set_status(**line['status'])
         if assert_success:
             assert line['success'], (line, self.ip, self.arduino_id)
         elif not line['success']:
@@ -171,7 +175,7 @@ class Node(object):
         data = {'out': data}
         return await self.send_command_raw(json.dumps(data), wait_start=[], wait_completion=False)
 
-    async def G1(self, system=None, **kwargs):
+    async def G1(self, **kwargs):
         # if not self.homed:
         #     raise
         # kwargs: x, y, z, feed
@@ -182,22 +186,39 @@ class Node(object):
             success, line = await self.send_command(command, assert_success=False)
             if success:
                 return success, line
-            if system is None:
-                raise (line, self.ip, self.arduino_id)
             error = {
                 'message': 'G1 Failed',
                 'location_name': self.name,
                 'details': line,
             }
             print(error)
-            error_clear_event = await system.register_error(error)
+            error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
             command['correct_initial'] = True
 
     def ready_for_command(self):
         return 'enc1' in self._status
 
-    def set_status(self, **kwargs):
+    async def set_status(self, **kwargs):
+        if 'r.stat' in kwargs:
+            r_stat = kwargs['r.stat']
+            if r_stat == 6:
+                if 'holded' not in self.errors:
+                    error = {
+                        'message': 'Station Holded',
+                        'location_name': self.name,
+                        'details': 'Probably a collision detected',
+                        'unclearable': True,
+                    }
+                    print(error)
+                    _, error_id = await self.system.register_error(error)
+                    self.errors['holded'] = error_id
+            else:
+                if 'holded' in self.errors:
+                    error_id = self.errors['holded']
+                    await self.system.clear_error(error_id)
+                    del self.errors['holded']
+
         self._status = kwargs
         self._status['time'] = time.time()
 
@@ -220,6 +241,7 @@ class Node(object):
                 await self.restart_arduino()
                 await asyncio.sleep(1)
                 await self.home_core()
+                await self.send_command_raw("{enc1: 1}")
                 self.homed = True
                 print('%s Homed!' % self.name)
                 return

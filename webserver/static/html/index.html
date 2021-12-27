@@ -81,7 +81,7 @@
           {{error.details}}
         </td>
         <td>
-          <button class="btn btn-danger btn-sm" ng-click="clear_error(error)">Clear</button>
+          <button ng-show="!error.unclearable" class="btn btn-danger btn-sm" ng-click="clear_error(error)">Clear</button>
 
         </td>
 

@@ -51,7 +51,7 @@ class Dosing(Node):
     async def home_core(self):
         pass
 
-    async def create_feeding_loop(self, feeder, system, recipe):
+    async def create_feeding_loop(self, feeder, recipe):
         '''
 
         feeding_task
@@ -74,9 +74,9 @@ class Dosing(Node):
         self.shield = asyncio.Lock()
         self.buffer_empty_event = asyncio.Event()
         self.feeding_task = asyncio.create_task(
-            self.feeding_loop(feeder, system, recipe))
+            self.feeding_loop(feeder, recipe))
         self.motor_control_task = asyncio.create_task(
-            self.motor_control_loop(feeder, system, recipe))
+            self.motor_control_loop(feeder, recipe))
 
     async def terminate_feeding_loop(self, feeder):
         if self.feeding_task is None:
@@ -93,7 +93,7 @@ class Dosing(Node):
         self.motor_control_task = None
         self.feeding_task = None
 
-    async def feeding_loop(self, feeder, system, recipe):
+    async def feeding_loop(self, feeder, recipe):
         while True:
             print('aaaaaaaaaaaaaaaaaaaaaa')
             await self.set_valves([0])
@@ -135,7 +135,7 @@ class Dosing(Node):
                 await self.set_valves([1])
                 await asyncio.sleep(.4)
 
-    async def motor_control_loop(self, feeder, system, recipe):
+    async def motor_control_loop(self, feeder, recipe):
         motors_on = True
         await self.set_motors_highlevel(feeder, 'on')
         while True:

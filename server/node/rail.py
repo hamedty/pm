@@ -89,7 +89,7 @@ class Rail(Robot):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
-    async def rail_loop(self, system, recipe, feeder):
+    async def rail_loop(self, recipe, feeder):
         assert abs(self._status['r.posz'] - 250) < 1, 'Rail must be parked'
         self.rail_parked_event.set()
 
@@ -99,15 +99,15 @@ class Rail(Robot):
             self.rail_move_event.clear()
 
             # rail backward
-            await system.system_running.wait()
-            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE, system=system)
+            await self.system.system_running.wait()
+            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
 
             # wait for feeder
             await feeder.feeder_is_full_event.wait()
             feeder.feeder_is_full_event.clear()
 
             # change jacks to moving
-            await system.system_running.wait()
+            await self.system.system_running.wait()
             await self.set_valves([1, 0])
             await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
             await feeder.set_valves([None, 0])
@@ -116,8 +116,8 @@ class Rail(Robot):
             await asyncio.sleep(recipe.T_RAIL_JACK2)
 
             # rail forward
-            await system.system_running.wait()
-            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT, system=system)
+            await self.system.system_running.wait()
+            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
 
             # clear feeder
             feeder.feeder_is_empty_event.set()

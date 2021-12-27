@@ -191,7 +191,7 @@ class Station(Node):
         self.station_is_done_event.set()
         self.events['station_is_done_event'] = self.station_is_done_event
 
-    async def station_assembly_loop(self, recipe, system):
+    async def station_assembly_loop(self, recipe):
         while True:
             await self.set_valves([None, 0, 0, 1])
             await self.station_is_full_event.wait()
@@ -202,14 +202,14 @@ class Station(Node):
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
 
-            await system.system_running.wait()
+            await self.system.system_running.wait()
             if full:
-                await self.align_holder(recipe, system)
+                await self.align_holder(recipe)
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
             if full:
-                await system.system_running.wait()
-                await self.align_dosing(recipe, system)
+                await self.system.system_running.wait()
+                await self.align_dosing(recipe)
 
                 # # check vision correctness
                 # if self.ip_short in {109}:
@@ -217,12 +217,12 @@ class Station(Node):
                 #         'message': 'Ready. continue?',
                 #         'location_name': self.name,
                 #     }
-                #     error_clear_event = await system.register_error(error)
+                #     error_clear_event, error_id = await self.system.register_error(error)
                 #     await error_clear_event.wait()
                 # # must be done in rpi, temporarily here for debugging
 
-                await system.system_running.wait()
-                await self.assemble(recipe, system)
+                await self.system.system_running.wait()
+                await self.assemble(recipe)
 
             if not (full or empty):
                 error = {
@@ -232,16 +232,16 @@ class Station(Node):
                 }
                 print(error)
                 # await aioconsole.ainput(str(error))
-                error_clear_event = await system.register_error(error)
+                error_clear_event, error_id = await self.system.register_error(error)
                 await error_clear_event.wait()
             self.station_is_done_event.set()
 
-    async def clearance(self, system):
+    async def clearance(self):
         await self.station_is_done_event.wait()
         self.station_is_done_event.clear()
-        await self.verify_no_holder_no_dosing(system)
+        await self.verify_no_holder_no_dosing()
 
-    async def align_holder(self, recipe, system):
+    async def align_holder(self, recipe):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
@@ -253,7 +253,7 @@ class Station(Node):
             }
             print(error)
             # await aioconsole.ainput(str(error))
-            error_clear_event = await system.register_error(error)
+            error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
@@ -262,13 +262,13 @@ class Station(Node):
                 'steps': z2['steps_history'],
             }
             table = 'vision_retries'
-            system.mongo.write(table, data)
+            self.system.mongo.write(table, data)
 
-    async def align_dosing(self, recipe, system):
+    async def align_dosing(self, recipe):
         data = {}
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
-        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], system=system)
+        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
@@ -281,7 +281,7 @@ class Station(Node):
             }
             print(error)
             # await aioconsole.ainput(str(error))
-            error_clear_event = await system.register_error(error)
+            error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
@@ -290,9 +290,9 @@ class Station(Node):
                 'steps': z2['steps_history'],
             }
             table = 'vision_retries'
-            system.mongo.write(table, data)
+            self.system.mongo.write(table, data)
 
-    async def verify_no_holder_no_dosing(self, system):
+    async def verify_no_holder_no_dosing(self):
         while True:
             res = await self.send_command({'verb': 'detect_vision', 'object': 'no_holder_no_dosing'})
             if res[1]['no_holder_no_dosing']:
@@ -305,11 +305,11 @@ class Station(Node):
                 'details': res,
             }
             print(error)
-            error_clear_event = await system.register_error(error)
+            error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
         await self.set_valves([None] * 3 + [1])
 
-    async def verify_dosing_sit_right(self, recipe, system):
+    async def verify_dosing_sit_right(self, recipe):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
         print(res)
         if not res[1]['sit_right']:
@@ -320,10 +320,10 @@ class Station(Node):
             }
             print(error)
             # await aioconsole.ainput(str(error))
-            error_clear_event = await system.register_error(error)
+            error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
 
-    async def assemble(self, recipe, system):
+    async def assemble(self, recipe):
         data = {}
         # go to aliging location
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
@@ -446,7 +446,7 @@ class Station(Node):
 
         # Verification
         # H_VERIFICATION = self.hw_config['H_PRE_DANCE'] - 80
-        # await self.G1(z=H_VERIFICATION, feed=data['FEED_DELIVER'], system=system)
+        # await self.G1(z=H_VERIFICATION, feed=data['FEED_DELIVER'])
         # # take picture and scp to dump folder
         # await self.send_command({
         #     'verb': 'dump_frame',
@@ -456,5 +456,5 @@ class Station(Node):
         #     '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
 
         # deliver
-        await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'], system=system)
+        await self.G1(z=data['H_DELIVER'], feed=data['FEED_DELIVER'])
         await self.set_valves([None, None, None, 1])

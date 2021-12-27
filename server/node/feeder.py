@@ -219,7 +219,7 @@ class Feeder(Node):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
-    async def feeding_loop(self, system, recipe):
+    async def feeding_loop(self, recipe):
         await self.feeder_initial_start_event.wait()
 
         # if self.is_at_loc(z=recipe.FEEDER_Z_DELIVER):
@@ -238,7 +238,7 @@ class Feeder(Node):
             ''' Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
                 await self.set_valves([None, 0])
-                await self.G1(z=recipe.FEEDER_Z_IDLE, feed=recipe.FEED_FEEDER_COMEBACK, system=system)
+                await self.G1(z=recipe.FEEDER_Z_IDLE, feed=recipe.FEED_FEEDER_COMEBACK)
 
                 holder_mask = [1] * recipe.N
                 dosing_mask = [
@@ -254,15 +254,15 @@ class Feeder(Node):
                     'jerk_feed': recipe.JERK_FEEDER_FEED,
                     'jerk_idle': recipe.JERK_FEEDER_DELIVER,
                 }
-                await system.system_running.wait()
+                await self.system.system_running.wait()
                 await self.send_command(command)
                 self.feeder_finished_command_event.set()
 
             ''' Deliver '''
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
-            await system.system_running.wait()
-            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER, system=system)
+            await self.system.system_running.wait()
+            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
 
             await self.set_motors((6, 100))
 

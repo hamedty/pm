@@ -19,33 +19,33 @@ async def main(system, ALL_NODES):
     ''' Initial Condition '''
     await system.system_running.wait()
 
-    await do_nodes(system, robots, lambda r: r.set_valves([0] * 10), simultanously=False)
-    await do_nodes(system, stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))
+    await do_nodes(robots, lambda r: r.set_valves([0] * 10))
+    await do_nodes(stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
 
     ''' Initial Condition '''
     # feeder
     feeder.init_events()
-    asyncio.create_task(feeder.feeding_loop(system, recipe))
+    asyncio.create_task(feeder.feeding_loop(recipe))
 
     # dosing feeder
-    await dosing_feeder.create_feeding_loop(feeder, system, recipe)
+    await dosing_feeder.create_feeding_loop(feeder, recipe)
 
     # rail
     rail.init_events()
-    asyncio.create_task(rail.rail_loop(system, recipe, feeder))
+    asyncio.create_task(rail.rail_loop(recipe, feeder))
 
     # stations
     stations_loop = []
     for station in stations:
         station.init_events()
         task = asyncio.create_task(
-            station.station_assembly_loop(recipe, system))
+            station.station_assembly_loop(recipe))
         stations_loop.append(task)
 
     ''' Fill Line '''
-    # await feeder_fill_line(system, recipe, feeder, rail)
+    # await feeder_fill_line(recipe, feeder, rail)
     feeder.feeder_initial_start_event.set()
 
     ''' Main Loop'''
@@ -60,19 +60,19 @@ async def main(system, ALL_NODES):
         t0 = time.time()
 
         # do robots
-        await do_nodes(system, robots, lambda r: r.do_robot(recipe, system), simultanously=True)
+        await do_nodes(robots, lambda r: r.do_robot(recipe))
 
         # command rail to do the next cycle
         rail.rail_move_event.set()
 
         # park robots
-        await do_nodes(system, robots, lambda r: r.do_robot_park(recipe, system), simultanously=True)
+        await do_nodes(robots, lambda r: r.do_robot_park(recipe))
 
     ''' Clean Up '''
     rail.system_stop_event.set()
     feeder.system_stop_event.set()
 
-    await asyncio.gather(*[station.clearance(system) for station in stations])
+    await asyncio.gather(*[station.clearance() for station in stations])
     for task in stations_loop:
         task.cancel()
 
@@ -81,55 +81,40 @@ async def main(system, ALL_NODES):
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
 
-async def home_all_nodes(system, feeder, rail, robots, stations):
+async def home_all_nodes(feeder, rail, robots, stations):
     await system.system_running.wait()
     feeder_home = asyncio.create_task(feeder.home())
 
     await system.system_running.wait()
-    await do_nodes(system, stations, lambda s: s.home())
+    await do_nodes(stations, lambda s: s.home())
 
     await system.system_running.wait()
-    await do_nodes(system, robots, lambda r: r.home())
+    await do_nodes(robots, lambda r: r.home())
 
     await system.system_running.wait()
     await rail.home()
 
     await system.system_running.wait()
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6, system=system)
+    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
     await feeder_home
 
 
-async def do_nodes(system, stations, func, simultanously=True):
-    if simultanously:
-        res = await asyncio.gather(*[func(station) for station in stations], return_exceptions=True)
-        for i in range(len(stations)):
-            if isinstance(res[i], Exception):
-                error = {
-                    'message': 'error while running for %dth' % (i + 1),
-                    'location_name': stations[i].name,
-                    'details': res[i],
-                }
-                print(error)
-                # await aioconsole.ainput(str(error))
-                error_clear_event = await system.register_error(error)
-                await error_clear_event.wait()
-    else:
-        for station in stations:
-            try:
-                await func(station)
-            except:
-                error = {
-                    'message': 'error - exception raised',
-                    'location_name': station.name,
-                    'details': traceback.format_exc(),
-                }
-                print(error)
-                # await aioconsole.ainput(str(error))
-                error_clear_event = await system.register_error(error)
-                await error_clear_event.wait()
+async def do_nodes(stations, func):
+    res = await asyncio.gather(*[func(station) for station in stations], return_exceptions=True)
+    for i in range(len(stations)):
+        if isinstance(res[i], Exception):
+            error = {
+                'message': 'error while running for %dth' % (i + 1),
+                'location_name': stations[i].name,
+                'details': res[i],
+            }
+            print(error)
+            # await aioconsole.ainput(str(error))
+            error_clear_event, error_id = await system.register_error(error)
+            await error_clear_event.wait()
 
 
-async def feeder_fill_line(system, recipe, feeder, rail):
+async def feeder_fill_line(recipe, feeder, rail):
     masks = [
         [0] * 4 + [1],
         [0] * 4 + [1],

@@ -36,6 +36,7 @@ class System(object):
 
     async def connect(self):
         for node in self.nodes:
+            node.set_system(self)
             asyncio.create_task(self.setup_node(node))
 
     async def setup_node(self, node):
@@ -53,7 +54,7 @@ class System(object):
             # self.system_running.clear()
             self.errors[error_id] = error
             self.errors_events[error_id] = error_event
-        return error_event
+        return error_event, error_id
 
     async def clear_error(self, error_id):
         async with self.error_lock:
