@@ -1,22 +1,27 @@
-feeder hang (G1 bug)
+feed hold exit strategies:
+  1- resume (1- update G53 2- G1 to location in hold 3- resume)
+  2- control indivisual encoder threshold on fly
+  3- auto resume budget based
+kaar bazri - run holder motor in reverse
 dosing active ROI
+running out of connection
 main x 2 doesnt work
 extract dosing feeder params to recepie
 shlvar ro bekesh bala
-optimize feeder gcodes
-G1 optimization - optimize robot move
-robot / rail / station gcode optimization
+optimize
+  feeder gcodes
+  robot moves / commands
+  rail
+  station
 verify correct press
 feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
-status request sent for no reason
 if nodes downs, UI must react
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 control feeder motors with RPI
-control holder DC motor with PWM instead of timer
 log collection framework
-need to feed 16 dosing in begining
 vision debug frame work
+need to feed 16 dosing in begining
 dosing feeder investigate
 HMI Khoshgel
 *************************************************************************

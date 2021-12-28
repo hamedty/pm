@@ -110,7 +110,7 @@ async def do_nodes(stations, func):
             }
             print(error)
             # await aioconsole.ainput(str(error))
-            error_clear_event, error_id = await system.register_error(error)
+            error_clear_event, error_id = await stations[i].system.register_error(error)
             await error_clear_event.wait()
 
 

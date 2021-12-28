@@ -20,10 +20,10 @@ class Robot(Node):
             'am': 1,  # standard axis mode
             'vm': 60000,  # max speed
             'fr': 60000,  # max feed rate
-            'tn': 0,  # min travel
-            'tm': 400,  # max travel
             'jm': 900,  # max jerk
             'jh': 1000,  # hominzg jerk
+            'tn': 0,  # min travel
+            'tm': 400,  # max travel
             'hi': 1,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
@@ -50,10 +50,10 @@ class Robot(Node):
             'am': 1,  # standard axis mode
             'vm': 20000,  # max speed
             'fr': 800000,  # max feed rate
-            'tn': 0,  # min travel
-            'tm': 100,  # max travel
             'jm': 7000,  # max jerk
             'jh': 8000,  # homing jerk
+            'tn': 0,  # min travel
+            'tm': 100,  # max travel
             'hi': 3,  # home switch
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
@@ -72,6 +72,9 @@ class Robot(Node):
         ('sv', 2),  # Status report enabled
         ('sr', {'uda0': True, 'posx': True, 'posy': True, 'stat': True}),
         ('si', 250),  # also every 250ms
+
+        ('jt', 1.2),
+        ('ct', 2),
     ]
 
     hw_config_base = {
@@ -141,12 +144,24 @@ class Robot(Node):
         T_GRAB_IN = 0.5
 
         await self.system.system_running.wait()
-        await self.G1(y=Y_GRAB_IN_UP_1, feed=recipe.FEED_Y_UP)
-        await self.G1(x=X_GRAB_IN, feed=recipe.FEED_X)
-        await self.G1(y=Y_GRAB_IN_DOWN, feed=recipe.FEED_Y_DOWN)
+
+        # await self.G1(y=Y_GRAB_IN_UP_1, feed=recipe.FEED_Y_UP)
+        # await self.G1(x=X_GRAB_IN, feed=recipe.FEED_X)
+        # await self.G1(y=Y_GRAB_IN_DOWN, feed=recipe.FEED_Y_DOWN)
+
+        await self.send_command_raw(f'''
+            G1 Y{Y_GRAB_IN_UP_1} F{recipe.FEED_Y_UP}
+            G1 X{X_GRAB_IN} F{recipe.FEED_X}
+            G1 Y{Y_GRAB_IN_DOWN} F{recipe.FEED_Y_DOWN}
+        ''')
+
         await self.set_valves_grab_infeed()
         await asyncio.sleep(T_GRAB_IN)
-        await self.G1(y=Y_GRAB_IN_UP_2, feed=recipe.FEED_Y_UP)
+
+        # await self.G1(y=Y_GRAB_IN_UP_2, feed=recipe.FEED_Y_UP)
+        await self.send_command_raw(f'''
+            G1 Y{Y_GRAB_IN_UP_2} F{recipe.FEED_Y_UP}
+        ''')
 
         '''EXCHANGE'''
         X_CAPPING = self.hw_config['X_CAPPING']
