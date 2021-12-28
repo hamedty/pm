@@ -101,6 +101,7 @@ class Robot(Node):
             'posx': ['enc2', 120.0, 1.0, 5.0],
             'posy': ['enc1', 120.0, 1.0, 5.0],
         },
+        'eac': [600, 600],
         'Y_GRAB_IN_UP_2': 64,
         'X_CAPPING': 60,
     }

@@ -60,6 +60,7 @@ class Rail(Robot):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 64.0, 1.0, 5.0],
         },
+        'eac': [],
     }
 
     async def set_valves(self, values):

@@ -104,6 +104,7 @@ class Station(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 300.0, .7, 5.0],
         },
+        'eac': [500],
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,

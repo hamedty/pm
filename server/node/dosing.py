@@ -39,7 +39,7 @@ class Dosing(Node):
             'pusher': 6,
             'conveyor_direction': 7,
         },
-
+        'eac': [],
     }
 
     def __init__(self, *args, **kwargs):

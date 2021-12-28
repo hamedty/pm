@@ -1,7 +1,8 @@
 feed hold exit strategies:
-  2- control indivisual encoder threshold on fly
+  1- use it (deploy in code)
+  2- add feeder and rail
   3- auto resume budget based
-  4- only ran once
+  4- only ran clear once
 kaar bazri - run holder motor in reverse
 dosing active ROI
 running out of connection

@@ -231,7 +231,7 @@ class Node(object):
         if self.errors['holded']['status'] == 'clearing':
             return
         self.errors['holded']['status'] = 'clearing'
-        await self.send_command_raw('{enc1: 0}', wait_start=[], wait_completion=False)
+        await self.set_eac(eac1=0, eac2=0, wait_start=[], wait_completion=False)
         # detect axis error
         enc_configs = self.hw_config['encoders']
         for axis_key in enc_configs:
@@ -261,7 +261,7 @@ class Node(object):
         # resume
         await self.send_command_raw('~', wait_start=[], wait_completion=False)
         await asyncio.sleep(.1)
-        await self.send_command_raw('{enc1: 1}', wait_start=[], wait_completion=False)
+        await self.set_eac(*self.hw_config['eac'], wait_start=[], wait_completion=False)
         await asyncio.sleep(.1)
 
         del self.errors['holded']
@@ -285,13 +285,19 @@ class Node(object):
                 await self.restart_arduino()
                 await asyncio.sleep(1)
                 await self.home_core()
-                await self.send_command_raw("{enc1: 1}")
+                await self.set_eac(*self.hw_config['eac'])
                 self.homed = True
                 print('%s Homed!' % self.name)
                 return
             except:
                 print('repeating home - homming failed', self.name)
         raise Exception('Homing Failed')
+
+    async def set_eac(self, eac1=None, eac2=None, **kwargs):
+        if eac1 is not None:
+            await self.send_command_raw(f"{{eac1: {eac1}}}", **kwargs)
+        if eac2 is not None:
+            await self.send_command_raw(f"{{eac2: {eac2}}}", **kwargs)
 
     def get_loc(self, axis):
         # axis in {'x', 'y', 'z'}

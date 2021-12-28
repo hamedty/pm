@@ -130,6 +130,7 @@ class Feeder(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 120.0, 1.0, 1000.0],
         },
+        'eac': [],
     }
 
     async def home_core(self):
