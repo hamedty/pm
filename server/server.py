@@ -28,6 +28,7 @@ class System(object):
         self.system_stop.clear()
         self.errors = {}
         self.errors_events = {}
+        self.errors_cb = {}
         self.error_lock = asyncio.Lock()
 
         # mongo db access point
@@ -44,7 +45,7 @@ class System(object):
         asyncio.create_task(node.loop())
         node.boot = True
 
-    async def register_error(self, error):
+    async def register_error(self, error, error_cb=None):
         error_id = str(uuid.uuid1())
         error_event = asyncio.Event()
         error_event.clear()
@@ -54,10 +55,14 @@ class System(object):
             # self.system_running.clear()
             self.errors[error_id] = error
             self.errors_events[error_id] = error_event
+            self.errors_cb[error_id] = error_cb
         return error_event, error_id
 
     async def clear_error(self, error_id):
         async with self.error_lock:
+            clear_cb = self.errors_cb[error_id]
+            if clear_cb:
+                await clear_cb()
             del self.errors[error_id]
             self.errors_events[error_id].set()
             del self.errors_events[error_id]

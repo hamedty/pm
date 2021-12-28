@@ -1,7 +1,7 @@
 feed hold exit strategies:
-  1- resume (1- update G53 2- G1 to location in hold 3- resume)
   2- control indivisual encoder threshold on fly
   3- auto resume budget based
+  4- only ran once
 kaar bazri - run holder motor in reverse
 dosing active ROI
 running out of connection

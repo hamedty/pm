@@ -200,27 +200,71 @@ class Node(object):
         return 'enc1' in self._status
 
     async def set_status(self, **kwargs):
-        if 'r.stat' in kwargs:
-            r_stat = kwargs['r.stat']
-            if r_stat == 6:
-                if 'holded' not in self.errors:
-                    error = {
-                        'message': 'Station Holded',
-                        'location_name': self.name,
-                        'details': 'Probably a collision detected',
-                        'unclearable': True,
-                    }
-                    print(error)
-                    _, error_id = await self.system.register_error(error)
-                    self.errors['holded'] = error_id
-            else:
-                if 'holded' in self.errors:
-                    error_id = self.errors['holded']
-                    await self.system.clear_error(error_id)
-                    del self.errors['holded']
-
         self._status = kwargs
         self._status['time'] = time.time()
+
+        if 'r.stat' in kwargs:
+            if kwargs['r.stat'] == 6:
+                await self.raise_hold_error()
+            # elif self.is_hold_error_raised():
+            #     await self.clear_hold_error()
+
+    async def raise_hold_error(self):
+        if self.is_hold_error_raised():
+            return
+        self.errors['holded'] = {'status': 'raising'}
+        error = {
+            'message': 'Station Holded',
+            'location_name': self.name,
+            'details': 'Probably a collision detected',
+        }
+        clear_cb = self.clear_hold_error
+        print(error)
+        _, error_id = await self.system.register_error(error, clear_cb)
+        self.errors['holded']['error_id'] = error_id
+        self.errors['holded']['status'] = 'raised'
+
+    def is_hold_error_raised(self):
+        return 'holded' in self.errors
+
+    async def clear_hold_error(self):
+        if self.errors['holded']['status'] == 'clearing':
+            return
+        self.errors['holded']['status'] = 'clearing'
+        await self.send_command_raw('{enc1: 0}', wait_start=[], wait_completion=False)
+        # detect axis error
+        enc_configs = self.hw_config['encoders']
+        for axis_key in enc_configs:
+            # axis_key = 'posx'
+            axes = axis_key[-1].upper()
+            feedrate = 1000
+            # encoder key, ratio, telorance_soft, telorance_hard
+            # 'posx': ['enc2', 120.0, 1.0, 5.0],
+            # 'posy': ['enc1', 120.0, 1.0, 5.0],
+            enc_key, ratio, telorance, _ = enc_configs[axis_key]
+            enc_value = self._status[enc_key]
+            enc_location = float(enc_value) / ratio
+            g2_location = self._status['r.' + axis_key]
+            error = abs(enc_location - g2_location)
+            if error < telorance:
+                continue
+            message = f'Correction: {self.name} Axes: {axes} From: {enc_location:.2f} To: {g2_location:.2f}'
+            print(message)
+            # update g2core location
+            await self.send_command_raw(f'{{gc2:"G28.3 {axes}{enc_location}"}}', wait_start=[], wait_completion=False)
+            await asyncio.sleep(.1)
+            # g1 to g2core_old location
+            await self.send_command_raw(f'{{gc2:"G1 {axes}{g2_location} F{feedrate}"}}', wait_start=[], wait_completion=False)
+            sleep_time = error / feedrate * 60
+            await asyncio.sleep(sleep_time + .3)
+
+        # resume
+        await self.send_command_raw('~', wait_start=[], wait_completion=False)
+        await asyncio.sleep(.1)
+        await self.send_command_raw('{enc1: 1}', wait_start=[], wait_completion=False)
+        await asyncio.sleep(.1)
+
+        del self.errors['holded']
 
     def get_status(self):
         data = {'connected': self.connection_pool.ready(), 'age': 0}
