@@ -70,8 +70,8 @@ class Feeder(Node):
         (3, {
             'ma': 2,  # map to Z
             'sa': 1.8,  # step angle 1.8
-            'tr': 20,  # travel per rev = 5mm
-            'mi': 2,  # microstep = 4
+            'tr': 20,  # travel per rev = 20mm
+            'mi': 2,  # microstep = 2
             'po': 1,  # direction
         }),
         ('z', {
@@ -130,7 +130,7 @@ class Feeder(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 120.0, 1.0, 1000.0],
         },
-        'eac': [],
+        'eac': [600],
     }
 
     async def home_core(self):

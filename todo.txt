@@ -1,8 +1,6 @@
 feed hold exit strategies:
-  1- use it (deploy in code)
-  2- add feeder and rail
   3- auto resume budget based
-  4- only ran clear once
+  4- protect clear to only be ran once
 kaar bazri - run holder motor in reverse
 dosing active ROI
 running out of connection
