@@ -211,28 +211,16 @@ class Station(Node):
             if full:
                 await self.system.system_running.wait()
                 await self.align_dosing(recipe)
-
-                # # check vision correctness
-                # if self.ip_short in {109}:
-                #     error = {
-                #         'message': 'Ready. continue?',
-                #         'location_name': self.name,
-                #     }
-                #     error_clear_event, error_id = await self.system.register_error(error)
-                #     await error_clear_event.wait()
-                # # must be done in rpi, temporarily here for debugging
-
                 await self.system.system_running.wait()
                 await self.assemble(recipe)
 
             if not (full or empty):
                 error = {
-                    'message': 'Not all elements are present in the station. Remove all to continue.',
+                    'message': 'هولدر یا دوزینگ وجود ندارد. استیشن را خالی کنید.',
                     'location_name': self.name,
                     'details': check_fullness,
                 }
                 print(error)
-                # await aioconsole.ainput(str(error))
                 error_clear_event, error_id = await self.system.register_error(error)
                 await error_clear_event.wait()
             self.station_is_done_event.set()
@@ -248,7 +236,7 @@ class Station(Node):
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             error = {
-                'message': 'Aligining failed for holder. Align to continue',
+                'message': 'هولدر را دستی تنظیم کنید.',
                 'location_name': self.name,
                 'details': (z1, z2),
             }
@@ -274,9 +262,10 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, None])
+            await self.set_valves([0, None, None, 0])
+            await self.G1(z=100, feed=5000)
             error = {
-                'message': 'Aligining failed for dosing. Align to continue',
+                'message': 'دوزینگ را دستی تنظیم کنید.',
                 'location_name': self.name,
                 'details': (z1, z2),
             }
@@ -301,7 +290,7 @@ class Station(Node):
 
             await self.set_valves([None] * 3 + [0])
             error = {
-                'message': 'no-holder-no-dosing failed',
+                'message': 'استیشن باید خالی باشد. خالی نیست!',
                 'location_name': self.name,
                 'details': res,
             }
@@ -315,7 +304,7 @@ class Station(Node):
         print(res)
         if not res[1]['sit_right']:
             error = {
-                'message': 'verify_dosing_sit_right failed',
+                'message': 'دوزینگ بد وارد شده!',
                 'location_name': self.name,
                 'details': res,
             }

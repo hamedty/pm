@@ -187,7 +187,7 @@ class Node(object):
             if success:
                 return success, line
             error = {
-                'message': 'G1 Failed',
+                'message': 'خطا در حرکت - احتمال تصادف',
                 'location_name': self.name,
                 'details': line,
             }
@@ -214,9 +214,9 @@ class Node(object):
             return
         self.errors['holded'] = {'status': 'raising'}
         error = {
-            'message': 'Station Holded',
+            'message': 'خطا در حرکت',
             'location_name': self.name,
-            'details': 'Probably a collision detected',
+            'details': 'احتمالا تصادف رخ داده!',
         }
         clear_cb = self.clear_hold_error
         print(error)

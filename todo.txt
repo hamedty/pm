@@ -1,13 +1,12 @@
-farsi sazi error ha
-dosing active ROI
 main x 2 doesnt work
-shlvar ro bekesh bala
+dosing active ROI
 optimize
   feeder gcodes
   robot moves / commands
   rail
   station
 get rid of our own G1
+shlvar ro bekesh bala
 -------------------------
 running out of connection
 extract dosing feeder params to recepie
