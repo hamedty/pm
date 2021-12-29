@@ -4,6 +4,7 @@ import time
 import aioconsole
 
 CONVEYOR_SPEED = 5
+LIFT_SPEED = 55
 
 
 class Dosing(Node):
@@ -95,7 +96,6 @@ class Dosing(Node):
 
     async def feeding_loop(self, feeder, recipe):
         while True:
-            print('aaaaaaaaaaaaaaaaaaaaaa')
             await self.set_valves([0])
 
             # wait for optic sensor input=1
@@ -108,7 +108,6 @@ class Dosing(Node):
                     # run motor in reverse
                     await self.run_motor_in_reverse(reverse_time=2)
                     timeout = 6
-            print('bbbbbbbbbbbbbbbbbb')
 
             # wait for proximity_input value established
             await asyncio.sleep(.030)
@@ -155,7 +154,7 @@ class Dosing(Node):
 
     async def set_motors_highlevel(self, feeder, status):
         if status == 'on':
-            await asyncio.shield(self.set_motors(feeder, (5, 50), (9, CONVEYOR_SPEED)))
+            await asyncio.shield(self.set_motors(feeder, (5, LIFT_SPEED), (9, CONVEYOR_SPEED)))
         elif status == 'off':
             await asyncio.shield(self.set_motors(feeder, (5, 0), (9, 0)))
         elif status == 'standby':

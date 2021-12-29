@@ -58,23 +58,24 @@ async def feeder_process(arduino, G1, command):
         {z:{jm:%d}}
         ''' % JERK_FEED)
 
-    # Motors
-    # if any(dosing_mask):
-    #     arduino._send_command("{m5: 75}")
     if any(holder_mask):
         arduino._send_command("{m6: 15}")  # cartridge conveyor
 
+    # holder motors on, air pusher on
     arduino._send_command("{m2: 4, m3: 4, out10: 1}")
 
     holder_shift_register = 0
     dosing_gate_status = 0
 
     for i in range(N):
+        await wait_for_inputs(arduino, holder_mask=1, holder_value=0)
         # Gate Open
         if holder_mask[i]:
+            # holder motors and gate. Firmware automatically reduces holder motor speed (special functions)
             arduino._send_command("{out7: 1, m2: 4, m3: 4}")
+
         if dosing_mask[i] and not dosing_gate_status:
-            arduino._send_command("{out11: 1}")
+            arduino._send_command("{out11: 1}")  # dosing gate
             dosing_gate_status = 1
 
         # Grab
@@ -83,7 +84,7 @@ async def feeder_process(arduino, G1, command):
 
         # Wait for holder
         current_z = FEEDER_OFFSET + 25 * i
-        await wait_for_inputs(arduino, holder_mask[i], dosing_mask[i], current_z)
+        await wait_for_inputs(arduino, holder_mask=holder_mask[i], dosing_mask=dosing_mask[i])
 
         # Close Gate
         if not dosing_mask[i + 1] and dosing_gate_status:
@@ -161,16 +162,18 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     await arduino.wait_for_command_id(command_id)
 
 
-async def wait_for_inputs(arduino, holder, dosing, current_z):
+async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_value=1, dosing_value=1):
     # print('waiting for holder')
-    if holder:
+    if holder_mask:
         value = False
         while not value:
-            _, value = await arduino.read_metric('in5', 'r.in5')
+            _, read_value = await arduino.read_metric('in5', 'r.in5')
+            value = (read_value == holder_value)
 
     # print('waiting for dosing')
-    if dosing:
+    if dosing_mask:
         value = False
         while not value:
-            _, value = await arduino.read_metric('in6', 'r.in6')
+            _, read_value = await arduino.read_metric('in6', 'r.in6')
+            value = (read_value == dosing_value)
     # print('dosing done')

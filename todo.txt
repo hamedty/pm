@@ -1,8 +1,6 @@
-kaar bazri - run holder motor in reverse
+farsi sazi error ha
 dosing active ROI
-running out of connection
 main x 2 doesnt work
-extract dosing feeder params to recepie
 shlvar ro bekesh bala
 optimize
   feeder gcodes
@@ -10,6 +8,9 @@ optimize
   rail
   station
 get rid of our own G1
+-------------------------
+running out of connection
+extract dosing feeder params to recepie
 feed hold exit strategies: A- auto resume budget based B- protect clear to only be ran once
 verify correct press
 feeder stop motors if didn't feed for a while
@@ -23,21 +24,3 @@ need to feed 16 dosing in begining
 dosing feeder investigate
 HMI Khoshgel
 *************************************************************************
-
-{
-  "connected": true,
-  "message": "usb port opened",
-  "f.2": 0,
-  "enc1": -97,
-  "r.posz": 16,
-  "r.stat": 3,
-  "er.st": 203,
-  "r.in5": 1,
-  "r.in6": 0,
-  "stat_code": 0,
-  "feeder_is_full_event": false,
-  "feeder_is_empty_event": false,
-  "feeder_rail_is_parked_event": true,
-  "feeder_finished_command_event": true,
-  "feeder_initial_start_event": true
-}
