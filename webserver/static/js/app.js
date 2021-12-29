@@ -103,7 +103,7 @@ app.controller('app_controller', function($scope, ws) {
       form: eval(data),
       selected_nodes: $scope.nodes.filter(x => x.selected).map(x => x.name),
     }
-    // $scope.nodes.forEach(x => x.selected = false);
+    $scope.nodes.forEach(x => x.selected = false);
     console.log(data)
     ws.get(data);
   }

@@ -10,6 +10,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors(
         (6, 300),  # Cartridge Conveyor
+        (8, 20),  # Cartridge Conveyor
     )
 
 

@@ -1,6 +1,3 @@
-feed hold exit strategies:
-  3- auto resume budget based
-  4- protect clear to only be ran once
 kaar bazri - run holder motor in reverse
 dosing active ROI
 running out of connection
@@ -12,6 +9,8 @@ optimize
   robot moves / commands
   rail
   station
+get rid of our own G1
+feed hold exit strategies: A- auto resume budget based B- protect clear to only be ran once
 verify correct press
 feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
