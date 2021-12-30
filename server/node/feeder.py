@@ -258,7 +258,8 @@ class Feeder(Node):
                 await self.system.system_running.wait()
                 await self.send_command(command)
                 self.feeder_finished_command_event.set()
-
+            t1 = time.time()
+            print(f'Feeder Fill Loop: {(t1-t0):.1f}')
             ''' Deliver '''
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()

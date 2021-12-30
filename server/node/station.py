@@ -233,7 +233,7 @@ class Station(Node):
     async def align_holder(self, recipe):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES}, assert_success=False)
-        print(self.name, z1, z2)
+        # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             error = {
                 'message': 'هولدر را دستی تنظیم کنید.',
@@ -260,7 +260,7 @@ class Station(Node):
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
-        print(self.name, z1, z2)
+        # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             await self.set_valves([0, None, None, 0])
             await self.G1(z=100, feed=5000)
@@ -301,7 +301,6 @@ class Station(Node):
 
     async def verify_dosing_sit_right(self, recipe):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
-        print(res)
         if not res[1]['sit_right']:
             error = {
                 'message': 'دوزینگ بد وارد شده!',

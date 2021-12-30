@@ -109,8 +109,8 @@ async def pickup_rail(system, ALL_NODES):
 async def holder_feeder_forever(system, ALL_NODES):
     await system.system_running.wait()
     while system.system_running.is_set():
-        await holder_feeder(ALL_NODES)
-        await feeder_handover_to_rail(ALL_NODES)
+        await holder_feeder(system, ALL_NODES)
+        await feeder_handover_to_rail(system, ALL_NODES)
 
 
 async def holder_feeder(system, ALL_NODES):

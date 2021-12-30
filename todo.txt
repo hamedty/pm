@@ -1,5 +1,3 @@
-main x 2 doesnt work
-dosing active ROI
 optimize
   feeder gcodes
   robot moves / commands
@@ -7,6 +5,7 @@ optimize
   station
 get rid of our own G1
 shlvar ro bekesh bala
+dosing active ROI
 -------------------------
 running out of connection
 extract dosing feeder params to recepie
@@ -22,4 +21,3 @@ vision debug frame work
 need to feed 16 dosing in begining
 dosing feeder investigate
 HMI Khoshgel
-*************************************************************************

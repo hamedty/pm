@@ -113,6 +113,7 @@ class System(object):
             await asyncio.sleep(.1)
 
     async def script_wrapper_always(self, func=None):
+        self.system_stop.clear()
         if func is None:
             return
         await func(self, ALL_NODES)

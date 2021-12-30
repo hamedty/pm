@@ -72,7 +72,8 @@ async def feeder_process(arduino, G1, command):
         # Gate Open
         if holder_mask[i]:
             # holder motors and gate. Firmware automatically reduces holder motor speed (special functions)
-            arduino._send_command("{out7: 1, m2: 4, m3: 4}")
+            # arduino._send_command("{out7: 1, m2: 4, m3: 4}")
+            arduino._send_command("{out7: 1}")
 
         if dosing_mask[i] and not dosing_gate_status:
             arduino._send_command("{out11: 1}")  # dosing gate
@@ -100,6 +101,8 @@ async def feeder_process(arduino, G1, command):
             await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': FEED_FEED, 'correct_initial': True})
             arduino.send_command('{out1: 0}')
             await asyncio.sleep(.1)  # wait to release microswitch holder
+
+    arduino._send_command("{m2: 30, m3: 30}")
 
     arduino._send_command('G1 Y10 F60000')
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
