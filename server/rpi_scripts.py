@@ -8,9 +8,11 @@ HOLDER_ARDUINO_INDEX = 2
 '''
     m1 (10): holder sequencer - on and off (jack)
     m2, m3: holder pusher motors
-    m4, m7: holder elevator and conveyor
+    m4: holder elevator
     m5, m9: dosing feeder motors
-    m6, m8: reserve
+    m6: cartridge conveyor
+    m7: holder conveyor
+    m8: cartridge randomizer
 
     out1: holder microswitch lock
     out2: comb
@@ -55,7 +57,7 @@ async def feeder_process(arduino, G1, command):
     initial_z = FEEDER_OFFSET
     arduino._send_command('''
         {out2: 1}
-        {z:{jm:%d}}
+        ;{z:{jm:%d}}
         ''' % JERK_FEED)
 
     if any(holder_mask):
@@ -105,7 +107,7 @@ async def feeder_process(arduino, G1, command):
     arduino._send_command("{m2: 30, m3: 30}")
 
     arduino._send_command('G1 Y10 F60000')
-    arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
+    # arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
 
     # # Motors
     # if any(holder_mask):
@@ -116,7 +118,7 @@ async def cartridge_grab(arduino):
     # rotate to upstream + Vacuum + bring jack down
     arduino._send_command("{out9: 1}")
     arduino._send_command('''
-        G1 Y100 F60000
+        G1 Y101 F60000
         M100.1 ({out13: 1})
         ''')
     await asyncio.sleep(.24)
@@ -130,8 +132,8 @@ async def cartridge_grab(arduino):
     await asyncio.sleep(.1)
 
     # Cartridge Pusher back
-    arduino._send_command("{out4: 0}")  # pull cartridge pusher back
-    await asyncio.sleep(.02)
+    # arduino._send_command("{out4: 0}")  # pull cartridge pusher back
+    # await asyncio.sleep(.02)
 
 
 async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
@@ -143,12 +145,14 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
         M100 ({uda0:"0x%x"})
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
+    arduino._send_command("{}")  # pull cartridge pusher back
+
     await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': feed, 'correct_initial': True})
 
     command_id = arduino.get_command_id()
     command_raw = '''
-        ; release microswitch holder (out1) / hug (out6)
-        M100 ({out1: 0, out6: 1})
+        ; out1: release microswitch holder / out6: hug / out4: cartridge pusher back
+        {out: {1:0,6:1,4:0}}
 
         ; put in cartridge
         G38.2 Y-100 F2000

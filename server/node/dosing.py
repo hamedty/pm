@@ -109,15 +109,9 @@ class Dosing(Node):
                     await self.run_motor_in_reverse(reverse_time=2)
                     timeout = 6
 
-            # wait for proximity_input value established
-            await asyncio.sleep(.030)
-            confidence = 0
-            while True:
-                confidence, proximity_input = await self.read_proximity()
-                if (confidence > .6):
-                    break
-                await asyncio.sleep(.15)
-            await self.set_valves([None, proximity_input])
+            # detect direction
+            direction = await self.detect_direction()
+            await self.set_valves([None, direction])
 
             # wait for buffer to be free
             self.buffer_full_time = time.time()
@@ -194,14 +188,29 @@ class Dosing(Node):
         await asyncio.sleep(.3)
         await self.set_motors(None, (9, CONVEYOR_SPEED))
 
-    async def read_proximity(self):
+    async def detect_direction(self):
+        T_FIRST_READ = .030  # wait for proximity_input value established
+        N_READ_COUNT = 30
+        T_INTER_READ = .006
+        # wait for proximity_input value established
+        await asyncio.sleep(T_FIRST_READ)
+
+        while True:
+            confidence, proximity_input = await self.read_proximity(n=N_READ_COUNT, delay=T_INTER_READ)
+            if (confidence > .6):
+                break
+            await asyncio.sleep(.15)
+
+        return proximity_input
+
+    async def read_proximity(self, n, delay):
         read_out = []
-        for i in range(30):
+        for i in range(n):
             proximity_input = await self.read_metric('in2')
             read_out.append(proximity_input)
-            await asyncio.sleep(.006)
+            await asyncio.sleep(delay)
         # print(read_out)
-        mean = sum(read_out) / float(len(read_out))
+        mean = sum(read_out) / float(n)
         threshold = 0.25
         value = int(mean > threshold)
         confidence = (mean - threshold) / (value - threshold)

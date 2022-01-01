@@ -58,7 +58,7 @@ class Rail(Robot):
         },
         'encoders': {
             # encoder key, ratio, telorance_soft, telorance_hard
-            'posz': ['enc1', 64.0, 1.0, 5.0],
+            'posz': ['enc1', 64.0, 1.1, 5.0],
         },
         'eac': [600],
     }

@@ -76,11 +76,11 @@ class Feeder(Node):
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 100000,  # max speed
-            'fr': 100000,  # max feed rate
+            'vm': 20000,  # max speed
+            'fr': 20000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 719,  # max travel
-            'jm': 2500,  # max jerk
+            'jm': 1000,  # max jerk
             'jh': 5000,  # hominzg jerk
             'hi': 3,  # home switch
             # 'sn': 3,  # minimum switch mode = limit-and-homing

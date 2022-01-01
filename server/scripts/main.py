@@ -27,7 +27,7 @@ async def main(system, ALL_NODES):
     ''' Initial Condition '''
     # feeder
     feeder.init_events()
-    asyncio.create_task(feeder.feeding_loop(recipe))
+    feeder_loop_task = asyncio.create_task(feeder.feeding_loop(recipe))
 
     # dosing feeder
     await dosing_feeder.create_feeding_loop(feeder, recipe)
@@ -81,6 +81,7 @@ async def main(system, ALL_NODES):
         task.cancel()
 
     await dosing_feeder.terminate_feeding_loop(feeder)
+    await feeder_loop_task
     await feeder.set_motors()  # set all feeder motors to 0
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
