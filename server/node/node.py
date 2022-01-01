@@ -400,6 +400,13 @@ class Node(object):
                 await self.G1(z=1, feed=10000)
             await self.scp_from(folder_name_src, folder_name_dst)
 
+        elif command['verb'] == 'align' and command['component'] == 'dosing':
+            await self.set_valves([0])
+            await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
+            await self.send_command(command)
+            await self.set_valves([0])
+            await self.G1(z=100, feed=10000)
+
         elif command['verb'] == 'home':
             await self.home()
         else:

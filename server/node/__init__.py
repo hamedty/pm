@@ -92,6 +92,8 @@ if 'Station 8' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 236
     station.hw_config['H_PRE_DANCE'] = 243.5
     station.hw_config['holder_webcam_direction'] = 'down'
+    station.hw_config['dosing_offset'] = -1  # posetive moves to right
+
 
 if 'Station 9' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 9']

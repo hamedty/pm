@@ -195,6 +195,6 @@ COMMAND_TEMPLATE_DUMP_TRAINING_DOSING = "{\n\
   'frames_per_rev': 400,\n\
   'prepare': 1,\n\
 }"
-COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder', 'retries': 10}"
-COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing', 'retries': 10}"
+COMMAND_TEMPLATE_ALIGN_HOLDER = "{'verb': 'align', 'component': 'holder', 'retries': [5, 5, 5], 'speed': 25000}"
+COMMAND_TEMPLATE_ALIGN_DOSING = "{'verb': 'align', 'component': 'dosing', 'retries': [5, 5, 5], 'speed': 25000}"
 COMMAND_TEMPLATE_HOME = "{'verb': 'home'}"

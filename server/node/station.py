@@ -156,6 +156,12 @@ class Station(Node):
         roi_dosing = annotation_data['dosing_roi']
         roi_dosing_presence = roi_dosing
 
+        # ROI Dosing Alignment
+        DOSING_Y_MARGIN = 30
+        roi_dosing_alignment = dict(roi_dosing)
+        roi_dosing_alignment['y0'] -= DOSING_Y_MARGIN
+        roi_dosing_alignment['dy'] += 2 * DOSING_Y_MARGIN
+
         # ROI Dosing Sit Right
         y_margin = 40
         direction = self.hw_config['dosing_webcam_direction']
@@ -167,7 +173,7 @@ class Station(Node):
         roi_dosing_sit_right = {'x0': x0, 'dx': dx, 'y0': y0, 'dy': dy}
 
         dosing_roi = {
-            'alignment': roi_dosing,
+            'alignment': roi_dosing_alignment,
             'existance': roi_dosing_presence,
             'sit_right': roi_dosing_sit_right,
         }
@@ -262,7 +268,7 @@ class Station(Node):
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, 0])
+            await self.set_valves([0, None, None, None])
             await self.G1(z=100, feed=5000)
             error = {
                 'message': 'دوزینگ را دستی تنظیم کنید.',

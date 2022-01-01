@@ -4,6 +4,7 @@ import numpy as np
 import json
 import os
 import matplotlib.pyplot as plt
+import pickle
 
 VISION_PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(VISION_PATH)
@@ -13,6 +14,8 @@ MODELS_PATH = os.path.join(BASE_PATH, 'models')
 
 SRC_DATA = os.path.join(VISION_PATH, 'annotaion.json')
 DST_DATA = os.path.join(MODELS_PATH, 'annotaion.json')
+
+DOSING_Y_MARGIN = 30
 
 
 def load_data():
@@ -25,7 +28,8 @@ data = load_data()
 
 nodes = list(data.keys())
 nodes.sort()
-componenets = ['holder', 'dosing']
+# componenets = ['holder', 'dosing']
+componenets = ['dosing']
 
 
 def npz_valid(npz_filename, roi_in, zero_in):
@@ -35,30 +39,72 @@ def npz_valid(npz_filename, roi_in, zero_in):
     return (npz.get('roi') == roi_in) and (npz.get('zero') == zero_in)
 
 
-def prepare_frame(frame, roi, component):
+def passive_roi(frame, roi, component):
+    x0 = roi['x0']
+    dx = roi['dx']
+    y0 = roi['y0']
+    dy = roi['dy']
+
     if component == 'dosing':
         x_downsample = 8
         y_downsample = 1
+
+        # active ROI
+        y0 -= DOSING_Y_MARGIN
+        dy += 2 * DOSING_Y_MARGIN
+
     elif component == 'holder':
         x_downsample = 1
         y_downsample = 8
-    else:
-        raise
 
-    x0 = roi['x0']
-    x1 = roi['x0'] + roi['dx']
-    y0 = roi['y0']
-    y1 = roi['y0'] + roi['dy']
-    x_size = round(roi['dx'] / x_downsample)
-    y_size = round(roi['dy'] / y_downsample)
-
-    frame = frame[y0:y1, x0:x1, :]
+    x_size = round(dx / x_downsample)
+    y_size = round(dy / y_downsample)
+    frame = frame[y0:y0 + dy, x0:x0 + dx, :]
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_AREA)
 
-    # plt.imshow(frame)
-    # plt.show()
-    # raise
+    return frame
+
+
+def active_roi(frame, back_cross_section):
+    cross_section = frame.mean(axis=1)
+    argmax = np.argmax(np.convolve(
+        back_cross_section[0], cross_section, mode='same'))
+    offset = argmax - back_cross_section[1]
+    assert abs(offset) < DOSING_Y_MARGIN
+    # print(offset)
+    return offset
+
+
+def prepare_cross_section(datasets, roi, node):
+    dataset_name = list(datasets.keys())[0]
+    dataset_dict = datasets[dataset_name]
+    zero = dataset_dict['zero']
+    back = (zero + (400 / 2)) % 400
+    filename = DATASET_PATH + f'/dosing_{node}_{dataset_name}_192.168.44.{node}/{int(back):03d}_00.png'
+    image = cv2.imread(filename)
+    frame = passive_roi(image, roi, 'dosing')
+    cross_section = frame.mean(axis=1)
+    default_argmax = np.argmax(np.convolve(
+        cross_section, cross_section, mode='same'))
+    data = (cross_section, default_argmax)
+
+    with open(MODELS_PATH + f'/cross_section_{node}.pickle', 'wb') as f:
+        pickle.dump(data, f)
+
+    return (cross_section, default_argmax)
+
+
+def prepare_frame(frame, roi, component, back_cross_section):
+    frame = passive_roi(frame, roi, component)
+
+    if component == 'dosing':
+        offset = active_roi(frame, back_cross_section)
+        frame = frame[DOSING_Y_MARGIN + offset:offset - DOSING_Y_MARGIN, :]
+
+        # plt.imshow(frame)
+        # plt.show()
+        # raise
 
     frame = frame.flatten()
     return frame
@@ -67,13 +113,17 @@ def prepare_frame(frame, roi, component):
 def main():
     for node in nodes:
         for component in componenets:
+            datasets = data[node][component]
             roi = data[node][component + '_roi']
 
-            for dataset_name in data[node][component]:
+            if component == 'dosing':
+                back_cross_section = prepare_cross_section(datasets, roi, node)
+
+            for dataset_name in datasets:
                 IMAGES = []
                 INDICES = []
 
-                dataset_dict = data[node][component][dataset_name]
+                dataset_dict = datasets[dataset_name]
                 path = DATASET_PATH + '/%s_%s_%s_192.168.44.%s' % (
                     component, node, dataset_name, node)
                 npz_filename = path + '/data.npz'
@@ -83,13 +133,14 @@ def main():
                 zero = dataset_dict['zero']
                 print(path, fpr)
 
-                if npz_valid(npz_filename, roi, zero):
-                    print('npz is valid')
-                    continue
+                # if npz_valid(npz_filename, roi, zero):
+                #     print('npz is valid')
+                #     continue
 
                 for filename in files:
                     image = cv2.imread(filename)
-                    image = prepare_frame(image, roi, component)
+                    image = prepare_frame(
+                        image, roi, component, back_cross_section)
                     IMAGES.append(image)
 
                     index = int(filename.split('/')[-1].split('_')[0]) - zero

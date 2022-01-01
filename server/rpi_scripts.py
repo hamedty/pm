@@ -145,14 +145,13 @@ async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
         M100 ({uda0:"0x%x"})
         ''' % (z, command_id))
     await arduino.wait_for_command_id(command_id)
-    arduino._send_command("{}")  # pull cartridge pusher back
 
     await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': feed, 'correct_initial': True})
 
     command_id = arduino.get_command_id()
     command_raw = '''
-        ; out1: release microswitch holder / out6: hug / out4: cartridge pusher back
-        {out: {1:0,6:1,4:0}}
+        ; out1: release microswitch holder / out4: pull cartridge pusher back / out6: hug
+        M100 ({out:{1:0,4:0,6:1}})
 
         ; put in cartridge
         G38.2 Y-100 F2000

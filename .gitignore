@@ -5,6 +5,7 @@ __pycache__
 *.png
 *.npy
 *.clf
+*.pickle
 *.mp4
 *.npz
 .ipynb_checkpoints

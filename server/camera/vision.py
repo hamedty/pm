@@ -1,9 +1,15 @@
 import pickle
 import cv2
+import numpy as np
+
+DOSING_Y_MARGIN = 30
+
 
 try:
     clf_holder = pickle.load(open('/home/pi/models/holder.clf', 'rb'))
     clf_dosing = pickle.load(open('/home/pi/models/dosing.clf', 'rb'))
+    back_cross_section = pickle.load(
+        open('/home/pi/models/cross_section.pickle', 'rb'))
 except:
     pass  # robot and rail
 
@@ -77,8 +83,24 @@ def prepare_frame(frame, component):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     frame = cv2.resize(frame, (x_size, y_size), interpolation=cv2.INTER_AREA)
 
+    if component == 'dosing':
+        offset = active_roi(frame, back_cross_section)
+        frame = frame[DOSING_Y_MARGIN + offset:offset - DOSING_Y_MARGIN, :]
+
     frame = frame.flatten()
     return frame
+
+
+def active_roi(frame, back_cross_section):
+    cross_section = frame.mean(axis=1)
+    argmax = np.argmax(np.convolve(
+        back_cross_section[0], cross_section, mode='same'))
+    offset = argmax - back_cross_section[1]
+
+    if abs(offset) > DOSING_Y_MARGIN:
+        offset = 0  # fault
+
+    return offset
 
 
 def dump(frame, filename):
