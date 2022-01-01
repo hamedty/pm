@@ -306,8 +306,8 @@ class Node(object):
         enc_location = self._status[enc_name] / float(enc_ratio)
         # g2_location = await self.read_metric('pos' + axis)
         g2_location = self._status['r.pos' + axis]
-        assert abs(
-            g2_location - enc_location) < telorance_soft, 'get_loc failed for %s' % self.name
+        error = abs(g2_location - enc_location)
+        assert error < telorance_soft, f'get_loc failed for {self.name}, error = {error}'
         return g2_location, enc_location, telorance_soft
 
     def get_enc_loc(self, axis):

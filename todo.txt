@@ -21,3 +21,13 @@ vision debug frame work
 need to feed 16 dosing in begining
 dosing feeder investigate
 HMI Khoshgel
+-----------------------------
+Sprint: Robot Speed up
+Thursday morning
+    robot portion: 13.8
+    rail portion: 5.5
+        movement: 2.6
+        jacks-1set: 2.7
+    complete: 19.3
+-----------------------------
+Rail Jerk Update

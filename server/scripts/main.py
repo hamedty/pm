@@ -50,18 +50,22 @@ async def main(system, ALL_NODES):
 
     ''' Main Loop'''
     t0 = time.time()
+    t1 = time.time()
     while not system.system_stop.is_set():
         # await(await system.register_error({'message': 'دور بعدی شروع شود?', 'location_name': 'System'})).wait()
 
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
         rail.rail_parked_event.clear()
-        print(time.time() - t0)
+        print(f'rail portion: {time.time() - t1:.1f}')
+        print(f'complete: {time.time() - t0:.1f}')
         t0 = time.time()
 
         # do robots
         await do_nodes(robots, lambda r: r.do_robot(recipe))
 
+        print(f'robot portion: {time.time() - t0:.1f}')
+        t1 = time.time()
         # command rail to do the next cycle
         rail.rail_move_event.set()
 

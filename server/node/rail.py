@@ -18,8 +18,8 @@ class Rail(Robot):
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 50000,  # max speed
-            'fr': 50000,  # max feed rate
+            'vm': 30000,  # max speed
+            'fr': 30000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 496,  # max travel -- 496
             'jm': 2000,  # max jerk
@@ -91,7 +91,8 @@ class Rail(Robot):
         self.system_stop_event.clear()
 
     async def rail_loop(self, recipe, feeder):
-        assert abs(self._status['r.posz'] - 250) < 1, 'Rail must be parked'
+        assert abs(self._status['r.posz'] -
+                   recipe.D_STANDBY) < 1, 'Rail must be parked'
         self.rail_parked_event.set()
 
         while not self.system_stop_event.is_set():
@@ -101,7 +102,10 @@ class Rail(Robot):
 
             # rail backward
             await self.system.system_running.wait()
-            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+            # await self.G1(z=recipe.D_MIN, feed=)
+            await self.send_command_raw(f'''
+                G1 Z{recipe.D_MIN} F{recipe.FEED_RAIL_FREE}
+            ''')
 
             # wait for feeder
             await feeder.feeder_is_full_event.wait()
@@ -113,12 +117,18 @@ class Rail(Robot):
             await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
             await feeder.set_valves([None, 0])
             await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
-            await self.set_valves([1, 1])
+            await self.send_command_raw(f'''
+                {{out: {{9:1,10:1}}}}
+                ; M100.1({{z:{{jm:{recipe.JERK_RAIL_INTACT}}}}})
+            ''')
             await asyncio.sleep(recipe.T_RAIL_JACK2)
 
             # rail forward
             await self.system.system_running.wait()
-            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+            # await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+            await self.send_command_raw(f'''
+                G1 Z{recipe.D_STANDBY} F{recipe.FEED_RAIL_INTACT}
+            ''')
 
             # clear feeder
             feeder.feeder_is_empty_event.set()
@@ -129,3 +139,10 @@ class Rail(Robot):
             await asyncio.sleep(recipe.T_RAIL_JACK1)
             await self.set_valves([0, 0])
             await asyncio.sleep(recipe.T_RAIL_JACK2)
+            # await self.send_command_raw(f'''
+            #     M100 ({{out: {{9:1,10:0}}}})
+            #     G4 P{recipe.T_RAIL_JACK1:.2f}
+            #     M100 ({{out: {{9:0,10:0}}}})
+            #     G4 P{recipe.T_RAIL_JACK2:.2f}
+            #     M100.1 ({{z:{{jm:{recipe.JERK_RAIL_FREE:.2f}}}}})
+            # ''')

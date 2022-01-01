@@ -1,5 +1,6 @@
 from .node import Node
 import asyncio
+import time
 
 
 class Robot(Node):
@@ -18,10 +19,11 @@ class Robot(Node):
         }),
         ('x', {
             'am': 1,  # standard axis mode
-            'vm': 60000,  # max speed
-            'fr': 60000,  # max feed rate
-            'jm': 900,  # max jerk
-            'jh': 1000,  # hominzg jerk
+            'vm': 30000,  # max speed
+            'fr': 50000,  # max feed rate
+            # 'jm': 5000,  # max jerk
+            'jm': 3000,  # max jerk
+            'jh': 6000,  # hominzg jerk
             'tn': 0,  # min travel
             'tm': 400,  # max travel
             'hi': 1,  # home switch
@@ -48,8 +50,8 @@ class Robot(Node):
         }),
         ('y', {
             'am': 1,  # standard axis mode
-            'vm': 20000,  # max speed
-            'fr': 800000,  # max feed rate
+            'vm': 30000,  # max speed
+            'fr': 25000,  # max feed rate
             'jm': 7000,  # max jerk
             'jh': 8000,  # homing jerk
             'tn': 0,  # min travel
@@ -170,9 +172,6 @@ class Robot(Node):
         Y_INPUT_DOWN_PRE_PRESS_HOLDER = Y_INPUT_DOWN_PRESS_HOLDER + 10
         Y_OUTPUT = 80
 
-        Z_OUTPUT = 70
-        Z_OUTPUT_SAFE = Z_OUTPUT - 30
-
         T_INPUT_RELEASE = 1.0
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
@@ -192,11 +191,13 @@ class Robot(Node):
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
         ''')
 
-        await asyncio.sleep(T_INPUT_RELEASE)
-        await asyncio.gather(*[station.verify_dosing_sit_right(recipe) for station in self._stations])
+        t0 = time.time()
 
-        stations_task2 = asyncio.gather(
-            *[station.G1(z=Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 4.0) for station in self._stations])
+        async def stations_verify_and_deliver():
+            await asyncio.sleep(T_INPUT_RELEASE)
+            await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down(recipe) for station in self._stations])
+
+        stations_task = asyncio.create_task(stations_verify_and_deliver())
 
         await self.send_command_raw(f'''
             G1 Y{Y_INPUT_UP} F{recipe.FEED_Y_UP}
@@ -209,7 +210,10 @@ class Robot(Node):
             G4 P{T_POST_PRESS:.2f}
         ''')
 
-        await stations_task2
+        t2 = time.time()
+        print(f'press holder: {t2-t0:.2f}')
+
+        await stations_task
 
         await self.send_command_raw(f'''
             G1 Y{Y_OUTPUT} F{recipe.FEED_Y_UP}
@@ -221,7 +225,7 @@ class Robot(Node):
 
         await asyncio.gather(*[station.set_valves([0, 0, 0, 1]) for station in self._stations])
         await asyncio.sleep(T_OUTPUT_RELEASE)
-        await asyncio.gather(*[station.G1(z=Z_OUTPUT_SAFE, feed=recipe.FEED_Z_UP) for station in self._stations])
+        await asyncio.gather(*[station.G1(z=recipe.STATION_Z_OUTPUT_SAFE, feed=recipe.FEED_Z_UP) for station in self._stations])
         for station in self._stations:
             station.station_is_full_event.set()
 

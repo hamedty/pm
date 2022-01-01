@@ -299,7 +299,7 @@ class Station(Node):
             await error_clear_event.wait()
         await self.set_valves([None] * 3 + [1])
 
-    async def verify_dosing_sit_right(self, recipe):
+    async def verify_dosing_sit_right_and_come_down(self, recipe):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
         if not res[1]['sit_right']:
             error = {
@@ -311,6 +311,7 @@ class Station(Node):
             # await aioconsole.ainput(str(error))
             error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
+        await self.G1(z=recipe.STATION_Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 4.0)
 
     async def assemble(self, recipe):
         data = {}
