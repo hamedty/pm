@@ -221,8 +221,14 @@ class Station(Node):
                 await self.assemble(recipe)
 
             if not (full or empty):
+                # {"no_dosing":false,"no_holder":true,}
+                if check_fullness['no_dosing']:  # no dosing
+                    message = 'دوزینگ وجود ندارد. استیشن را خالی کنید.'
+                else:  # no holder
+                    message = 'هولدر وجود ندارد. استیشن را خالی کنید.'
+
                 error = {
-                    'message': 'هولدر یا دوزینگ وجود ندارد. استیشن را خالی کنید.',
+                    'message': message,
                     'location_name': self.name,
                     'details': check_fullness,
                 }
@@ -266,7 +272,6 @@ class Station(Node):
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
-        # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             await self.set_valves([0, None, None, None])
             await self.G1(z=100, feed=5000)
