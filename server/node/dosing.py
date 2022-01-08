@@ -6,6 +6,11 @@ import aioconsole
 CONVEYOR_SPEED = 5
 LIFT_SPEED = 55
 
+'''
+in1 -> dosing existance gate -> dosing exitsts -> red light on -> read value = 1
+
+'''
+
 
 class Dosing(Node):
     type = 'dosing'
@@ -190,28 +195,39 @@ class Dosing(Node):
 
     async def detect_direction(self):
         T_FIRST_READ = .030  # wait for proximity_input value established
-        N_READ_COUNT = 30
         T_INTER_READ = .006
+        N_READ_COUNT = 30
+        P_THRESHOLD = 0.25
         # wait for proximity_input value established
         await asyncio.sleep(T_FIRST_READ)
-
+        i = 0
         while True:
-            confidence, proximity_input = await self.read_proximity(n=N_READ_COUNT, delay=T_INTER_READ)
+
+            confidence, proximity_input = await self.read_proximity(n=N_READ_COUNT, delay=T_INTER_READ, threshold=P_THRESHOLD)
+
             if (confidence > .6):
                 break
+
+            if (i > 2):
+                proximity_input = 0
+                break
+
+            i += 1
+
             await asyncio.sleep(.15)
 
         return proximity_input
 
-    async def read_proximity(self, n, delay):
+    async def read_proximity(self, n, delay, threshold):
         read_out = []
         for i in range(n):
             proximity_input = await self.read_metric('in2')
             read_out.append(proximity_input)
             await asyncio.sleep(delay)
-        # print(read_out)
+
         mean = sum(read_out) / float(n)
-        threshold = 0.25
         value = int(mean > threshold)
         confidence = (mean - threshold) / (value - threshold)
+
+        print('----dosing------\n', confidence, value, mean, read_out)
         return confidence, value

@@ -87,7 +87,14 @@ def prepare_frame(frame, component):
         offset = active_roi(frame, back_cross_section)
         frame = frame[DOSING_Y_MARGIN + offset:offset - DOSING_Y_MARGIN, :]
 
+    # if component == 'dosing':
+    #     mid_point = int(frame.shape[0] / 2)
+    #     a = frame[0:mid_point - 55, :].flatten()
+    #     b = frame[mid_point + 55:, :].flatten()
+    #     frame = np.concatenate([a, b])
+    # else:
     frame = frame.flatten()
+
     return frame
 
 

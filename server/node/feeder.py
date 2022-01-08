@@ -188,9 +188,9 @@ class Feeder(Node):
     async def set_motors_slow(self, *args):
         if len(args) == 0:
             return
-        fast_args = [(i, int(j * 2.5)) for i, j in args]
+        fast_args = [(i, int(j * 3)) for i, j in args]
         await self.set_motors_fast(*args)
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         fast_args = [(i, j) for i, j in args]
         await self.set_motors_fast(*args)
 

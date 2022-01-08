@@ -104,6 +104,8 @@ class Robot(Node):
             'posy': ['enc1', 120.0, 1.0, 5.0],
         },
         'eac': [600, 600],
+        'X_GRAB_IN': 284.5,
+        'X_INPUT': 373,
         'Y_GRAB_IN_UP_2': 64,
         'X_CAPPING': 60,
     }
@@ -141,10 +143,10 @@ class Robot(Node):
 
         '''PICK UP'''
         Y_GRAB_IN_UP_1 = 75
-        X_GRAB_IN = 284.5
+        X_GRAB_IN = self.hw_config['X_GRAB_IN']
         Y_GRAB_IN_DOWN = 0
         Y_GRAB_IN_UP_2 = self.hw_config['Y_GRAB_IN_UP_2']
-        T_GRAB_IN = 0.5
+        T_GRAB_IN = 0.75
 
         await self.system.system_running.wait()
 
@@ -164,7 +166,8 @@ class Robot(Node):
         '''EXCHANGE'''
         X_CAPPING = self.hw_config['X_CAPPING']
 
-        X_INPUT = 373
+        X_INPUT = self.hw_config['X_INPUT']
+        X_PRESS = X_INPUT - 3
         Y_INPUT_DOWN_RELEASE_HOLDER = 36
         Y_INPUT_DOWN_RELEASE_DOSING = 32
         Y_INPUT_UP = 55 + 10
@@ -200,7 +203,7 @@ class Robot(Node):
         stations_task = asyncio.create_task(stations_verify_and_deliver())
 
         await self.send_command_raw(f'''
-            G1 Y{Y_INPUT_UP} F{recipe.FEED_Y_UP}
+            G1 Y{Y_INPUT_UP} X{X_PRESS} F{recipe.FEED_Y_UP}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
             M100 ({{out: {{6:1,7:1,8:1,9:1,10:1}}}})
             G4 P{T_HOLDER_JACK_CLOSE:.2f}
@@ -208,6 +211,8 @@ class Robot(Node):
             G4 P{T_PRE_PRESS:.2f}
             G1 Y{Y_INPUT_DOWN_PRESS_HOLDER} F{recipe.FEED_Y_DOWN_PRESS}
             G4 P{T_POST_PRESS:.2f}
+            G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} X{X_INPUT} F{recipe.FEED_Y_DOWN}
+
         ''')
 
         t2 = time.time()

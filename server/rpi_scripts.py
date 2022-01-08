@@ -57,7 +57,7 @@ async def feeder_process(arduino, G1, command):
     initial_z = FEEDER_OFFSET
     arduino._send_command('''
         {out2: 1}
-        ;{z:{jm:%d}}
+        {z:{jm:%d}}
         ''' % JERK_FEED)
 
     if any(holder_mask):
@@ -107,7 +107,7 @@ async def feeder_process(arduino, G1, command):
     arduino._send_command("{m2: 30, m3: 30}")
 
     arduino._send_command('G1 Y10 F60000')
-    # arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
+    arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
 
     # # Motors
     # if any(holder_mask):

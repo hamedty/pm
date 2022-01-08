@@ -191,3 +191,15 @@ async def motors_off(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors()
     await feeder.set_valves([None] * 9 + [0])
+
+
+async def motors_on(system, ALL_NODES):
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
+    await feeder.set_motors(
+        (2, 4), (3, 4),  # Holder Downstream
+        # Holder Upstream - Lift and long conveyor
+        (4, 4), (7, 11),
+        (1, 3750), (10, 35000),  # holder gate on/off
+        (6, 25),  (8, 8)  # Cartridge Conveyor + Randomizer
+    )
+    await dosing_feeder.set_motors_highlevel(feeder, 'on')

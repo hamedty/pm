@@ -28,8 +28,7 @@ data = load_data()
 
 nodes = list(data.keys())
 nodes.sort()
-# componenets = ['holder', 'dosing']
-componenets = ['dosing']
+componenets = ['holder', 'dosing']
 
 
 def npz_valid(npz_filename, roi_in, zero_in):
@@ -105,7 +104,12 @@ def prepare_frame(frame, roi, component, back_cross_section):
         # plt.imshow(frame)
         # plt.show()
         # raise
-
+    # if component == 'dosing':
+    #     mid_point = int(frame.shape[0] / 2)
+    #     a = frame[0:mid_point - 55, :].flatten()
+    #     b = frame[mid_point + 55:, :].flatten()
+    #     frame = np.concatenate([a, b])
+    # else:
     frame = frame.flatten()
     return frame
 
@@ -133,9 +137,9 @@ def main():
                 zero = dataset_dict['zero']
                 print(path, fpr)
 
-                # if npz_valid(npz_filename, roi, zero):
-                #     print('npz is valid')
-                #     continue
+                if npz_valid(npz_filename, roi, zero):
+                    print('npz is valid')
+                    continue
 
                 for filename in files:
                     image = cv2.imread(filename)

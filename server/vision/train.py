@@ -84,17 +84,20 @@ def train_holder(node, CPR=100.0, max_iter=MAX_ITER):
 
 
 def train(C, X, y, max_iter, name):
-    test_portion = 0.1
-    istest = np.random.random_sample(y.shape) < test_portion
+    # test_portion = 0.1
+    # istest = np.random.random_sample(y.shape) < test_portion
 
-    X_train = X[~istest, :].copy()
-    X_test = X[istest, :].copy()
-    y_train = y[~istest].copy()
-    y_test = y[istest].copy()
+    # X_train = X[~istest, :].copy()
+    # X_test = X[istest, :].copy()
+    # y_train = y[~istest].copy()
+    # y_test = y[istest].copy()
 
-    IX = np.argsort(y_test)
-    X_test = X_test[IX, :]
-    y_test = y_test[IX]
+    X_train = X.copy()
+    y_train = y.copy()
+
+    # IX = np.argsort(y_test)
+    # X_test = X_test[IX, :]
+    # y_test = y_test[IX]
 
     clf = svm.LinearSVC(C=1, max_iter=max_iter, verbose=True)
     clf = calibration.CalibratedClassifierCV(clf)
@@ -104,19 +107,19 @@ def train(C, X, y, max_iter, name):
         pickle.dump(clf, f)
 
     full_range = C / 2
-    predict = clf.predict(X_test)
-    print('STD:', np.std(np.minimum(np.abs(predict - y_test),
-                                    np.abs(full_range - np.abs(predict - y_test)))))
-
-    test = abs(y_test) < 20
-    print('STD under 40:', np.std(np.minimum(np.abs(
-        predict[test] - y_test[test]), np.abs(full_range - np.abs(predict[test] - y_test[test])))))
-
-    plt.clf()
-    plt.figure(figsize=(20, 12))
-    plt.scatter(y_test, predict, alpha=0.1, s=10)
-    plt.savefig(MODELS_PATH + '/predict_%s.png' % name, dpi=150)
-    # plt.show()
+    # predict = clf.predict(X_test)
+    # print('STD:', np.std(np.minimum(np.abs(predict - y_test),
+    #                                 np.abs(full_range - np.abs(predict - y_test)))))
+    #
+    # test = abs(y_test) < 20
+    # print('STD under 40:', np.std(np.minimum(np.abs(
+    #     predict[test] - y_test[test]), np.abs(full_range - np.abs(predict[test] - y_test[test])))))
+    #
+    # plt.clf()
+    # plt.figure(figsize=(20, 12))
+    # plt.scatter(y_test, predict, alpha=0.1, s=10)
+    # plt.savefig(MODELS_PATH + '/predict_%s.png' % name, dpi=150)
+    # # plt.show()
 
 
 def load_data(filename):

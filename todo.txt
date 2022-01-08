@@ -1,13 +1,12 @@
-dosing active ROI
+shlvar ro bekesh bala
 optimize
   station
   feeder gcodes
   robot moves / commands
   rail
-get rid of our own G1:
-  1- auto g38 at proper times (free well before and after)
-  2- adaptve eac limits
-shlvar ro bekesh bala
+  get rid of our own G1:
+    1- auto g38 at proper times (free well before and after)
+    2- adaptve eac limits
 -------------------------
 running out of connection
 extract dosing feeder params to recepie
@@ -23,13 +22,6 @@ vision debug frame work
 need to feed 16 dosing in begining
 dosing feeder investigate
 HMI Khoshgel
------------------------------
-Sprint: Robot Speed up
-Thursday morning
-    robot portion: 13.8
-    rail portion: 5.5
-        movement: 2.6
-        jacks-1set: 2.7
-    complete: 19.3
------------------------------
-Rail Jerk Update
+--------------------------------------------
+456*4
+(1) / ((116 + 51) * 10)

@@ -51,8 +51,10 @@ async def main(system, ALL_NODES):
     ''' Main Loop'''
     t0 = time.time()
     t1 = time.time()
+    i = 0
     while not system.system_stop.is_set():
-        # await(await system.register_error({'message': 'دور بعدی شروع شود?', 'location_name': 'System'})).wait()
+        # error_clear_event, error_id = await system.register_error({'message': 'دور بعدی شروع شود?', 'location_name': 'System'})
+        # await error_clear_event.wait()
 
         # wait for rail to be parked
         await rail.rail_parked_event.wait()
@@ -71,6 +73,8 @@ async def main(system, ALL_NODES):
 
         # park robots
         await do_nodes(robots, lambda r: r.do_robot_park(recipe))
+        i += 1
+        print('--------------------------------', i)
 
     ''' Clean Up '''
     rail.system_stop_event.set()
