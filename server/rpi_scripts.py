@@ -40,12 +40,14 @@ HOLDER_ARDUINO_INDEX = 2
 
 async def feeder_process(arduino, G1, command):
     FEEDER_OFFSET = command['z_offset']
+    FEED_COMEBACK = command['feed_comeback']
     FEED_FEED = command['feed_feed']
     JERK_FEED = command['jerk_feed']
     JERK_IDLE = command['jerk_idle']
     CARTRIDGE_FEED = command['cartridge_feed']
 
     # prepare masks
+    initial_z = FEEDER_OFFSET
     holder_mask = command['holder_mask']
     dosing_mask = command['dosing_mask']
     assert len(holder_mask) == len(dosing_mask)
@@ -53,28 +55,26 @@ async def feeder_process(arduino, G1, command):
     holder_mask.append(0)
     dosing_mask.append(0)
 
-    # initial condition
-    initial_z = FEEDER_OFFSET
-    arduino._send_command('''
-        {out2: 1}
-        {z:{jm:%d}}
-        ''' % JERK_FEED)
+    # 1- initial condition
+    # a- holder motors on, cartridge fast, air pusher on
+    arduino._send_command("{m2: 4, m3: 4, m6: 15}")
+    arduino._send_command("{out2:0, out10: 1}")
+    await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': initial_z, 'feed': FEED_COMEBACK, 'correct_initial': True})
 
-    if any(holder_mask):
-        arduino._send_command("{m6: 15}")  # cartridge conveyor
+    arduino._send_command(f'''
+        {{out2: 1}}
+        {{z:{{jm: {JERK_FEED:.0f}}}}}
+        ''')
 
-    # holder motors on, air pusher on
-    arduino._send_command("{m2: 4, m3: 4, out10: 1}")
-
-    holder_shift_register = 0
     dosing_gate_status = 0
 
     for i in range(N):
+        # 1- holder feed
+        # holder shouldn't exists before gate
         await wait_for_inputs(arduino, holder_mask=1, holder_value=0)
         # Gate Open
         if holder_mask[i]:
-            # holder motors and gate. Firmware automatically reduces holder motor speed (special functions)
-            # arduino._send_command("{out7: 1, m2: 4, m3: 4}")
+            # holder motors and gate. Firmware automatically closes the gate
             arduino._send_command("{out7: 1}")
 
         if dosing_mask[i] and not dosing_gate_status:
@@ -86,10 +86,9 @@ async def feeder_process(arduino, G1, command):
             await cartridge_grab(arduino)
 
         # Wait for holder
-        current_z = FEEDER_OFFSET + 25 * i
         await wait_for_inputs(arduino, holder_mask=holder_mask[i], dosing_mask=dosing_mask[i])
 
-        # Close Gate
+        # Close Dosing Gate
         if not dosing_mask[i + 1] and dosing_gate_status:
             arduino._send_command("{out11: 0}")
             dosing_gate_status = 0
@@ -104,14 +103,10 @@ async def feeder_process(arduino, G1, command):
             arduino.send_command('{out1: 0}')
             await asyncio.sleep(.1)  # wait to release microswitch holder
 
-    arduino._send_command("{m2: 30, m3: 30}")
+    arduino._send_command("{m2: 30, m3: 30, m6: 100}")
 
     arduino._send_command('G1 Y10 F60000')
     arduino._send_command('{z:{jm:%d}}' % JERK_IDLE)
-
-    # # Motors
-    # if any(holder_mask):
-    #     arduino._send_command("{m6: 100}")  # cartridge conveyor
 
 
 async def cartridge_grab(arduino):
@@ -131,16 +126,12 @@ async def cartridge_grab(arduino):
     arduino._send_command("{out9: 0}")  # bring jack up and open hug
     await asyncio.sleep(.1)
 
-    # Cartridge Pusher back
-    # arduino._send_command("{out4: 0}")  # pull cartridge pusher back
-    # await asyncio.sleep(.02)
-
 
 async def move_rail_n_cartridge_handover(arduino, z, feed, G1):
     # rotate to rail
     command_id = arduino.get_command_id()
     arduino._send_command('''
-        G1 Y10 Z%.2f F26000
+        G1 Y10 Z%.2f F35000
         M100 ({posz:n})
         M100 ({uda0:"0x%x"})
         ''' % (z, command_id))

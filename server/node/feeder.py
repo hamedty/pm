@@ -76,11 +76,11 @@ class Feeder(Node):
         }),
         ('z', {
             'am': 1,  # standard axis mode
-            'vm': 20000,  # max speed
-            'fr': 20000,  # max feed rate
+            'vm': 100000,  # max speed
+            'fr': 40000,  # max feed rate
             'tn': 0,  # min travel
             'tm': 719,  # max travel
-            'jm': 1000,  # max jerk
+            'jm': 10000,  # max jerk
             'jh': 5000,  # hominzg jerk
             'hi': 3,  # home switch
             # 'sn': 3,  # minimum switch mode = limit-and-homing
@@ -159,7 +159,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 35000),  # holder gate on/off
-            (6, 25),  (8, 8)  # Cartridge Conveyor + Randomizer
+            (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])
@@ -222,25 +222,13 @@ class Feeder(Node):
 
     async def feeding_loop(self, recipe):
         await self.feeder_initial_start_event.wait()
-
-        # if self.is_at_loc(z=recipe.FEEDER_Z_DELIVER):
-        #     self.feeder_is_full_event.set()
-        #     await self.feeder_is_empty_event.wait()
-        #     self.feeder_is_empty_event.clear()
-
         await self.set_motors_working_condition(recipe)
 
         while not self.system_stop_event.is_set():
             t0 = time.time()
 
-            ''' Turn on Motors '''
-            await self.set_motors_working_condition(recipe, fast=True)
-
-            ''' Fill '''
+            ''' 1- Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
-                await self.set_valves([None, 0])
-                await self.G1(z=recipe.FEEDER_Z_IDLE, feed=recipe.FEED_FEEDER_COMEBACK)
-
                 holder_mask = [1] * recipe.N
                 dosing_mask = [
                     int(not recipe.SERVICE_FUNC_NO_DOSING)] * recipe.N
@@ -251,6 +239,7 @@ class Feeder(Node):
                     'dosing_mask': dosing_mask,
                     'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
                     'z_offset': recipe.FEEDER_Z_IDLE,
+                    'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
                     'feed_feed': recipe.FEED_FEEDER_FEED,
                     'jerk_feed': recipe.JERK_FEEDER_FEED,
                     'jerk_idle': recipe.JERK_FEEDER_DELIVER,
@@ -258,15 +247,15 @@ class Feeder(Node):
                 await self.system.system_running.wait()
                 await self.send_command(command)
                 self.feeder_finished_command_event.set()
+
             t1 = time.time()
             print(f'Feeder Fill Loop: {(t1-t0):.1f}')
-            ''' Deliver '''
+
+            ''' 2- Deliver '''
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
             await self.system.system_running.wait()
             await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
-
-            await self.set_motors((6, 100))
 
             self.feeder_is_full_event.set()
             await self.feeder_is_empty_event.wait()

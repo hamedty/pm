@@ -21,8 +21,7 @@ class Robot(Node):
             'am': 1,  # standard axis mode
             'vm': 30000,  # max speed
             'fr': 50000,  # max feed rate
-            # 'jm': 5000,  # max jerk
-            'jm': 3000,  # max jerk
+            'jm': 3500,  # max jerk
             'jh': 6000,  # hominzg jerk
             'tn': 0,  # min travel
             'tm': 400,  # max travel
