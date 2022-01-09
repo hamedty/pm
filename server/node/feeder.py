@@ -258,5 +258,9 @@ class Feeder(Node):
             await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
 
             self.feeder_is_full_event.set()
+
+            # home Y
+            await self.send_command_raw('G38.3 Y-100 F1000\nG10 L20 P1 Y0')
+
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()

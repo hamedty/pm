@@ -125,7 +125,7 @@ class Arduino(object):
         for i in range(500):
             if response in self._status:
                 break
-            await asyncio.sleep(0.002)
+            await asyncio.sleep(0.001)
         if response in self._status:
             return True, self._status[response]
         else:

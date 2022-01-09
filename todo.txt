@@ -1,14 +1,14 @@
 shlvar ro bekesh bala
+get rid of our own G1:
+  1- auto g38 at proper times (free well before and after)
+  2- adaptve eac limits
+home feeder arm properly
 optimize
   station
   feeder gcodes
   robot moves / commands
   rail
-  get rid of our own G1:
-    1- auto g38 at proper times (free well before and after)
-    2- adaptve eac limits
 -------------------------
-running out of connection
 extract dosing feeder params to recepie
 feed hold exit strategies: A- auto resume budget based B- protect clear to only be ran once
 verify correct press
@@ -16,17 +16,7 @@ feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
 if nodes downs, UI must react
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
-control feeder motors with RPI
 log collection framework
 vision debug frame work
 need to feed 16 dosing in begining
-dosing feeder investigate
 HMI Khoshgel
---------------------------------------------
-456*4
-(1) / ((116 + 51) * 10)
-
-
---------------------------------------------
-
-Feeder Fill Loop: 16.3
