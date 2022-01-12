@@ -10,13 +10,8 @@ from node import ALL_NODES_DICT
 async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
-    ''' Homing '''
-    # a = await aioconsole.ainput('type anything to home. or enter to dismiss')
-    # if a:
-    #     print('homing')
-    #     await home_all_nodes(system, feeder, rail, robots, stations)
-    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     ''' Initial Condition '''
+    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     await system.system_running.wait()
 
     await do_nodes(robots, lambda r: r.set_valves([0] * 10))
@@ -90,7 +85,9 @@ async def main(system, ALL_NODES):
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
 
-async def home_all_nodes(feeder, rail, robots, stations):
+async def home_all_nodes(system, ALL_NODES):
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+
     await system.system_running.wait()
     feeder_home = asyncio.create_task(feeder.home())
 

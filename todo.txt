@@ -1,8 +1,6 @@
+auto g38 at proper times (free well before and after)
+adaptve eac limits
 shlvar ro bekesh bala
-get rid of our own G1:
-  1- auto g38 at proper times (free well before and after)
-  2- adaptve eac limits
-home feeder arm properly
 optimize
   station
   feeder gcodes

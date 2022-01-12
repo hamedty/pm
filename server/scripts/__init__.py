@@ -1,4 +1,5 @@
 from .main import main
+from .main import home_all_nodes
 from .test_single import main as test_single
 from .helpers import fill_cartridge_conveyor
 from .helpers import fill_dosing_rail

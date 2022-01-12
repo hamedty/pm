@@ -19,9 +19,9 @@ class Robot(Node):
         }),
         ('x', {
             'am': 1,  # standard axis mode
-            'vm': 30000,  # max speed
+            'vm': 50000,  # max speed
             'fr': 50000,  # max feed rate
-            'jm': 3500,  # max jerk
+            'jm': 10000,  # max jerk
             'jh': 6000,  # hominzg jerk
             'tn': 0,  # min travel
             'tm': 400,  # max travel
@@ -49,9 +49,9 @@ class Robot(Node):
         }),
         ('y', {
             'am': 1,  # standard axis mode
-            'vm': 30000,  # max speed
-            'fr': 25000,  # max feed rate
-            'jm': 7000,  # max jerk
+            'vm': 50000,  # max speed
+            'fr': 50000,  # max feed rate
+            'jm': 9000,  # max jerk
             'jh': 8000,  # homing jerk
             'tn': 0,  # min travel
             'tm': 100,  # max travel
@@ -151,7 +151,7 @@ class Robot(Node):
 
         await self.send_command_raw(f'''
             G1 Y{Y_GRAB_IN_UP_1} F{recipe.FEED_Y_UP}
-            G1 X{X_GRAB_IN} F{recipe.FEED_X}
+            G1 X{X_GRAB_IN} F{recipe.FEED_X_FORWARD}
             G1 Y{Y_GRAB_IN_DOWN} F{recipe.FEED_Y_DOWN}
         ''')
 
@@ -186,7 +186,7 @@ class Robot(Node):
         await self.system.system_running.wait()
 
         await self.send_command_raw(f'''
-            G1 X{X_INPUT} F{recipe.FEED_X}
+            G1 X{X_INPUT} F{recipe.FEED_X_SHORT}
             G1 Y{Y_INPUT_DOWN_RELEASE_HOLDER} F{recipe.FEED_Y_DOWN_PRESS}
             M100 ({{out: {{6:0,7:0,8:0,9:0,10:0}}}})
             G1 Y{Y_INPUT_DOWN_RELEASE_DOSING} F{recipe.FEED_Y_DOWN_PRESS}
@@ -237,7 +237,7 @@ class Robot(Node):
         STATION_SAFE_LIMIT = 310
 
         t1 = asyncio.create_task(self.send_command_raw(f'''
-            G1 X{X_CAPPING} F{recipe.FEED_X}
+            G1 X{X_CAPPING} F{recipe.FEED_X_BACKWARD}
         '''))
 
         while self.get_enc_loc('x') > STATION_SAFE_LIMIT:
@@ -249,7 +249,7 @@ class Robot(Node):
         await self.send_command_raw(f'''
             G1 Y{recipe.Y_CAPPING_DOWN} F{recipe.FEED_Y_DOWN_CAP}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
-            G1 X{recipe.X_PARK} F{recipe.FEED_X}
+            G1 X{recipe.X_PARK} F{recipe.FEED_X_BACKWARD}
         ''')
 
     async def do_robot_park(self, recipe):

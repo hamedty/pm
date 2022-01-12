@@ -6,6 +6,10 @@ import aioconsole
 CONVEYOR_SPEED = 5
 LIFT_SPEED = 55
 
+
+DOSING_TIMEOUT = 3
+DOSING_TIMEOUT_FACTOR = 2
+DOSING_REVERSE_TIME = 1
 '''
 in1 -> dosing existance gate -> dosing exitsts -> red light on -> read value = 1
 
@@ -104,15 +108,15 @@ class Dosing(Node):
             await self.set_valves([0])
 
             # wait for optic sensor input=1
-            timeout = 2
+            timeout = DOSING_TIMEOUT
             while True:
                 try:
                     await self.wait_metric('in1', timeout=timeout)
                     break
                 except WAIT_METRIC_TIMEOUT_EXCEPTION as e:
                     # run motor in reverse
-                    await self.run_motor_in_reverse(reverse_time=2)
-                    timeout = 6
+                    await self.run_motor_in_reverse(reverse_time=DOSING_REVERSE_TIME)
+                    timeout = DOSING_TIMEOUT * DOSING_TIMEOUT_FACTOR
 
             # detect direction
             direction = await self.detect_direction()
@@ -143,7 +147,7 @@ class Dosing(Node):
                 if buffer_full_time is None:
                     continue
                 buffer_full_time = time.time() - buffer_full_time
-                if (buffer_full_time > 2):
+                if (buffer_full_time > 30):
                     motors_on = False
                     await self.set_motors_highlevel(feeder, 'standby')
             else:  # motors off
@@ -229,5 +233,4 @@ class Dosing(Node):
         value = int(mean > threshold)
         confidence = (mean - threshold) / (value - threshold)
 
-        print('----dosing------\n', confidence, value, mean, read_out)
         return confidence, value
