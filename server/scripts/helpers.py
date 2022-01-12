@@ -190,7 +190,9 @@ async def feeder_handover_to_rail(system, ALL_NODES):
 async def motors_off(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
     await feeder.set_motors()
-    await feeder.set_valves([None] * 9 + [0])
+    valves = [0] * 14
+    valves[1] = None  # comb
+    await feeder.set_valves(valves)
 
 
 async def motors_on(system, ALL_NODES):

@@ -229,14 +229,13 @@ class Feeder(Node):
 
             ''' 1- Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
-                holder_mask = [1] * recipe.N
-                dosing_mask = [
-                    int(not recipe.SERVICE_FUNC_NO_DOSING)] * recipe.N
+                # mask = [1] * recipe.N
+                mask = [1] * recipe.N
+                # mask[5] = 0  # station 3
 
                 command = {
                     'verb': 'feeder_process',
-                    'holder_mask': holder_mask,
-                    'dosing_mask': dosing_mask,
+                    'mask': mask,
                     'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
                     'z_offset': recipe.FEEDER_Z_IDLE,
                     'feed_comeback': recipe.FEED_FEEDER_COMEBACK,

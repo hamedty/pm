@@ -128,7 +128,8 @@ class Dosing(Node):
             await self.wait_metric('in3', 0)
             self.buffer_full_time = None
             self.buffer_empty_event.set()
-
+            asyncio.create_task(feeder.send_command(
+                {'verb': 'set_dosing_reserve', 'change': 1}))
             # wait for jacks to be stable
             await asyncio.sleep(.05)
 
@@ -147,6 +148,10 @@ class Dosing(Node):
                 if buffer_full_time is None:
                     continue
                 buffer_full_time = time.time() - buffer_full_time
+                if (buffer_full_time > 1):
+                    asyncio.create_task(feeder.send_command(
+                        {'verb': 'set_dosing_reserve', 'value': 8}))
+
                 if (buffer_full_time > 30):
                     motors_on = False
                     await self.set_motors_highlevel(feeder, 'standby')

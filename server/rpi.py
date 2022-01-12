@@ -337,6 +337,12 @@ async def read_metric(command):
     return {'success': success, 'result': result}
 
 
+async def set_dosing_reserve(command):
+    arduino = ARDUINOS[command['arduino_index']]
+    await arduino.set_dosing_reserve(value=command.get('value'), change=command.get('change'))
+    return {'success': True}
+
+
 async def get_status(command):
     arduino_index = command['arduino_index']
 
@@ -365,6 +371,7 @@ COMMAND_HANDLER = {
     'G1': G1,
     'feeder_process': feeder_process,
     'read_metric': read_metric,
+    'set_dosing_reserve': set_dosing_reserve,
 
     # second channel - status
     'get_status': get_status,

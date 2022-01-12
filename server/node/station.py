@@ -269,7 +269,7 @@ class Station(Node):
         data = {}
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
-        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'])
+        await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], correct_initial=True)
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
         if (not z1) or (not z2['aligned']):

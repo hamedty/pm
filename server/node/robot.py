@@ -255,6 +255,8 @@ class Robot(Node):
     async def do_robot_park(self, recipe):
         await self.system.system_running.wait()
 
-        await self.send_command_raw(f'''
-            G1 Y{recipe.Y_PARK} F{recipe.FEED_Y_UP/10}
-        ''')
+        # await self.send_command_raw(f'''
+        #     G1 Y{recipe.Y_PARK} F{recipe.FEED_Y_UP/10}
+        # ''')
+        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 10, correct_initial=True)
+        await self.G1(x=recipe.X_PARK - 1, feed=recipe.FEED_X_BACKWARD / 40, correct_initial=True)

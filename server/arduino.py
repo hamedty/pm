@@ -35,6 +35,8 @@ class Arduino(object):
         self._hw_config = {'motors': {}}
         self.receive_thread = None
         self._debug = False
+        self.dosing_reserve_lock = asyncio.Lock()
+        self.dosing_reserve = 0
         self.set_status(message='object created')
         self._open_port()
         self.set_status(message='usb port opened')
@@ -54,6 +56,15 @@ class Arduino(object):
         self.stat_code = 0
         self.lock.release()
         self.init_command_id()
+        self.dosing_reserve = 0
+
+    async def set_dosing_reserve(self, value=None, change=None):
+        async with self.dosing_reserve_lock:
+            if value is not None:
+                self.dosing_reserve = value
+            elif change is not None:
+                self.dosing_reserve += change
+            self.dosing_reserve = min(max(self.dosing_reserve, 0), 8)
 
     def _close_port(self):
         self.ser.close()
