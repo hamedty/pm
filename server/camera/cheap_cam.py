@@ -69,3 +69,9 @@ def create_camera(index, roi):
     v4l2.update(v4l2_config[index])
 
     return CheapCam(SERAIL_NOS[index], config={}, settings={'roi': roi}, v4l2_config=v4l2)
+
+
+def test():
+    holder = create_camera('holder', {})
+    filename = '/home/pi/data/test.png'
+    holder.dump_frame(filename=filename)

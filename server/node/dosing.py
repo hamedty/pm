@@ -4,7 +4,7 @@ import time
 import aioconsole
 
 CONVEYOR_SPEED = 5
-LIFT_SPEED = 55
+LIFT_SPEED = 60
 
 
 DOSING_TIMEOUT = 3

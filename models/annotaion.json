@@ -1,15 +1,15 @@
 {
     "101": {
         "dosing": {
-            "q9ivywje": {
-                "zero": 192
+            "vvxdcj0c": {
+                "zero": 206
             }
         },
         "dosing_roi": {
             "dx": 236,
-            "dy": 205,
-            "x0": 234,
-            "y0": 34
+            "dy": 213,
+            "x0": 217,
+            "y0": 31
         },
         "holder": {
             "0m1whc6p": {
@@ -87,33 +87,15 @@
             "y0": 138
         },
         "holder": {
-            "410r222s": {
-                "zero": 198
-            },
-            "aa9uzj14": {
-                "zero": 197
-            },
-            "eqaouequ": {
-                "zero": 201
-            },
-            "lrdxxyyl": {
-                "zero": 241
-            },
-            "phx3mw8i": {
-                "zero": 160
-            },
-            "sr0fmycd": {
-                "zero": 211
-            },
-            "sxgqpfzh": {
+            "es7gnjqd": {
                 "zero": 217
             }
         },
         "holder_roi": {
             "dx": 177,
             "dy": 167,
-            "x0": 228,
-            "y0": 191
+            "x0": 221,
+            "y0": 197
         }
     },
     "104": {
