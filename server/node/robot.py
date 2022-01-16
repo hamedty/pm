@@ -33,11 +33,11 @@ class Robot(Node):
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di1ac', 2),
-        ('di1fn', 1),
+        ('di1ac', 0),
+        ('di1fn', 0),
         ('di2mo', 1),  # Limit Switch + - Mode = Active High - NC
-        ('di2ac', 2),  # Limit Switch + - Action = Fast Stop
-        ('di2fn', 1),  # Limit Switch + - Function = Limit
+        ('di2ac', 0),  # Limit Switch + - Action = Fast Stop
+        ('di2fn', 0),  # Limit Switch + - Function = Limit
 
         # Y - Dosing Motor
         (2, {
@@ -63,11 +63,11 @@ class Robot(Node):
             'zb': 1,  # zero backoff
         }),
         ('di3mo', 1),  # Homing Switch - Mode = Active High - NC
-        ('di3ac', 2),
-        ('di3fn', 1),
+        ('di3ac', 0),
+        ('di3fn', 0),
         ('di4mo', 1),  # Limit Switch + - Mode = Active High - NC
-        ('di4ac', 2),  # Limit Switch + - Action = Fast Stop
-        ('di4fn', 1),  # Limit Switch + - Function = Limit
+        ('di4ac', 0),  # Limit Switch + - Action = Fast Stop
+        ('di4fn', 0),  # Limit Switch + - Function = Limit
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
