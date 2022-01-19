@@ -29,12 +29,13 @@ HOLDER_ARDUINO_INDEX = 2
     out13: cartridge vaccum
     out14: reserve
 
-    in1:
-    in2:
-    in3:
-    in4:
+    in1: X (cartridge feeder arm 1) home switch
+    in2: Y (cartridge feeder arm 2) home switch
+    in3: Z (main axis) home switch
+    in4: holder air Q optical sensor
     in5: holder microswitch
     in6: dosing existance sensor
+    in7(s2): Cartridge Hug sensor
 '''
 
 
@@ -67,6 +68,7 @@ async def feeder_process(arduino, G1, command):
 
     # c- comb forward, dosing gate / and High jerk active
     arduino._send_command(f'''
+        {{eac1:3500}}
         {{out2: 1}}
         {{out11: 1}}
         {{z:{{jm: {JERK_FEED:.0f}}}}}
@@ -105,6 +107,7 @@ async def feeder_process(arduino, G1, command):
     #---------------------------------------------------------------
     # 3- relax condition
     arduino._send_command(f'''
+        {{eac1:600}}
         {{z:{{jm: {JERK_IDLE:.0f}}}}}
         G1 Y10 F60000
         {{m2: 30, m3: 30, m6: 100}}
@@ -132,6 +135,7 @@ async def mover_rail_n_grab(arduino, z, feed, G1):
     arduino._send_command(f"G1 Y101 Z{z:.1f} F55000")
     await asyncio.sleep(.006 * 5)
     arduino._send_command(f'''
+        {{uda1:"0x0"}}
         {{out9: 1, out13: 1}}
         M100 ({{posz:n}})
         M100 ({{uda0:"0x{command_id:x}"}})
@@ -159,6 +163,17 @@ async def place_cartridge(arduino):
     await asyncio.sleep(.1)
     arduino._send_command("{out6: 0}")  # unhug
 
+    await wait_for_cartridge(arduino)
+
+
+async def wait_for_cartridge(arduino):
+    if arduino._status.get('r.uda1', 0) == 1:
+        return
+
+    arduino.errors.append('no_cartridge')
+    while not arduino._status.get('r.uda1', 0):
+        await asyncio.sleep(.1)
+
 
 async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_value=1, dosing_value=1):
     if holder_mask:
@@ -173,7 +188,7 @@ async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_value=1,
     if dosing_mask:
         value = False
         if dosing_value:
-            while arduino.dosing_reserve < 5:
+            while arduino.dosing_reserve < 6:
                 await asyncio.sleep(0.001)
         while True:
             _, read_value = await arduino.read_metric('in6', 'r.in6')

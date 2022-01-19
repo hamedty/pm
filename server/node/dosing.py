@@ -9,7 +9,7 @@ LIFT_SPEED = 60
 
 DOSING_TIMEOUT = 3
 DOSING_TIMEOUT_FACTOR = 2
-DOSING_REVERSE_TIME = 1
+DOSING_REVERSE_TIME = .33
 '''
 in1 -> dosing existance gate -> dosing exitsts -> red light on -> read value = 1
 
@@ -128,8 +128,7 @@ class Dosing(Node):
             await self.wait_metric('in3', 0)
             self.buffer_full_time = None
             self.buffer_empty_event.set()
-            asyncio.create_task(feeder.send_command(
-                {'verb': 'set_dosing_reserve', 'change': 1}))
+            asyncio.create_task(self.plus_plus(feeder))
             # wait for jacks to be stable
             await asyncio.sleep(.05)
 
@@ -137,6 +136,10 @@ class Dosing(Node):
             async with self.shield:
                 await self.set_valves([1])
                 await asyncio.sleep(.4)
+
+    async def plus_plus(self, feeder):
+        # await asyncio.sleep(.5)
+        await feeder.send_command({'verb': 'set_dosing_reserve', 'change': 1})
 
     async def motor_control_loop(self, feeder, recipe):
         motors_on = True
@@ -191,7 +194,7 @@ class Dosing(Node):
     async def run_motor_in_reverse(self, reverse_time):
         await self.set_motors(None, (9, 0))
         await self.set_valves([None] * 6 + [1])
-        await asyncio.sleep(.3)
+        await asyncio.sleep(.1)
         # feeder not available
         await self.set_motors(None, (9, CONVEYOR_SPEED))
 
@@ -199,7 +202,7 @@ class Dosing(Node):
 
         await self.set_motors(None, (9, 0))
         await self.set_valves([None] * 6 + [0])
-        await asyncio.sleep(.3)
+        await asyncio.sleep(.1)
         await self.set_motors(None, (9, CONVEYOR_SPEED))
 
     async def detect_direction(self):

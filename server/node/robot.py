@@ -249,6 +249,7 @@ class Robot(Node):
         await self.send_command_raw(f'''
             G1 Y{recipe.Y_CAPPING_DOWN} F{recipe.FEED_Y_DOWN_CAP}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
+            G4 P.35
             G1 X{recipe.X_PARK} F{recipe.FEED_X_BACKWARD}
         ''')
 

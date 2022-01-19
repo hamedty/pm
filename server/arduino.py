@@ -37,6 +37,7 @@ class Arduino(object):
         self._debug = False
         self.dosing_reserve_lock = asyncio.Lock()
         self.dosing_reserve = 0
+        self.errors = []
         self.set_status(message='object created')
         self._open_port()
         self.set_status(message='usb port opened')
@@ -57,6 +58,7 @@ class Arduino(object):
         self.lock.release()
         self.init_command_id()
         self.dosing_reserve = 0
+        self.errors = []
 
     async def set_dosing_reserve(self, value=None, change=None):
         async with self.dosing_reserve_lock:
@@ -160,6 +162,7 @@ class Arduino(object):
 
         d['age'] = time.time() - d['time']
         d['stat_code'] = self.stat_code
+        d['errors'] = self.errors
         del d['time']
         return d
 
@@ -206,10 +209,13 @@ def clean_dictionary(dictionary):
             new_dict[key] = value
     if 'r.uda0' in new_dict:
         new_dict['r.uda0'] = int(new_dict['r.uda0'], 16)
+    if 'r.uda1' in new_dict:
+        new_dict['r.uda1'] = int(new_dict['r.uda1'], 16)
     return new_dict
 
 
-GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2', 'r.stat', 'r.uda0', 'er.st'}
+GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2',
+             'r.stat', 'r.uda0', 'r.uda1', 'er.st'}
 
 
 def clean_key(key):

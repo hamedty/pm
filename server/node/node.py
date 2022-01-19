@@ -21,7 +21,7 @@ class WAIT_METRIC_TIMEOUT_EXCEPTION(Exception):
 
 
 class ConnectionPool(object):
-    def __init__(self, ip, port, count=5):
+    def __init__(self, ip, port, count=8):
         self.ip = ip
         self.port = port
         self.count = count
@@ -208,6 +208,11 @@ class Node(object):
                 await self.raise_hold_error()
             # elif self.is_hold_error_raised():
             #     await self.clear_hold_error()
+
+        # if 'errors' in kwargs:
+        #     errors = kwargs['errors']
+        #     if 'no_cartridge' in errors:
+        #         await self.raise_no_cartridge_error()
 
     async def raise_hold_error(self):
         if self.is_hold_error_raised():

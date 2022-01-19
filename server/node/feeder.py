@@ -98,10 +98,14 @@ class Feeder(Node):
         ('di5ac', 0),
         ('di5fn', 0),
 
+        ('di7mo', 0),  # Holder Input - Mode = Active Low - NC
+        ('di7ac', 0),
+        ('di7fn', 0),
+
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
-        ('sr', {'uda0': True, 'posx': True,
+        ('sr', {'uda0': True, 'uda1': True, 'posx': True,
                 'posy': True, 'posz': True, 'stat': True}),
         ('si', 250),  # also every 250ms
     ]

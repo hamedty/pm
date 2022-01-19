@@ -166,8 +166,8 @@ async def feeder_handover_to_rail(system, ALL_NODES):
     assert await feeder.is_homed(), 'Feeder is not homed!'
     assert rail.is_at_loc(z=D_STANDBY) or rail.is_at_loc(
         z=D_MIN), 'rail is in bad location'
-    assert feeder.is_at_loc(z=FEEDER_Z_DELIVER) or feeder.is_at_loc(
-        z=FEEDER_Z_IDLE), 'feeder is in bad location'
+    # assert feeder.is_at_loc(z=FEEDER_Z_DELIVER) or feeder.is_at_loc(
+    #     z=FEEDER_Z_IDLE), 'feeder is in bad location'
 
     # jack's to normal
     await rail.set_valves([0, 0])

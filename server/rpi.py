@@ -131,6 +131,10 @@ async def align(command):
                 break
             arduino.send_command('{%s:0}' % valve)
             await asyncio.sleep(.3)
+            steps = 120
+            arduino.send_command('G10 L20 P1 %s0' % axis)
+            arduino.send_command('G1 %s%d F%d' % (axis, steps, feed))
+            await asyncio.sleep(abs(steps) / float(feed) * 60 + .1)
             arduino.send_command('{%s:1}' % valve)
             await asyncio.sleep(.2)
 
