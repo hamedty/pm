@@ -32,10 +32,12 @@ HOLDER_ARDUINO_INDEX = 2
     in1: X (cartridge feeder arm 1) home switch
     in2: Y (cartridge feeder arm 2) home switch
     in3: Z (main axis) home switch
-    in4: holder air Q optical sensor
+    in4: holder air low level optical sensor
     in5: holder microswitch
     in6: dosing existance sensor
     in7(s2): Cartridge Hug sensor
+    in8: holder air high level optical sensor
+
 '''
 
 
@@ -110,18 +112,18 @@ async def feeder_process(arduino, G1, command):
         {{eac1:600}}
         {{z:{{jm: {JERK_IDLE:.0f}}}}}
         G1 Y10 F60000
-        {{m2: 30, m3: 30, m6: 100}}
+        {{m2: 30, m3: 30, m6: 70}}
         {{out10: 1}}
         ''')
 
 
 async def do_holder_task(n, N, mask, arduino):
-    await wait_for_inputs(arduino, holder_mask=1, holder_value=0)
+    await wait_for_inputs(arduino, holder_mask=1, holder_line_mask=1, holder_value=0)
     n += 2  # 1 indexed holder number
     if n <= N:
         arduino._send_command("{out7: 1}")  # gate will be closed automatically
         await asyncio.sleep(0.05)
-        await wait_for_inputs(arduino, holder_mask=1, dosing_mask=1)
+        await wait_for_inputs(arduino, holder_mask=1, holder_line_mask=1, dosing_mask=1)
     if n == N:
         # close dosing gate
         arduino._send_command("{out11: 0}")
@@ -170,12 +172,12 @@ async def wait_for_cartridge(arduino):
     if arduino._status.get('r.uda1', 0) == 1:
         return
 
-    arduino.errors.append('no_cartridge')
+    # arduino.errors.append('no_cartridge')
     while not arduino._status.get('r.uda1', 0):
         await asyncio.sleep(.1)
 
 
-async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_value=1, dosing_value=1):
+async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_line_mask=0, holder_value=1, dosing_value=1):
     if holder_mask:
         value = False
         while True:
@@ -184,6 +186,16 @@ async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_value=1,
             if value:
                 break
             await asyncio.sleep(0.005)
+
+    if holder_line_mask:
+        value = False
+        line_value = 1
+        while True:
+            _, read_value = await arduino.read_metric('in4', 'r.in4')
+            value = (read_value == line_value)
+            if value:
+                break
+            await asyncio.sleep(3)
 
     if dosing_mask:
         value = False

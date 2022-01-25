@@ -94,6 +94,10 @@ class Feeder(Node):
         ('di3ac', 1),
         ('di3fn', 1),
 
+        ('di4mo', 0),  # Holder Low Level - Mode = Active Low
+        ('di4ac', 0),
+        ('di4fn', 0),
+
         ('di5mo', 0),  # Holder Input - Mode = Active Low - NC
         ('di5ac', 0),
         ('di5fn', 0),
