@@ -108,6 +108,7 @@ class Station(Node):
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
+        'H_DELIVER': -1,
         'holder_offset': 0,
         'dosing_offset': 0,
         'holder_webcam_direction': 'up',
@@ -375,7 +376,7 @@ class Station(Node):
         data['FEED_DANCE_BACK'] = data['FEED_DANCE']
 
         # Deliver
-        data['H_DELIVER'] = -1
+        data['H_DELIVER'] = self.hw_config['H_DELIVER']
         data['FEED_DELIVER'] = recipe.FEED_Z_UP
 
         command = '''

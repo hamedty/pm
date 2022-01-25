@@ -102,11 +102,11 @@ async def feeder_process(arduino, G1, command):
         ''')
 
 
-async def do_holder_task(n, N, mask_holder, mask_dosing, arduino):
+async def do_holder_task(i, N, mask_holder, mask_dosing, arduino):
     ''' This function get called 11 times. When the rail is at the exact location'''
 
     # # open dosing gate
-    # if mask[i + 1] and (dosing_gate == 0):
+    # if mask_dosing[i] and (dosing_gate == 0):
     #     arduino._send_command('{out11: 1}')
     #     dosing_gate = 1
 
@@ -114,23 +114,23 @@ async def do_holder_task(n, N, mask_holder, mask_dosing, arduino):
                           holder_mask=1,
                           holder_line_mask=1,
                           holder_value=0)
-    n += 1  # 1 indexed holder number
-    if n <= N:
+
+    if i < N:
         arduino._send_command("{out7: 1}")  # gate will be closed automatically
         await asyncio.sleep(0.05)
         await wait_for_inputs(arduino,
                               holder_mask=1,
                               holder_line_mask=1,
                               dosing_mask=1)
-    if n == N:
+    if i == N - 1:
         # close dosing gate
         arduino._send_command("{out11: 0}")
 
     # # close dosing gate
-    # if (mask[i + 1] == 0) and (dosing_gate == 1):
+    # if (mask_dosing[i + 1] == 0) and (dosing_gate == 1):
     #     arduino._send_command('{out11: 0}')
     #     dosing_gate = 0
-    #     await asyncio.sleep(.25)
+    #     await asyncio.sleep(.1)
 
 
 async def mover_rail_n_grab(arduino, z, feed, G1):
