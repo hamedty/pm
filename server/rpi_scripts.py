@@ -54,7 +54,8 @@ async def feeder_process(arduino, G1, command):
     # prepare masks
     initial_z = FEEDER_OFFSET
     N = len(command['mask'])
-    mask = command['mask'] + [0]
+    mask_holder = command['mask'] + [0]
+    mask_dosing = command['mask'] + [0]
 
     #---------------------------------------------------------------
 
@@ -78,33 +79,17 @@ async def feeder_process(arduino, G1, command):
     #---------------------------------------------------------------
     # 2- loop
 
-    # # dosing gate
-    # dosing_gate = 0
-    # if mask[0] and dosing_gate == 0:
-    #     arduino._send_command('{out11: 1}')
-    #     dosing_gate = 1
-
-    holder_task = asyncio.create_task(do_holder_task(-1, N, mask, arduino))
-    for i in range(N):
+    for i in range(N + 1):
+        holder_task = asyncio.create_task(do_holder_task(
+            i, N, mask_holder, mask_dosing, arduino))
+        await place_cartridge(arduino, no=(i == 0))
         await holder_task
 
-        # # close dosing gate
-        # if (mask[i + 1] == 0) and (dosing_gate == 1):
-        #     arduino._send_command('{out11: 0}')
-        #     dosing_gate = 0
-        #     await asyncio.sleep(.25)
+        if i == N:
+            break
 
         z = FEEDER_OFFSET + 25 * (i + 1)
         await mover_rail_n_grab(arduino, z, FEED_FEED, G1)
-
-        # # open dosing gate
-        # if mask[i + 1] and (dosing_gate == 0):
-        #     arduino._send_command('{out11: 1}')
-        #     dosing_gate = 1
-
-        holder_task = asyncio.create_task(do_holder_task(i, N, mask, arduino))
-        await place_cartridge(arduino)
-    await holder_task
 
     #---------------------------------------------------------------
     # 3- relax condition
@@ -113,23 +98,39 @@ async def feeder_process(arduino, G1, command):
         {{z:{{jm: {JERK_IDLE:.0f}}}}}
         G1 Y10 F60000
         {{m2: 30, m3: 30, m6: 70}}
-        {{out10: 1}}
+        {{out1: 0, out10: 1}}
         ''')
 
 
-async def do_holder_task(n, N, mask, arduino):
-    await wait_for_inputs(arduino, holder_mask=1, holder_line_mask=1, holder_value=0)
-    n += 2  # 1 indexed holder number
+async def do_holder_task(n, N, mask_holder, mask_dosing, arduino):
+    ''' This function get called 11 times. When the rail is at the exact location'''
+
+    # # open dosing gate
+    # if mask[i + 1] and (dosing_gate == 0):
+    #     arduino._send_command('{out11: 1}')
+    #     dosing_gate = 1
+
+    await wait_for_inputs(arduino,
+                          holder_mask=1,
+                          holder_line_mask=1,
+                          holder_value=0)
+    n += 1  # 1 indexed holder number
     if n <= N:
         arduino._send_command("{out7: 1}")  # gate will be closed automatically
         await asyncio.sleep(0.05)
-        await wait_for_inputs(arduino, holder_mask=1, holder_line_mask=1, dosing_mask=1)
+        await wait_for_inputs(arduino,
+                              holder_mask=1,
+                              holder_line_mask=1,
+                              dosing_mask=1)
     if n == N:
         # close dosing gate
         arduino._send_command("{out11: 0}")
-    if n > N:
-        # release holder microswitch
-        arduino._send_command("{out1: 0}")
+
+    # # close dosing gate
+    # if (mask[i + 1] == 0) and (dosing_gate == 1):
+    #     arduino._send_command('{out11: 0}')
+    #     dosing_gate = 0
+    #     await asyncio.sleep(.25)
 
 
 async def mover_rail_n_grab(arduino, z, feed, G1):
@@ -139,18 +140,21 @@ async def mover_rail_n_grab(arduino, z, feed, G1):
     arduino._send_command(f'''
         {{uda1:"0x0"}}
         {{out9: 1, out13: 1}}
-        M100 ({{posz:n}})
+
+        ;release holder microswitch
+        M100 ({{posz:n, out1: 0}})
         M100 ({{uda0:"0x{command_id:x}"}})
     ''')
     await arduino.wait_for_command_id(command_id)
     await G1({'arduino_index': HOLDER_ARDUINO_INDEX, 'z': z, 'feed': feed, 'correct_initial': True})
 
-    # cartridge forward / hug / release holder microswitch
-    arduino._send_command("{out4: 1, out6: 1, out1: 0}")
-    await asyncio.sleep(.15)
+    # cartridge forward / hug
+    arduino._send_command("{out4: 1, out6: 1}")
 
 
-async def place_cartridge(arduino):
+async def place_cartridge(arduino, no=False):
+    if no:
+        return
     # bring jack up
     arduino._send_command("{out9: 0}")  # bring jack up
     await asyncio.sleep(.07)
@@ -177,7 +181,13 @@ async def wait_for_cartridge(arduino):
         await asyncio.sleep(.1)
 
 
-async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_line_mask=0, holder_value=1, dosing_value=1):
+async def wait_for_inputs(arduino,
+                          holder_mask=0,
+                          holder_value=1,
+                          holder_line_mask=0,
+                          holder_line_value=1,
+                          dosing_mask=0,
+                          dosing_value=1):
     if holder_mask:
         value = False
         while True:
@@ -189,10 +199,9 @@ async def wait_for_inputs(arduino, holder_mask=0, dosing_mask=0, holder_line_mas
 
     if holder_line_mask:
         value = False
-        line_value = 1
         while True:
             _, read_value = await arduino.read_metric('in4', 'r.in4')
-            value = (read_value == line_value)
+            value = (read_value == holder_line_value)
             if value:
                 break
             await asyncio.sleep(3)
