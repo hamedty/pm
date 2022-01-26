@@ -55,7 +55,8 @@ async def feeder_process(arduino, G1, command):
     initial_z = FEEDER_OFFSET
     N = len(command['mask'])
     mask_holder = command['mask'] + [0]
-    mask_dosing = command['mask'] + [0]
+    mask_dosing = command['mask'] + [0, 0]
+    mask_dosing[8] = 0
 
     #---------------------------------------------------------------
 
@@ -105,32 +106,27 @@ async def feeder_process(arduino, G1, command):
 async def do_holder_task(i, N, mask_holder, mask_dosing, arduino):
     ''' This function get called 11 times. When the rail is at the exact location'''
 
-    # # open dosing gate
-    # if mask_dosing[i] and (dosing_gate == 0):
-    #     arduino._send_command('{out11: 1}')
-    #     dosing_gate = 1
+    # open dosing gate
+    if (mask_dosing[i] == 1) and (i == 0 or (mask_dosing[i - 1] == 0)):
+        arduino._send_command('{out11: 1}')
 
+    # no holder before gate and holder Q is full
     await wait_for_inputs(arduino,
                           holder_mask=1,
-                          holder_line_mask=1,
-                          holder_value=0)
+                          holder_value=0,
+                          holder_line_mask=1)
 
     if i < N:
         arduino._send_command("{out7: 1}")  # gate will be closed automatically
         await asyncio.sleep(0.05)
         await wait_for_inputs(arduino,
                               holder_mask=1,
-                              holder_line_mask=1,
-                              dosing_mask=1)
-    if i == N - 1:
-        # close dosing gate
-        arduino._send_command("{out11: 0}")
+                              dosing_mask=mask_dosing[i])
 
-    # # close dosing gate
-    # if (mask_dosing[i + 1] == 0) and (dosing_gate == 1):
-    #     arduino._send_command('{out11: 0}')
-    #     dosing_gate = 0
-    #     await asyncio.sleep(.1)
+    # close dosing gate
+    if (mask_dosing[i + 1] == 0) and (mask_dosing[i] == 1):
+        arduino._send_command('{out11: 0}')
+        await asyncio.sleep(.1)
 
 
 async def mover_rail_n_grab(arduino, z, feed, G1):
@@ -204,7 +200,7 @@ async def wait_for_inputs(arduino,
             value = (read_value == holder_line_value)
             if value:
                 break
-            await asyncio.sleep(3)
+            await asyncio.sleep(4)
 
     if dosing_mask:
         value = False

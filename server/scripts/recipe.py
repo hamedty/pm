@@ -106,7 +106,7 @@ async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations
 
     # stations
     for station in stations:
-        condition = station.is_at_loc(z=-1) or station.is_at_loc(
+        condition = station.is_at_loc(z=station.hw_config['H_DELIVER']) or station.is_at_loc(
             z=40) or station.is_at_loc(z=0)
         message = '%s is not at proper location' % station.name
         assert condition, message

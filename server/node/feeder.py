@@ -167,7 +167,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 25000),  # holder gate on/off
-            (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
+            (6, 15),  (8, 10)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])
