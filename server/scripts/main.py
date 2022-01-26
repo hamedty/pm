@@ -55,7 +55,7 @@ async def main(system, ALL_NODES):
         await rail.rail_parked_event.wait()
         rail.rail_parked_event.clear()
         print(f'rail portion: {time.time() - t1:.1f}')
-        print(f'complete: {time.time() - t0:.1f}')
+        print(f'\t\t\t\t\t\t\tcomplete: {time.time() - t0:.1f}')
         t0 = time.time()
 
         # do robots
@@ -79,8 +79,8 @@ async def main(system, ALL_NODES):
     for task in stations_loop:
         task.cancel()
 
-    await dosing_feeder.terminate_feeding_loop(feeder)
     await feeder_loop_task
+    await dosing_feeder.terminate_feeding_loop(feeder)
     await feeder.set_motors()  # set all feeder motors to 0
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 

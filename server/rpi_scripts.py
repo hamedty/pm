@@ -57,8 +57,12 @@ async def feeder_process(arduino, G1, command):
     mask_holder = command['mask'] + [0]
     mask_dosing = command['mask'] + [0, 0]
 
-    mask_holder[4] = 0  # station 2
-    mask_dosing[8] = 0  # station 2
+    disabled_stations = []
+    for disabled_station in disabled_stations:
+        holder_index = (disabled_station + 2) % 10
+        dosing_index = (disabled_station + 6) % 10
+        mask_holder[holder_index] = 0  # station 2 - 4
+        mask_dosing[dosing_index] = 0  # station 2 - 8
 
     #---------------------------------------------------------------
 
@@ -122,10 +126,11 @@ async def do_holder_task(i, N, mask_holder, mask_dosing, arduino):
                           holder_line_mask=1)
 
     if i < N:
-        arduino._send_command("{out7: 1}")  # gate will be closed automatically
+        # gate will be closed automatically
+        arduino._send_command(f"{{out7: {mask_holder[i]:d}}}")
         await asyncio.sleep(0.05)
         await wait_for_inputs(arduino,
-                              holder_mask=1,
+                              holder_mask=mask_holder[i],
                               dosing_mask=mask_dosing[i])
 
     # close dosing gate

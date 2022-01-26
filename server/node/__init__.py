@@ -11,7 +11,7 @@ ALL_NODES = [
     Rail('Rail', '192.168.44.100', arduino_id=2),
 
     Station('Station 1', '192.168.44.101'),
-    # Station('Station 2', '192.168.44.102'),
+    Station('Station 2', '192.168.44.102'),
     Station('Station 3', '192.168.44.103'),
     Station('Station 4', '192.168.44.104'),
     Station('Station 5', '192.168.44.105'),
@@ -36,9 +36,9 @@ if 'Station 1' in ALL_NODES_DICT:
 
 if 'Station 2' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 2']
-    station.hw_config['H_ALIGNING'] = 226
-    station.hw_config['H_PUSH'] = 237.5
-    station.hw_config['H_PRE_DANCE'] = 246
+    station.hw_config['H_ALIGNING'] = 225 + 1
+    station.hw_config['H_PUSH'] = 237 + 1.5
+    station.hw_config['H_PRE_DANCE'] = 244 + 1
     station.hw_config['H_DELIVER'] = 1
     station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['holder_webcam_direction'] = 'down'
