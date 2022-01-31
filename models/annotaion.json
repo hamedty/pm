@@ -1,6 +1,9 @@
 {
     "101": {
         "dosing": {
+            "sfmlb7ru": {
+                "zero": 200
+            },
             "vvxdcj0c": {
                 "zero": 206
             }
@@ -246,9 +249,6 @@
             },
             "j05t7r0g": {
                 "zero": 196
-            },
-            "z8q6dkde": {
-                "zero": 286
             }
         },
         "dosing_roi": {

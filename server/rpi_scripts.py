@@ -37,6 +37,7 @@ HOLDER_ARDUINO_INDEX = 2
     in6: dosing existance sensor
     in7(s2): Cartridge Hug sensor
     in8: holder air high level optical sensor
+    in9: low cartridge alarm - NC - active low
 
 '''
 
@@ -190,7 +191,6 @@ async def wait_for_inputs(arduino,
                           holder_mask=0,
                           holder_value=1,
                           holder_line_mask=0,
-                          holder_line_value=1,
                           dosing_mask=0,
                           dosing_value=1):
     if holder_mask:
@@ -205,11 +205,10 @@ async def wait_for_inputs(arduino,
     if holder_line_mask:
         value = False
         while True:
-            _, read_value = await arduino.read_metric('in4', 'r.in4')
-            value = (read_value == holder_line_value)
-            if value:
+            _, read_value = await arduino.read_metric('uda2', 'r.uda2')
+            if read_value < 20000:
                 break
-            await asyncio.sleep(4)
+            await asyncio.sleep(0.005)
 
     if dosing_mask:
         value = False

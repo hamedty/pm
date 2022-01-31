@@ -128,10 +128,10 @@ class Robot(Node):
         self._stations_slot[index] = station
 
     async def set_valves_grab_infeed(self):
-        mask = [1] * 5
-        # for i in range(5):
-        #     if self._stations_slot[i]:
-        #         mask[5 - i - 1] = 1
+        mask = [0] * 5
+        for i in range(5):
+            if self._stations_slot[i]:
+                mask[5 - i - 1] = 1
         mask = mask * 2
         await self.set_valves(mask)
 

@@ -60,9 +60,11 @@ async def main(system, ALL_NODES):
 
         # do robots
         await do_nodes(robots, lambda r: r.do_robot(recipe))
-
-        print(f'robot portion: {time.time() - t0:.1f}')
         t1 = time.time()
+        dt = t1 - t0
+        print(f'robot portion: {dt:.1f}')
+        system.mongo.write('timing', {'robots': dt})
+
         # command rail to do the next cycle
         rail.rail_move_event.set()
 

@@ -125,10 +125,11 @@ class Rail(Robot):
 
             # rail forward
             await self.system.system_running.wait()
+            await self.send_command_raw(f'''
+                G1 Z50 F{recipe.FEED_RAIL_INTACT / 4}
+                G1 Z{recipe.D_STANDBY} F{recipe.FEED_RAIL_INTACT}
+            ''')
             await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
-            # await self.send_command_raw(f'''
-            #     G1 Z{recipe.D_STANDBY} F{recipe.FEED_RAIL_INTACT}
-            # ''')
 
             # clear feeder
             feeder.feeder_is_empty_event.set()

@@ -245,7 +245,7 @@ class Station(Node):
 
     async def align_holder(self, recipe):
         await self.set_valves([0, 1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES_HOLDER}, assert_success=False)
         # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             error = {
@@ -272,7 +272,7 @@ class Station(Node):
         data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], correct_initial=True)
         await self.set_valves([1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES_DOSING}, assert_success=False)
         if (not z1) or (not z2['aligned']):
             await self.set_valves([0, None, None, None])
             await self.G1(z=100, feed=5000)

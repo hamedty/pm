@@ -23,13 +23,13 @@ def detect_dosing(frame, offset):
     p = 1.0 / class_per_rev * step_per_rev
 
     if cls <= 0:
-        cls = -cls * .95
+        cls = -cls
     elif cls <= 33:
-        cls = class_per_rev - (cls * .95)
+        cls = class_per_rev - cls
     else:
         cls = 25
 
-    steps = -cls * p
+    steps = -cls * p * .95
     aligned = bool(abs(cls) < 1)  # np.bool_ to bool
     return steps, aligned
 

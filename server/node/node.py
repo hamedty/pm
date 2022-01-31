@@ -408,7 +408,8 @@ class Node(object):
         elif command['verb'] == 'align' and command['component'] == 'dosing':
             await self.set_valves([0])
             await self.G1(z=self.hw_config['H_ALIGNING'], feed=10000)
-            await self.send_command(command)
+            res = await self.send_command(command)
+            print(res)
             await self.set_valves([0])
             await self.G1(z=100, feed=10000)
 

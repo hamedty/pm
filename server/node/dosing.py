@@ -7,7 +7,7 @@ CONVEYOR_SPEED = 5
 LIFT_SPEED = 15
 
 
-DOSING_TIMEOUT = 3
+DOSING_TIMEOUT = .7
 DOSING_TIMEOUT_FACTOR = 2
 DOSING_REVERSE_TIME = .33
 '''
@@ -207,8 +207,8 @@ class Dosing(Node):
 
     async def detect_direction(self):
         T_FIRST_READ = .030  # wait for proximity_input value established
-        T_INTER_READ = .006
-        N_READ_COUNT = 30
+        T_INTER_READ = .005
+        N_READ_COUNT = 20
         P_THRESHOLD = 0.25
         # wait for proximity_input value established
         await asyncio.sleep(T_FIRST_READ)

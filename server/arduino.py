@@ -211,11 +211,13 @@ def clean_dictionary(dictionary):
         new_dict['r.uda0'] = int(new_dict['r.uda0'], 16)
     if 'r.uda1' in new_dict:
         new_dict['r.uda1'] = int(new_dict['r.uda1'], 16)
+    if 'r.uda2' in new_dict:
+        new_dict['r.uda2'] = int(new_dict['r.uda2'], 16)
     return new_dict
 
 
 GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2',
-             'r.stat', 'r.uda0', 'r.uda1', 'er.st'}
+             'r.stat', 'r.uda0', 'r.uda1', 'r.uda2', 'er.st'}
 
 
 def clean_key(key):

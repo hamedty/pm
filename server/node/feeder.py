@@ -106,6 +106,10 @@ class Feeder(Node):
         ('di7ac', 0),
         ('di7fn', 0),
 
+        ('di9mo', 0),  # Holder Input - Mode = Active Low - NC
+        ('di9ac', 0),
+        ('di9fn', 0),
+
         ('jt', 1.00),
         ('gpa', 2),  # equivalent of G64
         ('sv', 2),  # Status report enabled
@@ -167,7 +171,7 @@ class Feeder(Node):
             # Holder Upstream - Lift and long conveyor
             (4, 4), (7, 11),
             (1, 3750), (10, 25000),  # holder gate on/off
-            (6, 15),  (8, 10)  # Cartridge Conveyor + Randomizer
+            (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
         await self.set_valves([None] * 9 + [1])
@@ -237,6 +241,7 @@ class Feeder(Node):
 
             ''' 1- Fill '''
             if not recipe.SERVICE_FUNC_NO_FEEDER:
+
                 # mask = [1] * recipe.N
                 mask = [1] * recipe.N
                 # mask[5] = 0  # station 3
@@ -256,7 +261,9 @@ class Feeder(Node):
                 self.feeder_finished_command_event.set()
 
             t1 = time.time()
-            print(f'Feeder Fill Loop: {(t1-t0):.1f}')
+            dt = t1 - t0
+            print(f'Feeder Fill Loop: {dt:.1f}')
+            self.system.mongo.write('timing', {'feeder_fill_loop': dt})
 
             ''' 2- Deliver '''
             await self.feeder_rail_is_parked_event.wait()
@@ -268,6 +275,12 @@ class Feeder(Node):
 
             # home Y
             await self.send_command_raw('G38.3 Y-100 F1000\nG10 L20 P1 Y0')
+
+            # check there are enough cartridge
+            cartridge_conveyor_sensor = await self.read_metric('in9')
+            if cartridge_conveyor_sensor == 0:
+                error_clear_event, _ = await self.system.register_error({'message': 'کارتریج تمام شده', 'location_name': self.name})
+                await error_clear_event.wait()
 
             await self.feeder_is_empty_event.wait()
             self.feeder_is_empty_event.clear()
