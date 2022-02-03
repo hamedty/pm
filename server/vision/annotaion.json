@@ -181,6 +181,9 @@
     },
     "106": {
         "dosing": {
+            "csf261k5": {
+                "zero": 198
+            },
             "q9wchi5k": {
                 "zero": 209
             }
@@ -245,10 +248,13 @@
     "108": {
         "dosing": {
             "bb2nvd86": {
-                "zero": 200
+                "zero": 198
+            },
+            "dej1f71l": {
+                "zero": 197
             },
             "j05t7r0g": {
-                "zero": 196
+                "zero": 193
             }
         },
         "dosing_roi": {
@@ -259,16 +265,16 @@
         },
         "holder": {
             "4dj7dbbx": {
-                "zero": 234
+                "zero": 238
             },
             "5voo52ia": {
-                "zero": 197
+                "zero": 201
             },
             "7b1ga82x": {
-                "zero": 200
+                "zero": 204
             },
             "o5lc4zjm": {
-                "zero": 175
+                "zero": 178
             }
         },
         "holder_roi": {

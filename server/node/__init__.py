@@ -72,7 +72,7 @@ if 'Station 6' in ALL_NODES_DICT:
     station.hw_config['H_PRE_DANCE'] = 248
     station.hw_config['dosing_webcam_direction'] = 'riu'
     station.hw_config['presence_threshold']['holder'] = 63
-    station.hw_config['dosing_offset'] = 1  # posetive moves to left
+    # station.hw_config['dosing_offset'] = 1  # posetive moves to left
 
     # station.hw_config['cameras']['dosing']['rois']['sit_right']['x0'] = 50
 
@@ -94,8 +94,8 @@ if 'Station 8' in ALL_NODES_DICT:
     station.hw_config['H_PUSH'] = 236
     station.hw_config['H_PRE_DANCE'] = 243.5
     station.hw_config['holder_webcam_direction'] = 'down'
-    station.hw_config['dosing_offset'] = -2  # positive moves to right
-    station.hw_config['holder_offset'] = 1  # positive moves to right
+    # station.hw_config['dosing_offset'] = -1  # positive moves to right
+    # station.hw_config['holder_offset'] = 1  # positive moves to right
 
 
 if 'Station 9' in ALL_NODES_DICT:

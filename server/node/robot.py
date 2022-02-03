@@ -193,8 +193,6 @@ class Robot(Node):
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
         ''')
 
-        t0 = time.time()
-
         async def stations_verify_and_deliver():
             await asyncio.sleep(T_INPUT_RELEASE)
             await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down(recipe) for station in self._stations])
@@ -213,9 +211,6 @@ class Robot(Node):
             G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} X{X_INPUT} F{recipe.FEED_Y_DOWN}
 
         ''')
-
-        t2 = time.time()
-        print(f'press holder: {t2-t0:.2f}')
 
         await stations_task
 

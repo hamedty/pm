@@ -48,10 +48,13 @@ def train_dosing(node, CPR=100.0, max_iter=MAX_ITER):
     y = y * CPR
     y = np.mod(y.round().astype(int) + int(CPR / 2), CPR) - int(CPR / 2)
 
-    start_back = (115.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
-    end_back = (285.0 / 400 * CPR + CPR / 2) % CPR - CPR / 2
+    band = 100.0
+    margin_back = 50
+    start_back = ((200 - band) / 400 * CPR + CPR / 2) % CPR - CPR / 2
+    end_back = ((200 + band) / 400 * CPR + CPR / 2) % CPR - CPR / 2
 
-    selected = ((end_back - 5) < y) * (y < (start_back + 5))
+    selected = ((end_back - margin_back) < y) * \
+        (y < (start_back + margin_back))
     X = X[selected].copy()
     y = y[selected].copy()
 
@@ -64,7 +67,7 @@ def train_dosing(node, CPR=100.0, max_iter=MAX_ITER):
     train(CPR, X, y, max_iter, '%s_%03d' % (component, node))
 
 
-def train_holder(node, CPR=100.0, max_iter=MAX_ITER):
+def train_holder(node, CPR=80.0, max_iter=MAX_ITER):
     component = 'holder'
     files = glob.glob(DATASET_PATH + '/%s_%03d_*/data.npz' % (component, node))
     y = []
@@ -154,6 +157,7 @@ def main():
 
     nodes = list(src_data.keys())
     nodes.sort()
+    # nodes = ['103', '104', '106', '108']
     componenets = ['holder', 'dosing']
     res = []
     with multiprocessing.get_context('spawn').Pool(5) as pool:

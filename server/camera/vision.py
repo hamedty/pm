@@ -14,8 +14,11 @@ except:
     pass  # robot and rail
 
 
-def detect_dosing(frame, offset):
+def detect_dosing(frame, offset, threshold_factor=1):
     frame = prepare_frame(frame, 'dosing')
+    max_class = clf_dosing.classes_[-1] + offset
+    min_class = abs(clf_dosing.classes_[0]) - abs(offset)  # todo: optimize
+
     cls = clf_dosing.predict([frame])[0] + offset
 
     step_per_rev = 360
@@ -24,13 +27,14 @@ def detect_dosing(frame, offset):
 
     if cls <= 0:
         cls = -cls
-    elif cls <= 33:
+    elif cls < max_class:
         cls = class_per_rev - cls
     else:
-        cls = 25
+        cls = min_class  # for pens that you cant see the front
 
     steps = -cls * p * .95
-    aligned = bool(abs(cls) < 1)  # np.bool_ to bool
+    threshold = 1 * threshold_factor
+    aligned = bool(abs(cls) < threshold)  # np.bool_ to bool
     return steps, aligned
 
 
@@ -39,11 +43,12 @@ def detect_holder(frame, offset):
     cls = clf_holder.predict([frame])[0] + offset
 
     step_per_rev = 360
-    class_per_rev = 100
+    class_per_rev = 80
     p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p
-    aligned = bool(abs(cls) < 1)  # np.bool_ to bool
+    threshold = 1
+    aligned = bool(abs(cls) < threshold)  # np.bool_ to bool
     return steps, aligned
 
 
