@@ -1,17 +1,19 @@
-auto g38 at proper times (free well before and after)
+auto clear tasadof once
 adaptve eac limits
-shlvar ro bekesh bala
+feeder issue warning instead of just waiting
 optimize
   station
   feeder gcodes
   robot moves / commands
   rail
+auto g38 at proper times (free well before and after)
 -------------------------
 extract dosing feeder params to recepie
 feed hold exit strategies: A- auto resume budget based B- protect clear to only be ran once
 verify correct press
 feeder stop motors if didn't feed for a while
 sometimes webcam doest load on boot - reset usb?
+shlvar ro bekesh bala
 if nodes downs, UI must react
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)
 log collection framework
