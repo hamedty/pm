@@ -51,11 +51,13 @@ class Arduino(object):
     def restart(self):
         data = '\x18\n'.encode()
         self.lock.acquire()
-        self.ser.write(data)
-        time.sleep(1)
-        self._open_port()
-        self.stat_code = 0
-        self.lock.release()
+        try:
+            self.ser.write(data)
+            time.sleep(1)
+            self._open_port()
+            self.stat_code = 0
+        finally:
+            self.lock.release()
         self.init_command_id()
         self.dosing_reserve = 0
         self.errors = []
@@ -99,10 +101,12 @@ class Arduino(object):
         data = data.encode()
 
         self.lock.acquire()
-        self.ser.write(data)
-        if self._debug:
-            print('command', data)
-        self.lock.release()
+        try:
+            self.ser.write(data)
+            if self._debug:
+                print('command', data)
+        finally:
+            self.lock.release()
 
     def init_command_id(self):
         self.command_id_lock.acquire()
@@ -130,8 +134,10 @@ class Arduino(object):
         if self.stat_code not in {0, 100}:
             raise HW_PANIC_EXCEPTION(self.stat_code)
 
-    async def read_metric(self, query, response):
+    async def read_metric(self, query, response=None):
         # e.g. query = in5, response = r.in5
+        if response is None:
+            response = 'r.' + query
         if response in self._status:
             del self._status[response]
         self._send_command('{%s:n}' % query)

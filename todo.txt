@@ -1,6 +1,5 @@
-auto clear tasadof once
-adaptve eac limits
 feeder issue warning instead of just waiting
+adaptve eac limits
 optimize
   station
   feeder gcodes

@@ -7,6 +7,7 @@ class Rail(Robot):
     arduino_reset_pin = 2
     HOMMING_RETRIES = 10
     HOMMED_AXES = ['z']
+    AUTO_CLEAR_HOLD = False
 
     g2core_config_base = [
         (1, {

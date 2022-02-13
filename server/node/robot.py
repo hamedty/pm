@@ -7,7 +7,7 @@ class Robot(Node):
     type = 'robot'
     arduino_reset_pin = 2
     HOMMED_AXES = ['x', 'y']
-
+    AUTO_CLEAR_HOLD = True
     g2core_config_base = [
         # X - Holder Motor
         (1, {
@@ -178,8 +178,8 @@ class Robot(Node):
         T_HOLDER_JACK_CLOSE = 0.1
         T_PRE_PRESS = 0.05
         T_POST_PRESS = 0.1
-        T_OUTPUT_GRIPP = 0.2
-        T_OUTPUT_RELEASE = 0.4
+        T_OUTPUT_GRIPP = 0.1
+        T_OUTPUT_RELEASE = 0.2
 
         # ensure about stations
         await stations_task1

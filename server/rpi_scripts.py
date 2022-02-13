@@ -8,10 +8,10 @@ HOLDER_ARDUINO_INDEX = 2
 '''
     m1 (10): holder sequencer - on and off (jack)
     m2, m3: holder pusher motors
-    m4: holder elevator
+    m4: holder conveyor
     m5, m9: dosing feeder motors
     m6: cartridge conveyor
-    m7: holder conveyor
+    m7: holder elevator
     m8: cartridge randomizer
 
     out1: holder microswitch lock
@@ -58,7 +58,7 @@ async def feeder_process(arduino, G1, command):
     mask_holder = command['mask'] + [0]
     mask_dosing = command['mask'] + [0, 0]
 
-    disabled_stations = [3, 6, 8]
+    disabled_stations = [2, 6]
     for disabled_station in disabled_stations:
         holder_index = (disabled_station + 2) % 10
         dosing_index = (disabled_station + 6) % 10
@@ -194,24 +194,26 @@ async def wait_for_inputs(arduino,
                           dosing_mask=0,
                           dosing_value=1):
     if holder_mask:
-        value = False
         while True:
             _, read_value = await arduino.read_metric('in5', 'r.in5')
             value = (read_value == holder_value)
             if value:
                 break
             await asyncio.sleep(0.005)
+        # if holder_value:
+        #     await wait_for_input(arduino, 'in5', lambda x: x == 1, 0.005, 'no_holder_at_gate')
+        # else:
+        #     await wait_for_input(arduino, 'in5', lambda x: x == 0, 0.005, 'extra_holder_at_gate')
 
     if holder_line_mask:
-        value = False
         while True:
             _, read_value = await arduino.read_metric('uda2', 'r.uda2')
             if read_value < 20000:
                 break
             await asyncio.sleep(0.005)
+        # await wait_for_input(arduino, 'uda2', lambda x: x < 20000, 0.005, 'not_enough_holder')
 
     if dosing_mask:
-        value = False
         if dosing_value:
             while arduino.dosing_reserve < 6:
                 await asyncio.sleep(0.001)
@@ -223,3 +225,28 @@ async def wait_for_inputs(arduino,
             await asyncio.sleep(0.005)
         if dosing_value:
             await arduino.set_dosing_reserve(change=-1)
+
+
+async def wait_for_input(arduino, metric, checker, delay, error_id):
+    n = 0
+    error_registered = False
+    while True:
+        _, read_value = await arduino.read_metric(metric)
+        if checker(read_value):
+            break
+        n += 1
+        if n * delay > 1 and not error_registered:
+            error_registered = True
+            asyncio.create_task(register_error(error_id))
+        await asyncio.sleep(delay)
+
+    if error_registered:
+        asyncio.create_task(clear_error(error_id))
+
+
+async def register_error(error_id):
+    pass
+
+
+async def clear_error(error_id):
+    pass

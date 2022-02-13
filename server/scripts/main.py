@@ -48,7 +48,7 @@ async def main(system, ALL_NODES):
     t1 = time.time()
     i = 0
     while not system.system_stop.is_set():
-        # error_clear_event, error_id = await system.register_error({'message': 'دور بعدی شروع شود?', 'location_name': 'System'})
+        # error_clear_event, error_id = await system.register_error({'message': 'دور بعدی شروع شود?', 'location_name': 'System', 'type': 'error'})
         # await error_clear_event.wait()
 
         # wait for rail to be parked
@@ -108,13 +108,15 @@ async def home_all_nodes(system, ALL_NODES):
 
 
 async def do_nodes(stations, func):
-    res = await asyncio.gather(*[func(station) for station in stations], return_exceptions=True)
+    # , return_exceptions=True)
+    res = await asyncio.gather(*[func(station) for station in stations])
     for i in range(len(stations)):
         if isinstance(res[i], Exception):
             error = {
                 'message': 'خطاپیچیده در: %s' % stations[i].name,
                 'location_name': stations[i].name,
                 'details': res[i],
+                'type': 'error',
             }
             print(error)
             # await aioconsole.ainput(str(error))

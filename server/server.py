@@ -46,6 +46,13 @@ class System(object):
         node.boot = True
 
     async def register_error(self, error, error_cb=None):
+        ''' error: {
+            'message',
+            'location_name',
+            'details',
+            'type': 'error / warning',
+        }'''
+
         error_id = str(uuid.uuid1())
         error_event = asyncio.Event()
         error_event.clear()
@@ -56,6 +63,8 @@ class System(object):
             self.errors[error_id] = error
             self.errors_events[error_id] = error_event
             self.errors_cb[error_id] = error_cb
+
+        self.mongo.write('errors', error.copy())
         return error_event, error_id
 
     async def clear_error(self, error_id):

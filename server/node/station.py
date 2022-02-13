@@ -77,7 +77,7 @@ class Station(Node):
             'hd': 0,  # homing direction
             'sv': 1000,  # home search speed
             'lv': 200,  # latch speed
-            'lb': 10,  # latch backoff; if home switch is active at start
+            'lb': 3,  # latch backoff; if home switch is active at start
             'zb': 1,  # zero backoff
         }),
         ('di1mo', 1),  # Homing Switch - Mode = Active High - NC
@@ -230,6 +230,7 @@ class Station(Node):
                     'message': message,
                     'location_name': self.name,
                     'details': check_fullness,
+                    'type': 'error',
                 }
                 print(error)
                 error_clear_event, error_id = await self.system.register_error(error)
@@ -240,6 +241,7 @@ class Station(Node):
         await self.station_is_done_event.wait()
         self.station_is_done_event.clear()
         await self.verify_no_holder_no_dosing()
+        print(f'station {self.name} cleared!')
 
     async def align_holder(self, recipe):
         await self.set_valves([0, 1])
@@ -250,6 +252,7 @@ class Station(Node):
                 'message': 'هولدر را دستی تنظیم کنید.',
                 'location_name': self.name,
                 'details': (z1, z2),
+                'type': 'error',
             }
             print(error)
             # await aioconsole.ainput(str(error))
@@ -278,6 +281,7 @@ class Station(Node):
                 'message': 'دوزینگ را دستی تنظیم کنید.',
                 'location_name': self.name,
                 'details': (z1, z2),
+                'type': 'error',
             }
             print(error)
             # await aioconsole.ainput(str(error))
@@ -303,6 +307,7 @@ class Station(Node):
                 'message': 'استیشن باید خالی باشد. خالی نیست!',
                 'location_name': self.name,
                 'details': res,
+                'type': 'error',
             }
             print(error)
             error_clear_event, error_id = await self.system.register_error(error)
@@ -316,22 +321,23 @@ class Station(Node):
                 'message': 'دوزینگ بد وارد شده!',
                 'location_name': self.name,
                 'details': res,
+                'type': 'error',
             }
             print(error)
             # await aioconsole.ainput(str(error))
             error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
-        await self.G1(z=recipe.STATION_Z_OUTPUT, feed=recipe.FEED_Z_DOWN / 1.5)
+        await self.G1(z=recipe.STATION_Z_OUTPUT, feed=recipe.FEED_Z_DOWN)
 
     async def assemble(self, recipe):
         # Dance
         dance_rev = .5
         charge_h = 0.1
-        H_DANCE = self.hw_config['H_PRE_DANCE'] - ((11 + charge_h) * dance_rev)
+        H_DANCE = self.hw_config['H_PRE_DANCE'] - (11 * dance_rev + charge_h)
         Y_DANCE = 360 * dance_rev
 
         # Dance Back
-        H_DANCE_BACK = H_DANCE + (charge_h * dance_rev)
+        H_DANCE_BACK = H_DANCE + charge_h
         H_DANCE_BACK2 = self.hw_config['H_PRE_DANCE']
         Y_DANCE_BACK = 0
         Y_DANCE_BACK2 = -7
@@ -376,14 +382,15 @@ class Station(Node):
             M100 ({{out1: 0, out2: 0, out4: 0}})
             M100 ({{out5: 1}})
             M100 ({{out3: 1}})
-            G4 P1
+            G4 P1.2
             M100 ({{out3: 0}})
 
             ; dance back
-            M100 ({{out1: 1, out4: 1, out5: 0}})
-            G4 P.2
-
+            M100 ({{out1: 1}})
+            G4 P.15
             G1 Z{H_DANCE_BACK:.2f} F5000
+            G4 P.15
+            M100 ({{ out4: 1, out5: 0}})
             G1 Z{H_DANCE_BACK2:.2f} Y{Y_DANCE_BACK:.2f} F{int(recipe.FEED_DANCE):d}
             G1 Y{Y_DANCE_BACK2:.2f} F{int(recipe.FEED_DANCE):d}
             M100 ({{out4: 0}})
@@ -402,5 +409,14 @@ class Station(Node):
         #     '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
 
         # deliver
+        # await self.G1(z=4, feed=recipe.FEED_Z_UP)
+        # eac = self.hw_config['eac'][0]
+        # await self.send_command_raw(f'''
+        #     {{eac1: 0}}
+        #     G28.2 Z0
+        #     G28.5
+        #     G1 Z{self.hw_config['H_DELIVER']:.2f} F1000
+        #     {{eac1: {eac}}}
+        # ''')
         await self.G1(z=self.hw_config['H_DELIVER'], feed=recipe.FEED_Z_UP)
         await self.set_valves([None, None, None, 1])

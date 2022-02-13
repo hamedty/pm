@@ -168,9 +168,9 @@ class Feeder(Node):
 
         await method(
             (2, 4), (3, 4),  # Holder Downstream
-            # Holder Upstream - Lift and long conveyor
+            # Holder Upstream - Long conveyor and Lift
             (4, 4), (7, 11),
-            (1, 3750), (10, 25000),  # holder gate on/off
+            (1, 3250), (10, 25000),  # holder gate on/off
             (6, 15),  (8, 8)  # Cartridge Conveyor + Randomizer
         )
         # turn on air tunnel
@@ -279,7 +279,7 @@ class Feeder(Node):
             # check there are enough cartridge
             cartridge_conveyor_sensor = await self.read_metric('in9')
             if cartridge_conveyor_sensor == 0:
-                error_clear_event, _ = await self.system.register_error({'message': 'کارتریج تمام شده', 'location_name': self.name})
+                error_clear_event, _ = await self.system.register_error({'message': 'کارتریج تمام شده', 'location_name': self.name, 'type': 'error'})
                 await error_clear_event.wait()
 
             await self.feeder_is_empty_event.wait()

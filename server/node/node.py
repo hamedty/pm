@@ -53,6 +53,7 @@ class ConnectionPool(object):
 class Node(object):
     HOMMING_RETRIES = 2
     HOMMED_AXES = ['a']
+    AUTO_CLEAR_HOLD = False
 
     def __init__(self, name, ip, arduino_id=None):
         # self.set_status(message='node instance creating')
@@ -68,6 +69,7 @@ class Node(object):
         self.homed = False
         self.events = {}
         self.errors = {}
+        self.last_hold_clear = 0
 
     def set_system(self, system):
         self.system = system
@@ -190,6 +192,7 @@ class Node(object):
                 'message': 'خطا در حرکت - احتمال تصادف',
                 'location_name': self.name,
                 'details': line,
+                'type': 'error',
             }
             print(error)
             error_clear_event, error_id = await self.system.register_error(error)
@@ -205,7 +208,7 @@ class Node(object):
 
         if 'r.stat' in kwargs:
             if kwargs['r.stat'] == 6:
-                await self.raise_hold_error()
+                asyncio.create_task(self.raise_hold_error())
             # elif self.is_hold_error_raised():
             #     await self.clear_hold_error()
 
@@ -222,8 +225,19 @@ class Node(object):
             'message': 'خطا در حرکت',
             'location_name': self.name,
             'details': 'احتمالا تصادف رخ داده!',
+            'type': 'error',
         }
         clear_cb = self.clear_hold_error
+
+        # Foregiveness
+        foregive = False
+        if self.AUTO_CLEAR_HOLD:
+            if time.time() - self.last_hold_clear > 60:
+                foregive = True
+        if foregive:
+            await self.clear_hold_error()
+            return
+
         print(error)
         _, error_id = await self.system.register_error(error, clear_cb)
         self.errors['holded']['error_id'] = error_id
@@ -235,7 +249,11 @@ class Node(object):
     async def clear_hold_error(self):
         if self.errors['holded']['status'] == 'clearing':
             return
+
         self.errors['holded']['status'] = 'clearing'
+        self.last_hold_clear = time.time()
+        await asyncio.sleep(.8)
+
         await self.set_eac(eac1=0, eac2=0, wait_start=[], wait_completion=False)
         # detect axis error
         enc_configs = self.hw_config['encoders']
