@@ -1,0 +1,128 @@
+#home-frame {
+  padding: 100px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1
+}
+
+#home-upper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.home-upper-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: baseline;
+  padding-top: 50px;
+  background-color: gray;
+  width: 350px;
+  height: 250px;
+  border-radius: 15px;
+}
+
+#home-upper-box-last {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  padding: 10px 0px 10px
+}
+
+#home-upper-box-last>div.left {
+  flex-grow: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#home-upper-box-last>div.right {
+  flex-grow: 4;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+  margin: 30px;
+}
+
+.home-upper-btn {
+  font-size: 18px;
+  border-radius: 15px;
+  width: 125px;
+  height: 125px;
+}
+
+.home-upper-btn>span {
+  font-size: 60px;
+}
+
+#home-upper-box-btn-run {
+  font-size: 48px;
+  width: 150px;
+  height: 150px;
+}
+
+#home-upper-box-btn-play {
+  font-size: 30px;
+  /* height: 70px; */
+}
+
+#home-hr {
+  background-color: white;
+  height: 2px;
+  margin: 40px 0px 40px
+}
+
+#home-lower {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-around;
+}
+
+#home-lower-div-left {
+  flex-grow: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.home-lower-box-left {
+  background-color: gray;
+  width: 80%;
+  border-radius: 15px;
+  padding: 50px;
+}
+
+.home-lower-box-left>h1, .home-lower-box-left>h4, .home-lower-box-left>h1>small {
+  color: white;
+}
+
+#home-lower-div-right {
+  flex-grow: 7;
+}
+
+#home-lower-box-alarms {
+  background-color: gray;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  padding: 20px
+}
+
+.home-lower-box-alarm-item, .home-lower-box-warning-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin: 5px 0 5px;
+  align-items: center;
+  border-radius: 10px;
+  height: 40px;
+  font-size: 18px;
+}
+
+.home-lower-box-alarm-item {
+  background-color: #edd7d7;
+}
+
+.home-lower-box-warning-item {
+  background-color: #fff8a0;
+}

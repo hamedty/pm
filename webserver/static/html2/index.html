@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+  <meta charset="utf-8" />
+  <title>PM - PAM2060</title>
+  <base href="/" />
+  <meta name="viewport" content="width=1920, initial-scale=2" />
+  <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
+  <link href="/static/dependencies/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/index2.css">
+  <link rel="stylesheet" href="/static/css/home.css">
+
+  <script src="/static/dependencies/angular.min.js"></script>
+  <script src="/static/dependencies/jquery.min.js"></script>
+  <script src="/static/dependencies/bootstrap/js/bootstrap.min.js"></script>
+  <script src="/static/dependencies/angular-websocket.min.js"></script>
+  <script src="/static/dependencies/d3.min.js"></script>
+  <script src="/static/dependencies/moment.js"></script>
+
+  <script src="/static/js/app.js"></script>
+</head>
+
+<body ng-app="app" ng-controller="app_controller">
+  <!-- No Connection -->
+  <div ng-show="no_connection" id="no-connection-overlay">
+    <h1>Connection to the Server is Lost!</h1>
+  </div>
+
+  <!-- container -->
+  <div id="container">
+    <div id="left-bar">
+      <div id="left-bar-logo-wrapper">
+
+        <img id="logo" src="/static/PM_VERTICAL_LOGO_BoW.svg" />
+        <h1 id="logo-text"> PAM2060 </h1>
+      </div>
+
+      <div id="left-bar-buttons-wrapper">
+        <!-- Left buttons wrapper -->
+        <button type="button" class="btn btn-lg btn-success left-bar-button" id="left-bar-button-home">
+          <span class="glyphicon glyphicon-home"></span>
+        </button>
+        <button type="button" class="btn btn-lg btn-default left-bar-button" id="left-bar-button-stats">
+          <span class="glyphicon glyphicon-stats"></span>
+        </button>
+        <button type="button" class="btn btn-lg btn-default left-bar-button" id="left-bar-button-recipe">
+          <span class="glyphicon glyphicon-edit"></span>
+        </button>
+        <button type="button" class="btn btn-lg btn-default left-bar-button" id="left-bar-button-advanced">
+          <span class="glyphicon glyphicon-wrench"></span>
+        </button>
+        <button type="button" class="btn btn-lg btn-default left-bar-button" id="left-bar-button-settings">
+          <span class="glyphicon glyphicon-cog"></span>
+        </button>
+      </div>
+
+    </div>
+
+
+    <div id="right-side">
+      <div id="top-bar">
+        <div> </div>
+        <div>
+          <span> Basalin - ING0021 </span>
+        </div>
+        <div id="top-left-corner">
+          <span> 10:52 AM </span>
+          <span> 2022/02/03 </span>
+        </div>
+      </div>
+      <div id="home-frame">
+        <div id="home-upper">
+          <div class="home-upper-box">
+            <button class="btn btn-success btn-lg home-upper-btn"><span class="glyphicon glyphicon-fire"></span><br />Warm Up</button>
+            <button class="btn btn-default btn-lg home-upper-btn"><span class="glyphicon glyphicon-log-in"></span><br />Feed 16</button>
+
+          </div>
+          <div class="home-upper-box">
+            <button class="btn btn-default btn-lg home-upper-btn"><span class="glyphicon glyphicon-remove-sign"></span><br />Close Feed</button>
+            <button class="btn btn-default btn-lg home-upper-btn"><span class="glyphicon glyphicon-log-out"></span><br />Empty Rail</button>
+
+          </div>
+          <div class="home-upper-box" id="home-upper-box-last">
+            <div class="left">
+              <button class="btn btn-success btn-lg" id="home-upper-box-btn-run">RUN</button>
+            </div>
+            <div class="right">
+              <button class=" btn btn-success btn-lg" id="home-upper-box-btn-play"><span class="glyphicon glyphicon-play"></span></button>
+              <button class="btn btn-danger btn-lg" id="home-upper-box-btn-play"><span class="glyphicon glyphicon-stop"></span></button>
+            </div>
+
+          </div>
+
+        </div>
+        <div id="home-hr">
+        </div>
+        <div id="home-lower">
+          <div id="home-lower-div-left">
+            <div class="home-lower-box-left">
+              <h1>1818 <small>pens</small></h1>
+              <h4> Since 8:12 AM </h4>
+
+              <button class="btn btn-default btn-lg"><span class="glyphicon glyphicon-repeat"></span> RESET</button>
+            </div>
+            <div class="home-lower-box-left">
+              <h1>2313 <small>pens/hr</small></h1>
+              <h4> In last 10 mins. </h4>
+            </div>
+          </div>
+          <div id="home-lower-div-right">
+            <div id="home-lower-box-alarms">
+              <h2> Alarms </h2>
+              <div id="home-lower-box-alarms-list">
+                <div class="home-lower-box-alarm-item">
+                  <span>Station 2</span>
+                  <span>استیشن را خالی کنید</span>
+                  <button class="btn btn-danger">Clear</button>
+                </div>
+                <div class="home-lower-box-warning-item">
+                  <span>Station 2</span>
+                  <span>استیشن را خالی کنید</span>
+                  <div style="width:60px"></div>
+                </div>
+                <div class="home-lower-box-alarm-item">
+                  <span>Feeder</span>
+                  <span>کارتریج تمام شده</span>
+                  <button class="btn btn-danger">Clear</button>
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--
+
+
+        <hr />
+        <div class="row">
+          <div class="col-md-3">
+            <p>
+              <button type="button" class="btn btn-lg main-action">آماده‌سازی شروع</button>
+            </p>
+            <p>
+              <button type="button" class="btn btn-lg main-action">فید ۱۶ دوزینگ</button>
+            </p>
+          </div>
+          <div class="col-md-7">
+            <p>
+              <button type="button" class="btn btn-lg main-action">بستن فید</button>
+            </p>
+            <p>
+              <button type="button" class="btn btn-lg main-action">تخلیه ریل</button>
+            </p>
+          </div>
+          <div class="col-md-2">
+            <p>
+            </p>
+
+          </div>
+        </div>
+        <div class="row" style="background-color: #e5e5e5;margin-left:0px;margin-right:0px;">
+          <h4> Alarms: </h4>
+          <div class="col-md-2" style="width: 100%; height: 300px; overflow-y: scroll; padding:0">
+            <table class="table table-hover">
+              <tr ng-repeat="error in errors track by $index" class="danger">
+                <td style="width:15%; text-align:center;">
+                  {{error.location_name}}
+                </td>
+                <td style="width:70%">
+                  {{error.message}}
+                </td>
+                <td style="width:10%; text-align:right;">
+                  <button class="btn btn-danger btn" ng-click="clear_error(error)" style="width:100px;">Clear</button>
+
+                </td>
+
+              </tr>
+            </table>
+
+
+
+
+          </div>
+        </div>
+      </div> -->
+
+
+
+    </div>
+  </div>
+  </div>
+
+
+</body>
+
+</html>

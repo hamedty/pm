@@ -6,7 +6,10 @@ import asyncio
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-from . import annotation
+try:
+    from . import annotation
+except:
+    pass
 PATH = os.path.dirname(os.path.abspath(__file__))
 STATIC_PATH_DIR = os.path.join(PATH, 'static')
 
@@ -14,6 +17,14 @@ STATIC_PATH_DIR = os.path.join(PATH, 'static')
 class Index(tornado.web.RequestHandler):
     def get(self):
         filename = os.path.join(STATIC_PATH_DIR, 'html/index.html')
+        with open(filename) as f:
+            content = f.read()
+        self.finish(content)
+
+
+class Index2(tornado.web.RequestHandler):
+    def get(self):
+        filename = os.path.join(STATIC_PATH_DIR, 'html2/index.html')
         with open(filename) as f:
             content = f.read()
         self.finish(content)
@@ -53,6 +64,27 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         SYSTEM.deregister_ws(self)
 
 
+class WebSocket2(tornado.websocket.WebSocketHandler):
+    data = {
+
+        'type': 'status_update',
+        'errors': [
+            {'location_name': 'فیدر', 'message': 'هولدر نیومده', 'type': 'error'}
+        ] * 0
+    }
+
+    async def open(self):
+        while True:
+            message = self.data
+            message = json.dumps(message)
+            self.write_message(message)
+            await asyncio.sleep(.5)
+
+    def on_message(self, message):
+        message = json.loads(message)
+        print(message)
+
+
 def create_server(system=None):
     global SYSTEM
     SYSTEM = system
@@ -68,3 +100,20 @@ def create_server(system=None):
          {'path': annotation.DATASET_PATH})
     ], debug=True)
     app.listen(8080)
+
+
+def test_server(system=None):
+    app = tornado.web.Application([
+        (r"/", Index2),
+        (r"/ws", WebSocket2),
+        (r'/static/(.*)', tornado.web.StaticFileHandler,
+         {'path': STATIC_PATH_DIR}),
+    ], debug=True)
+    app.listen(8080)
+    tornado.ioloop.IOLoop.current().start()
+
+
+if __name__ == "__main__":
+    test_server()
+    while True:
+        time.sleep(1)

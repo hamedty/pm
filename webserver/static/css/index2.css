@@ -1,0 +1,133 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 10px;
+  height: 100%;
+  margin: 0px;
+  background-color: #270040;
+  /* background pattern */
+  /* background-image: radial-gradient(#fff 10%, transparent 10%), radial-gradient(#fff 10%, transparent 10%);
+  background-color: #000;
+  background-position: 0 0, 7px 7px;
+  background-size: 14px 14px; */
+  overflow: hidden;
+}
+
+#container {
+  height: 100%;
+  display: flex;
+}
+
+#left-bar {
+  /* background-image: linear-gradient(135deg, gray, gray, gray); */
+  background-color: #363636;
+  /* background-image: linear-gradient(135deg, red, blue, yellow); */
+  height: 100%;
+  flex: 0 0 220px;
+  display: flex;
+  flex-flow: column;
+}
+
+#left-bar-logo-wrapper {
+  flex: 0 1 auto;
+}
+
+#logo {
+  /* https://codepen.io/sosuke/pen/Pjoqqp */
+  filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(171deg) brightness(105%) contrast(102%);
+  margin: 20px;
+}
+
+#logo-text {
+  text-align: center;
+  font-size: 40px;
+  color: white;
+  font-weight: bold
+}
+
+#left-bar-buttons-wrapper {
+  flex: 1 1 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.left-bar-button {
+  font-size: 80px;
+  height: 105px;
+  width: 105px;
+  border-radius: 20px;
+  padding-left: 10px;
+}
+
+#right-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#top-bar {
+  /* background-image: linear-gradient(90deg, green, green); */
+  background-color: #d3d3d3;
+  /* background-image: linear-gradient(90deg, blue, white); */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#top-left-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end
+}
+
+/* ---------------------- */
+.main-action {
+  width: 200px;
+}
+
+#btn-run {
+  height: 120px;
+  width: 120px;
+  border-radius: 500px;
+}
+
+#alarm-background {
+  position: absolute;
+  top: 200;
+  left: 500;
+}
+
+#no-connection-overlay {
+  position: fixed;
+  /* Sit on top of the page content */
+  display: block;
+  /* Hidden by default */
+  width: 100%;
+  /* Full width (cover the whole page) */
+  height: 100%;
+  /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(200, 0, 0, 0.68);
+  /* Black background with opacity */
+  z-index: 2;
+  /* Specify a stack order in case you're using a different order for other elements */
+  cursor: not-allowed;
+  /* Add a pointer on hover */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#no-connection-overlay>h1 {
+  color: black;
+  font-weight: bold;
+  font-size: 80px;
+}
