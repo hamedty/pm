@@ -85,6 +85,16 @@ body {
   align-items: flex-end
 }
 
+#top-center>span {
+  font-size: 20px;
+  color: #400000;
+}
+
+#top-left-corner {
+  margin-right: 10px;
+  color: #400000;
+}
+
 /* ---------------------- */
 .main-action {
   width: 200px;
