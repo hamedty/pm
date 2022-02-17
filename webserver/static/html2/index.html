@@ -5,12 +5,33 @@
   <meta charset="utf-8" />
   <title>PM - PAM2060</title>
   <base href="/" />
-  <meta name="viewport" content="width=1920, initial-scale=2" />
-  <link rel='shortcut icon' type='image/x-icon' href='/static/favicon.ico' />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <link rel="stylesheet" href="/static/dependencies/fontawesome-free-6.0.0-web/css/all.min.css">
-  <link rel="stylesheet" href="/static/css/index2.css">
-  <link rel="stylesheet" href="/static/css/home.css">
+  <meta
+    name="viewport"
+    content="width=1920, initial-scale=1"
+  />
+  <link
+    rel='shortcut icon'
+    type='image/x-icon'
+    href='/static/favicon.ico'
+  />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+    crossorigin="anonymous"
+  >
+  <link
+    rel="stylesheet"
+    href="/static/dependencies/fontawesome-free-6.0.0-web/css/all.min.css"
+  >
+  <link
+    rel="stylesheet"
+    href="/static/css/index2.css"
+  >
+  <link
+    rel="stylesheet"
+    href="/static/css/home.css"
+  >
 
   <script src="/static/dependencies/angular.min.js"></script>
   <script src="/static/dependencies/jquery.min.js"></script>
@@ -18,12 +39,18 @@
   <script src="/static/dependencies/d3.min.js"></script>
   <script src="/static/dependencies/moment.js"></script>
 
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app2.js"></script>
 </head>
 
-<body ng-app="app" ng-controller="app_controller">
+<body
+  ng-app="app"
+  ng-controller="app_controller"
+>
   <!-- No Connection -->
-  <div ng-show="no_connection" id="no-connection-overlay">
+  <div
+    ng-show="local_data.no_connection"
+    id="no-connection-overlay"
+  >
     <h1>Connection to the Server is Lost!</h1>
   </div>
 
@@ -32,178 +59,81 @@
     <div id="left-bar">
       <div id="left-bar-logo-wrapper">
 
-        <img id="logo" src="/static/PM_VERTICAL_LOGO_BoW.svg" />
+        <img
+          id="logo"
+          src="/static/PM_VERTICAL_LOGO_BoW.svg"
+        />
         <h1 id="logo-text"> PAM2060 </h1>
       </div>
 
       <div id="left-bar-buttons-wrapper">
         <!-- Left buttons wrapper -->
-        <button type="button" class="btn btn-lg btn-success left-bar-button" id="left-bar-button-home">
+        <button
+          type="button"
+          class="btn btn-lg left-bar-button"
+          ng-class="{true:'btn-success', false:'btn-secondary'}[local_data.page_selected[0] == 'home']"
+          ng-click="fn_change_page(['home'])"
+          id="left-bar-button-home"
+        >
           <i class="fa-solid fa-house"></i>
         </button>
-        <button type="button" class="btn btn-lg btn-secondary left-bar-button" id="left-bar-button-stats">
+        <button
+          type="button"
+          class="btn btn-lg left-bar-button"
+          ng-class="{true:'btn-success', false:'btn-secondary'}[local_data.page_selected[0] == 'stats']"
+          ng-click="fn_change_page(['stats'])"
+          id="left-bar-button-stats"
+        >
           <i class="fa-solid fa-chart-line"></i>
         </button>
-        <button type="button" class="btn btn-lg btn-secondary left-bar-button" id="left-bar-button-recipe">
+        <button
+          type="button"
+          class="btn btn-lg left-bar-button"
+          ng-class="{true:'btn-success', false:'btn-secondary'}[local_data.page_selected[0] == 'recipe']"
+          ng-click="fn_change_page(['recipe'])"
+          id="left-bar-button-recipe"
+        >
           <i class="fa-solid fa-pen-to-square"></i>
         </button>
-        <button type="button" class="btn btn-lg btn-secondary left-bar-button" id="left-bar-button-advanced">
+        <button
+          type="button"
+          class="btn btn-lg left-bar-button"
+          ng-class="{true:'btn-success', false:'btn-secondary'}[local_data.page_selected[0] == 'advanced']"
+          ng-click="fn_change_page(['advanced'])"
+          id="left-bar-button-advanced"
+        >
           <i class="fa-solid fa-screwdriver-wrench"></i>
         </button>
-        <button type="button" class="btn btn-lg btn-secondary left-bar-button" id="left-bar-button-settings">
+        <button
+          type="button"
+          class="btn btn-lg left-bar-button"
+          ng-class="{true:'btn-success', false:'btn-secondary'}[local_data.page_selected[0] == 'settings']"
+          ng-click="fn_change_page(['settings'])"
+          id="left-bar-button-settings"
+        >
           <i class="fa-solid fa-gears"></i>
         </button>
       </div>
 
     </div>
 
-
     <div id="right-side">
       <div id="top-bar">
         <div> </div>
         <div id="top-center">
-          <span> Basalin - ING0021 </span>
+          <span> {{remote_data.recipe.name}} - {{remote_data.stats.active_batch_no}} </span>
         </div>
         <div id="top-left-corner">
-          <span> 10:52 AM </span>
-          <span> 2022/02/03 </span>
-        </div>
-      </div>
-      <div id="home-frame">
-        <div id="home-upper">
-          <div class="home-upper-box">
-            <button class="btn btn-success btn-lg home-upper-btn">
-              <i class="fa-solid fa-crosshairs"></i>
-              <br />Positioning
-            </button>
-            <button class="btn btn-secondary btn-lg home-upper-btn">
-              <i class="fa-solid fa-arrow-right-to-bracket"></i>
-              <br />Feed 16</button>
-          </div>
-          <div class="home-upper-box">
-            <button class="btn btn-secondary btn-lg home-upper-btn">
-              <i class="fa-solid fa-xmark"></i>
-              <br />Close Feed</button>
-            <button class="btn btn-secondary btn-lg home-upper-btn">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-              <br />Empty Rail
-            </button>
-
-          </div>
-          <div class="home-upper-box" id="home-upper-box-last">
-            <div class="left">
-              <button class="btn btn-success btn-lg" id="home-upper-box-btn-run">RUN</button>
-            </div>
-            <div class="right">
-              <button class=" btn btn-success btn-lg" id="home-upper-box-btn-play">
-                <i class="fa-solid fa-play"></i>
-              </button>
-              <button class="btn btn-danger btn-lg" id="home-upper-box-btn-play">
-                <i class="fa-solid fa-stop"></i>
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-        <div id="home-hr">
-        </div>
-        <div id="home-lower">
-          <div id="home-lower-div-left">
-            <div class="home-lower-box-left">
-              <h1>1818 <small>pens</small></h1>
-              <h4> Since 8:12 AM </h4>
-              <button class="btn btn-secondary btn-lg">
-                <i class="fa-solid fa-arrow-rotate-right"></i>
-                RESET
-              </button>
-            </div>
-            <div class="home-lower-box-left">
-              <h1>2313 <small>pens/hr</small></h1>
-              <h4> In last 10 mins. </h4>
-            </div>
-          </div>
-          <div id="home-lower-div-right">
-            <div id="home-lower-box-alarms">
-              <h2> Alarms </h2>
-              <div id="home-lower-box-alarms-list">
-                <div class="home-lower-box-alarm-item">
-                  <span>Station 2</span>
-                  <span>استیشن را خالی کنید</span>
-                  <button class="btn btn-danger">Clear</button>
-                </div>
-                <div class="home-lower-box-warning-item">
-                  <span>Station 2</span>
-                  <span>استیشن را خالی کنید</span>
-                  <div style="width:60px"></div>
-                </div>
-                <div class="home-lower-box-alarm-item">
-                  <span>Feeder</span>
-                  <span>کارتریج تمام شده</span>
-                  <button class="btn btn-danger">Clear</button>
-                </div>
-
-
-              </div>
-            </div>
-          </div>
+          <span> {{remote_data.time_stamp.format('LTS')}} </span>
+          <span> {{remote_data.time_stamp.format('D MMM YYYY')}} </span>
         </div>
       </div>
 
-      <!--
-
-
-        <hr />
-        <div class="row">
-          <div class="col-md-3">
-            <p>
-              <button type="button" class="btn btn-lg main-action">آماده‌سازی شروع</button>
-            </p>
-            <p>
-              <button type="button" class="btn btn-lg main-action">فید ۱۶ دوزینگ</button>
-            </p>
-          </div>
-          <div class="col-md-7">
-            <p>
-              <button type="button" class="btn btn-lg main-action">بستن فید</button>
-            </p>
-            <p>
-              <button type="button" class="btn btn-lg main-action">تخلیه ریل</button>
-            </p>
-          </div>
-          <div class="col-md-2">
-            <p>
-            </p>
-
-          </div>
-        </div>
-        <div class="row" style="background-color: #e5e5e5;margin-left:0px;margin-right:0px;">
-          <h4> Alarms: </h4>
-          <div class="col-md-2" style="width: 100%; height: 300px; overflow-y: scroll; padding:0">
-            <table class="table table-hover">
-              <tr ng-repeat="error in errors track by $index" class="danger">
-                <td style="width:15%; text-align:center;">
-                  {{error.location_name}}
-                </td>
-                <td style="width:70%">
-                  {{error.message}}
-                </td>
-                <td style="width:10%; text-align:right;">
-                  <button class="btn btn-danger btn" ng-click="clear_error(error)" style="width:100px;">Clear</button>
-
-                </td>
-
-              </tr>
-            </table>
-
-
-
-
-          </div>
-        </div>
-      </div> -->
-
-
+      <div
+        id="main-frame"
+        ng-include="local_data.main_frame_url"
+      >
+      </div>
 
     </div>
   </div>

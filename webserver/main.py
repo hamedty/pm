@@ -65,12 +65,25 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
 
 class WebSocket2(tornado.websocket.WebSocketHandler):
+    import datetime
     data = {
-
-        'type': 'status_update',
+        'recipe': {
+            'name': 'Basalin',
+        },
         'errors': [
-            {'location_name': 'فیدر', 'message': 'هولدر نیومده', 'type': 'error'}
-        ] * 0
+            {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                'type': 'error', 'uid': '123', 'clearing': False},
+            {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                'type': 'error', 'uid': '123', 'clearing': True},
+            {'location_name': 'Feeder', 'message': 'هولدر نیومده', 'type': 'warning', 'uid': '456'},
+        ],
+        'stats': {
+            'active_batch_no': 'ING0021',
+            'counter': 1819,
+            'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
+            'speed': 2315,
+            'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
+        }
     }
 
     async def open(self):

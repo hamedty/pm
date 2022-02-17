@@ -1,0 +1,96 @@
+<div id="home-frame">
+  <div id="home-upper">
+    <div class="home-upper-box">
+      <button class="btn btn-success btn-lg home-upper-btn">
+        <i class="fa-solid fa-crosshairs"></i>
+        <br />Positioning
+      </button>
+      <button class="btn btn-secondary btn-lg home-upper-btn">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        <br />Feed 16</button>
+    </div>
+    <div class="home-upper-box">
+      <button class="btn btn-secondary btn-lg home-upper-btn">
+        <i class="fa-solid fa-xmark"></i>
+        <br />Close Feed</button>
+      <button class="btn btn-secondary btn-lg home-upper-btn">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <br />Empty Rail
+      </button>
+
+    </div>
+    <div
+      class="home-upper-box"
+      id="home-upper-box-last"
+    >
+      <div class="left">
+        <button
+          class="btn btn-success btn-lg"
+          id="home-upper-box-btn-run"
+        >RUN</button>
+      </div>
+      <div class="right">
+        <button
+          class=" btn btn-success btn-lg"
+          id="home-upper-box-btn-play"
+        >
+          <i class="fa-solid fa-play"></i>
+        </button>
+        <button
+          class="btn btn-danger btn-lg"
+          id="home-upper-box-btn-play"
+        >
+          <i class="fa-solid fa-stop"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+  <div id="home-hr">
+  </div>
+  <div id="home-lower">
+    <div id="home-lower-div-left">
+      <div class="home-lower-box-left">
+        <h1>{{remote_data.stats.counter}} <small>pens</small></h1>
+        <h4> Last reset:
+          {{moment(remote_data.stats.counter_since * 1000).format('LT')}}
+          <span ng-hide="moment(remote_data.stats.counter_since * 1000).isSame(moment(), 'day')">
+            - {{moment(remote_data.stats.counter_since * 1000).format('D MMM YYYY')}}
+          </span>
+        </h4>
+        <button
+          class="btn btn-secondary btn-lg"
+          ng-click="fn_reset_counter()"
+        >
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+          RESET
+        </button>
+      </div>
+      <div class="home-lower-box-left">
+        <h1>{{remote_data.stats.speed}} <small>pens/hr</small></h1>
+        <h4> Since {{moment(remote_data.stats.speed_since * 1000).fromNow()}} </h4>
+      </div>
+    </div>
+    <div id="home-lower-div-right">
+      <div id="home-lower-box-alarms">
+        <h2> Alarms </h2>
+        <div id="home-lower-box-alarms-list">
+          <div
+            ng-repeat="(key, error) in remote_data.errors"
+            class="home-lower-box-alarm-item"
+            ng-class="{'warning':'home-lower-box-warning-item', 'error':'home-lower-box-alarm-item'}[error.type]"
+          >
+            <span>{{error.location_name}}</span>
+            <span>{{error.message}}</span>
+            <button
+              class="btn btn-danger"
+              ng-class="{'invisible': error.type=='warning', 'disabled':error.clearing}"
+              ng-click="fn_clear_error(error)"
+            >Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
