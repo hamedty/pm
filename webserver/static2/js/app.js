@@ -2,7 +2,7 @@ var app = angular.module('app', ['ngWebSocket']);
 // ------------- websocket wrapper -------------
 app.factory('ws', function($websocket) {
   // Open a WebSocket connection
-  var dataStream = $websocket("ws://" + location.host + "/ws", null, {
+  var dataStream = $websocket("ws://" + location.host + "/ws2", null, {
     reconnectIfNotNormalClose: true
   });
 
@@ -34,7 +34,7 @@ app.controller('app_controller', function($scope, ws) {
 
   const consts = {
     'main_frame_urls': {
-      'home': '/static/html2/home.html',
+      'home': '/static2/html/home.html',
     },
   }
 

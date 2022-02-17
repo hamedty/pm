@@ -115,7 +115,7 @@ def create_server(system=None):
 
     new_hmi_app = [
         (r"/index2", Index2),
-        (r"/ws2", WebSocket),
+        (r"/ws2", WebSocket2),
         (r'/static2/(.*)', tornado.web.StaticFileHandler, {'path': STATIC2_PATH_DIR}),
     ]
     app = old_app + new_hmi_app
