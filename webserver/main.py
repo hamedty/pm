@@ -67,8 +67,13 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 class WebSocket2(tornado.websocket.WebSocketHandler):
     import datetime
     data = {
+        'status': {
+            'main_script': None,  # 'positioning' / 'feed16' / 'empty_rail' / 'main'
+            # 'play' / 'pause'
+        },
         'recipe': {
             'name': 'Basalin',
+            'feed_open': False,
         },
         'errors': [
             {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',

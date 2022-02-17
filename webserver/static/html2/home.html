@@ -1,19 +1,35 @@
 <div id="home-frame">
   <div id="home-upper">
     <div class="home-upper-box">
-      <button class="btn btn-success btn-lg home-upper-btn">
+      <button
+        class="btn btn-secondary btn-lg home-upper-btn"
+        ng-class="{'btn-success': remote_data.status.main_script == 'positioning', 'disabled': remote_data.status.main_script}"
+        ng-click="fn_run_script('positioning')"
+      >
         <i class="fa-solid fa-crosshairs"></i>
         <br />Positioning
       </button>
-      <button class="btn btn-secondary btn-lg home-upper-btn">
+      <button
+        class="btn btn-secondary btn-lg home-upper-btn"
+        ng-class="{'btn-success': remote_data.status.main_script == 'feed16', 'disabled': remote_data.status.main_script}"
+        ng-click="fn_run_script('feed16')"
+      >
         <i class="fa-solid fa-arrow-right-to-bracket"></i>
         <br />Feed 16</button>
     </div>
     <div class="home-upper-box">
-      <button class="btn btn-secondary btn-lg home-upper-btn">
+      <button
+        class="btn btn-secondary btn-lg home-upper-btn"
+        ng-class="{'btn-success': remote_data.recipe.feed_open == false}"
+        ng-click="fn_toggle_feed()"
+      >
         <i class="fa-solid fa-xmark"></i>
         <br />Close Feed</button>
-      <button class="btn btn-secondary btn-lg home-upper-btn">
+      <button
+        class="btn btn-secondary btn-lg home-upper-btn"
+        ng-class="{'btn-success': remote_data.status.main_script == 'empty_rail', 'disabled': remote_data.status.main_script}"
+        ng-click="fn_run_script('empty_rail')"
+      >
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
         <br />Empty Rail
       </button>
@@ -25,8 +41,10 @@
     >
       <div class="left">
         <button
-          class="btn btn-success btn-lg"
+          class="btn btn-secondary btn-lg"
           id="home-upper-box-btn-run"
+          ng-class="{'btn-success': remote_data.status.main_script == 'main', 'disabled': remote_data.status.main_script}"
+          ng-click="fn_run_script('main')"
         >RUN</button>
       </div>
       <div class="right">

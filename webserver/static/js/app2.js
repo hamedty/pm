@@ -64,13 +64,23 @@ app.controller('app_controller', function($scope, ws) {
       $scope.local_data.main_frame_url = $scope.consts.main_frame_urls[$scope.local_data.page_selected[0]]
   }
 
-  $scope.fn_clear_error = function(error) {
-    console.log('clear error:', error.uid);
+  $scope.fn_run_script = function(script_name) {
+    console.log('run script', script_name);
+  }
+
+  $scope.fn_toggle_feed = function() {
+    console.log('toggle feed');
   }
 
   $scope.fn_reset_counter = function() {
     console.log('reset counter');
   }
+
+  $scope.fn_clear_error = function(error) {
+    console.log('clear error:', error.uid);
+  }
+
+
   $scope.fn_log = console.log;
   $scope.moment = moment;
   // ------------- bootstrap -------------
