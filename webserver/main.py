@@ -9,9 +9,10 @@ import tornado.websocket
 try:
     from . import annotation
 except:
-    pass
+    annotation = None
 PATH = os.path.dirname(os.path.abspath(__file__))
 STATIC_PATH_DIR = os.path.join(PATH, 'static')
+STATIC2_PATH_DIR = os.path.join(PATH, 'static2')
 
 
 class Index(tornado.web.RequestHandler):
@@ -24,7 +25,7 @@ class Index(tornado.web.RequestHandler):
 
 class Index2(tornado.web.RequestHandler):
     def get(self):
-        filename = os.path.join(STATIC_PATH_DIR, 'html2/index.html')
+        filename = os.path.join(STATIC2_PATH_DIR, 'html/index.html')
         with open(filename) as f:
             content = f.read()
         self.finish(content)
@@ -106,32 +107,35 @@ class WebSocket2(tornado.websocket.WebSocketHandler):
 def create_server(system=None):
     global SYSTEM
     SYSTEM = system
-
-    app = tornado.web.Application([
+    old_app = [
         (r"/", Index),
-        (r"/annotation", Annotation),
-        (r"/annotation/api", AnnotationApi),
         (r"/ws", WebSocket),
-        (r'/static/(.*)', tornado.web.StaticFileHandler,
-         {'path': STATIC_PATH_DIR}),
-        (r'/dataset/(.*)', tornado.web.StaticFileHandler,
-         {'path': annotation.DATASET_PATH})
-    ], debug=True)
+        (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': STATIC_PATH_DIR}),
+    ]
+
+    new_hmi_app = [
+        (r"/index2", Index2),
+        (r"/ws2", WebSocket),
+        (r'/static2/(.*)', tornado.web.StaticFileHandler, {'path': STATIC2_PATH_DIR}),
+    ]
+    app = old_app + new_hmi_app
+    if annotation is not None:
+        annotation_app = [
+            (r"/annotation", Annotation),
+            (r"/annotation/api", AnnotationApi),
+            (r'/dataset/(.*)', tornado.web.StaticFileHandler, {'path': annotation.DATASET_PATH})
+        ]
+        app += annotation_app
+    app = tornado.web.Application(app, debug=True)
     app.listen(8080)
 
 
 def test_server(system=None):
-    app = tornado.web.Application([
-        (r"/", Index2),
-        (r"/ws", WebSocket2),
-        (r'/static/(.*)', tornado.web.StaticFileHandler,
-         {'path': STATIC_PATH_DIR}),
-    ], debug=True)
-    app.listen(8080)
+    create_server()
     tornado.ioloop.IOLoop.current().start()
+    while True:
+        time.sleep(1)
 
 
 if __name__ == "__main__":
     test_server()
-    while True:
-        time.sleep(1)
