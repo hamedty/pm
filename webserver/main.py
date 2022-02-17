@@ -81,7 +81,8 @@ class WebSocket2(tornado.websocket.WebSocketHandler):
                 'type': 'error', 'uid': '123', 'clearing': False},
             {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
                 'type': 'error', 'uid': '123', 'clearing': True},
-            {'location_name': 'Feeder', 'message': 'هولدر نیومده', 'type': 'warning', 'uid': '456'},
+            {'location_name': 'Feeder', 'message': 'هولدر نیومده',
+                'type': 'warning', 'uid': '456'},
         ],
         'stats': {
             'active_batch_no': 'ING0021',
@@ -96,8 +97,12 @@ class WebSocket2(tornado.websocket.WebSocketHandler):
         while True:
             message = self.data
             message = json.dumps(message)
-            self.write_message(message)
-            await asyncio.sleep(.5)
+            try:
+                self.write_message(message)
+                await asyncio.sleep(.5)
+            except:
+                print('Web socket connection closed!')
+                return
 
     def on_message(self, message):
         message = json.loads(message)
@@ -110,20 +115,23 @@ def create_server(system=None):
     old_app = [
         (r"/", Index),
         (r"/ws", WebSocket),
-        (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': STATIC_PATH_DIR}),
+        (r'/static/(.*)', tornado.web.StaticFileHandler,
+         {'path': STATIC_PATH_DIR}),
     ]
 
     new_hmi_app = [
         (r"/index2", Index2),
         (r"/ws2", WebSocket2),
-        (r'/static2/(.*)', tornado.web.StaticFileHandler, {'path': STATIC2_PATH_DIR}),
+        (r'/static2/(.*)', tornado.web.StaticFileHandler,
+         {'path': STATIC2_PATH_DIR}),
     ]
     app = old_app + new_hmi_app
     if annotation is not None:
         annotation_app = [
             (r"/annotation", Annotation),
             (r"/annotation/api", AnnotationApi),
-            (r'/dataset/(.*)', tornado.web.StaticFileHandler, {'path': annotation.DATASET_PATH})
+            (r'/dataset/(.*)', tornado.web.StaticFileHandler,
+             {'path': annotation.DATASET_PATH})
         ]
         app += annotation_app
     app = tornado.web.Application(app, debug=True)

@@ -58,7 +58,7 @@ async def feeder_process(arduino, G1, command):
     mask_holder = command['mask'] + [0]
     mask_dosing = command['mask'] + [0, 0]
 
-    disabled_stations = [2, 6]
+    disabled_stations = [2, 8]
     for disabled_station in disabled_stations:
         holder_index = (disabled_station + 2) % 10
         dosing_index = (disabled_station + 6) % 10
