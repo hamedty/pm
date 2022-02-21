@@ -158,6 +158,11 @@ class Feeder(Node):
         # await self.send_command_raw('G1 Y10 F60000')
         await asyncio.sleep(.5)  # unknown! needed to avoid g2core panic
 
+        await self.set_motors(
+            (6, 300),  # Cartridge Conveyor
+            (8, 20),  # Cartridge Conveyor
+        )
+
     async def set_motors_working_condition(self, recipe, fast=False):
         if recipe.SERVICE_FUNC_NO_FEEDER:
             return

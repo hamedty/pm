@@ -3,10 +3,13 @@
     <div class="home-upper-box">
       <button
         class="btn btn-secondary btn-lg home-upper-btn"
-        ng-class="{'btn-success': remote_data.status.main_script == 'positioning', 'disabled': remote_data.status.main_script}"
-        ng-click="fn_run_script('positioning')"
+        ng-class="{'btn-success': remote_data.status.main_script == 'home_all_nodes', 'disabled': remote_data.status.main_script}"
+        ng-click="fn_run_script('home_all_nodes')"
       >
-        <i class="fa-solid fa-crosshairs"></i>
+        <i
+          class="fa-solid fa-crosshairs"
+          ng-class="{'fa-spin': remote_data.status.main_script == 'home_all_nodes'}"
+        ></i>
         <br />Positioning
       </button>
       <button
@@ -20,15 +23,15 @@
     <div class="home-upper-box">
       <button
         class="btn btn-secondary btn-lg home-upper-btn"
-        ng-class="{'btn-success': remote_data.recipe.feed_open == false}"
+        ng-class="{'btn-warning': remote_data.recipe.feed_open == false}"
         ng-click="fn_toggle_feed()"
       >
         <i class="fa-solid fa-xmark"></i>
         <br />Close Feed</button>
       <button
         class="btn btn-secondary btn-lg home-upper-btn"
-        ng-class="{'btn-success': remote_data.status.main_script == 'empty_rail', 'disabled': remote_data.status.main_script}"
-        ng-click="fn_run_script('empty_rail')"
+        ng-class="{'btn-warning': remote_data.status.main_script == 'run_rail_empty', 'disabled': remote_data.status.main_script}"
+        ng-click="fn_run_script('run_rail_empty')"
       >
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
         <br />Empty Rail

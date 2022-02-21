@@ -3,10 +3,12 @@ import traceback
 import asyncio
 import aioconsole
 from .recipe import *
+from .utils import *
 from scripts import recipe
 from node import ALL_NODES_DICT
 
 
+@run_exclusively
 async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
@@ -40,7 +42,6 @@ async def main(system, ALL_NODES):
         stations_loop.append(task)
 
     ''' Fill Line '''
-    # await feeder_fill_line(recipe, feeder, rail)
     feeder.feeder_initial_start_event.set()
 
     ''' Main Loop'''
@@ -87,6 +88,7 @@ async def main(system, ALL_NODES):
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
 
+@run_exclusively
 async def home_all_nodes(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
@@ -122,40 +124,3 @@ async def do_nodes(stations, func):
             # await aioconsole.ainput(str(error))
             error_clear_event, error_id = await stations[i].system.register_error(error)
             await error_clear_event.wait()
-
-
-async def feeder_fill_line(recipe, feeder, rail):
-    masks = [
-        [0] * 4 + [1],
-        [0] * 4 + [1],
-        [0] * 3 + [1] * 2,
-        [0] * 3 + [1] * 2,
-        [0] * 2 + [1] * 3,
-        [0] * 2 + [1] * 3,
-        [0] * 1 + [1] * 4,
-        [0] * 1 + [1] * 4,
-        [1] * 5,
-        [1] * 5,
-        [1] * 5,
-        [1] * 5,
-        [1] * 5,
-        [1] * 2,
-    ]
-    i = 0
-    for mask in masks:
-        if (i % 3) == 0:
-            await aioconsole.ainput('enter to continue')
-        i += 1
-        # setup feeder
-        feeder.mask = mask
-        feeder.feeder_initial_start_event.set()
-
-        await rail.rail_parked_event.wait()
-        rail.rail_parked_event.clear()
-        rail.N = len(mask)
-        rail.rail_move_event.set()
-
-        await feeder.feeder_finished_command_event.wait()
-        feeder.feeder_finished_command_event.clear()
-
-    feeder.mask = None  # default

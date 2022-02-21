@@ -30,6 +30,8 @@ class System(object):
         self.errors_events = {}
         self.errors_cb = {}
         self.error_lock = asyncio.Lock()
+        self.running_script_lock = asyncio.Lock()  # used inside scripts
+        self.running_script = None
 
         # mongo db access point
         self.mongo = mongo.Mongo()
@@ -86,11 +88,17 @@ class System(object):
     def deregister_ws(self, ws):
         self._ws.remove(ws)
 
-    async def message_from_ws(self, ws, message_in):
-        if message_in['selected_nodes']:
+    async def message_from_ws(self, message_in):
+        if message_in.get('selected_nodes'):  # selected node HMI
             await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_from_hmi(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
-        else:
+            return
+        elif message_in.get('form'):  # HMI 1
             self.system_command_scenario(message_in['form'])
+            return
+        elif message_in['type'] == 'run_script':  # HMI2, run script
+            script_name = message_in['script_name']
+            script = getattr(scripts, script_name)
+            await self.script_runner(script)
 
     def send_architecture(self, ws):
         message = [{
@@ -118,7 +126,7 @@ class System(object):
                 },
                 'v2': {
                     'status': {
-                        'main_script': None,  # 'positioning' / 'feed16' / 'empty_rail' / 'main'
+                        'main_script': self.running_script,  # e.g. main, home_all_nodes
                         # 'play' / 'pause'
                     },
                     'recipe': {
@@ -147,17 +155,9 @@ class System(object):
                 ws.write_message(message)
             await asyncio.sleep(.1)
 
-    async def script_wrapper_always(self, func=None):
+    async def script_runner(self, func):
         self.system_stop.clear()
-        if func is None:
-            return
-        await func(self, ALL_NODES)
-        # while True:
-        #     input('start?')
-        #     try:
-        #         await func(self, ALL_NODES_DICT)
-        #     except:
-        #         print(traceback.format_exc())
+        asyncio.create_task(func(self, ALL_NODES))
 
     def _get_status(self):
         status = {
@@ -178,7 +178,7 @@ class System(object):
             asyncio.create_task(self.clear_error(form['clear_error']))
         if 'script' in form:
             script = getattr(scripts, form['script'])
-            asyncio.create_task(self.script_wrapper_always(script))
+            asyncio.create_task(self.script_runner(script))
         return {}
 
 
@@ -186,12 +186,8 @@ async def main():
     SYSTEM = System(ALL_NODES)
     webserver.create_server(SYSTEM)
     await SYSTEM.connect()  # Must be ran as a command - connect and create status loop
-
-    task1 = asyncio.create_task(SYSTEM.loop())
-    # await SYSTEM.script_wrapper_always(scripts.main)
-    await task1
+    await SYSTEM.loop()
 
 
 if __name__ == '__main__':
-
     asyncio.run(main())

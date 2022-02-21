@@ -4,10 +4,12 @@ import asyncio
 import traceback
 import aioconsole
 from .recipe import *
+from .utils import *
 from scripts import recipe
 from node import ALL_NODES_DICT
 
 
+@run_exclusively
 async def main(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
 

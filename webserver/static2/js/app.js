@@ -68,6 +68,11 @@ app.controller('app_controller', function($scope, ws) {
 
   $scope.fn_run_script = function(script_name) {
     console.log('run script', script_name);
+    command = {
+      'type': 'run_script',
+      'script_name': script_name,
+    }
+    ws.get(command);
   }
 
   $scope.fn_toggle_feed = function() {
