@@ -2,7 +2,7 @@ var app = angular.module('app', ['ngWebSocket']);
 // ------------- websocket wrapper -------------
 app.factory('ws', function($websocket) {
   // Open a WebSocket connection
-  var dataStream = $websocket("ws://" + location.host + "/ws2", null, {
+  var dataStream = $websocket("ws://" + location.host + "/ws", null, {
     reconnectIfNotNormalClose: true
   });
 
@@ -46,10 +46,12 @@ app.controller('app_controller', function($scope, ws) {
   }
 
   ws.onMessage(function(message) {
-    $scope.local_data.no_connection = false;
-    message = JSON.parse(message.data)
-    $scope.remote_data = message;
-    $scope.remote_data.time_stamp = moment();
+    message = JSON.parse(message.data).v2;
+    if (message) {
+      $scope.local_data.no_connection = false;
+      $scope.remote_data = message;
+      $scope.remote_data.time_stamp = moment();
+    }
   });
 
   ws.onClose(function() {

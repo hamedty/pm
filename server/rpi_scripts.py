@@ -206,12 +206,17 @@ async def wait_for_inputs(arduino,
         #     await wait_for_input(arduino, 'in5', lambda x: x == 0, 0.005, 'extra_holder_at_gate')
 
     if holder_line_mask:
-        while True:
-            _, read_value = await arduino.read_metric('uda2', 'r.uda2')
-            if read_value < 20000:
-                break
-            await asyncio.sleep(0.005)
-        # await wait_for_input(arduino, 'uda2', lambda x: x < 20000, 0.005, 'not_enough_holder')
+        _, read_value = await arduino.read_metric('uda2', 'r.uda2')
+        if read_value > 20000:  # lack of holder - check both holder sensors
+            # await wait_for_input(arduino, 'uda2', lambda x: x < 20000, 0.005, 'not_enough_holder')
+            while True:
+                _, read_value = await arduino.read_metric('uda2', 'r.uda2')
+                near_sensor = (read_value < 20000)
+                _, read_value = await arduino.read_metric('m1', 'r.m1')
+                far_sensor = (read_value == 1)
+                if near_sensor and far_sensor:
+                    break
+                await asyncio.sleep(0.01)
 
     if dosing_mask:
         if dosing_value:

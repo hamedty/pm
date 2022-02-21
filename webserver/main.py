@@ -65,32 +65,34 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         SYSTEM.deregister_ws(self)
 
 
-class WebSocket2(tornado.websocket.WebSocketHandler):
+class WebSocket_Mock(tornado.websocket.WebSocketHandler):
     import datetime
     data = {
-        'status': {
-            'main_script': None,  # 'positioning' / 'feed16' / 'empty_rail' / 'main'
-            # 'play' / 'pause'
+        'v2': {
+            'status': {
+                'main_script': None,  # 'positioning' / 'feed16' / 'empty_rail' / 'main'
+                # 'play' / 'pause'
+            },
+            'recipe': {
+                'name': 'Basalin',
+                'feed_open': False,
+            },
+            'errors': [
+                {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                    'type': 'error', 'uid': '123', 'clearing': False},
+                {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                    'type': 'error', 'uid': '123', 'clearing': True},
+                {'location_name': 'Feeder', 'message': 'هولدر نیومده',
+                    'type': 'warning', 'uid': '456'},
+            ],
+            'stats': {
+                'active_batch_no': 'ING0021',
+                'counter': 1819,
+                'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
+                'speed': 2315,
+                'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
+            },
         },
-        'recipe': {
-            'name': 'Basalin',
-            'feed_open': False,
-        },
-        'errors': [
-            {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
-                'type': 'error', 'uid': '123', 'clearing': False},
-            {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
-                'type': 'error', 'uid': '123', 'clearing': True},
-            {'location_name': 'Feeder', 'message': 'هولدر نیومده',
-                'type': 'warning', 'uid': '456'},
-        ],
-        'stats': {
-            'active_batch_no': 'ING0021',
-            'counter': 1819,
-            'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
-            'speed': 2315,
-            'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
-        }
     }
 
     async def open(self):
@@ -109,19 +111,18 @@ class WebSocket2(tornado.websocket.WebSocketHandler):
         print(message)
 
 
-def create_server(system=None):
+def create_server(system=None, mock_data=False):
     global SYSTEM
     SYSTEM = system
     old_app = [
         (r"/", Index),
-        (r"/ws", WebSocket),
+        (r"/ws", WebSocket_Mock if mock_data else WebSocket),
         (r'/static/(.*)', tornado.web.StaticFileHandler,
          {'path': STATIC_PATH_DIR}),
     ]
 
     new_hmi_app = [
         (r"/index2", Index2),
-        (r"/ws2", WebSocket2),
         (r'/static2/(.*)', tornado.web.StaticFileHandler,
          {'path': STATIC2_PATH_DIR}),
     ]
@@ -139,7 +140,7 @@ def create_server(system=None):
 
 
 def test_server(system=None):
-    create_server()
+    create_server(mock_data=True)
     tornado.ioloop.IOLoop.current().start()
     while True:
         time.sleep(1)

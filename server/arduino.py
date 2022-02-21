@@ -223,7 +223,7 @@ def clean_dictionary(dictionary):
 
 
 GOOD_KEYS = {'enc1', 'enc2', 'r.msg', 'f.2',
-             'r.stat', 'r.uda0', 'r.uda1', 'r.uda2', 'er.st'}
+             'r.stat', 'r.uda0', 'r.uda1', 'r.uda2', 'er.st', 'r.m1'}
 
 
 def clean_key(key):

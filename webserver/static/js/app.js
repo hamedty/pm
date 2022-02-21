@@ -26,7 +26,7 @@ app.controller('app_controller', function($scope, ws) {
 
   ws.onMessage(function(message) {
     $scope.no_connection = false;
-    message = JSON.parse(message.data)
+    message = JSON.parse(message.data).v1
     switch (message.type) {
       case 'architecture':
         $scope.nodes = message.payload;

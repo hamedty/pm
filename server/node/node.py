@@ -274,10 +274,10 @@ class Node(object):
             message = f'Correction: {self.name} Axes: {axes} From: {enc_location:.2f} To: {g2_location:.2f}'
             print(message)
             # update g2core location
-            await self.send_command_raw(f'{{gc2:"G28.3 {axes}{enc_location}"}}', wait_start=[], wait_completion=False)
+            await self.send_command_raw(f'{{gc2:"G28.3 {axes}{enc_location:.2f}"}}', wait_start=[], wait_completion=False)
             await asyncio.sleep(.1)
             # g1 to g2core_old location
-            await self.send_command_raw(f'{{gc2:"G1 {axes}{g2_location} F{feedrate}"}}', wait_start=[], wait_completion=False)
+            await self.send_command_raw(f'{{gc2:"G1 {axes}{g2_location:.2f} F{feedrate}"}}', wait_start=[], wait_completion=False)
             sleep_time = error / feedrate * 60
             await asyncio.sleep(sleep_time + .3)
 

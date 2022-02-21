@@ -88,12 +88,9 @@ class System(object):
 
     async def message_from_ws(self, ws, message_in):
         if message_in['selected_nodes']:
-            response = await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_from_hmi(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
+            await asyncio.gather(*[ALL_NODES_DICT[node_name].send_command_from_hmi(message_in['form']) for node_name in message_in['selected_nodes']], return_exceptions=True)
         else:
-            response = self.system_command_scenario(message_in['form'])
-        message_out = {'type': 'response', 'payload': response}
-        print(message_out)
-        ws.write_message(json.dumps(message_out))
+            self.system_command_scenario(message_in['form'])
 
     def send_architecture(self, ws):
         message = [{
@@ -101,9 +98,11 @@ class System(object):
             'name': n.name,
         } for n in self.nodes]
         message = {
-            'type': 'architecture',
-            'payload': message,
-            'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType)],
+            'v1': {
+                'type': 'architecture',
+                'payload': message,
+                'scripts': [i for i in dir(scripts) if isinstance(getattr(scripts, i), types.FunctionType)],
+            },
         }
         ws.write_message(json.dumps(message))
 
@@ -111,10 +110,37 @@ class System(object):
         while True:
             message = [n.get_status() for n in self.nodes]
             message = {
-                'type': 'status_update',
-                'nodes': message,
-                'system': self._get_status(),
-                'errors': self.errors,
+                'v1': {
+                    'type': 'status_update',
+                    'nodes': message,
+                    'system': self._get_status(),
+                    'errors': self.errors,
+                },
+                'v2': {
+                    'status': {
+                        'main_script': None,  # 'positioning' / 'feed16' / 'empty_rail' / 'main'
+                        # 'play' / 'pause'
+                    },
+                    'recipe': {
+                        'name': 'Basalin',
+                        'feed_open': False,
+                    },
+                    'errors': [
+                        {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                         'type': 'error', 'uid': '123', 'clearing': False},
+                        {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
+                         'type': 'error', 'uid': '123', 'clearing': True},
+                        {'location_name': 'Feeder', 'message': 'هولدر نیومده',
+                         'type': 'warning', 'uid': '456'},
+                    ],
+                    'stats': {
+                        'active_batch_no': 'ING0021',
+                        'counter': 1819,
+                        'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
+                        'speed': 2315,
+                        'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
+                    }
+                },  # v2
             }
             message = json.dumps(message)
             for ws in self._ws:
