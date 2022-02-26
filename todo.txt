@@ -1,4 +1,18 @@
+no feed:
+  nodes must have snapshot of recipe
+    dosing
+    rail
+    robot
+    station
+    main
+    helpers
+    test_single
+    utils
 HMI
+  recipe control from hmi
+  some how show nodes that are not connected
+  what if homming failed?
+-------------------------
 reset nodes
 feeder issue warning instead of just waiting
 adaptve eac limits

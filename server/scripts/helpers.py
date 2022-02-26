@@ -1,9 +1,9 @@
 import time
 import asyncio
 from .main import *
-from .recipe import *
+from recipe import *
 from .utils import *
-from scripts import recipe
+import recipe
 import aioconsole
 
 

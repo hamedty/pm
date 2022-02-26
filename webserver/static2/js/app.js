@@ -77,6 +77,12 @@ app.controller('app_controller', function($scope, ws) {
 
   $scope.fn_toggle_feed = function() {
     console.log('toggle feed');
+    command = {
+      'type': 'set_recipe',
+      'key': 'NO_FEEDER',
+      'value': !$scope.remote_data.recipe.NO_FEEDER,
+    }
+    ws.get(command);
   }
 
   $scope.fn_reset_counter = function() {

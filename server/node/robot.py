@@ -136,6 +136,7 @@ class Robot(Node):
         await self.set_valves(mask)
 
     async def do_robot(self, recipe):
+        self.update_recipe()
         # ensure about stations
         stations_task1 = asyncio.gather(
             *[station.clearance() for station in self._stations])

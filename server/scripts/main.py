@@ -2,9 +2,8 @@ import time
 import traceback
 import asyncio
 import aioconsole
-from .recipe import *
+from recipe import *
 from .utils import *
-from scripts import recipe
 from node import ALL_NODES_DICT
 
 
@@ -24,7 +23,7 @@ async def main(system, ALL_NODES):
     ''' Initial Condition '''
     # feeder
     feeder.init_events()
-    feeder_loop_task = asyncio.create_task(feeder.feeding_loop(recipe))
+    feeder_loop_task = asyncio.create_task(feeder.feeding_loop())
 
     # dosing feeder
     await dosing_feeder.create_feeding_loop(feeder, recipe)

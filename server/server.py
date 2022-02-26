@@ -15,6 +15,7 @@ sys.path.insert(0, PARENT_PATH)
 
 import webserver.main as webserver  # nopep8
 import scripts
+import recipe
 import rpi_scripts  # for sake of reload
 
 
@@ -36,6 +37,10 @@ class System(object):
         # mongo db access point
         self.mongo = mongo.Mongo()
         self.mongo.start()
+
+        # recipe
+        self.recipe = recipe.Recipe()
+        # self.recipe.set_value('NO_FEEDER', True)
 
     async def connect(self):
         for node in self.nodes:
@@ -99,6 +104,9 @@ class System(object):
             script_name = message_in['script_name']
             script = getattr(scripts, script_name)
             await self.script_runner(script)
+        elif message_in['type'] == 'set_recipe':  # HMI2, change recipe
+            self.recipe.set_value(message_in['key'], message_in['value'])
+            # self.recipe.set_value('NO_FEEDER', True)
 
     def send_architecture(self, ws):
         message = [{
@@ -129,10 +137,11 @@ class System(object):
                         'main_script': self.running_script,  # e.g. main, home_all_nodes
                         # 'play' / 'pause'
                     },
-                    'recipe': {
-                        'name': 'Basalin',
-                        'feed_open': False,
-                    },
+                    'recipe': self.recipe.values_dict,
+                    # {
+                    #     'name': 'Basalin',
+                    #     'feed_open': True,
+                    # },
                     'errors': [
                         {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
                          'type': 'error', 'uid': '123', 'clearing': False},

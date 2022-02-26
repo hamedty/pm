@@ -163,8 +163,8 @@ class Feeder(Node):
             (8, 20),  # Cartridge Conveyor
         )
 
-    async def set_motors_working_condition(self, recipe, fast=False):
-        if recipe.SERVICE_FUNC_NO_FEEDER:
+    async def set_motors_working_condition(self, fast=False):
+        if self.recipe.SERVICE_FUNC_NO_FEEDER:
             return
         if fast:
             method = self.set_motors_fast
@@ -237,29 +237,34 @@ class Feeder(Node):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
-    async def feeding_loop(self, recipe):
+    async def feeding_loop(self):
         await self.feeder_initial_start_event.wait()
-        await self.set_motors_working_condition(recipe)
+        await self.set_motors_working_condition()
 
         while not self.system_stop_event.is_set():
             t0 = time.time()
 
-            ''' 1- Fill '''
-            if not recipe.SERVICE_FUNC_NO_FEEDER:
+            ''' 0- update recipe '''
+            updates = self.update_recipe()
+            if updates:
+                await self.set_motors_working_condition()
 
-                # mask = [1] * recipe.N
-                mask = [1] * recipe.N
+            ''' 1- Fill '''
+            if not self.recipe.SERVICE_FUNC_NO_FEEDER:
+
+                # mask = [1] * self.recipe.N
+                mask = [1] * self.recipe.N
                 # mask[5] = 0  # station 3
 
                 command = {
                     'verb': 'feeder_process',
                     'mask': mask,
-                    'cartridge_feed': not recipe.SERVICE_FUNC_NO_CARTRIDGE,
-                    'z_offset': recipe.FEEDER_Z_IDLE,
-                    'feed_comeback': recipe.FEED_FEEDER_COMEBACK,
-                    'feed_feed': recipe.FEED_FEEDER_FEED,
-                    'jerk_feed': recipe.JERK_FEEDER_FEED,
-                    'jerk_idle': recipe.JERK_FEEDER_DELIVER,
+                    'cartridge_feed': not self.recipe.SERVICE_FUNC_NO_CARTRIDGE,
+                    'z_offset': self.recipe.FEEDER_Z_IDLE,
+                    'feed_comeback': self.recipe.FEED_FEEDER_COMEBACK,
+                    'feed_feed': self.recipe.FEED_FEEDER_FEED,
+                    'jerk_feed': self.recipe.JERK_FEEDER_FEED,
+                    'jerk_idle': self.recipe.JERK_FEEDER_DELIVER,
                 }
                 await self.system.system_running.wait()
                 await self.send_command(command)
@@ -274,7 +279,7 @@ class Feeder(Node):
             await self.feeder_rail_is_parked_event.wait()
             self.feeder_rail_is_parked_event.clear()
             await self.system.system_running.wait()
-            await self.G1(z=recipe.FEEDER_Z_DELIVER, feed=recipe.FEED_FEEDER_DELIVER)
+            await self.G1(z=self.recipe.FEEDER_Z_DELIVER, feed=self.recipe.FEED_FEEDER_DELIVER)
 
             self.feeder_is_full_event.set()
 
