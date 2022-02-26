@@ -1,9 +1,7 @@
 import time
 import asyncio
 from .main import *
-from recipe import *
 from .utils import *
-import recipe
 import aioconsole
 
 
@@ -36,20 +34,20 @@ async def run_rail_empty(system, ALL_NODES):
     while system.system_running.is_set():
         await rail.set_valves([0] * 2)
         await system.system_running.wait()
-        await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+        await rail.G1(z=rail.recipe.D_MIN, feed=rail.recipe.FEED_RAIL_FREE)
         await rail.set_valves([1, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK1)
+        await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
         await rail.set_valves([1, 1])
-        await asyncio.sleep(recipe.T_RAIL_JACK2)
+        await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
 
         # rail forward
-        await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+        await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_INTACT)
 
         # change jacks to moving
         await rail.set_valves([1, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK1)
+        await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
         await rail.set_valves([0, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK2)
+        await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
 
 
 @run_exclusively
@@ -68,18 +66,18 @@ async def feeder_handover_to_rail(system, ALL_NODES):
     await rail.set_valves([0, 0])
 
     await feeder.G1(z=FEEDER_Z_DELIVER, feed=5000), 'feeder is in bad location'
-    await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+    await rail.G1(z=rail.recipe.D_MIN, feed=rail.recipe.FEED_RAIL_FREE)
     await rail.set_valves([1, 0])
-    await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
+    await asyncio.sleep(rail.recipe.T_RAIL_FEEDER_JACK)
     await feeder.set_valves([None, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK1 - rail.recipe.T_RAIL_FEEDER_JACK)
     await rail.set_valves([1, 1])
-    await asyncio.sleep(recipe.T_RAIL_JACK2)
-    await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
+    await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_INTACT)
     await rail.set_valves([1, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK1)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
     await rail.set_valves([0, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK2)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
 
 
 @run_exclusively

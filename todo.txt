@@ -1,9 +1,3 @@
-nodes must have snapshot of recipe
-  robot
-  main
-  helpers
-  test_single
-  utils
 test no feed
 HMI:
   empty rail

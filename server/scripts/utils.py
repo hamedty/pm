@@ -1,5 +1,4 @@
 import asyncio
-import recipe
 
 
 def run_exclusively(func):
@@ -46,7 +45,7 @@ async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations
 
     # Feeder
     assert feeder.is_at_loc(
-        z=recipe.FEEDER_Z_IDLE) or feeder.is_at_loc(z=recipe.FEEDER_Z_DELIVER)
+        z=feeder.recipe.FEEDER_Z_IDLE) or feeder.is_at_loc(z=feeder.recipe.FEEDER_Z_DELIVER)
     assert await feeder.read_metric('out2') == 0, "Feeder Jack is out - transfer first"
 
     # Rail
@@ -55,7 +54,7 @@ async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations
     # robots
     for robot in robots:
         condition = robot.is_at_loc(
-            x=0, y=0) or robot.is_at_loc(x=recipe.X_PARK, y=recipe.Y_PARK)
+            x=0, y=0) or robot.is_at_loc(x=robot.recipe.X_PARK, y=robot.recipe.Y_PARK)
         message = '%s is not at proper location' % robot.name
         assert condition, message
 

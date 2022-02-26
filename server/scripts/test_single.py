@@ -3,7 +3,6 @@ from .main import *
 import asyncio
 import traceback
 import aioconsole
-from recipe import *
 from .utils import *
 from node import ALL_NODES_DICT
 

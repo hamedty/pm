@@ -2,7 +2,6 @@ import time
 import traceback
 import asyncio
 import aioconsole
-from recipe import *
 from .utils import *
 from node import ALL_NODES_DICT
 
@@ -59,7 +58,7 @@ async def main(system, ALL_NODES):
         t0 = time.time()
 
         # do robots
-        await do_nodes(robots, lambda r: r.do_robot(recipe))
+        await do_nodes(robots, lambda r: r.do_robot())
         t1 = time.time()
         dt = t1 - t0
         print(f'robot portion: {dt:.1f}')
@@ -69,7 +68,7 @@ async def main(system, ALL_NODES):
         rail.rail_move_event.set()
 
         # park robots
-        await do_nodes(robots, lambda r: r.do_robot_park(recipe))
+        await do_nodes(robots, lambda r: r.do_robot_park())
         i += 1
         print('--------------------------------', i)
 
