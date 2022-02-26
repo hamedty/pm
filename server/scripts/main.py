@@ -104,7 +104,7 @@ async def home_all_nodes(system, ALL_NODES):
     await rail.home()
 
     await system.system_running.wait()
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_FREE * .6)
     await feeder_home
 
 

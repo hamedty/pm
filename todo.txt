@@ -1,17 +1,17 @@
-test no feed
-HMI:
-  empty rail
-  feed 16
-  reset nodes
-  alarms
-  stats
-    redis
+play/stop/pause
+alarms
+stats / redis
+reset counter
+recipe - save to redis / json
+empty rail
+feed 16
+test feed / no feed
 -------------------------
-HMI
-  some how show nodes that are not connected
-  what if homming failed?
+reset nodes
+some how show nodes that are not connected
+what if homming failed?
+-------------------------
 feeder issue warning instead of just waiting
--------------------------
 adaptve eac limits
 optimize
   station

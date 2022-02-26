@@ -32,6 +32,7 @@ async def gather_all_nodes(system, ALL_NODES, wait_for_readiness=True):
         for node in all_nodes:
             while not node.ready_for_command():
                 await asyncio.sleep(.01)
+            node.update_recipe()
 
     return all_nodes, feeder, dosing_feeder, rail, robots, stations
 
@@ -49,7 +50,7 @@ async def check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations
     assert await feeder.read_metric('out2') == 0, "Feeder Jack is out - transfer first"
 
     # Rail
-    assert rail.is_at_loc(z=recipe.D_STANDBY)
+    assert rail.is_at_loc(z=rail.recipe.D_STANDBY)
 
     # robots
     for robot in robots:
