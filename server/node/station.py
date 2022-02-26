@@ -199,8 +199,9 @@ class Station(Node):
         self.station_is_done_event.set()
         self.events['station_is_done_event'] = self.station_is_done_event
 
-    async def station_assembly_loop(self, recipe):
+    async def station_assembly_loop(self):
         while True:
+            self.update_recipe()
             await self.set_valves([None, 0, 0, 1])
             await self.station_is_full_event.wait()
             self.station_is_full_event.clear()
@@ -212,12 +213,12 @@ class Station(Node):
 
             await self.system.system_running.wait()
             if full:
-                await self.align_holder(recipe)
+                await self.align_holder()
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
             if full:
-                await self.align_dosing(recipe)
-                await self.assemble(recipe)
+                await self.align_dosing()
+                await self.assemble()
 
             if not (full or empty):
                 # {"no_dosing":false,"no_holder":true,}
@@ -243,9 +244,9 @@ class Station(Node):
         await self.verify_no_holder_no_dosing()
         print(f'station {self.name} cleared!')
 
-    async def align_holder(self, recipe):
+    async def align_holder(self):
         await self.set_valves([0, 1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': recipe.ALIGN_SPEED_HOLDER, 'retries': recipe.VISION_RETRIES_HOLDER}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': self.recipe.ALIGN_SPEED_HOLDER, 'retries': self.recipe.VISION_RETRIES_HOLDER}, assert_success=False)
         # print(self.name, z1, z2)
         if (not z1) or (not z2['aligned']):
             error = {
@@ -267,13 +268,13 @@ class Station(Node):
             table = 'vision_retries'
             self.system.mongo.write(table, data)
 
-    async def align_dosing(self, recipe):
+    async def align_dosing(self):
         data = {}
         data['H_ALIGNING'] = self.hw_config['H_ALIGNING']
-        data['FEED_ALIGNING'] = recipe.FEED_Z_DOWN
+        data['FEED_ALIGNING'] = self.recipe.FEED_Z_DOWN
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], correct_initial=True)
         await self.set_valves([1])
-        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': recipe.ALIGN_SPEED_DOSING, 'retries': recipe.VISION_RETRIES_DOSING}, assert_success=False)
+        z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': self.recipe.ALIGN_SPEED_DOSING, 'retries': self.recipe.VISION_RETRIES_DOSING}, assert_success=False)
         if (not z1) or (not z2['aligned']):
             await self.set_valves([0, None, None, None])
             await self.G1(z=100, feed=5000)
@@ -314,7 +315,7 @@ class Station(Node):
             await error_clear_event.wait()
         await self.set_valves([None] * 3 + [1])
 
-    async def verify_dosing_sit_right_and_come_down(self, recipe):
+    async def verify_dosing_sit_right_and_come_down(self):
         res = await self.send_command({'verb': 'detect_vision', 'object': 'dosing_sit_right'})
         if not res[1]['sit_right']:
             error = {
@@ -327,9 +328,9 @@ class Station(Node):
             # await aioconsole.ainput(str(error))
             error_clear_event, error_id = await self.system.register_error(error)
             await error_clear_event.wait()
-        await self.G1(z=recipe.STATION_Z_OUTPUT, feed=recipe.FEED_Z_DOWN)
+        await self.G1(z=self.recipe.STATION_Z_OUTPUT, feed=self.recipe.FEED_Z_DOWN)
 
-    async def assemble(self, recipe):
+    async def assemble(self):
         # Dance
         dance_rev = .5
         charge_h = 0.1
@@ -356,27 +357,27 @@ class Station(Node):
 
 
             ; ready to push
-            G1 Z{self.hw_config['H_ALIGNING'] - 18:.1f} F{int(recipe.FEED_Z_UP):d}
+            G1 Z{self.hw_config['H_ALIGNING'] - 18:.1f} F{int(self.recipe.FEED_Z_UP):d}
             M100 ({{out1: 1}})
             G4 P.05
 
             ; push and come back
-            G1 Z{self.hw_config['H_PUSH']:.1f} F{int(recipe.FEED_Z_DOWN / 3.0):d}
+            G1 Z{self.hw_config['H_PUSH']:.1f} F{int(self.recipe.FEED_Z_DOWN / 3.0):d}
             G4 P.1
-            G1 Z{self.hw_config['H_PUSH'] - 5:.1f} F{int(recipe.FEED_Z_UP):d}
+            G1 Z{self.hw_config['H_PUSH'] - 5:.1f} F{int(self.recipe.FEED_Z_UP):d}
 
             ; prepare for dance
             G10 L20 P1 Y0
             M100 ({{zjm:5000}})
 
             M100 ({{out1: 0, out4: 1}})
-            G1 Z{self.hw_config['H_PRE_DANCE']:.1f} F{int(recipe.FEED_Z_UP * .7):d}
+            G1 Z{self.hw_config['H_PRE_DANCE']:.1f} F{int(self.recipe.FEED_Z_UP * .7):d}
             G4 P.05
             M100 ({{out1: 1}})
             G4 P.05
 
             ; dance
-            G1 Z{H_DANCE:.2f} Y{Y_DANCE:.2f} F{int(recipe.FEED_DANCE):d}
+            G1 Z{H_DANCE:.2f} Y{Y_DANCE:.2f} F{int(self.recipe.FEED_DANCE):d}
 
             ; press
             M100 ({{out1: 0, out2: 0, out4: 0}})
@@ -391,8 +392,8 @@ class Station(Node):
             G1 Z{H_DANCE_BACK:.2f} F5000
             G4 P.15
             M100 ({{ out4: 1, out5: 0}})
-            G1 Z{H_DANCE_BACK2:.2f} Y{Y_DANCE_BACK:.2f} F{int(recipe.FEED_DANCE):d}
-            G1 Y{Y_DANCE_BACK2:.2f} F{int(recipe.FEED_DANCE):d}
+            G1 Z{H_DANCE_BACK2:.2f} Y{Y_DANCE_BACK:.2f} F{int(self.recipe.FEED_DANCE):d}
+            G1 Y{Y_DANCE_BACK2:.2f} F{int(self.recipe.FEED_DANCE):d}
             M100 ({{out4: 0}})
             M100 ({{zjm:15000}})
         ''')
@@ -409,7 +410,7 @@ class Station(Node):
         #     '~/data/dosing.png', './dump/verification/%d_%d.png' % (self.ip_short, time.time())))
 
         # deliver
-        # await self.G1(z=4, feed=recipe.FEED_Z_UP)
+        # await self.G1(z=4, feed=self.recipe.FEED_Z_UP)
         # eac = self.hw_config['eac'][0]
         # await self.send_command_raw(f'''
         #     {{eac1: 0}}
@@ -418,5 +419,5 @@ class Station(Node):
         #     G1 Z{self.hw_config['H_DELIVER']:.2f} F1000
         #     {{eac1: {eac}}}
         # ''')
-        await self.G1(z=self.hw_config['H_DELIVER'], feed=recipe.FEED_Z_UP)
+        await self.G1(z=self.hw_config['H_DELIVER'], feed=self.recipe.FEED_Z_UP)
         await self.set_valves([None, None, None, 1])

@@ -196,7 +196,7 @@ class Robot(Node):
 
         async def stations_verify_and_deliver():
             await asyncio.sleep(T_INPUT_RELEASE)
-            await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down(recipe) for station in self._stations])
+            await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down() for station in self._stations])
 
         stations_task = asyncio.create_task(stations_verify_and_deliver())
 

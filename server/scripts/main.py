@@ -37,8 +37,7 @@ async def main(system, ALL_NODES):
     stations_loop = []
     for station in stations:
         station.init_events()
-        task = asyncio.create_task(
-            station.station_assembly_loop(recipe))
+        task = asyncio.create_task(station.station_assembly_loop())
         stations_loop.append(task)
 
     ''' Fill Line '''

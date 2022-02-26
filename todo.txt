@@ -1,18 +1,23 @@
-no feed:
-  nodes must have snapshot of recipe
-    robot
-    station
-    main
-    helpers
-    test_single
-    utils
+nodes must have snapshot of recipe
+  robot
+  main
+  helpers
+  test_single
+  utils
+test no feed
+HMI:
+  empty rail
+  feed 16
+  reset nodes
+  alarms
+  stats
+    redis
+-------------------------
 HMI
-  recipe control from hmi
   some how show nodes that are not connected
   what if homming failed?
--------------------------
-reset nodes
 feeder issue warning instead of just waiting
+-------------------------
 adaptve eac limits
 optimize
   station
