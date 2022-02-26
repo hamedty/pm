@@ -1,6 +1,5 @@
 no feed:
   nodes must have snapshot of recipe
-    dosing
     rail
     robot
     station

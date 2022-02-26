@@ -26,7 +26,8 @@ async def main(system, ALL_NODES):
     feeder_loop_task = asyncio.create_task(feeder.feeding_loop())
 
     # dosing feeder
-    await dosing_feeder.create_feeding_loop(feeder, recipe)
+    dosing_loop_task = asyncio.create_task(
+        dosing_feeder.dosing_master_loop(feeder))
 
     # rail
     rail.init_events()
@@ -82,6 +83,7 @@ async def main(system, ALL_NODES):
         task.cancel()
 
     await feeder_loop_task
+    await dosing_loop_task
     await dosing_feeder.terminate_feeding_loop(feeder)
     await feeder.set_motors()  # set all feeder motors to 0
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel

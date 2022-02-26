@@ -19,7 +19,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 @run_exclusively
 async def fill_dosing_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
-    await dosing_feeder.create_feeding_loop(feeder, recipe)
+    await dosing_feeder.create_feeding_loop(feeder)
     await asyncio.sleep(20)
     await dosing_feeder.terminate_feeding_loop(feeder)
 
