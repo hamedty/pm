@@ -1,70 +1,61 @@
 from multiprocessing import Lock
 
 
-N = 10
-SPEED = 1  # between 0-1
-SERVICE_FUNC_NO_FEEDER = 1
-SERVICE_FUNC_NO_CARTRIDGE = 1
-SERVICE_FUNC_NO_DOSING = 1
-''' Station '''
-FEED_Z_UP = 10000 * SPEED
-FEED_Z_DOWN = 15000 * SPEED
-FEED_DANCE = 40000
-STATION_Z_OUTPUT = 70
-STATION_Z_OUTPUT_SAFE = STATION_Z_OUTPUT - 30
-
-# Vision
-ALIGN_SPEED_DOSING = 25000
-ALIGN_SPEED_HOLDER = 25000
-VISION_RETRIES_HOLDER = [3, 2, 2, 2]
-VISION_RETRIES_DOSING = [4, 3, 3, 3, 3]
-
-''' Robot '''
-FEED_X_FORWARD = 23000 * SPEED  # 30000
-FEED_X_BACKWARD = 28000 * SPEED  # 280000
-FEED_X_SHORT = 35000 * SPEED
-FEED_Y_UP = 35000 * SPEED * .5
-FEED_Y_DOWN = 40000 * SPEED * .5
-FEED_Y_DOWN_CAP = 8000 * SPEED * .5
-FEED_Y_DOWN_PRESS = 5000 * SPEED * .5
-
-# Park
-X_PARK = 10
-Y_PARK = 40
-
-# Capping
-Y_CAPPING_DOWN = 10
-assert Y_CAPPING_DOWN < Y_PARK
-
-''' Rail '''
-FEED_RAIL_FREE = 25000 * SPEED  # 30000
-FEED_RAIL_INTACT = 16000 * SPEED
-JERK_RAIL_FREE = 2000
-JERK_RAIL_INTACT = 4500
-
-D_STANDBY = 250
-D_MIN = -1  # D_STANDBY - 25 * N
-assert D_MIN >= -5
-T_RAIL_JACK1 = 1.5
-T_RAIL_JACK2 = 1.2
-T_RAIL_FEEDER_JACK = 0.5
-assert T_RAIL_FEEDER_JACK < T_RAIL_JACK1
-
-''' Feeder '''
-FEED_FEEDER_FEED = 25000 * SPEED  # 25000
-FEED_FEEDER_DELIVER = 28000 * SPEED  # 30000
-FEED_FEEDER_COMEBACK = 27000 * SPEED  # 28000
-
-JERK_FEEDER_FEED = 60000
-JERK_FEEDER_DELIVER = 10000
-
-FEEDER_Z_IDLE = 16
-FEEDER_Z_DELIVER = 718
-
-
 VALUES_DEFINITION = [
-    # 'name' 'value' 'speedy' 'no_change' 'no_save' 'range' 'description'
-    {'name': 'NO_FEEDER', 'value': False, 'no_save': True}
+    # 'name' 'value' 'speedy': False 'no_change': False 'no_save': False 'range' 'description'
+
+    # General
+    {'name': 'N', 'value': 10, 'no_change': True},
+    {'name': 'SERVICE_FUNC_NO_FEEDER', 'value': False, 'no_save': True},
+    {'name': 'SERVICE_FUNC_NO_CARTRIDGE', 'value': False, 'no_save': True},
+    {'name': 'SERVICE_FUNC_NO_DOSING', 'value': False, 'no_save': True},
+
+    # Station
+    {'name': 'FEED_Z_UP', 'value': 10000, 'speedy': True},
+    {'name': 'FEED_Z_DOWN', 'value': 15000, 'speedy': True},
+    {'name': 'FEED_DANCE', 'value': 40000, 'speedy': True},
+    {'name': 'STATION_Z_OUTPUT', 'value': 70},
+    {'name': 'STATION_Z_OUTPUT_SAFE', 'value': 40},
+
+    # Station - Vision
+    {'name': 'ALIGN_SPEED_DOSING', 'value': 25000},
+    {'name': 'ALIGN_SPEED_HOLDER', 'value': 25000},
+    {'name': 'VISION_RETRIES_HOLDER', 'value': [3, 2, 2, 2]},
+    {'name': 'VISION_RETRIES_DOSING', 'value': [4, 3, 3, 3, 3]},
+
+    # Robot
+    {'name': 'FEED_X_FORWARD', 'value': 23000, 'speedy': True},  # 30000
+    {'name': 'FEED_X_BACKWARD', 'value': 28000, 'speedy': True},
+    {'name': 'FEED_X_SHORT', 'value': 35000, 'speedy': True},
+    {'name': 'FEED_Y_UP', 'value': 35000 * .5, 'speedy': True},
+    {'name': 'FEED_Y_DOWN', 'value': 40000 * .5, 'speedy': True},
+    {'name': 'FEED_Y_DOWN_CAP', 'value': 8000 * .5, 'speedy': True},
+    {'name': 'FEED_Y_DOWN_PRESS', 'value': 5000 * .5, 'speedy': True},
+
+    # Robot - Park
+    {'name': 'X_PARK', 'value': 10},
+    {'name': 'Y_PARK', 'value': 40},
+    {'name': 'Y_CAPPING_DOWN', 'value': 10},
+
+    # Rail
+    {'name': 'FEED_RAIL_FREE', 'value': 25000, 'speedy': True},  # 30000
+    {'name': 'FEED_RAIL_INTACT', 'value': 16000, 'speedy': True},
+    {'name': 'JERK_RAIL_FREE', 'value': 2000},
+    {'name': 'JERK_RAIL_INTACT', 'value': 4500},
+    {'name': 'D_STANDBY', 'value': 250},
+    {'name': 'D_MIN', 'value': -1},  # D_STANDBY - 25 * N
+    {'name': 'T_RAIL_JACK1', 'value': 1.5},
+    {'name': 'T_RAIL_JACK2', 'value': 1.2},
+    {'name': 'T_RAIL_FEEDER_JACK', 'value': 0.5},
+
+    # Feeder
+    {'name': 'FEED_FEEDER_FEED', 'value': 25000, 'speedy': True},
+    {'name': 'FEED_FEEDER_DELIVER', 'value': 28000, 'speedy': True},
+    {'name': 'FEED_FEEDER_COMEBACK', 'value': 27000, 'speedy': True},
+    {'name': 'JERK_FEEDER_FEED', 'value': 60000},
+    {'name': 'JERK_FEEDER_DELIVER', 'value': 10000},
+    {'name': 'FEEDER_Z_IDLE', 'value': 16},
+    {'name': 'FEEDER_Z_DELIVER', 'value': 718},
 ]
 
 
@@ -87,6 +78,10 @@ class Recipe(object):
     def sanity_check(self, values_dict):
         try:
             assert True
+            # assert Y_CAPPING_DOWN < Y_PARK
+            # assert D_MIN >= -5
+            # assert T_RAIL_FEEDER_JACK < T_RAIL_JACK1
+
         except:
             return False
         return True

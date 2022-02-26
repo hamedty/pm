@@ -40,7 +40,6 @@ class System(object):
 
         # recipe
         self.recipe = recipe.Recipe()
-        # self.recipe.set_value('NO_FEEDER', True)
 
     async def connect(self):
         for node in self.nodes:
@@ -106,7 +105,6 @@ class System(object):
             await self.script_runner(script)
         elif message_in['type'] == 'set_recipe':  # HMI2, change recipe
             self.recipe.set_value(message_in['key'], message_in['value'])
-            # self.recipe.set_value('NO_FEEDER', True)
 
     def send_architecture(self, ws):
         message = [{
