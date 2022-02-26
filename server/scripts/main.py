@@ -31,7 +31,7 @@ async def main(system, ALL_NODES):
 
     # rail
     rail.init_events()
-    asyncio.create_task(rail.rail_loop(recipe, feeder))
+    asyncio.create_task(rail.rail_loop(feeder))
 
     # stations
     stations_loop = []
