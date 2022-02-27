@@ -1,15 +1,13 @@
-play/stop/pause
-alarms
-stats / redis
-reset counter
-recipe - save to redis / json
-empty rail
+stats / redis / reset counter
+recipe - save to mongo / redis / json
 feed 16
+empty rail
 test feed / no feed
 -------------------------
+what if homming failed?
+clear error once only
 reset nodes
 some how show nodes that are not connected
-what if homming failed?
 -------------------------
 feeder issue warning instead of just waiting
 adaptve eac limits
@@ -21,10 +19,9 @@ optimize
 auto g38 at proper times (free well before and after)
 -------------------------
 extract dosing feeder params to recepie
-protect clear to only be ran once
 verify correct press
 control asansor dosing
-sometimes webcam doest load on boot - reset usb?
+sometimes webcam doesn't load on boot - reset usb?
 shlvar ro bekesh bala
 if nodes downs, UI must react
 emergency hold (e.g. when door opens) (hold on pc-rpi and usb commands)

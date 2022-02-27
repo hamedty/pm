@@ -75,6 +75,22 @@ app.controller('app_controller', function($scope, ws) {
     ws.get(command);
   }
 
+  $scope.fn_stop = function() {
+    console.log('stop button');
+    command = {
+      'type': 'system_stop',
+    }
+    ws.get(command);
+  }
+
+  $scope.fn_pause = function(paused) {
+    console.log('pause button');
+    command = {
+      'type': paused ? 'system_play': 'system_pause',
+    }
+    ws.get(command);
+  }
+
   $scope.fn_toggle_feed = function() {
     console.log('toggle feed');
     command = {
@@ -90,7 +106,12 @@ app.controller('app_controller', function($scope, ws) {
   }
 
   $scope.fn_clear_error = function(error) {
-    console.log('clear error:', error.uid);
+    console.log('clear error:', error.error_id);
+    command = {
+      'type': 'clear_error',
+      'error_id': error.error_id,
+    }
+    ws.get(command);
   }
 
 

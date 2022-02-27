@@ -26,7 +26,7 @@ class System(object):
         self.system_running = asyncio.Event()
         self.system_running.set()
         self.system_stop = asyncio.Event()
-        self.system_stop.clear()
+        self.system_stop.clear()  # set by command. clear by "run_exclusively"
         self.errors = {}
         self.errors_events = {}
         self.errors_cb = {}
@@ -105,6 +105,14 @@ class System(object):
             await self.script_runner(script)
         elif message_in['type'] == 'set_recipe':  # HMI2, change recipe
             self.recipe.set_value(message_in['key'], message_in['value'])
+        elif message_in['type'] == 'system_stop':  # HMI2, stop button
+            self.system_stop.set()
+        elif message_in['type'] == 'system_pause':  # HMI2, pause button
+            self.system_running.clear()
+        elif message_in['type'] == 'system_play':  # HMI2, play button
+            self.system_running.set()
+        elif message_in['type'] == 'clear_error':  # HMI2, clear error
+            asyncio.create_task(self.clear_error(message_in['error_id']))
 
     def send_architecture(self, ws):
         message = [{
@@ -133,6 +141,8 @@ class System(object):
                 'v2': {
                     'status': {
                         'main_script': self.running_script,  # e.g. main, home_all_nodes
+                        'stopping': self.system_stop.is_set(),
+                        'paused': not self.system_running.is_set(),
                         # 'play' / 'pause'
                     },
                     'recipe': self.recipe.values_dict,
@@ -140,14 +150,7 @@ class System(object):
                     #     'name': 'Basalin',
                     #     'feed_open': True,
                     # },
-                    'errors': [
-                        {'location_name': 'Station 1', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
-                         'type': 'error', 'uid': '123', 'clearing': False},
-                        {'location_name': 'Station 3', 'message': 'استیشن را خالی کنید - تنظیم هولدر',
-                         'type': 'error', 'uid': '123', 'clearing': True},
-                        {'location_name': 'Feeder', 'message': 'هولدر نیومده',
-                         'type': 'warning', 'uid': '456'},
-                    ],
+                    'errors': self.errors,
                     'stats': {
                         'active_batch_no': 'ING0021',
                         'counter': 1819,
@@ -163,7 +166,6 @@ class System(object):
             await asyncio.sleep(.1)
 
     async def script_runner(self, func):
-        self.system_stop.clear()
         asyncio.create_task(func(self, ALL_NODES))
 
     def _get_status(self):

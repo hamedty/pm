@@ -7,11 +7,14 @@ def run_exclusively(func):
         try:
             await asyncio.wait_for(lock.acquire(), timeout=.1)
             system.running_script = func.__name__
+            system.system_running.set()
             await func(system, ALL_NODES)
         except asyncio.TimeoutError:
             print('Script blocked by exclusive lock')
         finally:
             system.running_script = None
+            system.system_stop.clear()
+            system.system_running.set()
             lock.release()
 
     return wrapper

@@ -3,6 +3,7 @@ from multiprocessing import Lock
 
 VALUES_DEFINITION = [
     # 'name' 'value' 'speedy': False 'no_change': False 'no_save': False 'range' 'description'
+    {'name': 'name', 'value': 'Basalin'},
 
     # General
     {'name': 'N', 'value': 10, 'no_change': True},
