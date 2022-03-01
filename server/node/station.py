@@ -219,6 +219,7 @@ class Station(Node):
             if full:
                 await self.align_dosing()
                 await self.assemble()
+                self.system.stats.add_success()
 
             if not (full or empty):
                 # {"no_dosing":false,"no_holder":true,}

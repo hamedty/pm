@@ -61,11 +61,12 @@ VALUES_DEFINITION = [
 
 
 class Recipe(object):
-    def __init__(self):
+    def __init__(self, redis):
         # inits values_dict, values_def, values_snapshot
         self.create_values_dict_from_list()
         self.set_speed(1)
         self.lock = Lock()
+        self.redis = redis
 
     def create_values_dict_from_list(self):
         self.values_dict = {item['name']: item['value']

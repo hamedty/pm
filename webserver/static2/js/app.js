@@ -103,6 +103,10 @@ app.controller('app_controller', function($scope, ws) {
 
   $scope.fn_reset_counter = function() {
     console.log('reset counter');
+    command = {
+      'type': 'reset_counter',
+    }
+    ws.get(command);
   }
 
   $scope.fn_clear_error = function(error) {

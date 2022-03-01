@@ -1,8 +1,7 @@
-stats / redis / reset counter
-recipe - save to mongo / redis / json
+stats - speed?
+recipe save/load redis
 feed 16
 empty rail
-test feed / no feed
 -------------------------
 what if homming failed?
 clear error once only
@@ -11,12 +10,12 @@ some how show nodes that are not connected
 -------------------------
 feeder issue warning instead of just waiting
 adaptve eac limits
+auto g38 at proper times (free well before and after)
 optimize
   station
   feeder gcodes
   robot moves / commands
   rail
-auto g38 at proper times (free well before and after)
 -------------------------
 extract dosing feeder params to recepie
 verify correct press

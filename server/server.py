@@ -7,7 +7,7 @@ import traceback
 import types
 from node import ALL_NODES, ALL_NODES_DICT
 import asyncio
-import mongo
+from stats import Mongo, Redis, Stats
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 PARENT_PATH = os.path.dirname(PATH)
@@ -35,11 +35,13 @@ class System(object):
         self.running_script = None
 
         # mongo db access point
-        self.mongo = mongo.Mongo()
+        self.mongo = Mongo()
         self.mongo.start()
+        self.redis = Redis()
+        self.stats = Stats(self.redis)
 
         # recipe
-        self.recipe = recipe.Recipe()
+        self.recipe = recipe.Recipe(self.redis)
 
     async def connect(self):
         for node in self.nodes:
@@ -113,6 +115,8 @@ class System(object):
             self.system_running.set()
         elif message_in['type'] == 'clear_error':  # HMI2, clear error
             asyncio.create_task(self.clear_error(message_in['error_id']))
+        elif message_in['type'] == 'reset_counter':  # HMI2, reset counter
+            self.stats.reset_counter()
 
     def send_architecture(self, ws):
         message = [{
@@ -151,13 +155,14 @@ class System(object):
                     #     'feed_open': True,
                     # },
                     'errors': self.errors,
-                    'stats': {
-                        'active_batch_no': 'ING0021',
-                        'counter': 1819,
-                        'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
-                        'speed': 2315,
-                        'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
-                    }
+                    'stats': self.stats.data,
+                    # {
+                    #     'active_batch_no': 'ING0021',
+                    #     'counter': 1819,
+                    #     'counter_since': (datetime.datetime.now() - datetime.timedelta(hours=2, minutes=30, days=2)).timestamp(),
+                    #     'speed': 2315,
+                    #     'speed_since': (datetime.datetime.now() - datetime.timedelta(minutes=10)).timestamp()
+                    # }
                 },  # v2
             }
             message = json.dumps(message)
