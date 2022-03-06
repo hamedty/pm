@@ -237,6 +237,25 @@ class Feeder(Node):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
+    async def feeder_process(self, mask_holder, mask_dosing):
+        disabled_stations = [2, 8]
+        for s in disabled_stations:
+            mask_holder[(s + 2) % 10] = 0  # station 2 -> 4
+            mask_dosing[(s + 6) % 10] = 0  # station 2 -> 8
+
+        command = {
+            'verb': 'feeder_process',
+            'mask_holder': mask_holder,
+            'mask_dosing': mask_dosing,
+            'cartridge_feed': not self.recipe.SERVICE_FUNC_NO_CARTRIDGE,
+            'z_offset': self.recipe.FEEDER_Z_IDLE,
+            'feed_comeback': self.recipe.FEED_FEEDER_COMEBACK,
+            'feed_feed': self.recipe.FEED_FEEDER_FEED,
+            'jerk_feed': self.recipe.JERK_FEEDER_FEED,
+            'jerk_idle': self.recipe.JERK_FEEDER_DELIVER,
+        }
+        await self.send_command(command)
+
     async def feeding_loop(self):
         await self.feeder_initial_start_event.wait()
         await self.set_motors_working_condition()
@@ -252,22 +271,11 @@ class Feeder(Node):
             ''' 1- Fill '''
             if not self.recipe.SERVICE_FUNC_NO_FEEDER:
 
-                # mask = [1] * self.recipe.N
-                mask = [1] * self.recipe.N
-                # mask[5] = 0  # station 3
+                mask_holder = [1] * self.recipe.N
+                mask_dosing = [1] * self.recipe.N
 
-                command = {
-                    'verb': 'feeder_process',
-                    'mask': mask,
-                    'cartridge_feed': not self.recipe.SERVICE_FUNC_NO_CARTRIDGE,
-                    'z_offset': self.recipe.FEEDER_Z_IDLE,
-                    'feed_comeback': self.recipe.FEED_FEEDER_COMEBACK,
-                    'feed_feed': self.recipe.FEED_FEEDER_FEED,
-                    'jerk_feed': self.recipe.JERK_FEEDER_FEED,
-                    'jerk_idle': self.recipe.JERK_FEEDER_DELIVER,
-                }
                 await self.system.system_running.wait()
-                await self.send_command(command)
+                await self.feeder_process(mask_holder, mask_dosing)
                 self.feeder_finished_command_event.set()
 
             t1 = time.time()
