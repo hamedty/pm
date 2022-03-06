@@ -25,29 +25,30 @@ async def fill_dosing_rail(system, ALL_NODES):
 @run_exclusively
 async def run_rail_empty(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
 
-    await system.system_running.wait()
+    ''' Initial Condition '''
+    # feeder
+    feeder.init_events()
 
-    while system.system_running.is_set():
-        await rail.set_valves([0] * 2)
-        await system.system_running.wait()
-        await rail.G1(z=rail.recipe.D_MIN, feed=rail.recipe.FEED_RAIL_FREE)
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
-        await rail.set_valves([1, 1])
-        await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
+    # rail
+    rail.init_events()
+    asyncio.create_task(rail.rail_loop(feeder))
 
-        # rail forward
-        await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_INTACT)
+    ''' Main Loop'''
+    for i in range(2):
+        if system.system_stop.is_set():
+            break
+        await rail.rail_parked_event.wait()
+        rail.rail_parked_event.clear()
+        rail.rail_move_event.set()
+        feeder.feeder_is_full_event.set()
 
-        # change jacks to moving
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
-        await rail.set_valves([0, 0])
-        await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
+    await rail.rail_parked_event.wait()
+    rail.system_stop_event.set()
 
 
 @run_exclusively

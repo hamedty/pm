@@ -12,7 +12,6 @@ async def main(system, ALL_NODES):
 
     ''' Initial Condition '''
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
-    await system.system_running.wait()
 
     await do_nodes(robots, lambda r: r.set_valves([0] * 10))
     await do_nodes(stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))

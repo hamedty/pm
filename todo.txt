@@ -1,7 +1,6 @@
-stats - speed?
+stats speed?
 recipe save/load redis
 feed 16
-empty rail
 -------------------------
 what if homming failed?
 clear error once only
