@@ -21,20 +21,20 @@ restart_service () {
 #   restart_service $i
 # done
 
-# # Stations
-# for i in 102 #101 102 103 104 105 106 107 108 109 110
-# do
-#   echo 192.168.44.$i
-#   copy_files $i
-#   copy_models $i
-#   restart_service $i
-# done
-
-# Feeder
-for i in  21
+# Stations
+for i in 101 #101 102 103 104 105 106 107 108 109 110
 do
   echo 192.168.44.$i
   copy_files $i
+  copy_models $i
   restart_service $i
 done
-echo "Done"
+
+# # Feeder
+# for i in  21
+# do
+#   echo 192.168.44.$i
+#   copy_files $i
+#   restart_service $i
+# done
+# echo "Done"

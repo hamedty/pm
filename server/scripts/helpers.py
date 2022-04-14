@@ -4,7 +4,7 @@ from .main import *
 from .recipe import *
 from .utils import *
 from scripts import recipe
-import aioconsole
+
 
 
 @run_exclusively

@@ -2,7 +2,7 @@ import time
 from .main import *
 import asyncio
 import traceback
-import aioconsole
+
 from .recipe import *
 from .utils import *
 from scripts import recipe
