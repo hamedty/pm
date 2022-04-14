@@ -3,7 +3,7 @@ from .node import Node
 import os
 import json
 import asyncio
-import aioconsole
+
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(PATH)
@@ -37,7 +37,7 @@ class Station(Node):
             'tn': 0,  # min travel
             'tm': 0,  # max travel
         }),
-        ('out', {7: 1, 8: 1, 9: 1}),  # Microstepping enabled
+        # ('out', {7: 1, 8: 1, 9: 1}),  # Microstepping enabled - done in FW
 
         # Y - Dosing Motor
         (2, {
@@ -55,7 +55,7 @@ class Station(Node):
             'tn': 0,  # min travel
             'tm': 0,  # max travel
         }),
-        ('out', {10: 1, 11: 1, 12: 1}),  # Microstepping enabled
+        # ('out', {10: 1, 11: 1, 12: 1}),  # Microstepping enabled -  - done in FW
 
         # Z - Main Motor
         (3, {
