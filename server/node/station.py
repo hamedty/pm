@@ -94,7 +94,10 @@ class Station(Node):
             'main': 3,
             'dosing_base': 4,
             'gate': 5,
-            'reserve': 6,
+            'light_red': 6,
+            'light_green': 7,
+            'motor_enable1': 8,
+            'motor_enable2': 9,
         },
         'di': {
             'jack': 1,  # jack verification
@@ -104,7 +107,7 @@ class Station(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 300.0, .7, 5.0],
         },
-        'eac': [500],
+        'eac': [500 * 2],
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
@@ -372,7 +375,7 @@ class Station(Node):
             M100 ({{out1: 0, out4: 1}})
             G1 Z{self.hw_config['H_PRE_DANCE']:.1f} F{int(recipe.FEED_Z_UP * .7):d}
             G4 P.05
-            M100 ({{out1: 1}})
+            M100 ({{out1: 1, out8: 1}})
             G4 P.05
 
             ; dance
@@ -382,18 +385,19 @@ class Station(Node):
             M100 ({{out1: 0, out2: 0, out4: 0}})
             M100 ({{out5: 1}})
             M100 ({{out3: 1}})
+            M100 ({{out8: 0}})
             G4 P1.2
             M100 ({{out3: 0}})
 
             ; dance back
-            M100 ({{out1: 1}})
+            M100 ({{out1: 1, out8: 1}})
             G4 P.15
             G1 Z{H_DANCE_BACK:.2f} F5000
             G4 P.15
             M100 ({{ out4: 1, out5: 0}})
             G1 Z{H_DANCE_BACK2:.2f} Y{Y_DANCE_BACK:.2f} F{int(recipe.FEED_DANCE):d}
             G1 Y{Y_DANCE_BACK2:.2f} F{int(recipe.FEED_DANCE):d}
-            M100 ({{out4: 0}})
+            M100 ({{out4: 0, out8: 0}})
             M100 ({{zjm:15000}})
         ''')
 

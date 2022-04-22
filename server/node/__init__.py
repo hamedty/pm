@@ -33,9 +33,9 @@ assert len(ALL_NODES_DICT) == len(ALL_NODES)
 
 if 'Station X' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station X']
-    station.hw_config['H_ALIGNING'] = 230
-    station.hw_config['H_PUSH'] = 238
-    station.hw_config['H_PRE_DANCE'] = 245
+    station.hw_config['H_ALIGNING'] = 235
+    station.hw_config['H_PUSH'] = 246
+    station.hw_config['H_PRE_DANCE'] = 254
 
 
 if 'Station 1' in ALL_NODES_DICT:
