@@ -9,6 +9,7 @@ import copy
 import string
 import uuid
 import random
+from recipe import RecipeSnapshot
 
 
 def generate_random_string():
@@ -73,6 +74,12 @@ class Node(object):
 
     def set_system(self, system):
         self.system = system
+        # node must only access to a snapshot - since parametes may change in middle of script
+        self.recipe = RecipeSnapshot(system.recipe)
+        # run self.update_recipe() in proper moments
+
+    def update_recipe(self):
+        return self.recipe.update()
 
     async def scp_from(self, path_src, path_dst):
         path_dst, file_extension = os.path.splitext(path_dst)

@@ -2,10 +2,7 @@ import time
 from .main import *
 import asyncio
 import traceback
-
-from .recipe import *
 from .utils import *
-from scripts import recipe
 from node import ALL_NODES_DICT
 
 

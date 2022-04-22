@@ -1,10 +1,7 @@
 import time
 import traceback
 import asyncio
-
-from .recipe import *
 from .utils import *
-from scripts import recipe
 from node import ALL_NODES_DICT
 
 
@@ -14,7 +11,6 @@ async def main(system, ALL_NODES):
 
     ''' Initial Condition '''
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
-    await system.system_running.wait()
 
     await do_nodes(robots, lambda r: r.set_valves([0] * 10))
     await do_nodes(stations, lambda s: s.set_valves([None, 0, 0, 1, 0]))
@@ -24,21 +20,21 @@ async def main(system, ALL_NODES):
     ''' Initial Condition '''
     # feeder
     feeder.init_events()
-    feeder_loop_task = asyncio.create_task(feeder.feeding_loop(recipe))
+    feeder_loop_task = asyncio.create_task(feeder.feeding_loop())
 
     # dosing feeder
-    await dosing_feeder.create_feeding_loop(feeder, recipe)
+    dosing_loop_task = asyncio.create_task(
+        dosing_feeder.dosing_master_loop(feeder))
 
     # rail
     rail.init_events()
-    asyncio.create_task(rail.rail_loop(recipe, feeder))
+    asyncio.create_task(rail.rail_loop(feeder))
 
     # stations
     stations_loop = []
     for station in stations:
         station.init_events()
-        task = asyncio.create_task(
-            station.station_assembly_loop(recipe))
+        task = asyncio.create_task(station.station_assembly_loop())
         stations_loop.append(task)
 
     ''' Fill Line '''
@@ -60,7 +56,7 @@ async def main(system, ALL_NODES):
         t0 = time.time()
 
         # do robots
-        await do_nodes(robots, lambda r: r.do_robot(recipe))
+        await do_nodes(robots, lambda r: r.do_robot())
         t1 = time.time()
         dt = t1 - t0
         print(f'robot portion: {dt:.1f}')
@@ -70,7 +66,7 @@ async def main(system, ALL_NODES):
         rail.rail_move_event.set()
 
         # park robots
-        await do_nodes(robots, lambda r: r.do_robot_park(recipe))
+        await do_nodes(robots, lambda r: r.do_robot_park())
         i += 1
         print('--------------------------------', i)
 
@@ -83,6 +79,7 @@ async def main(system, ALL_NODES):
         task.cancel()
 
     await feeder_loop_task
+    await dosing_loop_task
     await dosing_feeder.terminate_feeding_loop(feeder)
     await feeder.set_motors()  # set all feeder motors to 0
     await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
@@ -105,7 +102,7 @@ async def home_all_nodes(system, ALL_NODES):
     await rail.home()
 
     await system.system_running.wait()
-    await rail.G1(z=D_STANDBY, feed=FEED_RAIL_FREE * .6)
+    await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_FREE * .6)
     await feeder_home
 
 

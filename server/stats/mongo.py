@@ -1,6 +1,6 @@
-import pymongo
 import queue
 import threading
+import pymongo
 
 client = pymongo.MongoClient()
 db = client["PAM2060"]
