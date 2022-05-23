@@ -54,16 +54,9 @@ async def feeder_process(arduino, G1, command):
 
     # prepare masks
     initial_z = FEEDER_OFFSET
-    N = len(command['mask'])
-    mask_holder = command['mask'] + [0]
-    mask_dosing = command['mask'] + [0, 0]
-
-    disabled_stations = [2, 8]
-    for disabled_station in disabled_stations:
-        holder_index = (disabled_station + 2) % 10
-        dosing_index = (disabled_station + 6) % 10
-        mask_holder[holder_index] = 0  # station 2 - 4
-        mask_dosing[dosing_index] = 0  # station 2 - 8
+    N = len(command['mask_holder'])
+    mask_holder = command['mask_holder'] + [0]
+    mask_dosing = command['mask_dosing'] + [0, 0]
 
     #---------------------------------------------------------------
 
@@ -81,7 +74,6 @@ async def feeder_process(arduino, G1, command):
     arduino._send_command(f'''
         {{eac1:3500}}
         {{out2: 1}}
-        {{out11: 1}}
         {{z:{{jm: {JERK_FEED:.0f}}}}}
         ''')
     #---------------------------------------------------------------

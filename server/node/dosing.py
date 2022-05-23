@@ -61,7 +61,17 @@ class Dosing(Node):
     async def home_core(self):
         pass
 
-    async def create_feeding_loop(self, feeder, recipe):
+    async def dosing_master_loop(self, feeder):
+        while not feeder.system_stop_event.is_set():
+            # use feeder recipe to sync
+            no_feed_dosing = feeder.recipe.SERVICE_FUNC_NO_FEEDER or feeder.recipe.SERVICE_FUNC_NO_DOSING
+            if no_feed_dosing:
+                await self.terminate_feeding_loop(feeder)
+            else:
+                await self.create_feeding_loop(feeder)
+            await asyncio.sleep(1)
+
+    async def create_feeding_loop(self, feeder):
         '''
 
         feeding_task
@@ -75,18 +85,16 @@ class Dosing(Node):
         terminate_feeding_loop()
 
         '''
-        if recipe.SERVICE_FUNC_NO_FEEDER or recipe.SERVICE_FUNC_NO_DOSING:
-            return
         if self.feeding_task is not None:
             return
+
         # shield is a Lock for time sensetive operation inside the loop. Shield must be
         # created here to be in the same event loop as the loop.
         self.shield = asyncio.Lock()
         self.buffer_empty_event = asyncio.Event()
-        self.feeding_task = asyncio.create_task(
-            self.feeding_loop(feeder, recipe))
+        self.feeding_task = asyncio.create_task(self.feeding_loop(feeder))
         self.motor_control_task = asyncio.create_task(
-            self.motor_control_loop(feeder, recipe))
+            self.motor_control_loop(feeder))
 
     async def terminate_feeding_loop(self, feeder):
         if self.feeding_task is None:
@@ -103,7 +111,7 @@ class Dosing(Node):
         self.motor_control_task = None
         self.feeding_task = None
 
-    async def feeding_loop(self, feeder, recipe):
+    async def feeding_loop(self, feeder):
         while True:
             await self.set_valves([0])
 
@@ -141,7 +149,7 @@ class Dosing(Node):
         # await asyncio.sleep(.5)
         await feeder.send_command({'verb': 'set_dosing_reserve', 'change': 1})
 
-    async def motor_control_loop(self, feeder, recipe):
+    async def motor_control_loop(self, feeder):
         motors_on = True
         await self.set_motors_highlevel(feeder, 'on')
         while True:

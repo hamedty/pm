@@ -135,7 +135,8 @@ class Robot(Node):
         mask = mask * 2
         await self.set_valves(mask)
 
-    async def do_robot(self, recipe):
+    async def do_robot(self):
+        self.update_recipe()
         # ensure about stations
         stations_task1 = asyncio.gather(
             *[station.clearance() for station in self._stations])
@@ -150,16 +151,16 @@ class Robot(Node):
         await self.system.system_running.wait()
 
         await self.send_command_raw(f'''
-            G1 Y{Y_GRAB_IN_UP_1} F{recipe.FEED_Y_UP}
-            G1 X{X_GRAB_IN} F{recipe.FEED_X_FORWARD}
-            G1 Y{Y_GRAB_IN_DOWN} F{recipe.FEED_Y_DOWN}
+            G1 Y{Y_GRAB_IN_UP_1} F{self.recipe.FEED_Y_UP}
+            G1 X{X_GRAB_IN} F{self.recipe.FEED_X_FORWARD}
+            G1 Y{Y_GRAB_IN_DOWN} F{self.recipe.FEED_Y_DOWN}
         ''')
 
         await self.set_valves_grab_infeed()
 
         await self.send_command_raw(f'''
             G4 P{T_GRAB_IN:.2f}
-            G1 Y{Y_GRAB_IN_UP_2} F{recipe.FEED_Y_UP}
+            G1 Y{Y_GRAB_IN_UP_2} F{self.recipe.FEED_Y_UP}
         ''')
 
         '''EXCHANGE'''
@@ -186,36 +187,36 @@ class Robot(Node):
         await self.system.system_running.wait()
 
         await self.send_command_raw(f'''
-            G1 X{X_INPUT} F{recipe.FEED_X_SHORT}
-            G1 Y{Y_INPUT_DOWN_RELEASE_HOLDER} F{recipe.FEED_Y_DOWN_PRESS}
+            G1 X{X_INPUT} F{self.recipe.FEED_X_SHORT}
+            G1 Y{Y_INPUT_DOWN_RELEASE_HOLDER} F{self.recipe.FEED_Y_DOWN_PRESS}
             M100 ({{out: {{6:0,7:0,8:0,9:0,10:0}}}})
-            G1 Y{Y_INPUT_DOWN_RELEASE_DOSING} F{recipe.FEED_Y_DOWN_PRESS}
+            G1 Y{Y_INPUT_DOWN_RELEASE_DOSING} F{self.recipe.FEED_Y_DOWN_PRESS}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
         ''')
 
         async def stations_verify_and_deliver():
             await asyncio.sleep(T_INPUT_RELEASE)
-            await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down(recipe) for station in self._stations])
+            await asyncio.gather(*[station.verify_dosing_sit_right_and_come_down() for station in self._stations])
 
         stations_task = asyncio.create_task(stations_verify_and_deliver())
 
         await self.send_command_raw(f'''
-            G1 Y{Y_INPUT_UP} X{X_PRESS} F{recipe.FEED_Y_UP}
+            G1 Y{Y_INPUT_UP} X{X_PRESS} F{self.recipe.FEED_Y_UP}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
             M100 ({{out: {{6:1,7:1,8:1,9:1,10:1}}}})
             G4 P{T_HOLDER_JACK_CLOSE:.2f}
-            G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} F{recipe.FEED_Y_DOWN}
+            G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} F{self.recipe.FEED_Y_DOWN}
             G4 P{T_PRE_PRESS:.2f}
-            G1 Y{Y_INPUT_DOWN_PRESS_HOLDER} F{recipe.FEED_Y_DOWN_PRESS}
+            G1 Y{Y_INPUT_DOWN_PRESS_HOLDER} F{self.recipe.FEED_Y_DOWN_PRESS}
             G4 P{T_POST_PRESS:.2f}
-            G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} X{X_INPUT} F{recipe.FEED_Y_DOWN}
+            G1 Y{Y_INPUT_DOWN_PRE_PRESS_HOLDER} X{X_INPUT} F{self.recipe.FEED_Y_DOWN}
 
         ''')
 
         await stations_task
 
         await self.send_command_raw(f'''
-            G1 Y{Y_OUTPUT} F{recipe.FEED_Y_UP}
+            G1 Y{Y_OUTPUT} F{self.recipe.FEED_Y_UP}
             M100 ({{out: {{1:1,2:1,3:1,4:1,5:1}}}})
             M100 ({{out: {{6:0,7:0,8:0,9:0,10:0}}}})
         ''')
@@ -224,7 +225,7 @@ class Robot(Node):
 
         await asyncio.gather(*[station.set_valves([0, 0, 0, 1]) for station in self._stations])
         await asyncio.sleep(T_OUTPUT_RELEASE)
-        await asyncio.gather(*[station.G1(z=recipe.STATION_Z_OUTPUT_SAFE, feed=recipe.FEED_Z_UP) for station in self._stations])
+        await asyncio.gather(*[station.G1(z=self.recipe.STATION_Z_OUTPUT_SAFE, feed=self.recipe.FEED_Z_UP) for station in self._stations])
         for station in self._stations:
             station.station_is_full_event.set()
 
@@ -232,7 +233,7 @@ class Robot(Node):
         STATION_SAFE_LIMIT = 310
 
         t1 = asyncio.create_task(self.send_command_raw(f'''
-            G1 X{X_CAPPING} F{recipe.FEED_X_BACKWARD}
+            G1 X{X_CAPPING} F{self.recipe.FEED_X_BACKWARD}
         '''))
 
         while self.get_enc_loc('x') > STATION_SAFE_LIMIT:
@@ -242,17 +243,17 @@ class Robot(Node):
             station.station_is_safe_event.set()
 
         await self.send_command_raw(f'''
-            G1 Y{recipe.Y_CAPPING_DOWN} F{recipe.FEED_Y_DOWN_CAP}
+            G1 Y{self.recipe.Y_CAPPING_DOWN} F{self.recipe.FEED_Y_DOWN_CAP}
             M100 ({{out: {{1:0,2:0,3:0,4:0,5:0}}}})
             G4 P.35
-            G1 X{recipe.X_PARK} F{recipe.FEED_X_BACKWARD}
+            G1 X{self.recipe.X_PARK} F{self.recipe.FEED_X_BACKWARD}
         ''')
 
-    async def do_robot_park(self, recipe):
+    async def do_robot_park(self):
         await self.system.system_running.wait()
 
         # await self.send_command_raw(f'''
-        #     G1 Y{recipe.Y_PARK} F{recipe.FEED_Y_UP/10}
+        #     G1 Y{self.recipe.Y_PARK} F{self.recipe.FEED_Y_UP/10}
         # ''')
-        await self.G1(y=recipe.Y_PARK, feed=recipe.FEED_Y_UP / 10, correct_initial=True)
-        await self.G1(x=recipe.X_PARK - 1, feed=recipe.FEED_X_BACKWARD / 40, correct_initial=True)
+        await self.G1(y=self.recipe.Y_PARK, feed=self.recipe.FEED_Y_UP / 10, correct_initial=True)
+        await self.G1(x=self.recipe.X_PARK - 1, feed=self.recipe.FEED_X_BACKWARD / 40, correct_initial=True)

@@ -91,21 +91,22 @@ class Rail(Robot):
         self.system_stop_event = asyncio.Event()  # setter: main loop - waiter: self
         self.system_stop_event.clear()
 
-    async def rail_loop(self, recipe, feeder):
+    async def rail_loop(self, feeder):
         assert abs(self._status['r.posz'] -
-                   recipe.D_STANDBY) < 1, 'Rail must be parked'
+                   self.recipe.D_STANDBY) < 1, 'Rail must be parked'
         self.rail_parked_event.set()
 
         while not self.system_stop_event.is_set():
             feeder.feeder_rail_is_parked_event.set()
             await self.rail_move_event.wait()
             self.rail_move_event.clear()
+            self.update_recipe()
 
             # rail backward
             await self.system.system_running.wait()
-            await self.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+            await self.G1(z=self.recipe.D_MIN, feed=self.recipe.FEED_RAIL_FREE)
             # await self.send_command_raw(f'''
-            #     G1 Z{recipe.D_MIN} F{recipe.FEED_RAIL_FREE}
+            #     G1 Z{self.recipe.D_MIN} F{self.recipe.FEED_RAIL_FREE}
             # ''')
 
             # wait for feeder
@@ -115,22 +116,22 @@ class Rail(Robot):
             # change jacks to moving
             await self.system.system_running.wait()
             await self.set_valves([1, 0])
-            await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
+            await asyncio.sleep(self.recipe.T_RAIL_FEEDER_JACK)
             await feeder.set_valves([None, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
+            await asyncio.sleep(self.recipe.T_RAIL_JACK1 - self.recipe.T_RAIL_FEEDER_JACK)
             await self.send_command_raw(f'''
                 {{out: {{9:1,10:1}}}}
-                ; M100.1({{z:{{jm:{recipe.JERK_RAIL_INTACT}}}}})
+                ; M100.1({{z:{{jm:{self.recipe.JERK_RAIL_INTACT}}}}})
             ''')
-            await asyncio.sleep(recipe.T_RAIL_JACK2)
+            await asyncio.sleep(self.recipe.T_RAIL_JACK2)
 
             # rail forward
             await self.system.system_running.wait()
             await self.send_command_raw(f'''
-                G1 Z50 F{recipe.FEED_RAIL_INTACT / 4}
-                G1 Z{recipe.D_STANDBY} F{recipe.FEED_RAIL_INTACT}
+                G1 Z50 F{self.recipe.FEED_RAIL_INTACT / 4}
+                G1 Z{self.recipe.D_STANDBY} F{self.recipe.FEED_RAIL_INTACT}
             ''')
-            await self.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+            await self.G1(z=self.recipe.D_STANDBY, feed=self.recipe.FEED_RAIL_INTACT)
 
             # clear feeder
             feeder.feeder_is_empty_event.set()
@@ -138,13 +139,13 @@ class Rail(Robot):
 
             # change jacks to moving
             await self.set_valves([1, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK1)
+            await asyncio.sleep(self.recipe.T_RAIL_JACK1)
             await self.set_valves([0, 0])
-            await asyncio.sleep(recipe.T_RAIL_JACK2)
+            await asyncio.sleep(self.recipe.T_RAIL_JACK2)
             # await self.send_command_raw(f'''
             #     M100 ({{out: {{9:1,10:0}}}})
-            #     G4 P{recipe.T_RAIL_JACK1:.2f}
+            #     G4 P{self.recipe.T_RAIL_JACK1:.2f}
             #     M100 ({{out: {{9:0,10:0}}}})
-            #     G4 P{recipe.T_RAIL_JACK2:.2f}
-            #     M100.1 ({{z:{{jm:{recipe.JERK_RAIL_FREE:.2f}}}}})
+            #     G4 P{self.recipe.T_RAIL_JACK2:.2f}
+            #     M100.1 ({{z:{{jm:{self.recipe.JERK_RAIL_FREE:.2f}}}}})
             # ''')

@@ -23,7 +23,7 @@
     <div class="home-upper-box">
       <button
         class="btn btn-secondary btn-lg home-upper-btn"
-        ng-class="{'btn-warning': remote_data.recipe.feed_open == false}"
+        ng-class="{'btn-warning': remote_data.recipe.SERVICE_FUNC_NO_FEEDER == true}"
         ng-click="fn_toggle_feed()"
       >
         <i class="fa-solid fa-xmark"></i>
@@ -52,14 +52,21 @@
       </div>
       <div class="right">
         <button
-          class=" btn btn-success btn-lg"
+          class=" btn btn-warning btn-lg"
           id="home-upper-box-btn-play"
+          ng-class="{'disabled': !remote_data.status.main_script, 'btn-warning': !remote_data.status.paused, 'btn-success': remote_data.status.paused}"
+          ng-click="fn_pause(remote_data.status.paused)"
         >
-          <i class="fa-solid fa-play"></i>
+          <i
+            class="fa-solid"
+            ng-class="{'fa-pause': !remote_data.status.paused, 'fa-play': remote_data.status.paused}"
+          ></i>
         </button>
         <button
           class="btn btn-danger btn-lg"
           id="home-upper-box-btn-play"
+          ng-class="{'disabled': !remote_data.status.main_script || remote_data.status.stopping, 'blink-stop': remote_data.status.stopping}"
+          ng-click="fn_stop()"
         >
           <i class="fa-solid fa-stop"></i>
         </button>
@@ -103,7 +110,7 @@
             ng-class="{'warning':'home-lower-box-warning-item', 'error':'home-lower-box-alarm-item'}[error.type]"
           >
             <span>{{error.location_name}}</span>
-            <span>{{error.message}}</span>
+            <span dir="rtl">{{error.message}}</span>
             <button
               class="btn btn-danger"
               ng-class="{'invisible': error.type=='warning', 'disabled':error.clearing}"

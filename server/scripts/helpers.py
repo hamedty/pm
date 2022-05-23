@@ -1,10 +1,41 @@
 import time
 import asyncio
 from .main import *
-from .recipe import *
 from .utils import *
-from scripts import recipe
 import aioconsole
+
+
+@run_exclusively
+async def feed16(system, ALL_NODES):
+    all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+    await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
+
+    ''' Inits '''
+    await rail.set_valves([0, 0])
+    await feeder.set_valves([0] * 14)
+    feeder.init_events()
+
+    dosing_loop_task = asyncio.create_task(
+        dosing_feeder.dosing_master_loop(feeder))
+
+    ''' main task '''
+    # 1st round
+    mask_holder = [0] * 10
+    mask_dosing = [0] * 4 + [1] * 6
+    await feeder.feeder_process(mask_holder, mask_dosing)
+    await feeder_handover_to_rail_bare(system, ALL_NODES)
+    # 2nd round
+    mask_holder = [0] * 10
+    mask_dosing = [1] * 10
+    await feeder.feeder_process(mask_holder, mask_dosing)
+    await feeder_handover_to_rail_bare(system, ALL_NODES)
+
+    ''' clean up '''
+    feeder.system_stop_event.set()
+    await dosing_loop_task
+    await dosing_feeder.terminate_feeding_loop(feeder)
+    await feeder.set_motors()  # set all feeder motors to 0
+    await feeder.set_valves([None] * 9 + [0])  # turn off air tunnel
 
 
 @run_exclusively
@@ -19,7 +50,7 @@ async def fill_cartridge_conveyor(system, ALL_NODES):
 @run_exclusively
 async def fill_dosing_rail(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES, wait_for_readiness=False)
-    await dosing_feeder.create_feeding_loop(feeder, recipe)
+    await dosing_feeder.create_feeding_loop(feeder)
     await asyncio.sleep(20)
     await dosing_feeder.terminate_feeding_loop(feeder)
 
@@ -27,59 +58,68 @@ async def fill_dosing_rail(system, ALL_NODES):
 @run_exclusively
 async def run_rail_empty(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
+
     await check_home_all_nodes(system, all_nodes, feeder, rail, robots, stations)
     await rail.set_valves([0, 0])
     await feeder.set_valves([0] * 14)
 
-    await system.system_running.wait()
+    ''' Initial Condition '''
+    # feeder
+    feeder.init_events()
 
-    while system.system_running.is_set():
-        await rail.set_valves([0] * 2)
-        await system.system_running.wait()
-        await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK1)
-        await rail.set_valves([1, 1])
-        await asyncio.sleep(recipe.T_RAIL_JACK2)
+    # rail
+    rail.init_events()
+    asyncio.create_task(rail.rail_loop(feeder))
 
-        # rail forward
-        await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+    ''' Main Loop'''
+    for i in range(10):
+        if system.system_stop.is_set():
+            break
+        await rail.rail_parked_event.wait()
+        rail.rail_parked_event.clear()
+        rail.rail_move_event.set()
+        feeder.feeder_is_full_event.set()
 
-        # change jacks to moving
-        await rail.set_valves([1, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK1)
-        await rail.set_valves([0, 0])
-        await asyncio.sleep(recipe.T_RAIL_JACK2)
+    await rail.rail_parked_event.wait()
+    rail.system_stop_event.set()
 
 
 @run_exclusively
-async def feeder_handover_to_rail(system, ALL_NODES):
+async def feeder_handover_to_rail(*args, **kwargs):
+    await feeder_handover_to_rail_bare(*args, **kwargs)
+
+
+async def feeder_handover_to_rail_bare(system, ALL_NODES):
     all_nodes, feeder, dosing_feeder, rail, robots, stations = await gather_all_nodes(system, ALL_NODES)
 
     # rail, feeder homed and parked
     assert await rail.is_homed(), 'Rail is not homed!'
     assert await feeder.is_homed(), 'Feeder is not homed!'
-    assert rail.is_at_loc(z=D_STANDBY) or rail.is_at_loc(
-        z=D_MIN), 'rail is in bad location'
-    # assert feeder.is_at_loc(z=FEEDER_Z_DELIVER) or feeder.is_at_loc(
-    #     z=FEEDER_Z_IDLE), 'feeder is in bad location'
+    assert rail.is_at_loc(z=rail.recipe.D_STANDBY) or rail.is_at_loc(
+        z=rail.recipe.D_MIN), 'rail is in bad location'
+    # assert feeder.is_at_loc(z=feeder.recipe.FEEDER_Z_DELIVER) or feeder.is_at_loc(
+    #     z=feeder.recipe.FEEDER_Z_IDLE), 'feeder is in bad location'
 
     # jack's to normal
     await rail.set_valves([0, 0])
 
-    await feeder.G1(z=FEEDER_Z_DELIVER, feed=5000), 'feeder is in bad location'
-    await rail.G1(z=recipe.D_MIN, feed=recipe.FEED_RAIL_FREE)
+    await feeder.G1(z=feeder.recipe.FEEDER_Z_DELIVER, feed=feeder.recipe.FEED_FEEDER_DELIVER), 'feeder is in bad location'
+    await rail.G1(z=rail.recipe.D_MIN, feed=rail.recipe.FEED_RAIL_FREE)
     await rail.set_valves([1, 0])
-    await asyncio.sleep(recipe.T_RAIL_FEEDER_JACK)
+    await asyncio.sleep(rail.recipe.T_RAIL_FEEDER_JACK)
     await feeder.set_valves([None, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK1 - recipe.T_RAIL_FEEDER_JACK)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK1 - rail.recipe.T_RAIL_FEEDER_JACK)
     await rail.set_valves([1, 1])
-    await asyncio.sleep(recipe.T_RAIL_JACK2)
-    await rail.G1(z=recipe.D_STANDBY, feed=recipe.FEED_RAIL_INTACT)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
+    await rail.send_command_raw(f'''
+        G1 Z50 F{rail.recipe.FEED_RAIL_INTACT / 4}
+        G1 Z{rail.recipe.D_STANDBY} F{rail.recipe.FEED_RAIL_INTACT}
+    ''')
+    await rail.G1(z=rail.recipe.D_STANDBY, feed=rail.recipe.FEED_RAIL_INTACT)
     await rail.set_valves([1, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK1)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK1)
     await rail.set_valves([0, 0])
-    await asyncio.sleep(recipe.T_RAIL_JACK2)
+    await asyncio.sleep(rail.recipe.T_RAIL_JACK2)
 
 
 @run_exclusively
