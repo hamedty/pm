@@ -5,11 +5,13 @@ import asyncio
 import time
 import subprocess
 import threading
+from multiprocessing import Process
 
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
 import rpi_scripts
+import rpi_button
 
 
 global ARDUINOS, CAMERAS
@@ -425,6 +427,9 @@ async def async_main():
 
 
 def main():
+    # button
+    Process(target=rpi_button.main).start()
+
     asyncio.run(async_main())
 
 

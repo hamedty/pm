@@ -36,7 +36,35 @@ if 'Station X' in ALL_NODES_DICT:
     station.hw_config['H_ALIGNING'] = 235
     station.hw_config['H_PUSH'] = 246
     station.hw_config['H_PRE_DANCE'] = 254
-
+    station.hw_config['dosing_offset'] = 0  # posetive moves to left
+# X1 235,246,254
+'''
+    "101": {
+        "dosing": {
+            "bt61bl83": {
+                "zero": 201
+            }
+        },
+        "dosing_roi": {
+            "dx": 250,
+            "dy": 213,
+            "x0": 140,
+            "y0": 144
+        },
+        "holder": {
+            "cmbm1h2t": {
+                "zero": 211
+            }
+        },
+        "holder_roi": {
+            "dx": 188,
+            "dy": 174,
+            "x0": 214,
+            "y0": 249
+        }
+    },
+'''
+# X2 235,246,254
 
 if 'Station 1' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 1']

@@ -111,12 +111,20 @@ class WebSocket_Mock(tornado.websocket.WebSocketHandler):
         print(message)
 
 
+class RpiGateway(tornado.web.RequestHandler):
+    def post(self):
+        data = self.request.body
+        asyncio.create_task(SYSTEM.message_from_rpi(json.loads(data)))
+        self.write('')
+
+
 def create_server(system=None, mock_data=False):
     global SYSTEM
     SYSTEM = system
     old_app = [
         (r"/", Index),
         (r"/ws", WebSocket_Mock if mock_data else WebSocket),
+        (r"/rpi", RpiGateway),
         (r'/static/(.*)', tornado.web.StaticFileHandler,
          {'path': STATIC_PATH_DIR}),
     ]

@@ -133,7 +133,7 @@ class Station(Node):
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
-        await self.send_command_raw('{out4:1}')
+        await self.send_command_raw('{out4:1, out7:1}')
 
     def calc_rois(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
