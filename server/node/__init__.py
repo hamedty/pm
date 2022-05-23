@@ -1,5 +1,4 @@
 from .station import Station
-from .station2 import Station2
 from .robot import Robot
 from .rail import Rail
 from .feeder import Feeder
