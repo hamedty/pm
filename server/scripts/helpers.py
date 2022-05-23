@@ -72,7 +72,7 @@ async def run_rail_empty(system, ALL_NODES):
     asyncio.create_task(rail.rail_loop(feeder))
 
     ''' Main Loop'''
-    for i in range(2):
+    for i in range(10):
         if system.system_stop.is_set():
             break
         await rail.rail_parked_event.wait()
