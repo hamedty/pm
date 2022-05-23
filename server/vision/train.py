@@ -157,7 +157,7 @@ def main():
 
     nodes = list(src_data.keys())
     nodes.sort()
-    # nodes = ['103', '104', '106', '108']
+
     componenets = ['holder', 'dosing']
     res = []
     with multiprocessing.get_context('spawn').Pool(5) as pool:

@@ -40,7 +40,7 @@ VALUES_DEFINITION = [
 
     # Rail
     {'name': 'FEED_RAIL_FREE', 'value': 25000, 'speedy': True},  # 30000
-    {'name': 'FEED_RAIL_INTACT', 'value': 16000, 'speedy': True},
+    {'name': 'FEED_RAIL_INTACT', 'value': 10000, 'speedy': True},  # 16000
     {'name': 'JERK_RAIL_FREE', 'value': 2000},
     {'name': 'JERK_RAIL_INTACT', 'value': 4500},
     {'name': 'D_STANDBY', 'value': 250},

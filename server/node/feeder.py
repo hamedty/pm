@@ -238,7 +238,8 @@ class Feeder(Node):
         self.system_stop_event.clear()
 
     async def feeder_process(self, mask_holder, mask_dosing):
-        disabled_stations = [2, 8]
+        disabled_stations = [8]
+        # disabled_stations = []
         for s in disabled_stations:
             mask_holder[(s + 2) % 10] = 0  # station 2 -> 4
             mask_dosing[(s + 6) % 10] = 0  # station 2 -> 8

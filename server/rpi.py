@@ -5,11 +5,13 @@ import asyncio
 import time
 import subprocess
 import threading
+from multiprocessing import Process
 
 import traceback
 from arduino import Arduino
 from camera import cheap_cam, vision
 import rpi_scripts
+import rpi_button
 
 
 global ARDUINOS, CAMERAS
@@ -46,6 +48,7 @@ async def dump_training(command):
     feed = command['speed']
     camera = CAMERAS[component]
     axis = {'holder': 'X', 'dosing': 'Y'}[component]
+    enable_pin = {'holder': 'out9', 'dosing': 'out8'}[component]
 
     os.system('rm -rf %s/*' % DATA_PATH)
     directory = os.path.join(DATA_PATH, command['folder_name'])
@@ -58,6 +61,7 @@ async def dump_training(command):
 
     webcam_buffer_length = 4
     arduino.send_command('{out6:1}')
+    arduino.send_command(f'{{ {enable_pin}: 1}}')
 
     for frame_no in range(-webcam_buffer_length, no_frames):
         if frame_no < 0:
@@ -71,8 +75,10 @@ async def dump_training(command):
 
         if (frame_no + webcam_buffer_length) < no_frames:
             await asyncio.sleep(.033)  # wait for one frame to scan
-            arduino.send_command('G10 L20 P1 %s0' % axis)
-            arduino.send_command('G1 %s%.02f F%d' % (axis, steps, feed))
+            arduino.send_command(f'''
+                G10 L20 P1 {axis}0
+                G1 {axis}{steps:.02f} F{feed:d}
+            ''')
             command_id = arduino.get_command_id()
             arduino.send_command('M100 ({uda0:"0x%x"})' % (command_id))
             await arduino.wait_for_command_id(command_id)
@@ -80,6 +86,7 @@ async def dump_training(command):
             delay = .25
             await asyncio.sleep(delay)  # needed for system to settle
 
+    arduino.send_command(f'{{ {enable_pin}: 0}}')
     arduino.send_command('{out6:0}')
     return {'success': True}
 
@@ -93,8 +100,10 @@ async def align(command):
     valve = {'holder': 'out2', 'dosing': 'out1'}[component]
     detector = {'holder': vision.detect_holder,
                 'dosing': vision.detect_dosing}[component]
+    enable_pin = {'holder': 'out9', 'dosing': 'out8'}[component]
 
     arduino.send_command('{out6:1}')
+    arduino.send_command(f'{{ {enable_pin}: 1}}')
 
     # global PEN_ID
     # if PEN_ID > 10:
@@ -153,6 +162,7 @@ async def align(command):
     # if component == 'dosing':
     #     PEN_ID += 1
 
+    arduino.send_command(f'{{ {enable_pin}: 0}}')
     arduino.send_command('{out6:0}')
     return {'success': True, 'aligned': aligned, 'steps_history': steps_history}
 
@@ -417,6 +427,9 @@ async def async_main():
 
 
 def main():
+    # button
+    Process(target=rpi_button.main).start()
+
     asyncio.run(async_main())
 
 

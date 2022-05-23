@@ -46,6 +46,8 @@ class Stats(object):
         self.data = self.redis.root.stats
         self.data._setup()
         self.data = self.data._wrapped
+        if self.data is None:
+            self.data = {}
         merge_dicts(self.data, STRUCTURE)
 
     async def background_task(self):

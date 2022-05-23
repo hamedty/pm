@@ -1,7 +1,7 @@
 from .node import Node, WAIT_METRIC_TIMEOUT_EXCEPTION
 import asyncio
 import time
-import aioconsole
+
 
 CONVEYOR_SPEED = 5
 LIFT_SPEED = 15

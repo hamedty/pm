@@ -1,7 +1,6 @@
 import time
 import traceback
 import asyncio
-import aioconsole
 from .utils import *
 from node import ALL_NODES_DICT
 

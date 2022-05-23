@@ -2,7 +2,6 @@ import time
 import asyncio
 from .main import *
 from .utils import *
-import aioconsole
 
 
 @run_exclusively

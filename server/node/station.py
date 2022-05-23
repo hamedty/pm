@@ -3,7 +3,7 @@ from .node import Node
 import os
 import json
 import asyncio
-import aioconsole
+
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 SERVER_PATH = os.path.dirname(PATH)
@@ -37,7 +37,7 @@ class Station(Node):
             'tn': 0,  # min travel
             'tm': 0,  # max travel
         }),
-        ('out', {7: 1, 8: 1, 9: 1}),  # Microstepping enabled
+        # ('out', {7: 1, 8: 1, 9: 1}),  # Microstepping enabled - done in FW
 
         # Y - Dosing Motor
         (2, {
@@ -55,7 +55,7 @@ class Station(Node):
             'tn': 0,  # min travel
             'tm': 0,  # max travel
         }),
-        ('out', {10: 1, 11: 1, 12: 1}),  # Microstepping enabled
+        # ('out', {10: 1, 11: 1, 12: 1}),  # Microstepping enabled -  - done in FW
 
         # Z - Main Motor
         (3, {
@@ -94,7 +94,10 @@ class Station(Node):
             'main': 3,
             'dosing_base': 4,
             'gate': 5,
-            'reserve': 6,
+            'light_red': 6,
+            'light_green': 7,
+            'motor_enable1': 8,
+            'motor_enable2': 9,
         },
         'di': {
             'jack': 1,  # jack verification
@@ -104,7 +107,7 @@ class Station(Node):
             # encoder key, ratio, telorance_soft, telorance_hard
             'posz': ['enc1', 300.0, .7, 5.0],
         },
-        'eac': [500],
+        'eac': [500 * 2],
         'H_ALIGNING': 210,
         'H_PUSH': 219,
         'H_PRE_DANCE': 224,
@@ -130,7 +133,7 @@ class Station(Node):
         await self.send_command_raw('G28.5')
         await self.send_command_raw('G1 Z1 F1000')
         await self.send_command_raw('G1 Z0 F1000')
-        await self.send_command_raw('{out4:1}')
+        await self.send_command_raw('{out4:1, out7:1}')
 
     def calc_rois(self):
         annotation_data = VISION_ANNOTATION[str(self.ip_short)]
@@ -210,20 +213,26 @@ class Station(Node):
             check_fullness = check_fullness[1]
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
+            correct_holder = True
+            correct_dosing = True
 
             await self.system.system_running.wait()
             if full:
-                await self.align_holder()
+                correct_holder = await self.align_holder()
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
-            if full:
-                await self.align_dosing()
+            if full and correct_holder:
+                correct_dosing = await self.align_dosing()
                 await self.assemble()
                 self.system.stats.add_success()
 
-            if not (full or empty):
+            if (not (full or empty)) or (not (correct_holder and correct_dosing)):
                 # {"no_dosing":false,"no_holder":true,}
-                if check_fullness['no_dosing']:  # no dosing
+                if correct_holder == False:
+                    message = 'هولدر تنظیم نشد . استیشن را خالی کنید.'
+                elif correct_dosing == False:
+                    message = 'هولدر تنظیم نشد. استیشن را خالی کنید.'
+                elif check_fullness['no_dosing']:  # no dosing
                     message = 'دوزینگ وجود ندارد. استیشن را خالی کنید.'
                 else:  # no holder
                     message = 'هولدر وجود ندارد. استیشن را خالی کنید.'
@@ -248,18 +257,18 @@ class Station(Node):
     async def align_holder(self):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': self.recipe.ALIGN_SPEED_HOLDER, 'retries': self.recipe.VISION_RETRIES_HOLDER}, assert_success=False)
-        # print(self.name, z1, z2)
-        if (not z1) or (not z2['aligned']):
-            error = {
-                'message': 'هولدر را دستی تنظیم کنید.',
-                'location_name': self.name,
-                'details': (z1, z2),
-                'type': 'error',
-            }
-            print(error)
-            # await aioconsole.ainput(str(error))
-            error_clear_event, error_id = await self.system.register_error(error)
-            await error_clear_event.wait()
+        # # print(self.name, z1, z2)
+        # if (not z1) or (not z2['aligned']):
+        #     error = {
+        #         'message': 'هولدر را دستی تنظیم کنید.',
+        #         'location_name': self.name,
+        #         'details': (z1, z2),
+        #         'type': 'error',
+        #     }
+        #     print(error)
+        #     # await aioconsole.ainput(str(error))
+        #     error_clear_event, error_id = await self.system.register_error(error)
+        #     await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
                 'station': self.ip_short,
@@ -268,6 +277,9 @@ class Station(Node):
             }
             table = 'vision_retries'
             self.system.mongo.write(table, data)
+        if (not z1) or (not z2['aligned']):
+            return False
+        return True
 
     async def align_dosing(self):
         data = {}
@@ -276,19 +288,19 @@ class Station(Node):
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], correct_initial=True)
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': self.recipe.ALIGN_SPEED_DOSING, 'retries': self.recipe.VISION_RETRIES_DOSING}, assert_success=False)
-        if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, None])
-            await self.G1(z=100, feed=5000)
-            error = {
-                'message': 'دوزینگ را دستی تنظیم کنید.',
-                'location_name': self.name,
-                'details': (z1, z2),
-                'type': 'error',
-            }
-            print(error)
-            # await aioconsole.ainput(str(error))
-            error_clear_event, error_id = await self.system.register_error(error)
-            await error_clear_event.wait()
+        # if (not z1) or (not z2['aligned']):
+        #     await self.set_valves([0, None, None, None])
+        #     await self.G1(z=100, feed=5000)
+        #     error = {
+        #         'message': 'دوزینگ را دستی تنظیم کنید.',
+        #         'location_name': self.name,
+        #         'details': (z1, z2),
+        #         'type': 'error',
+        #     }
+        #     print(error)
+        #     # await aioconsole.ainput(str(error))
+        #     error_clear_event, error_id = await self.system.register_error(error)
+        #     await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
                 'station': self.ip_short,
@@ -297,6 +309,11 @@ class Station(Node):
             }
             table = 'vision_retries'
             self.system.mongo.write(table, data)
+        if (not z1) or (not z2['aligned']):
+            await self.set_valves([0, None, None, None])
+            await self.G1(z=1, feed=5000)
+            return False
+        return True
 
     async def verify_no_holder_no_dosing(self):
         while True:
@@ -374,7 +391,7 @@ class Station(Node):
             M100 ({{out1: 0, out4: 1}})
             G1 Z{self.hw_config['H_PRE_DANCE']:.1f} F{int(self.recipe.FEED_Z_UP * .7):d}
             G4 P.05
-            M100 ({{out1: 1}})
+            M100 ({{out1: 1, out8: 1}})
             G4 P.05
 
             ; dance
@@ -384,18 +401,19 @@ class Station(Node):
             M100 ({{out1: 0, out2: 0, out4: 0}})
             M100 ({{out5: 1}})
             M100 ({{out3: 1}})
+            M100 ({{out8: 0}})
             G4 P1.2
             M100 ({{out3: 0}})
 
             ; dance back
-            M100 ({{out1: 1}})
+            M100 ({{out1: 1, out8: 1}})
             G4 P.15
             G1 Z{H_DANCE_BACK:.2f} F5000
             G4 P.15
             M100 ({{ out4: 1, out5: 0}})
             G1 Z{H_DANCE_BACK2:.2f} Y{Y_DANCE_BACK:.2f} F{int(self.recipe.FEED_DANCE):d}
             G1 Y{Y_DANCE_BACK2:.2f} F{int(self.recipe.FEED_DANCE):d}
-            M100 ({{out4: 0}})
+            M100 ({{out4: 0, out8: 0}})
             M100 ({{zjm:15000}})
         ''')
 

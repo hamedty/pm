@@ -72,6 +72,8 @@ class Node(object):
         self.errors = {}
         self.last_hold_clear = 0
 
+        self.main_loop_task = None
+
     def set_system(self, system):
         self.system = system
         # node must only access to a snapshot - since parametes may change in middle of script
@@ -310,6 +312,11 @@ class Node(object):
 
     async def home(self):
         self.homed = False
+
+        if self.main_loop_task:
+            self.main_loop_task.cancel()
+        self.main_loop_task = None
+
         for retry in range(self.HOMMING_RETRIES):
             try:
                 await self.restart_arduino()

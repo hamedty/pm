@@ -120,6 +120,7 @@ def main():
             datasets = data[node][component]
             roi = data[node][component + '_roi']
 
+            back_cross_section = None
             if component == 'dosing':
                 back_cross_section = prepare_cross_section(datasets, roi, node)
 
