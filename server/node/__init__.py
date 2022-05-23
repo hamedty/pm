@@ -6,25 +6,25 @@ from .dosing import Dosing
 
 
 ALL_NODES = [
-    Station('Station X', '192.168.44.101'),
+    # Station('Station X', '192.168.44.101'),
 
-    # Robot('Robot 1', '192.168.44.100', arduino_id=0),
-    # Robot('Robot 2', '192.168.44.100', arduino_id=1),
-    # Rail('Rail', '192.168.44.100', arduino_id=2),
-    #
-    # Station('Station 1', '192.168.44.101'),
-    # # Station('Station 2', '192.168.44.102'),
-    # Station('Station 3', '192.168.44.103'),
-    # Station('Station 4', '192.168.44.104'),
-    # Station('Station 5', '192.168.44.105'),
-    # Station('Station 6', '192.168.44.106'),
-    # Station('Station 7', '192.168.44.107'),
-    # # Station('Station 8', '192.168.44.108'),
-    # Station('Station 9', '192.168.44.109'),
-    # Station('Station 10', '192.168.44.110'),
-    #
-    # Feeder('Feeder 1', '192.168.44.21', arduino_id=2),
-    # Dosing('Dosing F. 1', '192.168.44.21', arduino_id=1),
+    Robot('Robot 1', '192.168.44.100', arduino_id=0),
+    Robot('Robot 2', '192.168.44.100', arduino_id=1),
+    Rail('Rail', '192.168.44.100', arduino_id=2),
+
+    Station('Station 1', '192.168.44.101'),
+    Station('Station 2', '192.168.44.102'),
+    Station('Station 3', '192.168.44.103'),
+    Station('Station 4', '192.168.44.104'),
+    Station('Station 5', '192.168.44.105'),
+    Station('Station 6', '192.168.44.106'),
+    Station('Station 7', '192.168.44.107'),
+    Station('Station 8', '192.168.44.108'),
+    Station('Station 9', '192.168.44.109'),
+    Station('Station 10', '192.168.44.110'),
+
+    Feeder('Feeder 1', '192.168.44.21', arduino_id=2),
+    Dosing('Dosing F. 1', '192.168.44.21', arduino_id=1),
 ]
 ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 
@@ -73,14 +73,10 @@ if 'Station 1' in ALL_NODES_DICT:
 
 if 'Station 2' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 2']
-    station.hw_config['H_ALIGNING'] = 225 + 1
-    station.hw_config['H_PUSH'] = 237 + 1.5
-    station.hw_config['H_PRE_DANCE'] = 244 + 1
-    station.hw_config['H_DELIVER'] = 1
-    station.hw_config['dosing_webcam_direction'] = 'riu'
-    station.hw_config['holder_webcam_direction'] = 'down'
-    # station.hw_config['holder_offset'] = 2 # posetive moves to right
-    station.hw_config['dosing_sit_right']['wrong_sitting_count_threshold'] = 25
+    station.hw_config['H_ALIGNING'] = 240
+    station.hw_config['H_PUSH'] = 250
+    station.hw_config['H_PRE_DANCE'] = 258.5
+    station.hw_config['presence_threshold']['holder'] = 65
 
 if 'Station 3' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 3']
@@ -116,8 +112,9 @@ if 'Station 6' in ALL_NODES_DICT:
 
 if 'Station 7' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 7']
-    assert station.g2core_config[7][0] == 'z'
-    station.g2core_config[7][1]['hi'] = 4
+    Z_CONFIG_INDEX = 5
+    assert station.g2core_config[Z_CONFIG_INDEX][0] == 'z'
+    station.g2core_config[Z_CONFIG_INDEX][1]['hi'] = 4
     station.hw_config['H_ALIGNING'] = 228
     station.hw_config['H_PUSH'] = 240
     station.hw_config['H_PRE_DANCE'] = 248
@@ -126,14 +123,10 @@ if 'Station 7' in ALL_NODES_DICT:
 
 if 'Station 8' in ALL_NODES_DICT:
     station = ALL_NODES_DICT['Station 8']
-    assert station.g2core_config[7][0] == 'z'
-    station.g2core_config[7][1]['hi'] = 4
-    station.hw_config['H_ALIGNING'] = 224
-    station.hw_config['H_PUSH'] = 236
-    station.hw_config['H_PRE_DANCE'] = 243.5
-    station.hw_config['holder_webcam_direction'] = 'down'
-    # station.hw_config['dosing_offset'] = -1  # positive moves to right
-    # station.hw_config['holder_offset'] = 1  # positive moves to right
+    station.hw_config['H_ALIGNING'] = 235
+    station.hw_config['H_PUSH'] = 246
+    station.hw_config['H_PRE_DANCE'] = 254
+    station.hw_config['dosing_webcam_direction'] = 'riu'
 
 
 if 'Station 9' in ALL_NODES_DICT:

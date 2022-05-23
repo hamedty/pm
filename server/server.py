@@ -197,10 +197,11 @@ class System(object):
 
     async def message_from_rpi(self, message_in):
         if message_in['type'] == 'button_press':
-            if message_in['duration'] >= 1:
-                await self.script_runner(scripts.station_bring_up.home_station)
-            else:
-                await self.script_runner(scripts.station_bring_up.station_is_full)
+            pass
+            # if message_in['duration'] >= 1:
+            #     await self.script_runner(scripts.station_bring_up.home_station)
+            # else:
+            #     await self.script_runner(scripts.station_bring_up.station_is_full)
 
 
 async def main():

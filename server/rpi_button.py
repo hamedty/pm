@@ -17,7 +17,8 @@ def isr_press(channel):
         if duration < .05:
             return
         in_press = False
-        post_press_data(duration)
+        if duration > .1:
+            post_press_data(duration)
 
 
 def post_press_data(duration):

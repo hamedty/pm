@@ -114,7 +114,8 @@ class WebSocket_Mock(tornado.websocket.WebSocketHandler):
 class RpiGateway(tornado.web.RequestHandler):
     def post(self):
         data = self.request.body
-        asyncio.create_task(SYSTEM.message_from_rpi(json.loads(data)))
+        # asyncio.create_task(SYSTEM.message_from_rpi(json.loads(data)))
+        print('1', data, repr(self.request))
         self.write('')
 
 

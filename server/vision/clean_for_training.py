@@ -26,7 +26,7 @@ def load_data():
 
 data = load_data()
 
-nodes = ['101']  # list(data.keys())
+nodes = list(data.keys())
 nodes.sort()
 componenets = ['holder', 'dosing']
 

@@ -155,7 +155,7 @@ def main():
     src_data = load_data(SRC_DATA)
     dst_data = load_data(DST_DATA)
 
-    nodes = ['101']  # list(src_data.keys())
+    nodes = list(src_data.keys())
     nodes.sort()
 
     componenets = ['holder', 'dosing']

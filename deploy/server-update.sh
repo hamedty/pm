@@ -13,13 +13,13 @@ restart_service () {
   ssh pi@192.168.44.$1 "sudo systemctl restart rpi.service"
 }
 
-# Rail and Robots
-for i in  100
-do
-  echo 192.168.44.$i
-  copy_files $i
-  restart_service $i
-done
+# # Rail and Robots
+# for i in  100
+# do
+#   echo 192.168.44.$i
+#   copy_files $i
+#   restart_service $i
+# done
 
 # Stations
 for i in 101 102 103 104 105 106 107 108 109 110
@@ -30,11 +30,11 @@ do
   restart_service $i
 done
 
-# Feeder
-for i in  21
-do
-  echo 192.168.44.$i
-  copy_files $i
-  restart_service $i
-done
-echo "Done"
+# # Feeder
+# for i in  21
+# do
+#   echo 192.168.44.$i
+#   copy_files $i
+#   restart_service $i
+# done
+# echo "Done"

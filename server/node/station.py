@@ -213,20 +213,26 @@ class Station(Node):
             check_fullness = check_fullness[1]
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
+            correct_holder = True
+            correct_dosing = True
 
             await self.system.system_running.wait()
             if full:
-                await self.align_holder()
+                correct_holder = await self.align_holder()
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
-            if full:
-                await self.align_dosing()
+            if full and correct_holder:
+                correct_dosing = await self.align_dosing()
                 await self.assemble()
                 self.system.stats.add_success()
 
-            if not (full or empty):
+            if (not (full or empty)) or (not (correct_holder and correct_dosing)):
                 # {"no_dosing":false,"no_holder":true,}
-                if check_fullness['no_dosing']:  # no dosing
+                if correct_holder == False:
+                    message = 'هولدر تنظیم نشد . استیشن را خالی کنید.'
+                elif correct_dosing == False:
+                    message = 'هولدر تنظیم نشد. استیشن را خالی کنید.'
+                elif check_fullness['no_dosing']:  # no dosing
                     message = 'دوزینگ وجود ندارد. استیشن را خالی کنید.'
                 else:  # no holder
                     message = 'هولدر وجود ندارد. استیشن را خالی کنید.'
@@ -251,18 +257,18 @@ class Station(Node):
     async def align_holder(self):
         await self.set_valves([0, 1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'holder', 'speed': self.recipe.ALIGN_SPEED_HOLDER, 'retries': self.recipe.VISION_RETRIES_HOLDER}, assert_success=False)
-        # print(self.name, z1, z2)
-        if (not z1) or (not z2['aligned']):
-            error = {
-                'message': 'هولدر را دستی تنظیم کنید.',
-                'location_name': self.name,
-                'details': (z1, z2),
-                'type': 'error',
-            }
-            print(error)
-            # await aioconsole.ainput(str(error))
-            error_clear_event, error_id = await self.system.register_error(error)
-            await error_clear_event.wait()
+        # # print(self.name, z1, z2)
+        # if (not z1) or (not z2['aligned']):
+        #     error = {
+        #         'message': 'هولدر را دستی تنظیم کنید.',
+        #         'location_name': self.name,
+        #         'details': (z1, z2),
+        #         'type': 'error',
+        #     }
+        #     print(error)
+        #     # await aioconsole.ainput(str(error))
+        #     error_clear_event, error_id = await self.system.register_error(error)
+        #     await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
                 'station': self.ip_short,
@@ -271,6 +277,9 @@ class Station(Node):
             }
             table = 'vision_retries'
             self.system.mongo.write(table, data)
+        if (not z1) or (not z2['aligned']):
+            return False
+        return True
 
     async def align_dosing(self):
         data = {}
@@ -279,19 +288,19 @@ class Station(Node):
         await self.G1(z=data['H_ALIGNING'], feed=data['FEED_ALIGNING'], correct_initial=True)
         await self.set_valves([1])
         z1, z2 = await self.send_command({'verb': 'align', 'component': 'dosing', 'speed': self.recipe.ALIGN_SPEED_DOSING, 'retries': self.recipe.VISION_RETRIES_DOSING}, assert_success=False)
-        if (not z1) or (not z2['aligned']):
-            await self.set_valves([0, None, None, None])
-            await self.G1(z=100, feed=5000)
-            error = {
-                'message': 'دوزینگ را دستی تنظیم کنید.',
-                'location_name': self.name,
-                'details': (z1, z2),
-                'type': 'error',
-            }
-            print(error)
-            # await aioconsole.ainput(str(error))
-            error_clear_event, error_id = await self.system.register_error(error)
-            await error_clear_event.wait()
+        # if (not z1) or (not z2['aligned']):
+        #     await self.set_valves([0, None, None, None])
+        #     await self.G1(z=100, feed=5000)
+        #     error = {
+        #         'message': 'دوزینگ را دستی تنظیم کنید.',
+        #         'location_name': self.name,
+        #         'details': (z1, z2),
+        #         'type': 'error',
+        #     }
+        #     print(error)
+        #     # await aioconsole.ainput(str(error))
+        #     error_clear_event, error_id = await self.system.register_error(error)
+        #     await error_clear_event.wait()
         if 'steps_history' in z2:
             data = {
                 'station': self.ip_short,
@@ -300,6 +309,11 @@ class Station(Node):
             }
             table = 'vision_retries'
             self.system.mongo.write(table, data)
+        if (not z1) or (not z2['aligned']):
+            await self.set_valves([0, None, None, None])
+            await self.G1(z=1, feed=5000)
+            return False
+        return True
 
     async def verify_no_holder_no_dosing(self):
         while True:
