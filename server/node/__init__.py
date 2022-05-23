@@ -28,6 +28,14 @@ ALL_NODES = [
 ]
 ALL_NODES_DICT = {n.name: n for n in ALL_NODES}
 
+
+def ip_to_node(ip):
+    for node in ALL_NODES:
+        if node.ip == ip:
+            return node
+    return None
+
+
 assert len(ALL_NODES_DICT) == len(ALL_NODES)
 
 if 'Station X' in ALL_NODES_DICT:

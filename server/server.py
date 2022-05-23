@@ -5,7 +5,7 @@ import uuid
 import json
 import traceback
 import types
-from node import ALL_NODES, ALL_NODES_DICT
+from node import ALL_NODES, ALL_NODES_DICT, ip_to_node
 import asyncio
 from stats import Mongo, Redis, Stats
 
@@ -195,9 +195,21 @@ class System(object):
             asyncio.create_task(self.script_runner(script))
         return {}
 
-    async def message_from_rpi(self, message_in):
+    async def message_from_rpi(self, remote_ip, message_in):
+        node = ip_to_node(remote_ip)
+        if node is None:
+            return
         if message_in['type'] == 'button_press':
-            pass
+            duration = message_in['duration']
+            print(f'button pressed for {duration:.2f}s on {node.name}')
+
+            if (duration > 1) or (duration < .1):
+                return
+            # Clear Error
+            for error_id in self.errors.keys():
+                if self.errors[error_id]['location_name'] == node.name:
+                    await self.clear_error(error_id)
+
             # if message_in['duration'] >= 1:
             #     await self.script_runner(scripts.station_bring_up.home_station)
             # else:
