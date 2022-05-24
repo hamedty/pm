@@ -213,25 +213,26 @@ class Station(Node):
             check_fullness = check_fullness[1]
             full = check_fullness['dosing_present'] and check_fullness['holder_present']
             empty = check_fullness['no_holder_no_dosing']
-            correct_holder = True
-            correct_dosing = True
+            correct_holder = False
+            correct_dosing = False
 
             await self.system.system_running.wait()
             if full:
                 correct_holder = await self.align_holder()
             await self.station_is_safe_event.wait()
             self.station_is_safe_event.clear()
-            if full and correct_holder:
+            if correct_holder:
                 correct_dosing = await self.align_dosing()
+            if correct_dosing:
                 await self.assemble()
                 self.system.stats.add_success()
 
-            if (not (full or empty)) or (not (correct_holder and correct_dosing)):
+            if (not (full or empty)) or (full and (not (correct_holder and correct_dosing))):
                 # {"no_dosing":false,"no_holder":true,}
-                if correct_holder == False:
+                if full and (not correct_holder):
                     message = 'هولدر تنظیم نشد . استیشن را خالی کنید.'
-                elif correct_dosing == False:
-                    message = 'هولدر تنظیم نشد. استیشن را خالی کنید.'
+                elif full and (not correct_dosing):
+                    message = 'دوزینگ تنظیم نشد. استیشن را خالی کنید.'
                 elif check_fullness['no_dosing']:  # no dosing
                     message = 'دوزینگ وجود ندارد. استیشن را خالی کنید.'
                 else:  # no holder

@@ -43,8 +43,8 @@ VALUES_DEFINITION = [
     {'name': 'FEED_RAIL_INTACT', 'value': 10000, 'speedy': True},  # 16000
     {'name': 'JERK_RAIL_FREE', 'value': 2000},
     {'name': 'JERK_RAIL_INTACT', 'value': 4500},
-    {'name': 'D_STANDBY', 'value': 250},
-    {'name': 'D_MIN', 'value': -1},  # D_STANDBY - 25 * N
+    {'name': 'D_STANDBY', 'value': 250.5},
+    {'name': 'D_MIN', 'value': -0.5},  # D_STANDBY - 25 * N
     {'name': 'T_RAIL_JACK1', 'value': 1.5},
     {'name': 'T_RAIL_JACK2', 'value': 1.2},
     {'name': 'T_RAIL_FEEDER_JACK', 'value': 0.5},

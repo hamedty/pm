@@ -43,7 +43,7 @@ def detect_holder(frame, offset):
     cls = clf_holder.predict([frame])[0] + offset
 
     step_per_rev = 360
-    class_per_rev = 80
+    class_per_rev = 100
     p = 1.0 / class_per_rev * step_per_rev
 
     steps = -cls * p

@@ -67,7 +67,7 @@ def train_dosing(node, CPR=100.0, max_iter=MAX_ITER):
     train(CPR, X, y, max_iter, '%s_%03d' % (component, node))
 
 
-def train_holder(node, CPR=80.0, max_iter=MAX_ITER):
+def train_holder(node, CPR=100.0, max_iter=MAX_ITER):
     component = 'holder'
     files = glob.glob(DATASET_PATH + '/%s_%03d_*/data.npz' % (component, node))
     y = []
