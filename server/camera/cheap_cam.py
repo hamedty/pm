@@ -1,5 +1,5 @@
 from .base import CameraBase
-from cv2 import *
+import cv2
 
 SERAIL_NOS = {
     'holder': '1',
@@ -13,9 +13,9 @@ class CheapCam(CameraBase):
     DEFAULT_PRE_FETCH = DEFAULT_PRE_FETCH
     FILE_FORMAT = '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.%s:1.0-video-index0'
     CONFIG_BASE = {
-        CAP_PROP_FOURCC: VideoWriter_fourcc('M', 'J', 'P', 'G'),
-        CAP_PROP_FRAME_WIDTH: 640,
-        CAP_PROP_FRAME_HEIGHT: 480,
+        cv2.CAP_PROP_FOURCC: cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+        cv2.CAP_PROP_FRAME_WIDTH: 640,
+        cv2.CAP_PROP_FRAME_HEIGHT: 480,
     }
     LAST_FRAME = None
 
@@ -41,7 +41,7 @@ class CheapCam(CameraBase):
         if filename is None:
             return
         print(filename, frame.shape)
-        imwrite(filename, frame)
+        cv2.imwrite(filename, frame)
 
 
 def create_camera(index, roi):

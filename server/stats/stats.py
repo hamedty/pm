@@ -39,8 +39,8 @@ class Stats(object):
     def __init__(self, redis):
         self.redis = redis
         self.lock = Lock()
-        self.load()
-        asyncio.create_task(self.background_task())
+        # self.load()
+        # asyncio.create_task(self.background_task())
 
     def load(self):
         self.data = self.redis.root.stats

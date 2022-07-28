@@ -1,3 +1,6 @@
+import rpi_scripts  # for sake of reload
+import recipe
+import scripts
 import datetime
 import os
 import sys
@@ -14,9 +17,6 @@ PARENT_PATH = os.path.dirname(PATH)
 sys.path.insert(0, PARENT_PATH)
 
 import webserver.main as webserver  # nopep8
-import scripts
-import recipe
-import rpi_scripts  # for sake of reload
 
 
 class System(object):
@@ -155,7 +155,7 @@ class System(object):
                     #     'feed_open': True,
                     # },
                     'errors': self.errors,
-                    'stats': self.stats.data,
+                    # 'stats': self.stats.data,
                     # {
                     #     'active_batch_no': 'ING0021',
                     #     'counter': 1819,
